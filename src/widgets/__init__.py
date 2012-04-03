@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 '''
 MAP Client, a program to generate detailed musculoskeletal models for OpenSim.
     Copyright (C) 2012  University of Auckland
@@ -18,29 +17,3 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     You should have received a copy of the GNU General Public License
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
-
-import os, sys, locale
-# Ensure the MAP Client module directory is in the system path so relative 'import' statements work
-base_path = os.path.dirname(os.path.abspath(__file__))
-if sys.path.count(base_path) == 0:
-    sys.path.insert(0, base_path)
-    
-
-# This method starts MAP Client
-def main():
-    '''
-    Initialise common settings and check the operating environment before starting the application.
-    '''
-
-    from settings import info
-    print("--------------------------------")
-    print("   MAP Client (version %s)" % info.ABOUT['version'])
-    print("--------------------------------")
-
-    # import the locale, and set the locale. This is used for 
-    # locale-aware number to string formatting
-    locale.setlocale(locale.LC_ALL, '')
-
-
-if __name__ == '__main__':
-    main()
