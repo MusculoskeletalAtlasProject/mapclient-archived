@@ -17,37 +17,36 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     You should have received a copy of the GNU General Public License
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
-
-from PyQt4 import QtGui
-from PyQt4.QtGui import QMainWindow
-from widgets.MainWindowUi import Ui_MainWindow
-
-class MainWindow(QMainWindow):
+from PyQt4.QtGui import QDialog
+from widgets.AboutDialogUi import Ui_AboutDialog
+class AboutDialog(QDialog):
     '''
-    This is the main window for the MAP Client.
+    About dialog to display program about information.
     '''
 
 
-    def __init__(self):
+    def __init__(self, parent=None):
         '''
         Constructor
         '''
-        QMainWindow.__init__(self)
-        
-        self.ui = Ui_MainWindow()
+        QDialog.__init__(self, parent)
+        self.ui = Ui_AboutDialog()
         self.ui.setupUi(self)
         self.makeConnections()
         
     def makeConnections(self):
-        self.ui.action_Quit.triggered.connect(self.quitApplication)
-        self.ui.action_About.triggered.connect(self.about)
+        self.ui.btn_Credits.clicked.connect(self.showCreditsDialog)
+        self.ui.btn_License.clicked.connect(self.showLicenseDialog)
         
-    def quitApplication(self):
-        QtGui.qApp.quit()
-        
-    def about(self):
-        from widgets.AboutDialog import AboutDialog
-        dlg = AboutDialog(self)
+    def showCreditsDialog(self):
+        from widgets.CreditsDialog import CreditsDialog
+        dlg = CreditsDialog(self)
         dlg.setModal(True)
         dlg.exec_()
-        
+
+    def showLicenseDialog(self):
+        from widgets.LicenseDialog import LicenseDialog
+        dlg = LicenseDialog(self)
+        dlg.setModal(True)
+        dlg.exec_()
+

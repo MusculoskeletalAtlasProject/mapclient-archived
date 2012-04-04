@@ -18,36 +18,20 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
 
-from PyQt4 import QtGui
-from PyQt4.QtGui import QMainWindow
-from widgets.MainWindowUi import Ui_MainWindow
+from PyQt4.QtGui import QDialog
+from widgets.LicenseDialogUi import Ui_LicenseDialog
 
-class MainWindow(QMainWindow):
+class LicenseDialog(QDialog):
     '''
-    This is the main window for the MAP Client.
+    Dialog for displaying the license.
     '''
 
 
-    def __init__(self):
+    def __init__(self, parent=None):
         '''
         Constructor
         '''
-        QMainWindow.__init__(self)
-        
-        self.ui = Ui_MainWindow()
+        QDialog.__init__(self, parent)
+        self.ui = Ui_LicenseDialog()
         self.ui.setupUi(self)
-        self.makeConnections()
-        
-    def makeConnections(self):
-        self.ui.action_Quit.triggered.connect(self.quitApplication)
-        self.ui.action_About.triggered.connect(self.about)
-        
-    def quitApplication(self):
-        QtGui.qApp.quit()
-        
-    def about(self):
-        from widgets.AboutDialog import AboutDialog
-        dlg = AboutDialog(self)
-        dlg.setModal(True)
-        dlg.exec_()
         
