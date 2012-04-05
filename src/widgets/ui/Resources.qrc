@@ -1,0 +1,6 @@
+<RCC>
+  <qresource prefix="mapclient">
+    <file>images/Icon.png</file>
+    <file>images/AboutLogo.png</file>
+  </qresource>
+</RCC>
