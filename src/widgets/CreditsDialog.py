@@ -20,7 +20,7 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
 from PyQt4.QtCore import Qt
 from PyQt4.QtGui import QDialog, QTabWidget, QWidget, QVBoxLayout, QLabel
 from widgets.CreditsDialogUi import Ui_CreditsDialog
-from settings import info
+from settings import Info
 
 class CreditsDialog(QDialog):
     '''
@@ -37,13 +37,13 @@ class CreditsDialog(QDialog):
         self.ui.setupUi(self)
         
         creditsTab = QTabWidget()
-        creditSections = info.CREDITS.keys()
+        creditSections = Info.CREDITS.keys()
         for creditSection in creditSections:
             creditTab = QWidget()
             creditsTab.addTab(creditTab, creditSection)
             vbox = QVBoxLayout(creditTab)
             creditList = ""
-            for person in info.CREDITS[creditSection]:
+            for person in Info.CREDITS[creditSection]:
                 creditList += ("\n%s [%s]" % (person['name'], person['email']))
             creditLabel = QLabel()
             creditLabel.setStyleSheet("QLabel { background-color : white}")
