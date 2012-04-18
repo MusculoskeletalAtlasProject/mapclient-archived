@@ -20,11 +20,12 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
 import unittest
 
 
-class Test(unittest.TestCase):
+class MainWindowTestCase(unittest.TestCase):
 
 
     def testMain(self):
         from widgets import MainWindow
+        assert(MainWindow.__name__ == 'widgets.MainWindow')
 
 
 if __name__ == "__main__":

@@ -19,35 +19,35 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
 '''
 import unittest
 
-from settings import info
+from settings import Info
 
-class Test(unittest.TestCase):
+class InfoTestCase(unittest.TestCase):
 
 
     def testABOUT(self):
-        assert(len(info.ABOUT.keys()) == 4)
-        assert(info.ABOUT.has_key('name'))
-        assert(info.ABOUT.has_key('version'))
-        assert(info.ABOUT.has_key('license'))
-        assert(info.ABOUT.has_key('description'))
+        assert(len(Info.ABOUT.keys()) == 4)
+        assert('name' in Info.ABOUT)
+        assert('version' in Info.ABOUT)
+        assert('license' in Info.ABOUT)
+        assert('description' in Info.ABOUT)
         
     def testCREDITS(self):
-        assert(len(info.CREDITS.keys()) == 3)
-        assert(info.CREDITS.has_key('programming'))
-        assert(info.CREDITS.has_key('artwork'))
-        assert(info.CREDITS.has_key('documentation'))
-        for contributor in info.CREDITS['programming']:
+        assert(len(Info.CREDITS.keys()) == 3)
+        assert('programming' in Info.CREDITS)
+        assert('artwork' in Info.CREDITS)
+        assert('documentation' in Info.CREDITS)
+        for contributor in Info.CREDITS['programming']:
             assert(len(contributor.keys()) == 2)
-            assert(contributor.has_key('name'))
-            assert(contributor.has_key('email'))
-        for contributor in info.CREDITS['artwork']:
+            assert('name' in contributor)
+            assert('email' in contributor)
+        for contributor in Info.CREDITS['artwork']:
             assert(len(contributor.keys()) == 2)
-            assert(contributor.has_key('name'))
-            assert(contributor.has_key('email'))
-        for contributor in info.CREDITS['documentation']:
+            assert('name' in contributor)
+            assert('email' in contributor)
+        for contributor in Info.CREDITS['documentation']:
             assert(len(contributor.keys()) == 2)
-            assert(contributor.has_key('name'))
-            assert(contributor.has_key('email'))
+            assert('name' in contributor)
+            assert('email' in contributor)
 
 
 if __name__ == "__main__":

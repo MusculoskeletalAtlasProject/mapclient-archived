@@ -32,9 +32,9 @@ def main():
     Initialise common settings and check the operating environment before starting the application.
     '''
 
-    from settings import info
+    from settings import Info
     print("--------------------------------")
-    print("   MAP Client (version %s)" % info.ABOUT['version'])
+    print("   MAP Client (version %s)" % Info.ABOUT['version'])
     print("--------------------------------")
 
     # import the locale, and set the locale. This is used for 
