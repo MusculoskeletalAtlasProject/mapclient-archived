@@ -38,12 +38,14 @@ def loadPlugins(pluginDir=None):
         if (os.path.isfile(dirList)):
             continue
         try :
+            print 'fail', dirList
             filename, path, description = imp.find_module(dir, [pluginDir])
             module = imp.load_module(dir, filename, path, description)
             print("Plugin {} v{} by {} loaded".format(dir, module.__version__, module.__author__))
         except :
             # non modules will fail
-            # print(sys.exc_info()[1])
+            #import sys
+            #print(sys.exc_info()[1])
             pass
 
 
@@ -102,14 +104,14 @@ class MountPoint(type):
 # Plugin mount points are defined below.
 class MenuOption(object):
     '''
-    Plugins can inherit this mount point in order to amending the menu of the GUI.
+    Plugins can inherit this mount point in order to add to the menu of the GUI.
 
      A plugin that registers this mount point must have attributes
      * label
      * command
      
      It must implement
-     def execute(self):
+     * def execute(self):
      '''
     __metaclass__ = MountPoint
     
