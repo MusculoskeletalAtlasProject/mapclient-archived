@@ -20,8 +20,6 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
 import unittest
 import os, tempfile
 from workspace.Workspace import Manager, WorkspaceError
-from PyQt4.QtCore import QSettings
-from settings import Info
 
 TEST_WORKSPACE_DIR_NAME = '/tmp/new_workspace_jihuuui'
 
