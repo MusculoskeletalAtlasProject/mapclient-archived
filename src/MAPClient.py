@@ -33,16 +33,23 @@ def main():
     '''
 
     from settings import Info
-    print("--------------------------------")
-    print("   MAP Client (version %s)" % Info.ABOUT['version'])
-    print("--------------------------------")
+    programHeader = '   MAP Client (version %s)   ' % Info.ABOUT['version']
+    print('-' * len(programHeader))
+    print(programHeader)
+    print('-' * len(programHeader))
 
     # import the locale, and set the locale. This is used for 
     # locale-aware number to string formatting
     locale.setlocale(locale.LC_ALL, '')
     
-    from PyQt4 import QtGui
+    from PyQt4 import QtGui, QtCore
     app = QtGui.QApplication(sys.argv)
+    
+    # Set the default organisation name and application name used to store application settings
+    QtCore.QCoreApplication.setOrganizationName(Info.ORGANISATION_NAME)
+    QtCore.QCoreApplication.setOrganizationDomain(Info.ORGANISATION_DOMAIN)
+    QtCore.QCoreApplication.setApplicationName(Info.APPLICATION_NAME)
+    
     from widgets.MainWindow import MainWindow
     window = MainWindow()
     window.show()

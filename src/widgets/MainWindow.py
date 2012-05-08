@@ -20,6 +20,8 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
 
 from PyQt4 import QtGui
 from PyQt4.QtGui import QMainWindow
+from PyQt4.QtCore import QSettings, QSize, QPoint
+
 from widgets.MainWindowUi import Ui_MainWindow
 
 class MainWindow(QMainWindow):
@@ -37,12 +39,31 @@ class MainWindow(QMainWindow):
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
         self.makeConnections()
+        self._readSettings()
+        
+    def _writeSettings(self):
+        settings = QSettings()
+        settings.beginGroup('MainWindow')
+        settings.setValue('size', self.size())
+        settings.setValue('pos', self.pos())
+        settings.endGroup()
+    
+    def _readSettings(self):
+        settings = QSettings()
+        settings.beginGroup('MainWindow')
+        self.resize(settings.value('size', QSize(600, 400)))
+        self.move(settings.value('pos', QPoint(100, 100)))
+        settings.endGroup()
         
     def makeConnections(self):
         self.ui.action_Quit.triggered.connect(self.quitApplication)
         self.ui.action_About.triggered.connect(self.about)
         
+    def closeEvent(self, event):
+        self.quitApplication()
+        
     def quitApplication(self):
+        self._writeSettings()
         QtGui.qApp.quit()
         
     def about(self):
