@@ -23,13 +23,18 @@ Inspired by Marty Alchin's Simple plugin framework.
 http://martyalchin.com/2008/jan/10/simple-plugin-framework/
 '''
 
-import os, imp, sys
+import os, imp
 
-def loadPlugins(pluginDir):
+def loadPlugins(pluginDir=None):
     '''
-    Utility method to load all plugins found in PLUGIN_DIRECTORY
+    Utility method to load all plugins found in pluginDir.  By default loads 
+    plugins in the src/plugin directory if no pluginDir is given.
     '''
-    for dirList in os.listdir(pluginDir): #TODO several directories, eg User Application Data
+    if pluginDir is None:
+        fileDir = os.path.dirname(__file__)
+        pluginDir = os.path.realpath(fileDir + '/../plugins')
+
+    for dirList in os.listdir(pluginDir):
         if (os.path.isfile(dirList)):
             continue
         try :
@@ -38,7 +43,7 @@ def loadPlugins(pluginDir):
             print("Plugin {} v{} by {} loaded".format(dir, module.__version__, module.__author__))
         except :
             # non modules will fail
-            print(sys.exc_info()[1])
+            # print(sys.exc_info()[1])
             pass
 
 

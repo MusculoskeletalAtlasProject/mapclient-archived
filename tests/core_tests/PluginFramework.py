@@ -18,13 +18,13 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
 import unittest
-
+from core.PluginFramework import loadPlugins
 
 class PluginFrameworkTestCase(unittest.TestCase):
 
 
     def testLoadPlugins(self):
-        pass
+        loadPlugins()
 
 
 if __name__ == "__main__":
