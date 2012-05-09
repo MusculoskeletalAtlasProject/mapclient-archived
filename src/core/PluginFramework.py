@@ -25,28 +25,70 @@ http://martyalchin.com/2008/jan/10/simple-plugin-framework/
 
 import os, imp
 
-def loadPlugins(pluginDir=None):
+def listPyFiles(directories):
+    l = list()
+    for dirName in directories:
+
+        for dirEntry in os.listdir(dirName):
+
+            absDirEntry = os.path.join(dirName, dirEntry)
+            if os.path.isfile(absDirEntry):
+                rootname, ext = os.path.splitext(dirEntry)
+                if ext == '.py':
+                    absfile = os.path.join(dirName, rootname)
+                    l.append(absfile)
+    
+    return l
+
+def listPlugins(pluginDir=None):
+    '''
+    Utility method to list available plugins
+    '''
+    pluginDirs = [pluginDir]
+    # If pluginDir is None list plugins in the builtin location
+    if pluginDir is None:
+        fileDir = os.path.dirname(__file__)
+        inbuiltPluginDir = os.path.realpath(fileDir + '/../plugins')
+        pluginDirs = list()
+        for dirEntry in os.listdir(inbuiltPluginDir):
+            absDir = os.path.join(inbuiltPluginDir,dirEntry)
+            if os.path.isdir(absDir):
+                pluginDirs.append(absDir)
+
+    return listPyFiles(pluginDirs)
+
+def loadPlugins(pluginDir=None, **kwargs):
     '''
     Utility method to load all plugins found in pluginDir.  By default loads 
     plugins in the src/plugin directory if no pluginDir is given.
     '''
-    if pluginDir is None:
-        fileDir = os.path.dirname(__file__)
-        pluginDir = os.path.realpath(fileDir + '/../plugins')
 
-    for dirList in os.listdir(pluginDir):
-        if (os.path.isfile(dirList)):
-            continue
-        try :
-            print 'fail', dirList
-            filename, path, description = imp.find_module(dir, [pluginDir])
-            module = imp.load_module(dir, filename, path, description)
-            print("Plugin {} v{} by {} loaded".format(dir, module.__version__, module.__author__))
-        except :
+    plugins = listPlugins(pluginDir=pluginDir)
+
+    for plugin in plugins:
+        pluginName = os.path.basename(plugin)
+        pluginDir = os.path.dirname(plugin)
+        loaded_plugins = {}
+        
+        try:
+            fp, path, description = imp.find_module(pluginName, [pluginDir])
+            module = imp.load_module(pluginDir, fp, path, description)
+            moduleVersion = '-.-.-'
+            if hasattr(module, '__version__'):
+                moduleVersion = module.__version__
+            moduleAuthor = '?'
+            if hasattr(module, '__author__'):
+                moduleAuthor = module.__author__
+            print("Plugin '{}' ver {} by {} loaded".format(pluginName, moduleVersion, moduleAuthor))
+            loaded_plugins[pluginName] = module
+        except:
             # non modules will fail
-            #import sys
-            #print(sys.exc_info()[1])
-            pass
+            print("Plugin '{}' not loaded".format(pluginName))
+        finally:
+            if fp:
+                fp.close()
+                
+        return loaded_plugins
 
 
 class PluginsAt(object):
@@ -64,11 +106,11 @@ class PluginsAt(object):
         '''
         Plugins are instantiated with the object that is calling them.
         '''
-        return [p(instance) for p in self.mount.plugins]
+        return [p() for p in self.mount.plugins]
 
 
 
-class MountPoint(type):
+class MetaMountPoint(type):
     '''
     * A way to declare a mount point for plugins. Since plugins are an example 
       of loose coupling, there needs to be a neutral location, somewhere between
@@ -99,26 +141,33 @@ class MountPoint(type):
             # Simply appending it to the list is all that's needed to keep
             # track of it later.
             cls.plugins.append(cls)
+            
+    def getPlugins(self, *args, **kwargs):
+        return [p(*args, **kwargs) for p in self.plugins]
        
 
 # Plugin mount points are defined below.
-class MenuOption(object):
-    '''
-    Plugins can inherit this mount point in order to add to the menu of the GUI.
+# For running in both python 2.x and python 3.x we must follow the example found
+# at http://mikewatkins.ca/2008/11/29/python-2-and-3-metaclasses/
+'''
+Plugins can inherit this mount point in order to add to the menu of the GUI.
 
-     A plugin that registers this mount point must have attributes
-     * label
-     * command
-     
-     It must implement
-     * def execute(self):
-     '''
-    __metaclass__ = MountPoint
-    
-    def __init__(self):
-        pass
+ A plugin that registers this mount point must have attributes
+ * label
+ * actionLabel
+ 
+ It must implement
+ * def execute(self):
+ '''
+from PyQt4.QtCore import QObject
 
+MetaQObject = type(QObject)
 
+class MetaQObjectMountPoint(MetaQObject, MetaMountPoint):
 
-
+    def __init__(self, name, bases, attrs):
+        MetaMountPoint.__init__(self, name, bases, attrs)
+        MetaQObject.__init__(self, name, bases, attrs)
+ 
+MenuOption = MetaQObjectMountPoint('MenuOption', (QObject, ), {})
 

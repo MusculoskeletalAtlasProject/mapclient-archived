@@ -18,23 +18,9 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
 
-from PyQt4.QtCore import QObject
-from core import PluginFramework
-
-class CoolMenuTwo(PluginFramework.MenuOption):
-    '''
-    classdocs
-    '''
-
-    label = 'Cool'
-    actionLabel = 'do it'
+class ConsumeOutput(object):
     def __init__(self):
-        '''
-        Constructor
-        '''
-        QObject.__init__(self)
-    
-    def execute(self):
-        print('Cool menu see!')
+        self.messages = list()
         
-        
+    def write(self, message):
+        self.messages.append(message)

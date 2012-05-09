@@ -23,12 +23,13 @@ from PyQt4.QtGui import QMainWindow
 from PyQt4.QtCore import QSettings, QSize, QPoint
 
 from widgets.MainWindowUi import Ui_MainWindow
+from core import PluginFramework
+from core.PluginFramework import PluginsAt, MenuOption
 
 class MainWindow(QMainWindow):
     '''
     This is the main window for the MAP Client.
     '''
-
 
     def __init__(self):
         '''
@@ -40,6 +41,16 @@ class MainWindow(QMainWindow):
         self.ui.setupUi(self)
         self.makeConnections()
         self._readSettings()
+        #print(PluginsAt(PluginFramework.MenuOption))
+        #print(PluginsAt(PluginFramework.MenuOption).__get__(self))
+        
+        self.menuPlugins = MenuOption.getPlugins()
+        for plugin in self.menuPlugins:
+            pluginAction = QtGui.QAction(plugin.actionLabel, plugin)
+            pluginAction.triggered.connect(plugin.execute)
+            
+            pluginMenu = self.ui.menubar.addMenu(plugin.label)
+            pluginMenu.addAction(pluginAction)
         
     def _writeSettings(self):
         settings = QSettings()
@@ -71,4 +82,7 @@ class MainWindow(QMainWindow):
         dlg = AboutDialog(self)
         dlg.setModal(True)
         dlg.exec_()
+        
+    def thisOne(self):
+        print('here I am')
         
