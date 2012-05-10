@@ -43,7 +43,7 @@ class MainWindow(QMainWindow):
         self._readSettings()
         #print(PluginsAt(PluginFramework.MenuOption))
         #print(PluginsAt(PluginFramework.MenuOption).__get__(self))
-        
+        #print(MenuOption.plugins)
         self.menuPlugins = MenuOption.getPlugins()
         for plugin in self.menuPlugins:
             pluginAction = QtGui.QAction(plugin.actionLabel, plugin)
@@ -65,7 +65,7 @@ class MainWindow(QMainWindow):
         self.resize(settings.value('size', QSize(600, 400)))
         self.move(settings.value('pos', QPoint(100, 100)))
         settings.endGroup()
-        
+                
     def makeConnections(self):
         self.ui.action_Quit.triggered.connect(self.quitApplication)
         self.ui.action_About.triggered.connect(self.about)
