@@ -23,7 +23,7 @@ Inspired by Marty Alchin's Simple plugin framework.
 http://martyalchin.com/2008/jan/10/simple-plugin-framework/
 '''
 
-import os, imp
+import os, sys, imp
 
 def listPyFiles(directories):
     l = list()
@@ -40,54 +40,61 @@ def listPyFiles(directories):
     
     return l
 
-def listPlugins(pluginDir=None):
+def listPlugins(pluginDir):
     '''
     Utility method to list available plugins
     '''
-    pluginDirs = [pluginDir]
-    # If pluginDir is None list plugins in the builtin location
-    if pluginDir is None:
-        fileDir = os.path.dirname(__file__)
-        inbuiltPluginDir = os.path.realpath(fileDir + '/../plugins')
-        pluginDirs = list()
-        for dirEntry in os.listdir(inbuiltPluginDir):
-            absDir = os.path.join(inbuiltPluginDir,dirEntry)
-            if os.path.isdir(absDir):
-                pluginDirs.append(absDir)
+    l = list()
+    for dirEntry in os.listdir(pluginDir):
 
-    return listPyFiles(pluginDirs)
+        absDirEntry = os.path.join(pluginDir, dirEntry)
+        if os.path.isfile(absDirEntry):
+            rootname, ext = os.path.splitext(dirEntry)
+            if ext == '.py':
+                absfile = os.path.join(pluginDir, rootname)
+                l.append(absfile)
 
-def loadPlugins(pluginDir=None, **kwargs):
+    return l
+
+def loadPlugins(pluginDir, **kwargs):
     '''
-    Utility method to load all plugins found in pluginDir.  By default loads 
-    plugins in the src/plugin directory if no pluginDir is given.
+    Utility method to load all plugins found in pluginDir.  Adds the plugin
+    directory to the current path.
     '''
 
-    plugins = listPlugins(pluginDir=pluginDir)
+    plugins = listPlugins(pluginDir)
 
+    if pluginDir not in sys.path:
+        sys.path.append(pluginDir)
+
+    loaded_plugins = {}
     for plugin in plugins:
         pluginName = os.path.basename(plugin)
         pluginDir = os.path.dirname(plugin)
-        loaded_plugins = {}
         
+        fp, path, description = imp.find_module(pluginName, [pluginDir])
+        module = imp.load_module(pluginDir, fp, path, description)
+        moduleVersion = '-.-.-'
+        if hasattr(module, '__version__'):
+            moduleVersion = module.__version__
+        moduleAuthor = '?'
+        if hasattr(module, '__author__'):
+            moduleAuthor = module.__author__
+        print("Plugin '{}' ver {} by {} loaded".format(pluginName, moduleVersion, moduleAuthor))
+        loaded_plugins[pluginName] = module
+
         try:
-            fp, path, description = imp.find_module(pluginName, [pluginDir])
-            module = imp.load_module(pluginDir, fp, path, description)
-            moduleVersion = '-.-.-'
-            if hasattr(module, '__version__'):
-                moduleVersion = module.__version__
-            moduleAuthor = '?'
-            if hasattr(module, '__author__'):
-                moduleAuthor = module.__author__
-            print("Plugin '{}' ver {} by {} loaded".format(pluginName, moduleVersion, moduleAuthor))
-            loaded_plugins[pluginName] = module
+            pass
         except:
             # non modules will fail
             print("Plugin '{}' not loaded".format(pluginName))
         finally:
             if fp:
                 fp.close()
-                
+              
+    if len(loaded_plugins) == 0:
+        sys.path.remove(pluginDir)
+        
     return loaded_plugins
 
 

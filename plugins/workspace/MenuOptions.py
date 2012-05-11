@@ -21,6 +21,8 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
 from PyQt4.QtCore import QObject
 from PyQt4.QtGui import QFileDialog
 from core import PluginFramework
+#import Workspace
+from Workspace import Manager
 
 # Placed in reverse order so that when the menu options are inserted before any 
 # other action the desired order is achieved.
@@ -105,9 +107,11 @@ class WorkspaceNewMenu(PluginFramework.MenuOption):
         QObject.__init__(self)
         
     def execute(self, parent=None):
-        worksapceDir = QFileDialog.getExistingDirectory(caption='Select Workspace Directory')
-        if len(worksapceDir) > 0:
-            print('great:', worksapceDir)
+        workspaceDir = QFileDialog.getExistingDirectory(caption='Select Workspace Directory')
+        if len(workspaceDir) > 0:
+            print('great:', workspaceDir)
+            m = Manager()
+            m.new(workspaceDir)
             
 
             

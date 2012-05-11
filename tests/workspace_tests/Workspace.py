@@ -26,6 +26,12 @@ TEST_WORKSPACE_DIR_NAME = '/tmp/new_workspace_jihuuui'
 class WorkspaceTestCase(unittest.TestCase):
 
 
+    def setUp(self):
+        pass
+    
+    def tearDown(self):
+        pass
+    
     def testNew(self):
         dirName = tempfile.mkdtemp(prefix='new_workspace_')
         try:

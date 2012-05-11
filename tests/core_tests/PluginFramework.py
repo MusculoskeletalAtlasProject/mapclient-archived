@@ -17,7 +17,7 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     You should have received a copy of the GNU General Public License
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
-import sys, unittest
+import os, sys, unittest
 from core.PluginFramework import loadPlugins
 from Utils import ConsumeOutput
     
@@ -26,7 +26,11 @@ class PluginFrameworkTestCase(unittest.TestCase):
     def testLoadPlugins(self):
         old_stdout = sys.stdout
         sys.stdout = redirectStdout = ConsumeOutput()
-        loadPlugins()
+        fileDir = os.path.dirname(__file__)
+        inbuiltPluginDir = os.path.realpath(fileDir + '/../../plugins/workspace')
+        #print(inbuiltPluginDir)
+        loadPlugins(inbuiltPluginDir)
+
         sys.stdout = old_stdout
         #print(redirectStdout.messages)
         assert("Plugin 'MenuOptions' ver 0.1.0 by Hugh Sorby loaded" in redirectStdout.messages)
