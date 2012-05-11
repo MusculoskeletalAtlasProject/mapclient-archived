@@ -21,6 +21,27 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
 from PyQt4.QtCore import QObject
 from core import PluginFramework
 
+
+class WorkspaceOpenMenu(PluginFramework.MenuOption):
+    '''
+    classdocs
+    '''
+
+    menuLabel = '&File'
+    menuName = 'menu_File'
+    actionLabel = '&Open'
+    shortcut = 'Ctrl+O'
+
+    def __init__(self):
+        '''
+        Constructor
+        '''
+        QObject.__init__(self)
+        
+    def execute(self):
+        print('Open workspace')
+
+
 class WorkspaceNewMenu(PluginFramework.MenuOption):
     '''
     classdocs
@@ -43,22 +64,4 @@ class WorkspaceNewMenu(PluginFramework.MenuOption):
         print('New workspace')
             
 
-class WorkspaceOpenMenu(PluginFramework.MenuOption):
-    '''
-    classdocs
-    '''
-
-    menuLabel = '&File'
-    menuName = 'menu_File'
-    actionLabel = '&Open'
-    shortcut = 'Ctrl+O'
-
-    def __init__(self):
-        '''
-        Constructor
-        '''
-        QObject.__init__(self)
-        
-    def execute(self):
-        print('Open workspace')
             
