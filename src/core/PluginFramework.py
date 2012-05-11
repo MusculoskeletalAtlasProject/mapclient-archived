@@ -88,7 +88,7 @@ def loadPlugins(pluginDir=None, **kwargs):
             if fp:
                 fp.close()
                 
-        return loaded_plugins
+    return loaded_plugins
 
 
 class PluginsAt(object):
@@ -110,7 +110,7 @@ class PluginsAt(object):
 
 
 
-class MetaMountPoint(type):
+class MetaPluginMountPoint(type):
     '''
     * A way to declare a mount point for plugins. Since plugins are an example 
       of loose coupling, there needs to be a neutral location, somewhere between
@@ -126,7 +126,9 @@ class MetaMountPoint(type):
       have done their thing at the mount point, the rest of the system needs to
       be able to iterate over the installed plugins and use them according to its need.
 
-    Add the parameter `metaclass = MountPoint` in any class to make it a mount point.
+    For compatibility across python 2.x and python 3.x we must construct the PluginMountPoint
+    classes like so:
+    MyPlugin = MetaPluginMountPoint('MyPlugin', (object, ), {})
     '''
 
     def __init__(cls, name, bases, attrs):
@@ -149,25 +151,37 @@ class MetaMountPoint(type):
 # Plugin mount points are defined below.
 # For running in both python 2.x and python 3.x we must follow the example found
 # at http://mikewatkins.ca/2008/11/29/python-2-and-3-metaclasses/
-'''
-Plugins can inherit this mount point in order to add to the menu of the GUI.
-
- A plugin that registers this mount point must have attributes
- * label
- * actionLabel
- 
- It must implement
- * def execute(self):
- '''
 from PyQt4.QtCore import QObject
 
 MetaQObject = type(QObject)
 
-class MetaQObjectMountPoint(MetaQObject, MetaMountPoint):
+# For multiple inheritance in classes we also need to create a metaclass that also
+# inherits from the metaclasses of the inherited classes
+class MetaQObjectPluginMountPoint(MetaQObject, MetaPluginMountPoint):
 
     def __init__(self, name, bases, attrs):
-        MetaMountPoint.__init__(self, name, bases, attrs)
+        MetaPluginMountPoint.__init__(self, name, bases, attrs)
         MetaQObject.__init__(self, name, bases, attrs)
  
-MenuOption = MetaQObjectMountPoint('MenuOption', (QObject, ), {})
+'''
+Plugins can inherit this mount point in order to add to the menu of the GUI.
+
+ A plugin that registers this mount point must have attributes
+ * menuLabel
+ * menuName
+ * actionLabel
+ 
+ A plugin that registers this mount point could have attributes
+ * subMenuLabel
+ * subMenuName
+ * shortcut
+  
+ It must implement
+ * def execute(self):
+ 
+ And it must call
+ * QObject.__init__(self)
+ in it's __init__ function
+ '''  
+MenuOption = MetaQObjectPluginMountPoint('MenuOption', (QObject, ), {'subMenuLabel': None, 'subMenuName': None, 'shortcut': None})
 

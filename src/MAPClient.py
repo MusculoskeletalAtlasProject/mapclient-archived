@@ -51,13 +51,21 @@ def main():
     
     from PyQt4 import QtGui, QtCore
     app = QtGui.QApplication(sys.argv)
-    
-    loadPlugins()
+
     # Set the default organisation name and application name used to store application settings
     QtCore.QCoreApplication.setOrganizationName(Info.ORGANISATION_NAME)
     QtCore.QCoreApplication.setOrganizationDomain(Info.ORGANISATION_DOMAIN)
     QtCore.QCoreApplication.setApplicationName(Info.APPLICATION_NAME)
     
+    from PyQt4.QtCore import QSettings
+    settings = QSettings()    
+    settings.beginGroup('Plugins')
+    loadDefaultPlugins = settings.value('load_defaults', True)
+    settings.endGroup()
+
+    if loadDefaultPlugins:
+        loadPlugins()
+
     from widgets.MainWindow import MainWindow
     window = MainWindow()
     window.show()

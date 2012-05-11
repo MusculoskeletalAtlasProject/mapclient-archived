@@ -18,13 +18,12 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
 
-from PyQt4 import QtGui
-from PyQt4.QtGui import QMainWindow
+from PyQt4 import Qt, QtGui
+from PyQt4.QtGui import QMainWindow, QMenu, QKeySequence
 from PyQt4.QtCore import QSettings, QSize, QPoint
 
 from widgets.MainWindowUi import Ui_MainWindow
-from core import PluginFramework
-from core.PluginFramework import PluginsAt, MenuOption
+from core.PluginFramework import MenuOption
 
 class MainWindow(QMainWindow):
     '''
@@ -48,9 +47,41 @@ class MainWindow(QMainWindow):
         for plugin in self.menuPlugins:
             pluginAction = QtGui.QAction(plugin.actionLabel, plugin)
             pluginAction.triggered.connect(plugin.execute)
+            pluginAction.setObjectName(plugin.actionLabel)
+            pluginAction.setShortcut(QKeySequence(plugin.shortcut))
             
-            pluginMenu = self.ui.menubar.addMenu(plugin.label)
-            pluginMenu.addAction(pluginAction)
+            pluginMenu = self.ui.menubar.findChild(QtGui.QMenu, plugin.menuName)
+            #for child in self.ui.menubar.findChildren(QtGui.QMenu):
+            #    if child.title() == plugin.menuLabel:
+            #        pluginMenu = child
+            #        break
+            if not pluginMenu:
+                menu = QMenu(plugin.menuLabel)
+                menu.setObjectName(plugin.menuName)
+                self.ui.menubar.insertMenu(self.ui.menubar.children()[1], menu)
+                pluginMenu = menu
+                
+                #pluginMenu = self.ui.menubar.addMenu(plugin.menuLabel)
+                
+            if plugin.subMenuLabel:
+                for ac in pluginMenu.actions():
+                    print('Action', ac, ac.text(), ac.objectName(), ac.children())
+                menu = QMenu(plugin.subMenuLabel, pluginMenu)
+                menu.setObjectName(plugin.subMenuName)
+                
+                firstAction = pluginMenu.actions()[0]
+                pluginMenu.insertMenu(firstAction, menu)
+                pluginMenu = menu
+
+            #pluginMenu.insertAction()
+            for ac in pluginMenu.actions():
+                print('action: ', ac.objectName(), ac.text())
+            print(pluginMenu, pluginMenu.title(), pluginMenu.objectName())
+            if len(pluginMenu.actions()) > 0:
+                firstAction = pluginMenu.actions()[0]
+                pluginMenu.insertAction(firstAction, pluginAction)
+            else:
+                pluginMenu.addAction(pluginAction)
         
     def _writeSettings(self):
         settings = QSettings()

@@ -28,7 +28,9 @@ class PluginFrameworkTestCase(unittest.TestCase):
         sys.stdout = redirectStdout = ConsumeOutput()
         loadPlugins()
         sys.stdout = old_stdout
-        assert(redirectStdout.messages[0] == "Plugin 'CoolMenu' ver -.-.- by ? loaded")
+        #print(redirectStdout.messages)
+        assert(redirectStdout.messages[0] == "Plugin 'WokspaceMenu' ver -.-.- by ? loaded")
+        assert(redirectStdout.messages[2] == "Plugin 'CoolMenu' ver -.-.- by ? loaded")
         #print(redirectStdout.messages[0])
 
 if __name__ == "__main__":
