@@ -19,6 +19,7 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
 '''
 
 from PyQt4.QtCore import QObject
+from PyQt4.QtGui import QFileDialog
 from core import PluginFramework
 
 # Placed in reverse order so that when the menu options are inserted before any 
@@ -103,8 +104,10 @@ class WorkspaceNewMenu(PluginFramework.MenuOption):
         '''
         QObject.__init__(self)
         
-    def execute(self):
-        print('New workspace')
+    def execute(self, parent=None):
+        worksapceDir = QFileDialog.getExistingDirectory(caption='Select Workspace Directory')
+        if len(worksapceDir) > 0:
+            print('great:', worksapceDir)
             
 
             
