@@ -175,6 +175,7 @@ Plugins can inherit this mount point in order to add to the menu of the GUI.
  * subMenuLabel
  * subMenuName
  * shortcut
+ * statustip
   
  It must implement
  * def execute(self):
@@ -183,5 +184,5 @@ Plugins can inherit this mount point in order to add to the menu of the GUI.
  * QObject.__init__(self)
  in it's __init__ function
  '''  
-MenuOption = MetaQObjectPluginMountPoint('MenuOption', (QObject, ), {'subMenuLabel': None, 'subMenuName': None, 'shortcut': None})
+MenuOption = MetaQObjectPluginMountPoint('MenuOption', (QObject, ), {'subMenuLabel': None, 'subMenuName': None, 'shortcut': None, 'statustip': ''})
 

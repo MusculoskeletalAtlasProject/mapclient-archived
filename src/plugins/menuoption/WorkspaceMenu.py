@@ -21,6 +21,47 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
 from PyQt4.QtCore import QObject
 from core import PluginFramework
 
+# Placed in reverse order so that when the menu options are inserted before any 
+# other action the desired order is achieved.
+class WorkspaceCloseMenu(PluginFramework.MenuOption):
+    '''
+    classdocs
+    '''
+
+    menuLabel = '&File'
+    menuName = 'menu_File'
+    actionLabel = '&Close'
+    shortcut = 'Ctrl+W'
+    statustip = 'Close open workspace'
+
+    def __init__(self):
+        '''
+        Constructor
+        '''
+        QObject.__init__(self)
+        
+    def execute(self):
+        print('Close workspace')
+
+
+class WorkspaceSeparatorMenu(PluginFramework.MenuOption):
+    '''
+    classdocs
+    '''
+
+    menuLabel = '&File'
+    menuName = 'menu_File'
+    actionLabel = ''
+
+    def __init__(self):
+        '''
+        Constructor
+        '''
+        QObject.__init__(self)
+        
+    def execute(self):
+        pass
+
 
 class WorkspaceOpenMenu(PluginFramework.MenuOption):
     '''
@@ -31,6 +72,7 @@ class WorkspaceOpenMenu(PluginFramework.MenuOption):
     menuName = 'menu_File'
     actionLabel = '&Open'
     shortcut = 'Ctrl+O'
+    statustip = 'Open a workspace'
 
     def __init__(self):
         '''
@@ -53,6 +95,7 @@ class WorkspaceNewMenu(PluginFramework.MenuOption):
     subMenuName = 'menu_New'
     actionLabel = '&Workspace'
     shortcut = 'Ctrl+N'
+    statustip = 'Create a new workspace'
 
     def __init__(self):
         '''
