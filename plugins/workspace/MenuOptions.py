@@ -44,7 +44,8 @@ class WorkspaceCloseMenu(PluginFramework.MenuOption):
         QObject.__init__(self)
         
     def execute(self):
-        print('Close workspace')
+        m = Manager()
+        m.close()
 
 
 class WorkspaceSeparatorMenu(PluginFramework.MenuOption):
@@ -84,7 +85,10 @@ class WorkspaceOpenMenu(PluginFramework.MenuOption):
         QObject.__init__(self)
         
     def execute(self):
-        print('Open workspace')
+        workspaceDir = QFileDialog.getExistingDirectory(caption='Open Workspace', options = QFileDialog.ShowDirsOnly | QFileDialog.DontResolveSymlinks | QFileDialog.ReadOnly)
+        if len(workspaceDir) > 0:
+            m = Manager()
+            m.load(workspaceDir)
 
 
 class WorkspaceNewMenu(PluginFramework.MenuOption):
@@ -109,7 +113,6 @@ class WorkspaceNewMenu(PluginFramework.MenuOption):
     def execute(self, parent=None):
         workspaceDir = QFileDialog.getExistingDirectory(caption='Select Workspace Directory')
         if len(workspaceDir) > 0:
-            print('great:', workspaceDir)
             m = Manager()
             m.new(workspaceDir)
             

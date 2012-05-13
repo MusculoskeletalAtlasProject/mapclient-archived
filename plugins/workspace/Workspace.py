@@ -21,6 +21,9 @@ import os
 from PyQt4.QtCore import QSettings
 from settings import Info
 
+def workspaceConfigurationExists(location):
+    return os.path.exists(location + '/' + Info.WORKSPACE_NAME)
+
 def getWorkspaceConfiguration(location):
     return QSettings(location + '/' + Info.WORKSPACE_NAME, QSettings.IniFormat)
 
@@ -43,8 +46,8 @@ class Manager(object):
     '''
     This class managers the workspace.
     '''
-
     location = None
+    
     def __init__(self):
         '''
         Constructor
@@ -82,11 +85,14 @@ class Manager(object):
         if not os.path.exists(location):
             raise WorkspaceError('Location %s does not exist' % location)
         
-        self.location = location
+        if not workspaceConfigurationExists(location):
+            raise WorkspaceError('No workspace located at %s' % location)
+        
         ws = getWorkspaceConfiguration(location)
         if ws.value('version') != Info.VERSION_STRING:
             raise WorkspaceError('Version mismatch in workspace expected: %s got: %s' % (Info.VERSION_STRING, ws.value('version')))
         
+        self.location = location
         
     def close(self):
         '''
