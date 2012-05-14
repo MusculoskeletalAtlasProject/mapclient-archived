@@ -80,7 +80,7 @@ def loadPlugins(pluginDir, **kwargs):
         moduleAuthor = '?'
         if hasattr(module, '__author__'):
             moduleAuthor = module.__author__
-        print("Plugin '{}' ver {} by {} loaded".format(pluginName, moduleVersion, moduleAuthor))
+        print("Plugin '{0}' ver {1} by {2} loaded".format(pluginName, moduleVersion, moduleAuthor))
         loaded_plugins[pluginName] = module
 
         try:
