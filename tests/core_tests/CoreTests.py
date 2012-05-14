@@ -17,27 +17,13 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     You should have received a copy of the GNU General Public License
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
-import sip
-API_NAMES = ["QDate", "QDateTime", "QString", "QTextStream", "QTime", "QUrl", "QVariant"]
-API_VERSION = 2
-for name in API_NAMES:
-    sip.setapi(name, API_VERSION)
-
 import unittest
 
-if __name__ == '__main__':
+def suite():
+    from core_tests.PluginFramework import PluginFrameworkTestCase
     tests = unittest.TestSuite()
-    
-    from settings_tests import SettingsTests
-    tests.addTests(SettingsTests.suite())
-    
-    from widgets_tests import WidgetsTests
-    tests.addTests(WidgetsTests.suite())
-    
-    from core_tests import CoreTests
-    tests.addTests(CoreTests.suite())
-    
-    from workspace_tests import WorkspaceTests
-    tests.addTests(WorkspaceTests.suite())
+    tests.addTests(unittest.TestLoader().loadTestsFromTestCase(PluginFrameworkTestCase))
+    return tests
 
-    unittest.TextTestRunner().run(tests)
+if __name__ == '__main__':
+    unittest.TextTestRunner().run(suite())

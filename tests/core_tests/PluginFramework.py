@@ -17,27 +17,25 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     You should have received a copy of the GNU General Public License
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
-import sip
-API_NAMES = ["QDate", "QDateTime", "QString", "QTextStream", "QTime", "QUrl", "QVariant"]
-API_VERSION = 2
-for name in API_NAMES:
-    sip.setapi(name, API_VERSION)
+import os, sys, unittest
+from core.PluginFramework import loadPlugins
+from Utils import ConsumeOutput
+    
+class PluginFrameworkTestCase(unittest.TestCase):
 
-import unittest
+    def testLoadPlugins(self):
+        old_stdout = sys.stdout
+        sys.stdout = redirectStdout = ConsumeOutput()
+        fileDir = os.path.dirname(__file__)
+        inbuiltPluginDir = os.path.realpath(fileDir + '/../../plugins/workspace')
+        #print(inbuiltPluginDir)
+        loadPlugins(inbuiltPluginDir)
 
-if __name__ == '__main__':
-    tests = unittest.TestSuite()
-    
-    from settings_tests import SettingsTests
-    tests.addTests(SettingsTests.suite())
-    
-    from widgets_tests import WidgetsTests
-    tests.addTests(WidgetsTests.suite())
-    
-    from core_tests import CoreTests
-    tests.addTests(CoreTests.suite())
-    
-    from workspace_tests import WorkspaceTests
-    tests.addTests(WorkspaceTests.suite())
+        sys.stdout = old_stdout
+        #print(redirectStdout.messages)
+        assert("Plugin 'MenuOptions' ver 0.1.0 by Hugh Sorby loaded" in redirectStdout.messages)
+        #print(redirectStdout.messages[0])
 
-    unittest.TextTestRunner().run(tests)
+if __name__ == "__main__":
+    #import sys;sys.argv = ['', 'Test.testLoadPlugins']
+    unittest.main()
