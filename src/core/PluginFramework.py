@@ -54,6 +54,12 @@ def listPlugins(pluginDir):
                 absfile = os.path.join(pluginDir, rootname)
                 l.append(absfile)
 
+    # Move __init__ to the front of the list, if found
+    initSearchTerm = os.path.join(pluginDir, '__init__')
+    initIndex = l.index(initSearchTerm)
+    if initIndex > 0: # If the index is zero we don't need to move it I guess.
+        l.insert(0, l.pop(initIndex))
+
     return l
 
 def loadPlugins(pluginDir, **kwargs):
@@ -72,19 +78,19 @@ def loadPlugins(pluginDir, **kwargs):
         pluginName = os.path.basename(plugin)
         pluginDir = os.path.dirname(plugin)
         
-        fp, path, description = imp.find_module(pluginName, [pluginDir])
-        module = imp.load_module(pluginDir, fp, path, description)
-        moduleVersion = '-.-.-'
-        if hasattr(module, '__version__'):
-            moduleVersion = module.__version__
-        moduleAuthor = '?'
-        if hasattr(module, '__author__'):
-            moduleAuthor = module.__author__
-        print("Plugin '{0}' ver {1} by {2} loaded".format(pluginName, moduleVersion, moduleAuthor))
-        loaded_plugins[pluginName] = module
-
         try:
-            pass
+            fp, path, description = imp.find_module(pluginName, [pluginDir])
+            module = imp.load_module(pluginDir, fp, path, description)
+            if pluginName != '__init__':
+                moduleVersion = '-.-.-'
+                if hasattr(module, '__version__'):
+                    moduleVersion = module.__version__
+                moduleAuthor = '?'
+                if hasattr(module, '__author__'):
+                    moduleAuthor = module.__author__
+                print("Plugin '{0}' version {1} by {2} loaded".format(pluginName, moduleVersion, moduleAuthor))
+    
+            loaded_plugins[pluginName] = module
         except:
             # non modules will fail
             print("Plugin '{}' not loaded".format(pluginName))
