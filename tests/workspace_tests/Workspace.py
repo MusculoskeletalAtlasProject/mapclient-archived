@@ -21,7 +21,7 @@ import unittest
 import os, tempfile
 from workspace.Workspace import Manager, WorkspaceError
 
-TEST_WORKSPACE_DIR_NAME = '/tmp/new_workspace_jihuuui'
+TEST_WORKSPACE_DIR_NAME = '/new_workspace_jihuuui'
 
 class WorkspaceTestCase(unittest.TestCase):
 
@@ -50,22 +50,24 @@ class WorkspaceTestCase(unittest.TestCase):
             pass
         
     def testNewWithNonexistentDir(self):
+        tempDir = tempfile.gettempdir() + TEST_WORKSPACE_DIR_NAME
         ws = Manager()
-        ws.new(TEST_WORKSPACE_DIR_NAME)
-        assert(os.path.exists(TEST_WORKSPACE_DIR_NAME + '/workspace.conf'))
+        ws.new(tempDir)
+        assert(os.path.exists(tempDir + '/workspace.conf'))
 
         # Get rid of test  output
-        os.remove(TEST_WORKSPACE_DIR_NAME + '/workspace.conf')
-        os.rmdir(TEST_WORKSPACE_DIR_NAME)
+        os.remove(tempDir + '/workspace.conf')
+        os.rmdir(tempDir)
         
     def testOpen(self):
+        tempDir = tempfile.gettempdir() + TEST_WORKSPACE_DIR_NAME
         ws = Manager()
-        ws.new(TEST_WORKSPACE_DIR_NAME)
-        ws.load(TEST_WORKSPACE_DIR_NAME)
+        ws.new(tempDir)
+        ws.load(tempDir)
 
         # Get rid of test  output
-        os.remove(TEST_WORKSPACE_DIR_NAME + '/workspace.conf')
-        os.rmdir(TEST_WORKSPACE_DIR_NAME)
+        os.remove(tempDir + '/workspace.conf')
+        os.rmdir(tempDir)
         
 
 if __name__ == "__main__":
