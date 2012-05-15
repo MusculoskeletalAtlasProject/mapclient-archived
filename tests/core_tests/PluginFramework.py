@@ -33,7 +33,7 @@ class PluginFrameworkTestCase(unittest.TestCase):
 
         sys.stdout = old_stdout
         #print(redirectStdout.messages)
-        assert("Plugin 'MenuOptions' ver 0.1.0 by Hugh Sorby loaded" in redirectStdout.messages)
+        assert("Plugin 'MenuOptions' version 0.1.0 by Hugh Sorby loaded" in redirectStdout.messages)
         #print(redirectStdout.messages[0])
 
 if __name__ == "__main__":
