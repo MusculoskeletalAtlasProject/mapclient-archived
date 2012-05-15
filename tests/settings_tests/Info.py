@@ -48,6 +48,11 @@ class InfoTestCase(unittest.TestCase):
             assert(len(contributor.keys()) == 2)
             assert('name' in contributor)
             assert('email' in contributor)
+            
+    def testNames(self):
+        assert(Info.APPLICATION_NAME == 'MAP Client')
+        assert(Info.ORGANISATION_NAME == 'Musculo Skeletal')
+        assert(Info.ORGANISATION_DOMAIN == 'musculoskeletal.org')
 
 
 if __name__ == "__main__":

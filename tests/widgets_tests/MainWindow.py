@@ -19,7 +19,6 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
 '''
 import unittest
 
-
 class MainWindowTestCase(unittest.TestCase):
 
 
