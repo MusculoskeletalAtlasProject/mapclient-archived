@@ -19,14 +19,16 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
 '''
 
 from PyQt4 import QtGui
-from PyQt4.QtGui import QMainWindow
+from PyQt4.QtGui import QMainWindow, QMenu, QKeySequence
+from PyQt4.QtCore import QSettings, QSize, QPoint
+
 from widgets.MainWindowUi import Ui_MainWindow
+from core.PluginFramework import MenuOption
 
 class MainWindow(QMainWindow):
     '''
     This is the main window for the MAP Client.
     '''
-
 
     def __init__(self):
         '''
@@ -37,12 +39,64 @@ class MainWindow(QMainWindow):
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
         self.makeConnections()
+        self._readSettings()
+        #print(PluginsAt(PluginFramework.MenuOption))
+        #print(PluginsAt(PluginFramework.MenuOption).__get__(self))
+        #print(MenuOption.plugins)
+        self.menuPlugins = MenuOption.getPlugins()
+        for plugin in self.menuPlugins:
+            pluginAction = QtGui.QAction(plugin.actionLabel, plugin)
+            pluginAction.triggered.connect(plugin.execute)
+            pluginAction.setObjectName(plugin.actionLabel)
+            pluginAction.setShortcut(QKeySequence(plugin.shortcut))
+            pluginAction.setStatusTip(plugin.statustip)
+            if len(plugin.actionLabel) == 0:
+                pluginAction.setSeparator(True)
+            
+            pluginMenu = self.ui.menubar.findChild(QtGui.QMenu, plugin.menuName)
+            if not pluginMenu:
+                menu = QMenu(plugin.menuLabel)
+                menu.setObjectName(plugin.menuName)
+                self.ui.menubar.insertMenu(self.ui.menubar.children()[1], menu)
+                pluginMenu = menu
+                
+            if plugin.subMenuLabel:
+                menu = QMenu(plugin.subMenuLabel, pluginMenu)
+                menu.setObjectName(plugin.subMenuName)
+                
+                firstAction = pluginMenu.actions()[0]
+                pluginMenu.insertMenu(firstAction, menu)
+                pluginMenu = menu
+
+            if len(pluginMenu.actions()) > 0:
+                firstAction = pluginMenu.actions()[0]
+                pluginMenu.insertAction(firstAction, pluginAction)
+            else:
+                pluginMenu.addAction(pluginAction)
         
+    def _writeSettings(self):
+        settings = QSettings()
+        settings.beginGroup('MainWindow')
+        settings.setValue('size', self.size())
+        settings.setValue('pos', self.pos())
+        settings.endGroup()
+    
+    def _readSettings(self):
+        settings = QSettings()
+        settings.beginGroup('MainWindow')
+        self.resize(settings.value('size', QSize(600, 400)))
+        self.move(settings.value('pos', QPoint(100, 100)))
+        settings.endGroup()
+                
     def makeConnections(self):
         self.ui.action_Quit.triggered.connect(self.quitApplication)
         self.ui.action_About.triggered.connect(self.about)
         
+    def closeEvent(self, event):
+        self.quitApplication()
+        
     def quitApplication(self):
+        self._writeSettings()
         QtGui.qApp.quit()
         
     def about(self):
@@ -50,4 +104,7 @@ class MainWindow(QMainWindow):
         dlg = AboutDialog(self)
         dlg.setModal(True)
         dlg.exec_()
+        
+    def thisOne(self):
+        print('here I am')
         
