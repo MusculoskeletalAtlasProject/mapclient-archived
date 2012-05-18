@@ -110,7 +110,14 @@ class WorkspaceNewWorkstepMenu(PluginFramework.MenuOption):
         QObject.__init__(self)
 
     def execute(self, parent=None):
-        print('sonugfff')
+        from workspace.widgets.WorkstepsDialog import WorkstepsDialog
+        dlg = WorkstepsDialog()
+        dlg.setModal(True)
+        if dlg.exec_():
+            print(dlg.getAdd())
+        else:
+            print(dlg.getAdd())
+
 
 
 class WorkspaceNewWorkspaceMenu(PluginFramework.MenuOption):
