@@ -90,6 +90,29 @@ class WorkspaceOpenMenu(PluginFramework.MenuOption):
             m.load(workspaceDir)
 
 
+class WorkspaceNewWorkstepMenu(PluginFramework.MenuOption):
+    '''
+    classdocs
+    '''
+
+    menuLabel = '&File'
+    menuName = 'menu_File'
+    subMenuLabel = '&New'
+    subMenuName = 'menu_New'
+    actionLabel = '&Workstep'
+    #shortcut = 'Ctrl+N'
+    statustip = 'Create a new workstep'
+
+    def __init__(self):
+        '''
+        Constructor
+        '''
+        QObject.__init__(self)
+
+    def execute(self, parent=None):
+        print('sonugfff')
+
+
 class WorkspaceNewWorkspaceMenu(PluginFramework.MenuOption):
     '''
     classdocs
@@ -114,28 +137,6 @@ class WorkspaceNewWorkspaceMenu(PluginFramework.MenuOption):
         if len(workspaceDir) > 0:
             m = Manager()
             m.new(workspaceDir)
-
-class WorkspaceNewWorkstepMenu(PluginFramework.MenuOption):
-    '''
-    classdocs
-    '''
-
-    menuLabel = '&File'
-    menuName = 'menu_File'
-    subMenuLabel = '&New'
-    subMenuName = 'menu_New'
-    actionLabel = '&Workstep'
-    #shortcut = 'Ctrl+N'
-    statustip = 'Create a new workstep'
-
-    def __init__(self):
-        '''
-        Constructor
-        '''
-        QObject.__init__(self)
-
-    def execute(self, parent=None):
-        print('sonugfff')
 
 
 

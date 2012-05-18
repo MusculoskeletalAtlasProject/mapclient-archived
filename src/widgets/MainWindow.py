@@ -59,11 +59,13 @@ class MainWindow(QMainWindow):
                 pluginMenu = menu
 
             if plugin.subMenuLabel:
-                menu = QMenu(plugin.subMenuLabel, pluginMenu)
-                menu.setObjectName(plugin.subMenuName)
+                menu = pluginMenu.findChild(QtGui.QMenu, name=plugin.subMenuName)
+                if not menu:
+                    menu = QMenu(plugin.subMenuLabel, pluginMenu)
+                    menu.setObjectName(plugin.subMenuName)
+                    firstAction = pluginMenu.actions()[0]
+                    pluginMenu.insertMenu(firstAction, menu)
 
-                firstAction = pluginMenu.actions()[0]
-                pluginMenu.insertMenu(firstAction, menu)
                 pluginMenu = menu
 
             if len(pluginMenu.actions()) > 0:
