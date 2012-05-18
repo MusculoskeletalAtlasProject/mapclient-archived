@@ -66,12 +66,7 @@ def main():
     if loadDefaultPlugins:
         fileDir = os.path.dirname(os.path.abspath(__file__))
         inbuiltPluginDir = os.path.realpath(fileDir + '/../plugins')
-        if os.path.exists(inbuiltPluginDir):
-            #sys.path.append(inbuiltPluginDir)
-            for dirEntry in os.listdir(inbuiltPluginDir):
-                absDirEntry = os.path.join(inbuiltPluginDir, dirEntry)
-                if os.path.isdir(absDirEntry):
-                    loadPlugins(absDirEntry)
+        loadPlugins(inbuiltPluginDir)
 
     from widgets.MainWindow import MainWindow
     window = MainWindow()

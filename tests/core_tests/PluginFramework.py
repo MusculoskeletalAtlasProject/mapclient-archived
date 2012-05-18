@@ -17,24 +17,19 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     You should have received a copy of the GNU General Public License
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
-import os, sys, unittest
+import os, unittest
 from core.PluginFramework import loadPlugins
-from Utils import ConsumeOutput
-    
+#from Utils import ConsumeOutput
+
 class PluginFrameworkTestCase(unittest.TestCase):
 
-    def testLoadPlugins(self):
-        old_stdout = sys.stdout
-        sys.stdout = redirectStdout = ConsumeOutput()
-        fileDir = os.path.dirname(__file__)
-        inbuiltPluginDir = os.path.realpath(fileDir + '/../../plugins/workspace')
-        #print(inbuiltPluginDir)
-        loadPlugins(inbuiltPluginDir)
 
-        sys.stdout = old_stdout
-        #print(redirectStdout.messages)
-        assert("Plugin 'MenuOptions' version 0.1.0 by Hugh Sorby loaded" in redirectStdout.messages)
-        #print(redirectStdout.messages[0])
+    def testLoadPlugins(self):
+        fileDir = os.path.dirname(__file__)
+        inbuiltPluginDir = os.path.realpath(fileDir + '/../../plugins')
+        
+        loadPlugins(inbuiltPluginDir)
+        
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testLoadPlugins']

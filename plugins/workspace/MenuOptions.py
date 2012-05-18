@@ -21,8 +21,8 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
 from PyQt4.QtCore import QObject
 from PyQt4.QtGui import QFileDialog
 from core import PluginFramework
-#import Workspace
-from Workspace import Manager
+from workspace.Workspace import Manager
+#from Workspace import Manager
 
 # Placed in reverse order so that when the menu options are inserted before any 
 # other action the desired order is achieved.

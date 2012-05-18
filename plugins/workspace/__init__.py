@@ -19,3 +19,12 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
 '''
 __version__ = '0.1.0'
 __author__ = 'Hugh Sorby'
+#import sys
+#from pkgutil import extend_path
+#__path__ = extend_path(sys.path, __name__)
+
+import sip
+API_NAMES = ["QDate", "QDateTime", "QString", "QTextStream", "QTime", "QUrl", "QVariant"]
+API_VERSION = 2
+for name in API_NAMES:
+    sip.setapi(name, API_VERSION)
