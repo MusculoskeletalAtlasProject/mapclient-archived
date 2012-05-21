@@ -24,7 +24,9 @@ class SegmentationTestCase(unittest.TestCase):
 
 
     def testPlugin(self):
-        pass
+        from segmentation.Step import Step
+        print(Step.description)
+        print(Step.icon)
 
 
 if __name__ == "__main__":

@@ -53,7 +53,7 @@ def initPackage(pkgDir):
 
 def loadModule(moduleName, moduleDir):
     fp, path, description = imp.find_module(moduleName, [moduleDir])
-    
+
     module = imp.load_module(moduleDir, fp, path, description)
 
     moduleVersion = '-.-.-'
@@ -133,10 +133,10 @@ class MetaPluginMountPoint(type):
             # Simply appending it to the list is all that's needed to keep
             # track of it later.
             cls.plugins.append(cls)
-            
+
     def getPlugins(self, *args, **kwargs):
         return [p(*args, **kwargs) for p in self.plugins]
-       
+
 
 # Plugin mount points are defined below.
 # For running in both python 2.x and python 3.x we must follow the example found
@@ -152,7 +152,27 @@ class MetaQObjectPluginMountPoint(MetaQObject, MetaPluginMountPoint):
     def __init__(self, name, bases, attrs):
         MetaPluginMountPoint.__init__(self, name, bases, attrs)
         MetaQObject.__init__(self, name, bases, attrs)
- 
+
+
+#
+# Template plugin comment:
+#
+#'''
+#Plugins can inherit this mount point to extend
+#
+# A plugin that registers this mount point must have attributes
+# * None
+# 
+# A plugin that registers this mount point could have attributes
+# * None
+# 
+# It must implement
+# * pass 
+# 
+#''' 
+#
+
+
 '''
 Plugins can inherit this mount point in order to add to the menu of the GUI.
 
@@ -173,6 +193,6 @@ Plugins can inherit this mount point in order to add to the menu of the GUI.
  And it must call
  * QObject.__init__(self)
  in it's __init__ function
- '''  
-MenuOption = MetaQObjectPluginMountPoint('MenuOption', (QObject, ), {'subMenuLabel': None, 'subMenuName': None, 'shortcut': None, 'statustip': ''})
+ '''
+MenuOption = MetaQObjectPluginMountPoint('MenuOption', (QObject,), {'subMenuLabel': None, 'subMenuName': None, 'shortcut': None, 'statustip': ''})
 

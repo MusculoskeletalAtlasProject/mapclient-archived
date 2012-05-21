@@ -36,6 +36,9 @@
         </property>
        </widget>
       </item>
+      <item>
+       <widget class="QListWidget" name="listWidget_Steps"/>
+      </item>
      </layout>
     </widget>
    </item>
@@ -56,6 +59,9 @@
      <layout class="QVBoxLayout" name="verticalLayout_2">
       <item>
        <widget class="QPlainTextEdit" name="edit_Description">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
         <property name="readOnly">
          <bool>true</bool>
         </property>

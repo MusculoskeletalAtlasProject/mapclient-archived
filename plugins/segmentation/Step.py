@@ -17,13 +17,21 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     You should have received a copy of the GNU General Public License
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
-import unittest
+from PyQt4.QtGui import QIcon
+from workspace import Workspace
 
-def suite():
-    from segmentation_tests.Segmentation import SegmentationTestCase
-    tests = unittest.TestSuite()
-    tests.addTests(unittest.TestLoader().loadTestsFromTestCase(SegmentationTestCase))
-    return tests
 
-if __name__ == '__main__':
-    unittest.TextTestRunner().run(suite())
+class Step(Workspace.WorkspaceStep):
+    '''
+    A step satisfies the step plugin duck
+    '''
+
+    description = 'This step is for segmenting images.'
+    icon = None
+    name = 'segmentation'
+
+    def __init__(self):
+        '''
+        Constructor
+        '''
+        self.icon = QIcon(':/icons/seg.png')

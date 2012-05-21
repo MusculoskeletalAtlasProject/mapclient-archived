@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'WorkstepsDialog.ui'
+# Form implementation generated from reading ui file 'ui/WorkstepsDialog.ui'
 #
-# Created: Fri May 18 15:52:02 2012
+# Created: Mon May 21 14:11:35 2012
 #      by: PyQt4 UI code generator 4.9.1
 #
 # WARNING! All changes made in this file will be lost!
@@ -33,6 +33,9 @@ class Ui_WorkstepsDialog(object):
         self.listView_Steps.setMaximumSize(QtCore.QSize(100, 16777215))
         self.listView_Steps.setObjectName(_fromUtf8("listView_Steps"))
         self.verticalLayout.addWidget(self.listView_Steps)
+        self.listWidget_Steps = QtGui.QListWidget(self.groupBox)
+        self.listWidget_Steps.setObjectName(_fromUtf8("listWidget_Steps"))
+        self.verticalLayout.addWidget(self.listWidget_Steps)
         self.gridLayout.addWidget(self.groupBox, 0, 0, 1, 1)
         self.groupBox_2 = QtGui.QGroupBox(WorkstepsDialog)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Preferred)
@@ -45,6 +48,7 @@ class Ui_WorkstepsDialog(object):
         self.verticalLayout_2 = QtGui.QVBoxLayout(self.groupBox_2)
         self.verticalLayout_2.setObjectName(_fromUtf8("verticalLayout_2"))
         self.edit_Description = QtGui.QPlainTextEdit(self.groupBox_2)
+        self.edit_Description.setEnabled(False)
         self.edit_Description.setReadOnly(True)
         self.edit_Description.setObjectName(_fromUtf8("edit_Description"))
         self.verticalLayout_2.addWidget(self.edit_Description)

@@ -18,8 +18,28 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
 
-from PyQt4.QtGui import QDialog
+from PyQt4.Qt import Qt
+from PyQt4.QtCore import QAbstractListModel, QModelIndex
+from PyQt4.QtGui import QDialog, QListWidgetItem
 from workspace.widgets.WorkstepsDialogUi import Ui_WorkstepsDialog
+from workspace.Workspace import WorkspaceStep
+
+class StepModel(QAbstractListModel):
+
+    def __init__(self, steps, parent=None, *args, **kwargs):
+        QAbstractListModel.__init__(self, parent, *args, **kwargs)
+        self.steps = steps
+
+    def rowCount(self, parent=QModelIndex()):
+        return len(self.steps)
+
+    def data(self, index, role):
+        if index.isValid() and role == Qt.DisplayRole:
+            return self.steps[index.row()].icon
+        else:
+            return None
+
+
 class WorkstepsDialog(QDialog):
     '''
     Dialog to select from a list of worksteps.
@@ -34,6 +54,11 @@ class WorkstepsDialog(QDialog):
         self.ui = Ui_WorkstepsDialog()
         self.ui.setupUi(self)
         self.makeConnections()
+        self.workspaceStepPlugins = WorkspaceStep.getPlugins()
+        self.ui.listView_Steps.setModel(StepModel(self.workspaceStepPlugins))
+        for plugin in self.workspaceStepPlugins:
+            print(plugin.icon, plugin.description)
+            QListWidgetItem(plugin.icon, plugin.name, self.ui.listWidget_Steps)
 
     def makeConnections(self):
         self.ui.btn_Add.clicked.connect(self.addStep)

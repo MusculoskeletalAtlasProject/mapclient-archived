@@ -20,6 +20,7 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
 import os
 from PyQt4.QtCore import QSettings
 from settings import Info
+from core import PluginFramework
 
 def workspaceConfigurationExists(location):
     return os.path.exists(location + '/' + Info.WORKSPACE_NAME)
@@ -29,6 +30,22 @@ def getWorkspaceConfiguration(location):
 
 class WorkspaceError(Exception):
     pass
+
+'''
+Plugins can inherit this mount point to add a workspace step.
+
+ A plugin that registers this mount point must have attributes
+ * description
+ * icon
+ 
+ A plugin that registers this mount point could have attributes
+ * None
+ 
+ It must implement
+ * pass 
+
+'''
+WorkspaceStep = PluginFramework.MetaPluginMountPoint('WorkspaceStep', (object,), {})
 
 class Workspace(object):
     '''

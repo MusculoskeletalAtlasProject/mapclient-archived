@@ -19,22 +19,12 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
 '''
 import unittest
 
-if __name__ == '__main__':
+
+def suite():
+    from segmentation_tests.Segmentation import SegmentationTestCase
     tests = unittest.TestSuite()
+    tests.addTests(unittest.TestLoader().loadTestsFromTestCase(SegmentationTestCase))
+    return tests
 
-    from settings_tests import SettingsTests
-    tests.addTests(SettingsTests.suite())
-
-    from widgets_tests import WidgetsTests
-    tests.addTests(WidgetsTests.suite())
-
-    from core_tests import CoreTests
-    tests.addTests(CoreTests.suite())
-
-    from workspace_tests import WorkspaceTests
-    tests.addTests(WorkspaceTests.suite())
-
-    from segmentation_tests import SegmentationTests
-    tests.addTests(SegmentationTests.suite())
-
-    unittest.TextTestRunner().run(tests)
+if __name__ == '__main__':
+    unittest.TextTestRunner().run(suite())
