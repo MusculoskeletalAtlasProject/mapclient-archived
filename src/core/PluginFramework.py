@@ -177,6 +177,7 @@ class MetaQObjectPluginMountPoint(MetaQObject, MetaPluginMountPoint):
 Plugins can inherit this mount point in order to add to the menu of the GUI.
 
  A plugin that registers this mount point must have attributes
+ * parent
  * menuLabel
  * menuName
  * actionLabel

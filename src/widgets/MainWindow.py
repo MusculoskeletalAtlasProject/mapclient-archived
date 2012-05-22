@@ -43,6 +43,7 @@ class MainWindow(QMainWindow):
 
         self.menuPlugins = MenuOption.getPlugins()
         for plugin in self.menuPlugins:
+            plugin.parent = self
             pluginAction = QtGui.QAction(plugin.actionLabel, plugin)
             pluginAction.triggered.connect(plugin.execute)
             pluginAction.setObjectName(plugin.actionLabel)

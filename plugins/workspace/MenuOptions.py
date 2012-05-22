@@ -30,6 +30,7 @@ class WorkspaceCloseMenu(PluginFramework.MenuOption):
     classdocs
     '''
 
+    parent = None
     menuLabel = '&File'
     menuName = 'menu_File'
     actionLabel = '&Close'
@@ -52,6 +53,7 @@ class WorkspaceSeparatorMenu(PluginFramework.MenuOption):
     classdocs
     '''
 
+    parent = None
     menuLabel = '&File'
     menuName = 'menu_File'
     actionLabel = ''
@@ -71,6 +73,7 @@ class WorkspaceOpenMenu(PluginFramework.MenuOption):
     classdocs
     '''
 
+    parent = None
     menuLabel = '&File'
     menuName = 'menu_File'
     actionLabel = '&Open'
@@ -95,6 +98,7 @@ class WorkspaceNewWorkstepMenu(PluginFramework.MenuOption):
     classdocs
     '''
 
+    parent = None
     menuLabel = '&File'
     menuName = 'menu_File'
     subMenuLabel = '&New'
@@ -109,9 +113,9 @@ class WorkspaceNewWorkstepMenu(PluginFramework.MenuOption):
         '''
         QObject.__init__(self)
 
-    def execute(self, parent=None):
+    def execute(self):
         from workspace.widgets.WorkstepsDialog import WorkstepsDialog
-        dlg = WorkstepsDialog()
+        dlg = WorkstepsDialog(self.parent)
         dlg.setModal(True)
         if dlg.exec_():
             print(dlg.addedStep())
@@ -123,6 +127,7 @@ class WorkspaceNewWorkspaceMenu(PluginFramework.MenuOption):
     classdocs
     '''
 
+    parent = None
     menuLabel = '&File'
     menuName = 'menu_File'
     subMenuLabel = '&New'
@@ -137,8 +142,8 @@ class WorkspaceNewWorkspaceMenu(PluginFramework.MenuOption):
         '''
         QObject.__init__(self)
 
-    def execute(self, parent=None):
-        workspaceDir = QFileDialog.getExistingDirectory(caption='Select Workspace Directory')
+    def execute(self):
+        workspaceDir = QFileDialog.getExistingDirectory(self.parent, caption='Select Workspace Directory')
         if len(workspaceDir) > 0:
             m = Manager()
             m.new(workspaceDir)
