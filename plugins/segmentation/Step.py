@@ -17,20 +17,21 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     You should have received a copy of the GNU General Public License
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
-import os, unittest
-from core.PluginFramework import loadPlugins
-#from Utils import ConsumeOutput
-
-class PluginFrameworkTestCase(unittest.TestCase):
+from PyQt4.QtGui import QIcon
+from workspace import Workspace
 
 
-    def testLoadPlugins(self):
-        fileDir = os.path.dirname(__file__)
-        inbuiltPluginDir = os.path.realpath(fileDir + '/../../plugins')
-        
-        loadPlugins(inbuiltPluginDir)
-        
+class Step(Workspace.WorkspaceStep):
+    '''
+    A step satisfies the step plugin duck
+    '''
 
-if __name__ == "__main__":
-    #import sys;sys.argv = ['', 'Test.testLoadPlugins']
-    unittest.main()
+    description = 'This step is for segmenting images.'
+    icon = None
+    name = 'segmentation'
+
+    def __init__(self):
+        '''
+        Constructor
+        '''
+        self.icon = QIcon(':/icons/seg.gif')

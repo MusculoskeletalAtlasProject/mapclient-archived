@@ -17,20 +17,14 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     You should have received a copy of the GNU General Public License
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
-import os, unittest
-from core.PluginFramework import loadPlugins
-#from Utils import ConsumeOutput
-
-class PluginFrameworkTestCase(unittest.TestCase):
+import unittest
 
 
-    def testLoadPlugins(self):
-        fileDir = os.path.dirname(__file__)
-        inbuiltPluginDir = os.path.realpath(fileDir + '/../../plugins')
-        
-        loadPlugins(inbuiltPluginDir)
-        
+def suite():
+    from segmentation_tests.Segmentation import SegmentationTestCase
+    tests = unittest.TestSuite()
+    tests.addTests(unittest.TestLoader().loadTestsFromTestCase(SegmentationTestCase))
+    return tests
 
-if __name__ == "__main__":
-    #import sys;sys.argv = ['', 'Test.testLoadPlugins']
-    unittest.main()
+if __name__ == '__main__':
+    unittest.TextTestRunner().run(suite())

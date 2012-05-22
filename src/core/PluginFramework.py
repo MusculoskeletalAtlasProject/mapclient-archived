@@ -23,86 +23,63 @@ Inspired by Marty Alchin's Simple plugin framework.
 http://martyalchin.com/2008/jan/10/simple-plugin-framework/
 '''
 
-import os, sys, imp
+import os, sys, imp, pkgutil
 
-def listPyFiles(directories):
-    l = list()
-    for dirName in directories:
+def loadPlugins(pkgDir):
+    ii = pkgutil.ImpImporter(pkgDir)
+    for moduleName, isPkg in ii.iter_modules():
+        if isPkg:
+            pkgPath = os.path.join(pkgDir, moduleName)
+            module = initPackage(pkgPath)
+            if module:
+                sys.path.append(pkgDir)
+            loadPlugins(pkgPath)
+        else:
+            loadModule(moduleName, pkgDir)
 
-        for dirEntry in os.listdir(dirName):
+def initPackage(pkgDir):
+    fp, path, description = imp.find_module('__init__', [pkgDir])
+    module = imp.load_module(pkgDir, fp, path, description)
+#    try:
+#        module = imp.load_module(pkgDir, fp, path, description)
+#    except:
+#        module = None
+#        print('Failed to initialise package {0}.'.format(pkgDir))
+#    finally:
+#        if fp:
+#            fp.close()
 
-            absDirEntry = os.path.join(dirName, dirEntry)
-            if os.path.isfile(absDirEntry):
-                rootname, ext = os.path.splitext(dirEntry)
-                if ext == '.py':
-                    absfile = os.path.join(dirName, rootname)
-                    l.append(absfile)
-    
-    return l
+    return module
 
-def listPlugins(pluginDir):
-    '''
-    Utility method to list available plugins
-    '''
-    l = list()
-    for dirEntry in os.listdir(pluginDir):
+def loadModule(moduleName, moduleDir):
+    fp, path, description = imp.find_module(moduleName, [moduleDir])
 
-        absDirEntry = os.path.join(pluginDir, dirEntry)
-        if os.path.isfile(absDirEntry):
-            rootname, ext = os.path.splitext(dirEntry)
-            if ext == '.py':
-                absfile = os.path.join(pluginDir, rootname)
-                l.append(absfile)
+    module = imp.load_module(moduleDir, fp, path, description)
 
-    # Move __init__ to the front of the list, if found
-    initSearchTerm = os.path.join(pluginDir, '__init__')
-    initIndex = l.index(initSearchTerm)
-    if initIndex > 0: # If the index is zero we don't need to move it I guess.
-        l.insert(0, l.pop(initIndex))
-
-    return l
-
-def loadPlugins(pluginDir, **kwargs):
-    '''
-    Utility method to load all plugins found in pluginDir.  Adds the plugin
-    directory to the current path.
-    '''
-
-    plugins = listPlugins(pluginDir)
-
-    if pluginDir not in sys.path:
-        sys.path.append(pluginDir)
-
-    loaded_plugins = {}
-    for plugin in plugins:
-        pluginName = os.path.basename(plugin)
-        pluginDir = os.path.dirname(plugin)
-        
-        try:
-            fp, path, description = imp.find_module(pluginName, [pluginDir])
-            module = imp.load_module(pluginDir, fp, path, description)
-            if pluginName != '__init__':
-                moduleVersion = '-.-.-'
-                if hasattr(module, '__version__'):
-                    moduleVersion = module.__version__
-                moduleAuthor = '?'
-                if hasattr(module, '__author__'):
-                    moduleAuthor = module.__author__
-                print("Plugin '{0}' version {1} by {2} loaded".format(pluginName, moduleVersion, moduleAuthor))
-    
-            loaded_plugins[pluginName] = module
-        except:
-            # non modules will fail
-            print("Plugin '{}' not loaded".format(pluginName))
-        finally:
-            if fp:
-                fp.close()
-              
-    if len(loaded_plugins) == 0:
-        sys.path.remove(pluginDir)
-        
-    return loaded_plugins
-
+    moduleVersion = '-.-.-'
+    if hasattr(module, '__version__'):
+        moduleVersion = module.__version__
+    moduleAuthor = '?'
+    if hasattr(module, '__author__'):
+        moduleAuthor = module.__author__
+    print("Plugin '{0}' version {1} by {2} loaded".format(moduleName, moduleVersion, moduleAuthor))
+    fp.close()
+#    try:
+#        module = imp.load_module(moduleDir, fp, path, description)
+#    
+#        moduleVersion = '-.-.-'
+#        if hasattr(module, '__version__'):
+#            moduleVersion = module.__version__
+#        moduleAuthor = '?'
+#        if hasattr(module, '__author__'):
+#            moduleAuthor = module.__author__
+#        print("Plugin '{0}' version {1} by {2} loaded".format(moduleName, moduleVersion, moduleAuthor))
+#    except:
+#        # non modules will fail
+#        print("Plugin '{0}' not loaded".format(moduleName))
+#    finally:
+#        if fp:
+#            fp.close()
 
 class PluginsAt(object):
     '''
@@ -156,10 +133,10 @@ class MetaPluginMountPoint(type):
             # Simply appending it to the list is all that's needed to keep
             # track of it later.
             cls.plugins.append(cls)
-            
+
     def getPlugins(self, *args, **kwargs):
         return [p(*args, **kwargs) for p in self.plugins]
-       
+
 
 # Plugin mount points are defined below.
 # For running in both python 2.x and python 3.x we must follow the example found
@@ -175,11 +152,32 @@ class MetaQObjectPluginMountPoint(MetaQObject, MetaPluginMountPoint):
     def __init__(self, name, bases, attrs):
         MetaPluginMountPoint.__init__(self, name, bases, attrs)
         MetaQObject.__init__(self, name, bases, attrs)
- 
+
+
+#
+# Template plugin comment:
+#
+#'''
+#Plugins can inherit this mount point to extend
+#
+# A plugin that registers this mount point must have attributes
+# * None
+# 
+# A plugin that registers this mount point could have attributes
+# * None
+# 
+# It must implement
+# * pass 
+# 
+#''' 
+#
+
+
 '''
 Plugins can inherit this mount point in order to add to the menu of the GUI.
 
  A plugin that registers this mount point must have attributes
+ * parent
  * menuLabel
  * menuName
  * actionLabel
@@ -196,6 +194,6 @@ Plugins can inherit this mount point in order to add to the menu of the GUI.
  And it must call
  * QObject.__init__(self)
  in it's __init__ function
- '''  
-MenuOption = MetaQObjectPluginMountPoint('MenuOption', (QObject, ), {'subMenuLabel': None, 'subMenuName': None, 'shortcut': None, 'statustip': ''})
+ '''
+MenuOption = MetaQObjectPluginMountPoint('MenuOption', (QObject,), {'subMenuLabel': None, 'subMenuName': None, 'shortcut': None, 'statustip': ''})
 

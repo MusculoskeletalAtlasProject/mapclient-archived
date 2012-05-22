@@ -17,20 +17,11 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     You should have received a copy of the GNU General Public License
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
-import os, unittest
-from core.PluginFramework import loadPlugins
-#from Utils import ConsumeOutput
+__version__ = '0.1.0'
+__author__ = 'Hugh Sorby'
 
-class PluginFrameworkTestCase(unittest.TestCase):
-
-
-    def testLoadPlugins(self):
-        fileDir = os.path.dirname(__file__)
-        inbuiltPluginDir = os.path.realpath(fileDir + '/../../plugins')
-        
-        loadPlugins(inbuiltPluginDir)
-        
-
-if __name__ == "__main__":
-    #import sys;sys.argv = ['', 'Test.testLoadPlugins']
-    unittest.main()
+import sip
+API_NAMES = ["QDate", "QDateTime", "QString", "QTextStream", "QTime", "QUrl", "QVariant"]
+API_VERSION = 2
+for name in API_NAMES:
+    sip.setapi(name, API_VERSION)

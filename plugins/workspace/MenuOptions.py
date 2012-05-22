@@ -21,8 +21,7 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
 from PyQt4.QtCore import QObject
 from PyQt4.QtGui import QFileDialog
 from core import PluginFramework
-#import Workspace
-from Workspace import Manager
+from workspace.Workspace import Manager
 
 # Placed in reverse order so that when the menu options are inserted before any 
 # other action the desired order is achieved.
@@ -31,6 +30,7 @@ class WorkspaceCloseMenu(PluginFramework.MenuOption):
     classdocs
     '''
 
+    parent = None
     menuLabel = '&File'
     menuName = 'menu_File'
     actionLabel = '&Close'
@@ -42,7 +42,7 @@ class WorkspaceCloseMenu(PluginFramework.MenuOption):
         Constructor
         '''
         QObject.__init__(self)
-        
+
     def execute(self):
         m = Manager()
         m.close()
@@ -53,6 +53,7 @@ class WorkspaceSeparatorMenu(PluginFramework.MenuOption):
     classdocs
     '''
 
+    parent = None
     menuLabel = '&File'
     menuName = 'menu_File'
     actionLabel = ''
@@ -62,7 +63,7 @@ class WorkspaceSeparatorMenu(PluginFramework.MenuOption):
         Constructor
         '''
         QObject.__init__(self)
-        
+
     def execute(self):
         pass
 
@@ -72,6 +73,7 @@ class WorkspaceOpenMenu(PluginFramework.MenuOption):
     classdocs
     '''
 
+    parent = None
     menuLabel = '&File'
     menuName = 'menu_File'
     actionLabel = '&Open'
@@ -83,19 +85,49 @@ class WorkspaceOpenMenu(PluginFramework.MenuOption):
         Constructor
         '''
         QObject.__init__(self)
-        
+
     def execute(self):
-        workspaceDir = QFileDialog.getExistingDirectory(caption='Open Workspace', options = QFileDialog.ShowDirsOnly | QFileDialog.DontResolveSymlinks | QFileDialog.ReadOnly)
+        workspaceDir = QFileDialog.getExistingDirectory(caption='Open Workspace', options=QFileDialog.ShowDirsOnly | QFileDialog.DontResolveSymlinks | QFileDialog.ReadOnly)
         if len(workspaceDir) > 0:
             m = Manager()
             m.load(workspaceDir)
 
 
-class WorkspaceNewMenu(PluginFramework.MenuOption):
+class WorkspaceNewWorkstepMenu(PluginFramework.MenuOption):
     '''
     classdocs
     '''
 
+    parent = None
+    menuLabel = '&File'
+    menuName = 'menu_File'
+    subMenuLabel = '&New'
+    subMenuName = 'menu_New'
+    actionLabel = '&Workstep'
+    #shortcut = 'Ctrl+N'
+    statustip = 'Create a new workstep'
+
+    def __init__(self):
+        '''
+        Constructor
+        '''
+        QObject.__init__(self)
+
+    def execute(self):
+        from workspace.widgets.WorkstepsDialog import WorkstepsDialog
+        dlg = WorkstepsDialog(self.parent)
+        dlg.setModal(True)
+        if dlg.exec_():
+            print(dlg.addedStep())
+
+
+
+class WorkspaceNewWorkspaceMenu(PluginFramework.MenuOption):
+    '''
+    classdocs
+    '''
+
+    parent = None
     menuLabel = '&File'
     menuName = 'menu_File'
     subMenuLabel = '&New'
@@ -109,12 +141,12 @@ class WorkspaceNewMenu(PluginFramework.MenuOption):
         Constructor
         '''
         QObject.__init__(self)
-        
-    def execute(self, parent=None):
-        workspaceDir = QFileDialog.getExistingDirectory(caption='Select Workspace Directory')
+
+    def execute(self):
+        workspaceDir = QFileDialog.getExistingDirectory(self.parent, caption='Select Workspace Directory')
         if len(workspaceDir) > 0:
             m = Manager()
             m.new(workspaceDir)
-            
 
-            
+
+
