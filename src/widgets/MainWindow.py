@@ -38,7 +38,7 @@ class MainWindow(QMainWindow):
 
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
-        self.makeConnections()
+        self._makeConnections()
         self._readSettings()
 
         self.menuPlugins = MenuOption.getPlugins()
@@ -88,7 +88,7 @@ class MainWindow(QMainWindow):
         self.move(settings.value('pos', QPoint(100, 100)))
         settings.endGroup()
 
-    def makeConnections(self):
+    def _makeConnections(self):
         self.ui.action_Quit.triggered.connect(self.quitApplication)
         self.ui.action_About.triggered.connect(self.about)
 

@@ -36,9 +36,6 @@
         </property>
        </widget>
       </item>
-      <item>
-       <widget class="QListWidget" name="listWidget_Steps"/>
-      </item>
      </layout>
     </widget>
    </item>
@@ -61,6 +58,12 @@
        <widget class="QPlainTextEdit" name="edit_Description">
         <property name="enabled">
          <bool>false</bool>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">QPlainTextEdit{
+background-color: rgb(255, 255, 255);
+color: rgb(0,0,0);
+}</string>
         </property>
         <property name="readOnly">
          <bool>true</bool>

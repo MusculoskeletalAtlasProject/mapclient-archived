@@ -34,4 +34,4 @@ class Step(Workspace.WorkspaceStep):
         '''
         Constructor
         '''
-        self.icon = QIcon(':/icons/seg.png')
+        self.icon = QIcon(':/icons/seg.gif')

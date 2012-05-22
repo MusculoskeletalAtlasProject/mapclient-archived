@@ -114,9 +114,7 @@ class WorkspaceNewWorkstepMenu(PluginFramework.MenuOption):
         dlg = WorkstepsDialog()
         dlg.setModal(True)
         if dlg.exec_():
-            print(dlg.getAdd())
-        else:
-            print(dlg.getAdd())
+            print(dlg.addedStep())
 
 
 

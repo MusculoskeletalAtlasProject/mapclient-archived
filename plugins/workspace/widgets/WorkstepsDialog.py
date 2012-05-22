@@ -19,10 +19,11 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
 '''
 
 from PyQt4.Qt import Qt
-from PyQt4.QtCore import QAbstractListModel, QModelIndex
-from PyQt4.QtGui import QDialog, QListWidgetItem
+from PyQt4.QtCore import QAbstractListModel, QModelIndex, QSize
+from PyQt4.QtGui import QDialog, QAbstractItemView
 from workspace.widgets.WorkstepsDialogUi import Ui_WorkstepsDialog
 from workspace.Workspace import WorkspaceStep
+from PyQt4 import QtGui
 
 class StepModel(QAbstractListModel):
 
@@ -34,10 +35,17 @@ class StepModel(QAbstractListModel):
         return len(self.steps)
 
     def data(self, index, role):
-        if index.isValid() and role == Qt.DisplayRole:
+        if index.isValid() and role == Qt.DecorationRole:
             return self.steps[index.row()].icon
-        else:
-            return None
+
+        return None
+
+
+    def stepAt(self, index):
+        if 0 <= index.row() < len(self.steps):
+            return self.steps[index.row()]
+
+        return None
 
 
 class WorkstepsDialog(QDialog):
@@ -53,20 +61,45 @@ class WorkstepsDialog(QDialog):
         QDialog.__init__(self, parent)
         self.ui = Ui_WorkstepsDialog()
         self.ui.setupUi(self)
-        self.makeConnections()
+
+        self.ui.listView_Steps.setViewMode(QtGui.QListView.IconMode)
+        self.ui.listView_Steps.setIconSize(QSize(80, 80))
+        self.ui.listView_Steps.setGridSize(QSize(94, 94))
+        self.ui.listView_Steps.setSpacing(10)
+        self.ui.listView_Steps.setSelectionMode(QAbstractItemView.SingleSelection)
         self.workspaceStepPlugins = WorkspaceStep.getPlugins()
-        self.ui.listView_Steps.setModel(StepModel(self.workspaceStepPlugins))
-        for plugin in self.workspaceStepPlugins:
-            print(plugin.icon, plugin.description)
-            QListWidgetItem(plugin.icon, plugin.name, self.ui.listWidget_Steps)
+        stepModel = StepModel(self.workspaceStepPlugins)
+        self.ui.listView_Steps.setModel(stepModel)
+        if self.ui.listView_Steps.model().rowCount() > 0:
+            self.ui.listView_Steps.setCurrentIndex(stepModel.index(0))
+            self._updateUi()
 
-    def makeConnections(self):
-        self.ui.btn_Add.clicked.connect(self.addStep)
+        # Do this last after the selection model has been created
+        self._makeConnections()
 
-    def getAdd(self):
+    def _makeConnections(self):
+        self.ui.btn_Add.clicked.connect(self._addButtonClicked)
+        self.ui.listView_Steps.clicked.connect(self._updateUi)
+        selectionModel = self.ui.listView_Steps.selectionModel()
+        selectionModel.selectionChanged.connect(self._updateUi)
+
+    def addedStep(self):
         return self.add
 
-    def addStep(self):
-        self.add = 'add this step'
+    def _addButtonClicked(self):
+        indexes = self.ui.listView_Steps.selectedIndexes()
+        assert(len(indexes) == 1)
+        self.add = self.ui.listView_Steps.model().stepAt(indexes[0])
         self.accept()
+
+    def _updateUi(self):
+        indexes = self.ui.listView_Steps.selectedIndexes()
+        if len(indexes) > 0:
+            self.ui.btn_Add.setEnabled(True)
+            description = self.ui.listView_Steps.model().stepAt(indexes[0]).description
+            self.ui.edit_Description.setPlainText(description)
+        else:
+            self.ui.btn_Add.setEnabled(False)
+            self.ui.edit_Description.setPlainText('')
+
 
