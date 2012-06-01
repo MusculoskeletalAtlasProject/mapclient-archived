@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui/MainWindow.ui'
 #
-# Created: Fri May 25 10:24:37 2012
+# Created: Fri May 25 11:07:48 2012
 #      by: PyQt4 UI code generator 4.9.1
 #
 # WARNING! All changes made in this file will be lost!
@@ -41,9 +41,6 @@ class Ui_MainWindow(object):
         self.listView.setViewMode(QtGui.QListView.IconMode)
         self.listView.setObjectName(_fromUtf8("listView"))
         self.horizontalLayout_2.addWidget(self.listView)
-        self.graphicsView = QtGui.QGraphicsView(self.frame)
-        self.graphicsView.setObjectName(_fromUtf8("graphicsView"))
-        self.horizontalLayout_2.addWidget(self.graphicsView)
         self.horizontalLayout.addWidget(self.frame)
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(MainWindow)

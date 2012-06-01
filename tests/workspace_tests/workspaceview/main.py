@@ -25,7 +25,7 @@ for name in API_NAMES:
     sip.setapi(name, API_VERSION)
 
 import sys
-from PyQt4 import QtGui, QtCore
+from PyQt4 import QtGui
 from MainWindow import MainWindow
 
 def main():

@@ -18,15 +18,34 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
 import unittest
-
+from PyQt4 import QtGui, QtCore
 
 class SegmentationTestCase(unittest.TestCase):
 
 
     def testPlugin(self):
+        import sys
+        app = QtGui.QApplication(sys.argv)
         from segmentation.Step import Step
-        print(Step.description)
-        print(Step.icon)
+        myStep = Step()
+        assert(myStep.description == 'This step is for segmenting images.')
+
+    def testSerialisation(self):
+        import sys
+        app = QtGui.QApplication(sys.argv)
+        from segmentation.Step import Step
+        myStep = Step()
+
+        itemData = QtCore.QByteArray()
+        writeDataStream = QtCore.QDataStream(itemData, QtCore.QIODevice.WriteOnly)
+
+        writeDataStream = myStep.serialize(writeDataStream)
+
+        readDataStream = QtCore.QDataStream(itemData, QtCore.QIODevice.ReadOnly)
+        retStep = Step.deserialize(readDataStream)
+        assert(retStep.description == 'This step is for segmenting images.')
+        assert(retStep.name == 'segmentation')
+        assert(retStep.icon)
 
 
 if __name__ == "__main__":

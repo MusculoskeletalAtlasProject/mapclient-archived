@@ -47,6 +47,25 @@ Plugins can inherit this mount point to add a workspace step.
 '''
 WorkspaceStep = PluginFramework.MetaPluginMountPoint('WorkspaceStep', (object,), {})
 
+class Direction(object):
+    '''
+    Pythonesque enum 
+    '''
+    IN = 0
+    OUT = 1
+
+class WorkspaceStepPort(object):
+    '''
+    Describes the location and properties of a port for a workspace step.
+    '''
+    location = None
+    properties = {}
+    direction = None
+
+    def __init__(self, location, direction):
+        self.location = location
+        self.direction = direction
+
 class Workspace(object):
     '''
     Holds information relating to a workspace.

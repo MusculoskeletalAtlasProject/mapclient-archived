@@ -59,9 +59,6 @@
          </property>
         </widget>
        </item>
-       <item>
-        <widget class="QGraphicsView" name="graphicsView"/>
-       </item>
       </layout>
      </widget>
     </item>

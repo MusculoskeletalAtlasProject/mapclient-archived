@@ -83,6 +83,20 @@ class WorkspaceTestCase(unittest.TestCase):
         os.remove(tempDir + '/workspace.conf')
         os.rmdir(tempDir)
 
+    def testDirection(self):
+        from workspace.Workspace import Direction
+
+        x = Direction.IN
+        assert(x == Direction.IN)
+
+    def testPort(self):
+        from workspace.Workspace import WorkspaceStepPort, Direction
+        port = WorkspaceStepPort([32, 45], Direction.IN)
+        assert(port)
+
+    def testDummy(self):
+        pass
+
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testNew']

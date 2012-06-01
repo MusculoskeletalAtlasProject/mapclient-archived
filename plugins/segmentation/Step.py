@@ -17,7 +17,8 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     You should have received a copy of the GNU General Public License
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
-from PyQt4.QtGui import QIcon
+import sys
+from PyQt4 import QtGui
 from workspace import Workspace
 
 
@@ -27,11 +28,39 @@ class Step(Workspace.WorkspaceStep):
     '''
 
     description = 'This step is for segmenting images.'
-    icon = None
     name = 'segmentation'
+    icon = None
+    ports = []
 
     def __init__(self):
         '''
         Constructor
         '''
-        self.icon = QIcon(':/icons/seg.gif')
+        self.icon = QtGui.QIcon(':/icons/seg.gif')
+
+    def serialize(self, stream):
+        description = bytearray(self.description, sys.stdout.encoding)
+        stream.writeUInt32(len(description))
+        stream.writeRawData(description)
+
+        name = bytearray(self.name, sys.stdout.encoding)
+        stream.writeUInt32(len(name))
+        stream.writeRawData(name)
+
+        stream << self.icon
+
+        return stream
+
+    @staticmethod
+    def deserialize(stream):
+        newStep = Step()
+        descriptionLen = stream.readUInt32()
+        newStep.description = stream.readRawData(descriptionLen).decode(sys.stdout.encoding)
+
+        nameLen = stream.readUInt32()
+        newStep.name = stream.readRawData(nameLen).decode(sys.stdout.encoding)
+
+        stream >> newStep.icon
+
+        return newStep
+

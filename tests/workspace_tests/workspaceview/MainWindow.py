@@ -17,176 +17,204 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     You should have received a copy of the GNU General Public License
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
-import random
-import weakref
-
-from MainWindowUi import Ui_MainWindow
+#import random
+import weakref, math
+import Resources_rc
+#from MainWindowUi import Ui_MainWindow
 from PyQt4.Qt import Qt
 from PyQt4 import QtCore
 from PyQt4 import QtGui
-from PyQt4.QtCore import QAbstractListModel, QModelIndex, QByteArray, QDataStream, QIODevice, QMimeData, QPoint, QRect
-from PyQt4.QtGui import QMainWindow, QIcon, QPixmap, QWidget, QPainter, QColor, QDrag
 
-class PiecesModel(QAbstractListModel):
+class StepList(QtGui.QListWidget):
 
-    def __init__(self, parent=None, *args, **kwargs):
-        QAbstractListModel.__init__(self, parent, *args, **kwargs)
-        self.locations = []
-        self.pixmaps = []
+    def __init__(self, stepIconSize, parent=None):
+        super(StepList, self).__init__(parent)
+        self.stepIconSize = stepIconSize
 
-    def data(self, index, role):
-        if not index.isValid():
-            return None;
+        size = QtCore.QSize(stepIconSize, stepIconSize)
+        self.setIconSize(size)
+        self.setSpacing(10)
+#        self.setViewMode(QtGui.QListWidget.IconMode)
+        self.setAcceptDrops(True)
+        self.setDropIndicatorShown(True)
 
-        if role == Qt.DecorationRole:
-            return QIcon(self.pixmaps[index.row()].scaled(60, 60, Qt.KeepAspectRatio, Qt.SmoothTransformation))
-        elif role == Qt.UserRole:
-            return self.pixmaps[index.row()]
-        elif role == Qt.UserRole + 1:
-            return self.locations[index.row()]
+    def addStep(self, pixmap, name):
+        stepItem = QtGui.QListWidgetItem(self)
+        stepItem.setText(name)
+        stepItem.setIcon(QtGui.QIcon(pixmap))
+        stepItem.setData(QtCore.Qt.UserRole, pixmap)
+#        stepItem.setFlags(QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsDragEnabled)
+        stepItem.setFlags(QtCore.Qt.ItemIsEnabled)
 
-        return None;
+    def mousePressEvent(self, event):
+        item = self.itemAt(event.pos())
+        if not item:
+            return None
 
-    def addPiece(self, pixmap, location):
-        if random.random() < 0.5:
-            row = 0;
-        else:
-            row = len(self.pixmaps);
+        itemData = QtCore.QByteArray()
+        dataStream = QtCore.QDataStream(itemData, QtCore.QIODevice.WriteOnly)
+        pixmap = QtGui.QPixmap(item.data(QtCore.Qt.UserRole))
+        pixmap = pixmap.scaled(64, 64, aspectRatioMode=QtCore.Qt.IgnoreAspectRatio, transformMode=QtCore.Qt.FastTransformation)
+        hotspot = QtCore.QPoint(pixmap.width() / 2, pixmap.height() / 2)
 
-        self.beginInsertRows(QModelIndex(), row, row);
-        self.pixmaps.insert(row, pixmap);
-        self.locations.insert(row, location);
-        self.endInsertRows();
+        dataStream << pixmap << hotspot
 
-    def flags(self, index):
-        if index.isValid():
-            return Qt.ItemIsEnabled | Qt.ItemIsSelectable | Qt.ItemIsDragEnabled
+        mimeData = QtCore.QMimeData()
+        mimeData.setData('image/x-puzzle-piece', itemData)
 
-        return Qt.ItemIsDropEnabled;
+        drag = QtGui.QDrag(self)
+        drag.setMimeData(mimeData)
+        drag.setHotSpot(hotspot)
+        drag.setPixmap(pixmap)
 
-    def removeRows(self, row, count, parent):
-        if parent.isValid():
-            return False
+        drag.exec_(QtCore.Qt.MoveAction)
 
-        if (row >= len(self.pixmaps) or row + count <= 0):
-            return False
+        return QtGui.QListWidget.mousePressEvent(self, event)
 
-        beginRow = max(0, row);
-        endRow = min(row + count - 1, len(self.pixmaps) - 1)
+class Edge(QtGui.QGraphicsItem):
+    Pi = math.pi
+    TwoPi = 2.0 * Pi
 
-        self.beginRemoveRows(parent, beginRow, endRow)
+    Type = QtGui.QGraphicsItem.UserType + 2
 
-        del self.pixmaps[beginRow:endRow + 1]
-        del self.locations[beginRow:endRow + 1]
+    def __init__(self, sourceNode, destNode):
+        QtGui.QGraphicsItem.__init__(self)
 
-        self.endRemoveRows();
-        return True
+        self.arrowSize = 10.0
+        self.sourcePoint = QtCore.QPointF()
+        self.destPoint = QtCore.QPointF()
+        self.setAcceptedMouseButtons(QtCore.Qt.NoButton)
+        self.source = weakref.ref(sourceNode)
+        self.dest = weakref.ref(destNode)
+        self.source().addEdge(self)
+        self.dest().addEdge(self)
+        self.adjust()
 
-    def mimeTypes(self):
-        return ['image/x-puzzle-piece']
+    def type(self):
+        return Edge.Type
 
-    def mimeData(self, indexes):
-        mimeData = QMimeData()
-        encodedData = QByteArray()
+    def adjust(self):
+        if not self.source() or not self.dest():
+            return
 
-        stream = QDataStream(encodedData, QIODevice.WriteOnly)
+        line = QtCore.QLineF(self.mapFromItem(self.source(), 0, 0), self.mapFromItem(self.dest(), 0, 0))
+        length = line.length()
 
-        for index in indexes:
-            if index.isValid():
-                pixmap = self.data(index, Qt.UserRole)
-                location = self.data(index, Qt.UserRole + 1)
-                stream << pixmap << location;
+        if length == 0.0:
+            return
 
-        mimeData.setData("image/x-puzzle-piece", encodedData);
-        return mimeData;
+        edgeOffset = QtCore.QPointF((line.dx() * 10) / length, (line.dy() * 10) / length)
 
-    def dropMimeData(self, data, action, row, column, parent):
-        if not data.hasFormat("image/x-puzzle-piece"):
-            return False
+        self.prepareGeometryChange()
+        self.sourcePoint = line.p1() + edgeOffset
+        self.destPoint = line.p2() - edgeOffset
 
-        if action == Qt.IgnoreAction:
-            return True;
+    def boundingRect(self):
+        if not self.source() or not self.dest():
+            return QtCore.QRectF()
 
-        if column > 0:
-            return False;
+        penWidth = 1
+        extra = (penWidth + self.arrowSize) / 2.0
 
-        if not parent.isValid():
-            if row < 0:
-                endRow = len(self.pixmaps)
-            else:
-                endRow = min(row, len(self.pixmaps))
-        else:
-            endRow = parent.row();
+        return QtCore.QRectF(self.sourcePoint,
+                             QtCore.QSizeF(self.destPoint.x() - self.sourcePoint.x(),
+                                           self.destPoint.y() - self.sourcePoint.y())).normalized().adjusted(-extra, -extra, extra, extra)
 
-        encodedData = data.data("image/x-puzzle-piece")
-        stream = QDataStream(encodedData, QIODevice.ReadOnly)
+    def paint(self, painter, option, widget):
+        if not self.source() or not self.dest():
+            return
 
-        while not stream.atEnd():
-            pixmap = QPixmap();
-            location = QPoint();
-            stream >> pixmap >> location;
+        # Draw the line itself.
+        line = QtCore.QLineF(self.sourcePoint, self.destPoint)
 
-            self.beginInsertRows(QModelIndex(), endRow, endRow);
-            self.pixmaps.insert(endRow, pixmap);
-            self.locations.insert(endRow, location);
-            self.endInsertRows();
+        if line.length() == 0.0:
+            return
 
-            endRow += 1
+        painter.setPen(QtGui.QPen(QtCore.Qt.black, 1, QtCore.Qt.SolidLine, QtCore.Qt.RoundCap, QtCore.Qt.RoundJoin))
+        painter.drawLine(line)
 
-        return True
+        # Draw the arrows if there's enough room.
+        angle = math.acos(line.dx() / line.length())
+        if line.dy() >= 0:
+            angle = Edge.TwoPi - angle
 
-    def rowCount(self, parent):
-        if parent.isValid():
-            return 0
+        destArrowP1 = self.destPoint + QtCore.QPointF(math.sin(angle - Edge.Pi / 3) * self.arrowSize,
+                                                      math.cos(angle - Edge.Pi / 3) * self.arrowSize)
+        destArrowP2 = self.destPoint + QtCore.QPointF(math.sin(angle - Edge.Pi + Edge.Pi / 3) * self.arrowSize,
+                                                      math.cos(angle - Edge.Pi + Edge.Pi / 3) * self.arrowSize)
 
-        return len(self.pixmaps)
-
-    def supportedDropActions(self):
-        return Qt.CopyAction | Qt.MoveAction
-
-    def addPieces(self, pixmap):
-        self.beginRemoveRows(QModelIndex(), 0, 24);
-        self.pixmaps = []
-        self.locations = []
-        self.endRemoveRows();
-        for y in [0, 1, 2, 3, 4]:
-            for x in [0, 1, 2, 3, 4]:
-                pieceImage = pixmap.copy(x * 80, y * 80, 80, 80);
-                self.addPiece(pieceImage, QPoint(x, y))
+        painter.setBrush(QtCore.Qt.black)
+#        painter.drawPolygon(QtGui.QPolygonF([line.p1(), sourceArrowP1, sourceArrowP2]))
+        painter.drawPolygon(QtGui.QPolygonF([line.p2(), destArrowP1, destArrowP2]))
 
 
 class Node(QtGui.QGraphicsItem):
     Type = QtGui.QGraphicsItem.UserType + 1
 
-    def __init__(self, puzzleWidget):
+    def __init__(self, pixmap, workspaceWidget):
         QtGui.QGraphicsItem.__init__(self)
 
-        self.graph = weakref.ref(puzzleWidget)
+        self.pixmap = pixmap
+        self.graph = weakref.ref(workspaceWidget)
         self.edgeList = []
         self.newPos = QtCore.QPointF()
         self.setFlag(QtGui.QGraphicsItem.ItemIsMovable)
         self.setFlag(QtGui.QGraphicsItem.ItemSendsGeometryChanges)
         self.setCacheMode(self.DeviceCoordinateCache)
         self.setZValue(-1)
-        self.selected = None
+        self.selected = False
 
     def type(self):
         return Node.Type
 
+    def setSelected(self, state):
+        self.selected = state
+        self.update()
+
+    def addEdge(self, edge):
+        self.edgeList.append(weakref.ref(edge))
+
+    def boundingRect(self):
+        adjust = 2.0
+        return QtCore.QRectF(-adjust, -adjust,
+                             self.pixmap.width() + adjust,
+                             self.pixmap.height() + adjust)
+
+    def paint(self, painter, option, widget):
+            if option.state & QtGui.QStyle.State_Sunken or self.selected:
+                painter.setBrush(QtCore.Qt.darkGray)
+                painter.drawRoundedRect(self.boundingRect(), 5, 5)
+
+            painter.drawPixmap(0, 0, self.pixmap)
+
+    def itemChange(self, change, value):
+
+        if change == QtGui.QGraphicsItem.ItemPositionChange:
+            for edge in self.edgeList:
+                edge().adjust()
+
+        return QtGui.QGraphicsItem.itemChange(self, change, value)
+
+    def mousePressEvent(self, event):
+        self.update()
+        QtGui.QGraphicsItem.mousePressEvent(self, event)
+
+    def mouseReleaseEvent(self, event):
+        self.update()
+        QtGui.QGraphicsItem.mouseReleaseEvent(self, event)
+        modifiers = QtGui.QApplication.keyboardModifiers()
+        if modifiers == QtCore.Qt.ControlModifier:
+            self.selected = not self.selected
+            self.graph().nodeSelected(self, self.selected)
 
 class WorkspaceWidget(QtGui.QGraphicsView):
 
-    puzzleCompleted = QtCore.pyqtSignal()
-
     def __init__(self, parent=None):
         QtGui.QGraphicsView.__init__(self, parent)
-        self.piecePixmaps = []
-        self.pieceRects = []
-        self.pieceLocations = []
-        self.highlightedRect = QRect()
-        self.inPlace = 0
+        self.selectedNodes = []
 
         scene = QtGui.QGraphicsScene(self)
+        scene.setSceneRect(-322, -200, 644, 400)
         scene.setItemIndexMethod(QtGui.QGraphicsScene.NoIndex)
 
         self.setScene(scene)
@@ -196,135 +224,78 @@ class WorkspaceWidget(QtGui.QGraphicsView):
         self.setResizeAnchor(QtGui.QGraphicsView.AnchorViewCenter)
 
         self.setAcceptDrops(True)
-        self.setMinimumSize(400, 400)
-        self.setMaximumSize(400, 400)
+        self.setMinimumSize(700, 500)
+        self.setMaximumSize(700, 500)
 
     def clear(self):
-        self.pieceLocations = []
         self.piecePixmaps = []
-        self.pieceRects = []
-        self.highlightedRect = QRect()
-        self.inPlace = 0;
         self.update()
 
-    def targetSquare(self, position):
-        return QRect(position.x() // 80 * 80, position.y() // 80 * 80, 80, 80);
+    def nodeSelected(self, node, state):
+        if state == True and node not in self.selectedNodes:
+            self.selectedNodes.append(node)
+        elif state == False and node in self.selectedNodes:
+            found = self.selectedNodes.index(node)
+            del self.selectedNodes[found]
 
-    def findPiece(self, pieceRect):
-        try:
-            return self.pieceRects.index(pieceRect)
-        except ValueError:
-            return -1
+        if len(self.selectedNodes) == 2:
+            self.scene().addItem(Edge(self.selectedNodes[0], self.selectedNodes[1]))
+            for x in self.selectedNodes:
+                x.setSelected(False)
+            self.selectedNodes = []
 
-#    def paintEvent(self, event):
-#    def render(self, painter, target):
-#        print('hi')
-#        painter.begin(self)
-#        painter.fillRect(target, Qt.white)
-#
-#        print(target)
-#        print(self.sceneRect())
-#        if self.highlightedRect.isValid():
-#            painter.setBrush(QColor("#ffcccc"))
-#            painter.setPen(Qt.NoPen)
-#            painter.drawRect(self.highlightedRect.adjusted(0, 0, -1, -1))
-#
-#        for i, pieceRect in enumerate(self.pieceRects):
-#            painter.drawPixmap(pieceRect, self.piecePixmaps[i])
-#
-#        painter.end()
+    def drawBackground(self, painter, rect):
+        # Shadow.
+        sceneRect = self.sceneRect()
+        rightShadow = QtCore.QRectF(sceneRect.right(), sceneRect.top() + 5, 5, sceneRect.height())
+        bottomShadow = QtCore.QRectF(sceneRect.left() + 5, sceneRect.bottom(), sceneRect.width(), 5)
+        if rightShadow.intersects(rect) or rightShadow.contains(rect):
+            painter.fillRect(rightShadow, QtCore.Qt.darkGray)
+        if bottomShadow.intersects(rect) or bottomShadow.contains(rect):
+            painter.fillRect(bottomShadow, QtCore.Qt.darkGray)
 
-    def mousePressEvent(self, event):
-        square = self.targetSquare(event.pos());
-        found = self.findPiece(square);
-
-        if found == -1:
-            return;
-
-        location = self.pieceLocations[found]
-        pixmap = self.piecePixmaps[found]
-        del self.pieceLocations[found]
-        del self.piecePixmaps[found]
-        del self.pieceRects[found]
-
-        if location == QPoint(square.x() / 80, square.y() / 80):
-            self.inPlace = self.inPlace - 1
-
-        self.update(square);
-
-        itemData = QByteArray()
-        dataStream = QDataStream(itemData, QIODevice.WriteOnly)
-
-        dataStream << pixmap << location;
-
-        mimeData = QMimeData()
-        mimeData.setData("image/x-puzzle-piece", itemData);
-
-        drag = QDrag(self);
-        drag.setMimeData(mimeData);
-        drag.setHotSpot(event.pos() - square.topLeft());
-        drag.setPixmap(pixmap);
-
-        if drag.start(Qt.MoveAction) == 0:
-            self.pieceLocations.insert(found, location);
-            self.piecePixmaps.insert(found, pixmap);
-            self.pieceRects.insert(found, square);
-            self.update(self.targetSquare(event.pos()));
-
-            if location == QPoint(square.x() / 80, square.y() / 80):
-                self.inPlace = self.inPlace + 1
+        # Fill.
+        gradient = QtGui.QLinearGradient(sceneRect.topLeft(), sceneRect.bottomRight())
+        gradient.setColorAt(0, QtGui.QColor('aliceblue'))
+        gradient.setColorAt(1, QtGui.QColor('lightskyblue'))
+        painter.fillRect(rect.intersect(sceneRect), QtGui.QBrush(gradient))
+        painter.setBrush(QtCore.Qt.NoBrush)
+        painter.drawRect(sceneRect)
+#        print(QtGui.QColor.colorNames())
 
     def dropEvent(self, event):
-        if event.mimeData().hasFormat("image/x-puzzle-piece") \
-            and self.findPiece(self.targetSquare(event.pos())) == -1:
-
+        if event.mimeData().hasFormat("image/x-puzzle-piece"):
             pieceData = event.mimeData().data("image/x-puzzle-piece")
-            stream = QDataStream(pieceData, QIODevice.ReadOnly)
-            square = self.targetSquare(event.pos())
-            pixmap = QPixmap()
-            location = QPoint()
-            stream >> pixmap >> location;
+            stream = QtCore.QDataStream(pieceData, QtCore.QIODevice.ReadOnly)
+            pixmap = QtGui.QPixmap()
+            hotspot = QtCore.QPoint()
 
-            self.pieceLocations.append(location);
-            self.piecePixmaps.append(pixmap);
-            ic = self.scene().addPixmap(pixmap)
-            ic.setFlag(QtGui.QGraphicsItem.ItemIsMovable)
-            ic.setFlag(QtGui.QGraphicsItem.ItemSendsGeometryChanges)
-            self.pieceRects.append(square);
+            stream >> pixmap >> hotspot
 
-            self.highlightedRect = QRect();
-            self.update(square);
+            node = Node(pixmap, self)
+            node.setPos(self.mapToScene(event.pos() - hotspot))
+            self.scene().addItem(node)
+#            ic = self.scene().addPixmap(pixmap)
+#            ic.setFlag(QtGui.QGraphicsItem.ItemIsMovable)
+#            ic.setFlag(QtGui.QGraphicsItem.ItemSendsGeometryChanges)
+#            ic.setPos(self.mapToScene(event.pos() - hotspot))
 
             event.setDropAction(Qt.MoveAction);
             event.accept();
-
-            if location == QPoint(square.x() / 80, square.y() / 80):
-                self.inPlace = self.inPlace + 1;
-                if self.inPlace == 25:
-                    self.puzzleCompleted.emit()
         else:
-            self.highlightedRect = QRect();
             event.ignore()
 
     def dragMoveEvent(self, event):
-        updateRect = self.highlightedRect.unite(self.targetSquare(event.pos()));
-
-        if event.mimeData().hasFormat("image/x-puzzle-piece") \
-            and self.findPiece(self.targetSquare(event.pos())) == -1:
-
-            self.highlightedRect = self.targetSquare(event.pos());
+        if event.mimeData().hasFormat("image/x-puzzle-piece"):
             event.setDropAction(Qt.MoveAction);
             event.accept();
         else:
-            self.highlightedRect = QRect();
             event.ignore();
 
-        self.update(updateRect)
+        self.update()
 
     def dragLeaveEvent(self, event):
-        updateRect = self.highlightedRect;
-        self.highlightedRect = QRect();
-        self.update(updateRect);
+        print('leaving viewport')
         event.accept()
 
     def dragEnterEvent(self, event):
@@ -333,32 +304,40 @@ class WorkspaceWidget(QtGui.QGraphicsView):
         else:
             event.ignore()
 
-class MainWindow(QMainWindow, Ui_MainWindow):
+
+class MainWindow(QtGui.QMainWindow):
     '''
     classdocs
     '''
 
 
-    def __init__(self):
+    def __init__(self, parent=None):
         '''
         Constructor
         '''
-        QMainWindow.__init__(self)
-        Ui_MainWindow.__init__(self)
-        self.setupUi(self)
-        self.widget_Puzzle = WorkspaceWidget(self.frame)
-        self.frame.layout().addWidget(self.widget_Puzzle)
-        self.piecesModel = PiecesModel()
-        self.puzzleImage = QPixmap(':/images/bolton_game.jpg')
-        self.listView.setModel(self.piecesModel)
+        super(MainWindow, self).__init__(parent)
+        self.piecesList = None
+        self.workspaceWidget = None
 
         self._makeConnections()
-        self._setupPuzzle()
+        self._setupWidgets()
+        self._loadSteps()
 
 
     def _makeConnections(self):
-        self.action_Open.triggered.connect(self._openImage)
-        self.action_Restart.triggered.connect(self._setupPuzzle)
+        pass
+
+    def _setupWidgets(self):
+        frame = QtGui.QFrame()
+        frameLayout = QtGui.QHBoxLayout(frame);
+#        puzzleWidget = PuzzleWidget(400);
+
+        self.piecesList = StepList(64, self)
+        self.workspaceWidget = WorkspaceWidget()
+
+        frameLayout.addWidget(self.piecesList)
+        frameLayout.addWidget(self.workspaceWidget)
+        self.setCentralWidget(frame);
 
     def _openImage(self, path=None):
         if not path:
@@ -366,7 +345,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                     "Image Files (*.png *.jpg *.bmp)")
 
         if path:
-            newImage = QPixmap()
+            newImage = QtGui.QPixmap()
 
             if not newImage.load(path):
                 QtGui.QMessageBox.warning(self, "Open Image",
@@ -376,18 +355,15 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 return
 
             self.puzzleImage = newImage
-            self._setupPuzzle()
+            self._setupWorkspaceView()
 
 
 
 
-    def _setupPuzzle(self):
-        size = min(self.puzzleImage.width(), self.puzzleImage.height());
-        self.puzzleImage = self.puzzleImage.copy((self.puzzleImage.width() - size) / 2,
-            (self.puzzleImage.height() - size) / 2, size, size).scaled(400,
-                400, Qt.IgnoreAspectRatio, Qt.SmoothTransformation);
+    def _loadSteps(self):
+        icons = [':/icons/pink-folder-icon.png', ':/icons/yellow-folder-icon.png', ':/icons/red-folder-icon.png', ':/icons/blue-folder-icon.png', ':/icons/green-folder-icon.png', ]
+        for icon in icons:
+            newImage = QtGui.QPixmap()
+            newImage.load(icon)
+            self.piecesList.addStep(newImage, 'image')
 
-        random.seed(QtGui.QCursor.pos().x() ^ QtGui.QCursor.pos().y())
-
-        self.piecesModel.addPieces(self.puzzleImage);
-        self.widget_Puzzle.clear()
