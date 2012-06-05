@@ -88,6 +88,8 @@ class Edge(QtGui.QGraphicsItem):
         self.dest = weakref.ref(destNode)
         self.source().addEdge(self)
         self.dest().addEdge(self)
+        self.setZValue(-2.0)
+        print('zs: ', self.boundingRect(), self.source().boundingRect(), self.dest().boundingRect())
         self.adjust()
 
     def type(self):
@@ -97,7 +99,9 @@ class Edge(QtGui.QGraphicsItem):
         if not self.source() or not self.dest():
             return
 
-        line = QtCore.QLineF(self.mapFromItem(self.source(), 0, 0), self.mapFromItem(self.dest(), 0, 0))
+        sourceCentre = self.source().boundingRect().center()
+        destCentre = self.dest().boundingRect().center()
+        line = QtCore.QLineF(self.mapFromItem(self.source(), sourceCentre.x(), sourceCentre.y()), self.mapFromItem(self.dest(), destCentre.x(), destCentre.y()))
         length = line.length()
 
         if length == 0.0:
@@ -133,19 +137,24 @@ class Edge(QtGui.QGraphicsItem):
         painter.setPen(QtGui.QPen(QtCore.Qt.black, 1, QtCore.Qt.SolidLine, QtCore.Qt.RoundCap, QtCore.Qt.RoundJoin))
         painter.drawLine(line)
 
-        # Draw the arrows if there's enough room.
         angle = math.acos(line.dx() / line.length())
+#        print('angle: ', angle)
         if line.dy() >= 0:
             angle = Edge.TwoPi - angle
 
-        destArrowP1 = self.destPoint + QtCore.QPointF(math.sin(angle - Edge.Pi / 3) * self.arrowSize,
-                                                      math.cos(angle - Edge.Pi / 3) * self.arrowSize)
-        destArrowP2 = self.destPoint + QtCore.QPointF(math.sin(angle - Edge.Pi + Edge.Pi / 3) * self.arrowSize,
-                                                      math.cos(angle - Edge.Pi + Edge.Pi / 3) * self.arrowSize)
 
-        painter.setBrush(QtCore.Qt.black)
+        # Draw the arrows if there's enough room.
+        if line.dy() * line.dy() + line.dx() * line.dx() > 200 * self.arrowSize:
+            midPoint = (self.destPoint + self.sourcePoint) / 2
+
+            destArrowP1 = midPoint + QtCore.QPointF(math.sin(angle - Edge.Pi / 3) * self.arrowSize,
+                                                          math.cos(angle - Edge.Pi / 3) * self.arrowSize)
+            destArrowP2 = midPoint + QtCore.QPointF(math.sin(angle - Edge.Pi + Edge.Pi / 3) * self.arrowSize,
+                                                          math.cos(angle - Edge.Pi + Edge.Pi / 3) * self.arrowSize)
+
+            painter.setBrush(QtCore.Qt.black)
 #        painter.drawPolygon(QtGui.QPolygonF([line.p1(), sourceArrowP1, sourceArrowP2]))
-        painter.drawPolygon(QtGui.QPolygonF([line.p2(), destArrowP1, destArrowP2]))
+            painter.drawPolygon(QtGui.QPolygonF([midPoint, destArrowP1, destArrowP2]))
 
 
 class Node(QtGui.QGraphicsItem):

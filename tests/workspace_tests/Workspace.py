@@ -92,7 +92,9 @@ class WorkspaceTestCase(unittest.TestCase):
     def testPort(self):
         from workspace.Workspace import WorkspaceStepPort, Direction
         port = WorkspaceStepPort([32, 45], Direction.IN)
-        assert(port)
+        assert(port.location[0] == 32)
+        assert(port.location[1] == 45)
+        assert(port.direction == Direction.IN)
 
     def testDummy(self):
         pass
