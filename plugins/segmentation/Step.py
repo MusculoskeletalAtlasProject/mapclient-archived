@@ -19,10 +19,10 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
 '''
 import sys
 from PyQt4 import QtGui
-from workspace import Workspace
+from workspace.MountPoint import WorkspaceStep
 
 
-class Step(Workspace.WorkspaceStep):
+class Step(WorkspaceStep):
     '''
     A step satisfies the step plugin duck
     '''
@@ -36,7 +36,7 @@ class Step(Workspace.WorkspaceStep):
         '''
         Constructor
         '''
-        self.icon = QtGui.QIcon(':/icons/seg.gif')
+        self.icon = QtGui.QPixmap(':/icons/seg.gif')
 
     def serialize(self, stream):
         description = bytearray(self.description, sys.stdout.encoding)

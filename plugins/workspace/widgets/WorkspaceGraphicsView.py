@@ -17,88 +17,8 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     You should have received a copy of the GNU General Public License
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
-#import random
 import weakref, math
-import Resources_rc
-#from MainWindowUi import Ui_MainWindow
-from PyQt4.Qt import Qt
-from PyQt4 import QtCore
-from PyQt4 import QtGui
-
-class StepList(QtGui.QTreeWidget):
-
-    def __init__(self, stepIconSize, parent=None):
-        super(StepList, self).__init__(parent)
-        self.stepIconSize = stepIconSize
-
-        size = QtCore.QSize(stepIconSize, stepIconSize)
-        self.setIconSize(size)
-        self.setColumnCount(1)
-#        self.setHeaderLabel('Steps')
-        self.setHeaderHidden(True)
-        self.setIndentation(0)
-
-        self.setMinimumWidth(250)
-#        self.itemClicked.connect(self.expand)
-#        mself.setSpacing(10)
-#        self.setViewMode(QtGui.QListWidget.IconMode)
-#        self.setAcceptDrops(False)
-#        self.setDropIndicatorShown(True)
-
-    def findParentItem(self, category):
-        parentItem = None
-        for index in range(self.topLevelItemCount()):
-            item = self.topLevelItem(index)
-            if item.text(0) == category:
-                parentItem = item
-                break
-
-        return parentItem
-
-    def addStep(self, pixmap, name, category='General'):
-
-        parentItem = self.findParentItem(category)
-        if parentItem == None:
-            parentItem = QtGui.QTreeWidgetItem(self)
-            parentItem.setText(0, category)
-
-        if not parentItem.isExpanded():
-            parentItem.setExpanded(True)
-
-        stepItem = QtGui.QTreeWidgetItem(parentItem)
-        stepItem.setText(0, name)
-        stepItem.setIcon(0, QtGui.QIcon(pixmap))
-        stepItem.setData(0, QtCore.Qt.UserRole, pixmap)
-        stepItem.setFlags(QtCore.Qt.ItemIsEnabled)
-
-    def mousePressEvent(self, event):
-        item = self.itemAt(event.pos())
-        if not item:
-            return None
-
-        if self.indexOfTopLevelItem(item) >= 0:
-            # Item is a top level item and it doesn't have drag an drop abilities
-            return QtGui.QTreeWidget.mousePressEvent(self, event)
-
-        itemData = QtCore.QByteArray()
-        dataStream = QtCore.QDataStream(itemData, QtCore.QIODevice.WriteOnly)
-        pixmap = QtGui.QPixmap(item.data(0, QtCore.Qt.UserRole))
-        pixmap = pixmap.scaled(64, 64, aspectRatioMode=QtCore.Qt.KeepAspectRatio, transformMode=QtCore.Qt.FastTransformation)
-        hotspot = QtCore.QPoint(pixmap.width() / 2, pixmap.height() / 2)
-
-        dataStream << pixmap << hotspot
-
-        mimeData = QtCore.QMimeData()
-        mimeData.setData('image/x-puzzle-piece', itemData)
-
-        drag = QtGui.QDrag(self)
-        drag.setMimeData(mimeData)
-        drag.setHotSpot(hotspot)
-        drag.setPixmap(pixmap)
-
-        drag.exec_(QtCore.Qt.MoveAction)
-
-        return QtGui.QTreeWidget.mousePressEvent(self, event)
+from PyQt4 import QtCore, QtGui
 
 class Edge(QtGui.QGraphicsItem):
     Pi = math.pi
@@ -244,7 +164,7 @@ class Node(QtGui.QGraphicsItem):
             self.selected = not self.selected
             self.graph().nodeSelected(self, self.selected)
 
-class WorkspaceWidget(QtGui.QGraphicsView):
+class WorkspaceGraphicsView(QtGui.QGraphicsView):
 
     def __init__(self, parent=None):
         QtGui.QGraphicsView.__init__(self, parent)
@@ -319,14 +239,14 @@ class WorkspaceWidget(QtGui.QGraphicsView):
 #            ic.setFlag(QtGui.QGraphicsItem.ItemSendsGeometryChanges)
 #            ic.setPos(self.mapToScene(event.pos() - hotspot))
 
-            event.setDropAction(Qt.MoveAction);
+            event.setDropAction(QtCore.Qt.MoveAction);
             event.accept();
         else:
             event.ignore()
 
     def dragMoveEvent(self, event):
         if event.mimeData().hasFormat("image/x-puzzle-piece"):
-            event.setDropAction(Qt.MoveAction);
+            event.setDropAction(QtCore.Qt.MoveAction);
             event.accept();
         else:
             event.ignore();
@@ -342,67 +262,3 @@ class WorkspaceWidget(QtGui.QGraphicsView):
             event.accept()
         else:
             event.ignore()
-
-
-class MainWindow(QtGui.QMainWindow):
-    '''
-    classdocs
-    '''
-
-
-    def __init__(self, parent=None):
-        '''
-        Constructor
-        '''
-        super(MainWindow, self).__init__(parent)
-        self.piecesList = None
-        self.workspaceWidget = None
-
-        self._makeConnections()
-        self._setupWidgets()
-        self._loadSteps()
-
-
-    def _makeConnections(self):
-        pass
-
-    def _setupWidgets(self):
-        frame = QtGui.QFrame()
-        frameLayout = QtGui.QHBoxLayout(frame);
-#        puzzleWidget = PuzzleWidget(400);
-
-        self.piecesList = StepList(64, self)
-        self.workspaceWidget = WorkspaceWidget()
-
-        frameLayout.addWidget(self.piecesList)
-        frameLayout.addWidget(self.workspaceWidget)
-        self.setCentralWidget(frame);
-
-    def _openImage(self, path=None):
-        if not path:
-            path = QtGui.QFileDialog.getOpenFileName(self, "Open Image", '',
-                    "Image Files (*.png *.jpg *.bmp)")
-
-        if path:
-            newImage = QtGui.QPixmap()
-
-            if not newImage.load(path):
-                QtGui.QMessageBox.warning(self, "Open Image",
-                        "The image file could not be loaded.",
-                        QtGui.QMessageBox.Cancel)
-
-                return
-
-            self.puzzleImage = newImage
-            self._setupWorkspaceView()
-
-
-
-
-    def _loadSteps(self):
-        icons = [':/icons/pink-folder-icon.png', ':/icons/yellow-folder-icon.png', ':/icons/red-folder-icon.png', ':/icons/blue-folder-icon.png', ':/icons/green-folder-icon.png', ]
-        for icon in icons:
-            newImage = QtGui.QPixmap()
-            newImage.load(icon)
-            self.piecesList.addStep(newImage, 'image', 'Segmentation')
-

@@ -22,7 +22,7 @@ from PyQt4.Qt import Qt
 from PyQt4.QtCore import QAbstractListModel, QModelIndex, QSize
 from PyQt4.QtGui import QDialog, QAbstractItemView
 from workspace.widgets.WorkstepsDialogUi import Ui_WorkstepsDialog
-from workspace.Workspace import WorkspaceStep
+from workspace.MountPoint import WorkspaceStep
 from PyQt4 import QtGui
 
 class StepModel(QAbstractListModel):

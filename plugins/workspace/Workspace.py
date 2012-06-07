@@ -18,34 +18,18 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
 import os
-from PyQt4.QtCore import QSettings
+from PyQt4 import QtCore, QtGui
 from settings import Info
-from core import PluginFramework
+from workspace.widgets.WorkspaceWidget import WorkspaceWidget
 
 def workspaceConfigurationExists(location):
     return os.path.exists(location + '/' + Info.WORKSPACE_NAME)
 
 def getWorkspaceConfiguration(location):
-    return QSettings(location + '/' + Info.WORKSPACE_NAME, QSettings.IniFormat)
+    return QtCore.QSettings(location + '/' + Info.WORKSPACE_NAME, QtCore.QSettings.IniFormat)
 
 class WorkspaceError(Exception):
     pass
-
-'''
-Plugins can inherit this mount point to add a workspace step.
-
- A plugin that registers this mount point must have attributes
- * description
- * icon
- 
- A plugin that registers this mount point could have attributes
- * None
- 
- It must implement
- * pass 
-
-'''
-WorkspaceStep = PluginFramework.MetaPluginMountPoint('WorkspaceStep', (object,), {})
 
 class Direction(object):
     '''
@@ -58,12 +42,10 @@ class WorkspaceStepPort(object):
     '''
     Describes the location and properties of a port for a workspace step.
     '''
-    location = None
     properties = {}
     direction = None
 
-    def __init__(self, location, direction):
-        self.location = location
+    def __init__(self, direction):
         self.direction = direction
 
 class Workspace(object):
@@ -78,11 +60,21 @@ class Workspace(object):
         self.location = location
         self.version = version
 
+def getWorkspaceManagerCreateIfNecessary(mainWindow):
+    if not hasattr(mainWindow, 'workspaceManager'):
+        setattr(mainWindow, 'workspaceManager', Manager())
+        stackedWidget = mainWindow.centralWidget().findChild(QtGui.QStackedWidget, 'stackedWidget')
+        index = stackedWidget.addWidget(WorkspaceWidget(stackedWidget))
+        mainWindow.workspaceManager.widgetIndex = index
+
+    return mainWindow.workspaceManager
+
 class Manager(object):
     '''
     This class managers the workspace.
     '''
     location = None
+    widgetIndex = -1
 
     def __init__(self):
         '''

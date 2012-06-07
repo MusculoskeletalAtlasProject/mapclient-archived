@@ -18,13 +18,29 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
 
-from PyQt4.QtCore import QObject
-from PyQt4.QtGui import QFileDialog
+from PyQt4 import QtCore, QtGui
 from core import PluginFramework
-from workspace.Workspace import Manager
+from workspace.Workspace import Manager, getWorkspaceManagerCreateIfNecessary
 
 # Placed in reverse order so that when the menu options are inserted before any 
 # other action the desired order is achieved.
+
+class WorkspaceViewMenu(PluginFramework.MenuOption):
+    '''
+    '''
+    parent = None
+    menuLabel = '&Window'
+    menuName = 'menu_Window'
+    actionLabel = 'Workspace'
+    statustip = 'Show the workspace window'
+
+    def __init__(self):
+        QtCore.QObject.__init__(self)
+
+    def execute(self):
+        pass
+#        self.parent.setCentralWidget(WorkspaceWidget(self.parent))
+
 class WorkspaceCloseMenu(PluginFramework.MenuOption):
     '''
     classdocs
@@ -41,7 +57,7 @@ class WorkspaceCloseMenu(PluginFramework.MenuOption):
         '''
         Constructor
         '''
-        QObject.__init__(self)
+        QtCore.QObject.__init__(self)
 
     def execute(self):
         m = Manager()
@@ -62,7 +78,7 @@ class WorkspaceSeparatorMenu(PluginFramework.MenuOption):
         '''
         Constructor
         '''
-        QObject.__init__(self)
+        QtCore.QObject.__init__(self)
 
     def execute(self):
         pass
@@ -84,12 +100,12 @@ class WorkspaceOpenMenu(PluginFramework.MenuOption):
         '''
         Constructor
         '''
-        QObject.__init__(self)
+        QtCore.QObject.__init__(self)
 
     def execute(self):
-        workspaceDir = QFileDialog.getExistingDirectory(caption='Open Workspace', options=QFileDialog.ShowDirsOnly | QFileDialog.DontResolveSymlinks | QFileDialog.ReadOnly)
+        workspaceDir = QtGui.QFileDialog.getExistingDirectory(caption='Open Workspace', options=QtGui.QFileDialog.ShowDirsOnly | QtGui.QFileDialog.DontResolveSymlinks | QtGui.QFileDialog.ReadOnly)
         if len(workspaceDir) > 0:
-            m = Manager()
+            m = getWorkspaceManagerCreateIfNecessary(self.parent)
             m.load(workspaceDir)
 
 
@@ -111,7 +127,7 @@ class WorkspaceNewWorkstepMenu(PluginFramework.MenuOption):
         '''
         Constructor
         '''
-        QObject.__init__(self)
+        QtCore.QObject.__init__(self)
 
     def execute(self):
         from workspace.widgets.WorkstepsDialog import WorkstepsDialog
@@ -140,12 +156,12 @@ class WorkspaceNewWorkspaceMenu(PluginFramework.MenuOption):
         '''
         Constructor
         '''
-        QObject.__init__(self)
+        QtCore.QObject.__init__(self)
 
     def execute(self):
-        workspaceDir = QFileDialog.getExistingDirectory(self.parent, caption='Select Workspace Directory')
+        workspaceDir = QtGui.QFileDialog.getExistingDirectory(self.parent, caption='Select Workspace Directory')
         if len(workspaceDir) > 0:
-            m = Manager()
+            m = getWorkspaceManagerCreateIfNecessary(self.parent)
             m.new(workspaceDir)
 
 

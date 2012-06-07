@@ -17,14 +17,21 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     You should have received a copy of the GNU General Public License
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
-__version__ = '0.2.0'
-__author__ = 'Hugh Sorby'
-#import sys
-#from pkgutil import extend_path
-#__path__ = extend_path(sys.path, __name__)
 
-import sip
-API_NAMES = ["QDate", "QDateTime", "QString", "QTextStream", "QTime", "QUrl", "QVariant"]
-API_VERSION = 2
-for name in API_NAMES:
-    sip.setapi(name, API_VERSION)
+from core import PluginFramework
+
+'''
+Plugins can inherit this mount point to add a workspace step.
+
+ A plugin that registers this mount point must have attributes
+ * description
+ * icon
+ 
+ A plugin that registers this mount point could have attributes
+ * None
+ 
+ It must implement
+ * pass 
+
+'''
+WorkspaceStep = PluginFramework.MetaPluginMountPoint('WorkspaceStep', (object,), {})

@@ -38,6 +38,9 @@ class MainWindow(QMainWindow):
 
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
+#        stackedWidget = QtGui.QStackedWidget(self)
+#        stackedWidget.setObjectName('stackedWidget')
+#        self.setCentralWidget(stackedWidget)
         self._makeConnections()
         self._readSettings()
 
@@ -54,9 +57,9 @@ class MainWindow(QMainWindow):
 
             pluginMenu = self.ui.menubar.findChild(QtGui.QMenu, plugin.menuName)
             if not pluginMenu:
-                menu = QMenu(plugin.menuLabel)
+                menu = QMenu(plugin.menuLabel, self.ui.menubar)
                 menu.setObjectName(plugin.menuName)
-                self.ui.menubar.insertMenu(self.ui.menubar.children()[1], menu)
+                self.ui.menubar.insertMenu(self.ui.menubar.actions()[-1], menu)
                 pluginMenu = menu
 
             if plugin.subMenuLabel:
