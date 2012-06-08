@@ -141,8 +141,8 @@ class Node(QtGui.QGraphicsItem):
     def boundingRect(self):
         adjust = 2.0
         return QtCore.QRectF(-adjust, -adjust,
-                             self.pixmap.width() + adjust,
-                             self.pixmap.height() + adjust)
+                             self.pixmap.width() + 2 * adjust,
+                             self.pixmap.height() + 2 * adjust)
 
     def paint(self, painter, option, widget):
             if option.state & QtGui.QStyle.State_Sunken or self.selected:
@@ -255,8 +255,8 @@ class WorkspaceGraphicsView(QtGui.QGraphicsView):
 #        print(QtGui.QColor.colorNames())
 
     def dropEvent(self, event):
-        if event.mimeData().hasFormat("image/x-puzzle-piece"):
-            pieceData = event.mimeData().data("image/x-puzzle-piece")
+        if event.mimeData().hasFormat("image/x-workspace-step"):
+            pieceData = event.mimeData().data("image/x-workspace-step")
             stream = QtCore.QDataStream(pieceData, QtCore.QIODevice.ReadOnly)
             pixmap = QtGui.QPixmap()
             hotspot = QtCore.QPoint()
@@ -277,7 +277,7 @@ class WorkspaceGraphicsView(QtGui.QGraphicsView):
             event.ignore()
 
     def dragMoveEvent(self, event):
-        if event.mimeData().hasFormat("image/x-puzzle-piece"):
+        if event.mimeData().hasFormat("image/x-workspace-step"):
             event.setDropAction(QtCore.Qt.MoveAction);
             event.accept();
         else:
@@ -290,7 +290,7 @@ class WorkspaceGraphicsView(QtGui.QGraphicsView):
         event.accept()
 
     def dragEnterEvent(self, event):
-        if event.mimeData().hasFormat("image/x-puzzle-piece"):
+        if event.mimeData().hasFormat("image/x-workspace-step"):
             event.accept()
         else:
             event.ignore()

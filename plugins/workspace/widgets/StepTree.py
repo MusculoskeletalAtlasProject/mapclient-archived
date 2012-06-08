@@ -84,7 +84,7 @@ class StepTree(QtGui.QTreeWidget):
         dataStream << pixmap << hotspot
 
         mimeData = QtCore.QMimeData()
-        mimeData.setData('image/x-puzzle-piece', itemData)
+        mimeData.setData('image/x-workspace-step', itemData)
 
         drag = QtGui.QDrag(self)
         drag.setMimeData(mimeData)
