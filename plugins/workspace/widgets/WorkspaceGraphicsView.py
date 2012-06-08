@@ -108,11 +108,11 @@ class Edge(QtGui.QGraphicsItem):
 class Node(QtGui.QGraphicsItem):
     Type = QtGui.QGraphicsItem.UserType + 1
 
-    def __init__(self, pixmap, workspaceWidget):
+    def __init__(self, pixmap, workspaceGraphicsView):
         QtGui.QGraphicsItem.__init__(self)
 
         self.pixmap = pixmap
-        self.graph = weakref.ref(workspaceWidget)
+        self.graph = weakref.ref(workspaceGraphicsView)
         self.edgeList = []
         self.newPos = QtCore.QPointF()
         self.setFlag(QtGui.QGraphicsItem.ItemIsMovable)
@@ -127,6 +127,13 @@ class Node(QtGui.QGraphicsItem):
     def setSelected(self, state):
         self.selected = state
         self.update()
+
+    def hasEdgeToDestination(self, node):
+        for edge in self.edgeList:
+            if edge().dest() == node:
+                return True
+
+        return False
 
     def addEdge(self, edge):
         self.edgeList.append(weakref.ref(edge))
@@ -154,6 +161,12 @@ class Node(QtGui.QGraphicsItem):
 
     def mousePressEvent(self, event):
         self.update()
+        modifiers = QtGui.QApplication.keyboardModifiers()
+        if modifiers == QtCore.Qt.ControlModifier:
+            pass
+        else:
+            self.graph().clearSelection()
+
         QtGui.QGraphicsItem.mousePressEvent(self, event)
 
     def mouseReleaseEvent(self, event):
@@ -162,6 +175,10 @@ class Node(QtGui.QGraphicsItem):
         modifiers = QtGui.QApplication.keyboardModifiers()
         if modifiers == QtCore.Qt.ControlModifier:
             self.selected = not self.selected
+            self.graph().nodeSelected(self, self.selected)
+        else:
+            self.graph().clearSelection()
+            self.selected = True
             self.graph().nodeSelected(self, self.selected)
 
 class WorkspaceGraphicsView(QtGui.QGraphicsView):
@@ -190,6 +207,24 @@ class WorkspaceGraphicsView(QtGui.QGraphicsView):
         self.piecePixmaps = []
         self.update()
 
+
+    def connectNodes(self, node1, node2):
+        # Check if nodes are already connected
+        if not node1.hasEdgeToDestination(node2):
+#        if node1.
+            self.scene().addItem(Edge(node1, node2))
+#            for x in self.selectedNodes:
+#                x.setSelected(False)
+
+#        self.clearSelection()
+
+    def clearSelection(self):
+        for node in self.selectedNodes:
+            node.selected = False
+            node.update()
+
+        self.selectedNodes = []
+
     def nodeSelected(self, node, state):
         if state == True and node not in self.selectedNodes:
             self.selectedNodes.append(node)
@@ -198,10 +233,7 @@ class WorkspaceGraphicsView(QtGui.QGraphicsView):
             del self.selectedNodes[found]
 
         if len(self.selectedNodes) == 2:
-            self.scene().addItem(Edge(self.selectedNodes[0], self.selectedNodes[1]))
-            for x in self.selectedNodes:
-                x.setSelected(False)
-            self.selectedNodes = []
+            self.connectNodes(self.selectedNodes[0], self.selectedNodes[1])
 
     def drawBackground(self, painter, rect):
         # Shadow.
