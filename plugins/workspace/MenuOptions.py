@@ -109,35 +109,6 @@ class WorkspaceOpenMenu(PluginFramework.MenuOption):
             m.load(workspaceDir)
 
 
-class WorkspaceNewWorkstepMenu(PluginFramework.MenuOption):
-    '''
-    classdocs
-    '''
-
-    parent = None
-    menuLabel = '&File'
-    menuName = 'menu_File'
-    subMenuLabel = '&New'
-    subMenuName = 'menu_New'
-    actionLabel = '&Workstep'
-    #shortcut = 'Ctrl+N'
-    statustip = 'Create a new workstep'
-
-    def __init__(self):
-        '''
-        Constructor
-        '''
-        QtCore.QObject.__init__(self)
-
-    def execute(self):
-        from workspace.widgets.WorkstepsDialog import WorkstepsDialog
-        dlg = WorkstepsDialog(self.parent)
-        dlg.setModal(True)
-        if dlg.exec_():
-            print(dlg.addedStep())
-
-
-
 class WorkspaceNewWorkspaceMenu(PluginFramework.MenuOption):
     '''
     classdocs
