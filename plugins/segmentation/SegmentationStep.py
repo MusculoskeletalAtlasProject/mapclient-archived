@@ -20,23 +20,26 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
 import sys
 from PyQt4 import QtGui
 from workspace.MountPoint import WorkspaceStep
-
+from workspace.Workspace import WorkspaceStepPort
 
 class Step(WorkspaceStep):
     '''
-    A step satisfies the step plugin duck
+    A step that acts like the step plugin duck
     '''
-
-    description = 'This step is for segmenting images.'
-    name = 'segmentation'
-    icon = None
-    ports = []
 
     def __init__(self):
         '''
         Constructor
         '''
+        self.name = 'segmentation'
+        self.ports = []
         self.icon = QtGui.QPixmap(':/icons/seg.gif')
+        portIn = WorkspaceStepPort()
+        portIn.addProperty(('pho#workspace#port', 'uses', 'images'))
+        portOut = WorkspaceStepPort()
+        portOut.addProperty(('pho#workspace#port', 'provides', 'pointcloud'))
+        self.ports.append(portIn)
+        self.ports.append(portOut)
 
     def serialize(self, stream):
         description = bytearray(self.description, sys.stdout.encoding)
