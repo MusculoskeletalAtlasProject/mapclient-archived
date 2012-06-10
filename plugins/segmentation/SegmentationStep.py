@@ -33,7 +33,7 @@ class Step(WorkspaceStep):
         '''
         self.name = 'segmentation'
         self.ports = []
-        self.icon = QtGui.QPixmap(':/icons/seg.gif')
+        self.icon = QtGui.QPixmap(':/segmentation/icons/seg.gif')
         portIn = WorkspaceStepPort()
         portIn.addProperty(('pho#workspace#port', 'uses', 'images'))
         portOut = WorkspaceStepPort()
