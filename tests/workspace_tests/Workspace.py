@@ -83,20 +83,27 @@ class WorkspaceTestCase(unittest.TestCase):
         os.remove(tempDir + '/workspace.conf')
         os.rmdir(tempDir)
 
-    def testDirection(self):
-        from workspace.Workspace import Direction
-
-        x = Direction.IN
-        assert(x == Direction.IN)
-
     def testPort(self):
-        from workspace.Workspace import WorkspaceStepPort, Direction
-        port = WorkspaceStepPort(Direction.IN)
-        assert(port.direction == Direction.IN)
+        from workspace.Workspace import WorkspaceStepPort
+        port = WorkspaceStepPort()
+        port.addProperty(('pho#workspace#port', 'uses', 'images'))
+        self.assertIn('pho#workspace#port', port.subj)
+
+
+    def testPortConnect(self):
+        from workspace.Workspace import WorkspaceStepPort
+        portIn = WorkspaceStepPort()
+        portIn.addProperty(('pho#workspace#port', 'uses', 'images'))
+        portOut = WorkspaceStepPort()
+        portOut.addProperty(('pho#workspace#port', 'provides', 'images'))
+        port2 = WorkspaceStepPort()
+        port2.addProperty(('pho#workspace#port', 'uses', 'dicom'))
+
+        self.assertEqual(portOut.canConnect(portIn), True)
+        self.assertEqual(portOut.canConnect(port2), False)
 
     def testDummy(self):
         pass
-
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testNew']

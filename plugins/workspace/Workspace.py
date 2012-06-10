@@ -31,22 +31,30 @@ def getWorkspaceConfiguration(location):
 class WorkspaceError(Exception):
     pass
 
-class Direction(object):
-    '''
-    Pythonesque enum 
-    '''
-    IN = 0
-    OUT = 1
-
 class WorkspaceStepPort(object):
     '''
     Describes the location and properties of a port for a workspace step.
     '''
-    properties = {}
-    direction = None
+    def __init__(self):
+        self.subj = {}
+        self.pred = {}
+        self.obj = {}
 
-    def __init__(self, direction):
-        self.direction = direction
+    def addProperty(self, rdftriple):
+        self.subj[rdftriple[0]] = rdftriple
+        self.pred[rdftriple[1]] = rdftriple
+        self.obj[rdftriple[2]] = rdftriple
+
+    def canConnect(self, other):
+        if 'pho#workspace#port' in self.subj and 'pho#workspace#port' in other.subj:
+            this = self.subj['pho#workspace#port']
+            that = other.subj['pho#workspace#port']
+            if this[1] == 'provides' and that[1] == 'uses':
+                if this[2] == that[2]:
+                    return True
+
+        return False
+
 
 class Workspace(object):
     '''

@@ -33,7 +33,7 @@ class PluginFrameworkTestCase(unittest.TestCase):
         loadPlugins(inbuiltPluginDir)
 
         sys.stdout = old_stdout
-        assert("Plugin 'Workspace' version 0.1.0 by Hugh Sorby loaded" in redirectstdout.messages)
+        assert("Plugin 'Workspace' version 0.2.0 by Hugh Sorby loaded" in redirectstdout.messages)
 
 
 if __name__ == "__main__":
