@@ -37,5 +37,5 @@ class WorkspaceWidget(QtGui.QWidget):
         self.workspaceStepPlugins = WorkspaceStep.getPlugins()
         self.stepTree = self.findChild(QtGui.QWidget, "stepTree")
         for step in self.workspaceStepPlugins:
-            self.stepTree.addStep(step.icon, step.name)
+            self.stepTree.addStep(step)
 

@@ -77,11 +77,13 @@ class StepTree(QtGui.QTreeWidget):
 
         itemData = QtCore.QByteArray()
         dataStream = QtCore.QDataStream(itemData, QtCore.QIODevice.WriteOnly)
-        pixmap = QtGui.QPixmap(item.data(0, QtCore.Qt.UserRole))
+        step = item.data(0, QtCore.Qt.UserRole)
+        pixmap = QtGui.QPixmap(step.pixmap)
         pixmap = pixmap.scaled(64, 64, aspectRatioMode=QtCore.Qt.KeepAspectRatio, transformMode=QtCore.Qt.FastTransformation)
         hotspot = QtCore.QPoint(pixmap.width() / 2, pixmap.height() / 2)
 
-        dataStream << pixmap << hotspot
+        dataStream = step.serialize(dataStream)
+        dataStream << hotspot
 
         mimeData = QtCore.QMimeData()
         mimeData.setData('image/x-workspace-step', itemData)
