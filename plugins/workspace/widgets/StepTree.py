@@ -50,20 +50,20 @@ class StepTree(QtGui.QTreeWidget):
 
         return parentItem
 
-    def addStep(self, pixmap, name, category='General'):
+    def addStep(self, step):
 
-        parentItem = self.findParentItem(category)
+        parentItem = self.findParentItem(step.category)
         if parentItem == None:
             parentItem = QtGui.QTreeWidgetItem(self)
-            parentItem.setText(0, category)
+            parentItem.setText(0, step.category)
 
         if not parentItem.isExpanded():
             parentItem.setExpanded(True)
 
         stepItem = QtGui.QTreeWidgetItem(parentItem)
-        stepItem.setText(0, name)
-        stepItem.setIcon(0, QtGui.QIcon(pixmap))
-        stepItem.setData(0, QtCore.Qt.UserRole, pixmap)
+        stepItem.setText(0, step.name)
+        stepItem.setIcon(0, QtGui.QIcon(step.pixmap))
+        stepItem.setData(0, QtCore.Qt.UserRole, step)
         stepItem.setFlags(QtCore.Qt.ItemIsEnabled)
 
     def mousePressEvent(self, event):
@@ -72,7 +72,7 @@ class StepTree(QtGui.QTreeWidget):
             return None
 
         if self.indexOfTopLevelItem(item) >= 0:
-            # Item is a top level item and it doesn't have drag an drop abilities
+            # Item is a top level item and it doesn't have drag and drop abilities
             return QtGui.QTreeWidget.mousePressEvent(self, event)
 
         itemData = QtCore.QByteArray()

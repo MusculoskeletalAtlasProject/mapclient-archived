@@ -33,7 +33,7 @@ class Step(WorkspaceStep):
         '''
         self.name = 'segmentation'
         self.ports = []
-        self.icon = QtGui.QPixmap(':/segmentation/icons/seg.gif')
+        self.pixmap = QtGui.QPixmap(':/segmentation/icons/seg.gif')
         portIn = WorkspaceStepPort()
         portIn.addProperty(('pho#workspace#port', 'uses', 'images'))
         portOut = WorkspaceStepPort()
@@ -42,28 +42,28 @@ class Step(WorkspaceStep):
         self.ports.append(portOut)
 
     def serialize(self, stream):
-        description = bytearray(self.description, sys.stdout.encoding)
-        stream.writeUInt32(len(description))
-        stream.writeRawData(description)
+#        description = bytearray(self.description, sys.stdout.encoding)
+#        stream.writeUInt32(len(description))
+#        stream.writeRawData(description)
 
         name = bytearray(self.name, sys.stdout.encoding)
         stream.writeUInt32(len(name))
         stream.writeRawData(name)
 
-        stream << self.icon
+        stream << self.pixmap
 
         return stream
 
     @staticmethod
     def deserialize(stream):
         newStep = Step()
-        descriptionLen = stream.readUInt32()
-        newStep.description = stream.readRawData(descriptionLen).decode(sys.stdout.encoding)
+#        descriptionLen = stream.readUInt32()
+#        newStep.description = stream.readRawData(descriptionLen).decode(sys.stdout.encoding)
 
         nameLen = stream.readUInt32()
         newStep.name = stream.readRawData(nameLen).decode(sys.stdout.encoding)
 
-        stream >> newStep.icon
+        stream >> newStep.pixmap
 
         return newStep
 

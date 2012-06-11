@@ -286,7 +286,6 @@ class WorkspaceGraphicsView(QtGui.QGraphicsView):
         self.update()
 
     def dragLeaveEvent(self, event):
-        print('leaving viewport')
         event.accept()
 
     def dragEnterEvent(self, event):

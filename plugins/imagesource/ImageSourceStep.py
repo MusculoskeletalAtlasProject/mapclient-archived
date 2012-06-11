@@ -37,7 +37,7 @@ class ImageSourceStep(WorkspaceStep):
         '''
         self.name = 'image source'
         self.ports = []
-        self.icon = QtGui.QPixmap(':/imagesource/icons/landscapeimages.png')
+        self.pixmap = QtGui.QPixmap(':/imagesource/icons/landscapeimages.png')
         port = WorkspaceStepPort()
         port.addProperty(('pho#workspace#port', 'provides', 'images'))
         self.ports.append(port)
@@ -52,7 +52,7 @@ class ImageSourceStep(WorkspaceStep):
         stream.writeUInt32(len(name))
         stream.writeRawData(name)
 
-        stream << self.icon
+        stream << self.pixmap
 
         return stream
 
@@ -65,7 +65,7 @@ class ImageSourceStep(WorkspaceStep):
         nameLen = stream.readUInt32()
         newStep.name = stream.readRawData(nameLen).decode(sys.stdout.encoding)
 
-        stream >> newStep.icon
+        stream >> newStep.pixmap
 
         return newStep
 

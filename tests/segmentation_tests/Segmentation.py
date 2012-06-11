@@ -26,14 +26,15 @@ class SegmentationTestCase(unittest.TestCase):
     def testPlugin(self):
         import sys
         app = QtGui.QApplication(sys.argv)
-        from segmentation.Step import Step
+        from segmentation.SegmentationStep import Step
         myStep = Step()
-        assert(myStep.description == 'This step is for segmenting images.')
+        assert(myStep.name == 'segmentation')
+        app.argc() # eclipse warning killer
 
     def testSerialisation(self):
         import sys
         app = QtGui.QApplication(sys.argv)
-        from segmentation.Step import Step
+        from segmentation.SegmentationStep import Step
         myStep = Step()
 
         itemData = QtCore.QByteArray()
@@ -43,9 +44,9 @@ class SegmentationTestCase(unittest.TestCase):
 
         readDataStream = QtCore.QDataStream(itemData, QtCore.QIODevice.ReadOnly)
         retStep = Step.deserialize(readDataStream)
-        assert(retStep.description == 'This step is for segmenting images.')
         assert(retStep.name == 'segmentation')
-        assert(retStep.icon)
+        assert(retStep.pixmap)
+        app.argc() # eclipse warning killer
 
 
 if __name__ == "__main__":

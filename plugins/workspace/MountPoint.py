@@ -24,14 +24,15 @@ from core import PluginFramework
 Plugins can inherit this mount point to add a workspace step.
 
  A plugin that registers this mount point must have attributes
- * description
- * icon
+ * pixmap
+ * name
  
  A plugin that registers this mount point could have attributes
- * None
+ * category
  
  It must implement
- * pass 
+ * serialize
+ * deserialize 
 
 '''
-WorkspaceStep = PluginFramework.MetaPluginMountPoint('WorkspaceStep', (object,), {})
+WorkspaceStep = PluginFramework.MetaPluginMountPoint('WorkspaceStep', (object,), {'category': 'General'})
