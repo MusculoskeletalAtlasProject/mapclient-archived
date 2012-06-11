@@ -1,0 +1,5 @@
+<RCC>
+  <qresource prefix="/workspace/" >
+    <file>images/cross.jpg</file>
+  </qresource>
+</RCC>

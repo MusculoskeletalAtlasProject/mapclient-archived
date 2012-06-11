@@ -19,7 +19,7 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
 '''
 from PyQt4 import QtGui
 from workspace.widgets.WorkspaceWidgetUi import Ui_WorkspaceWidget
-from workspace.MountPoint import WorkspaceStep
+from workspace.MountPoint import WorkspaceStepMountPoint
 
 class WorkspaceWidget(QtGui.QWidget):
     '''
@@ -34,8 +34,9 @@ class WorkspaceWidget(QtGui.QWidget):
         QtGui.QWidget.__init__(self)
         self.ui = Ui_WorkspaceWidget()
         self.ui.setupUi(self)
-        self.workspaceStepPlugins = WorkspaceStep.getPlugins()
+        self.workspaceStepPlugins = WorkspaceStepMountPoint.getPlugins()
         self.stepTree = self.findChild(QtGui.QWidget, "stepTree")
         for step in self.workspaceStepPlugins:
-            self.stepTree.addStep(step)
+            if step.name != 'empty':
+                self.stepTree.addStep(step)
 

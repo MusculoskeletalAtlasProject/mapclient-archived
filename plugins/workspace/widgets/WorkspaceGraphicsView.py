@@ -19,6 +19,59 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
 '''
 import weakref, math
 from PyQt4 import QtCore, QtGui
+from workspace.WorkspaceStep import WorkspaceStep
+
+class ErrorItem(QtGui.QGraphicsItem):
+
+    def __init__(self, sourceNode, destNode):
+        QtGui.QGraphicsItem.__init__(self)
+        self.source = weakref.ref(sourceNode)
+        self.dest = weakref.ref(destNode)
+        self.sourcePoint = QtCore.QPointF()
+        self.destPoint = QtCore.QPointF()
+        self.pixmap = QtGui.QPixmap(':/workspace/images/cross.jpg').scaled(16, 16, aspectRatioMode=QtCore.Qt.KeepAspectRatio, transformMode=QtCore.Qt.FastTransformation)
+        self.source().addEdge(self)
+        self.dest().addEdge(self)
+        self.setZValue(-1.5)
+        self.adjust()
+
+    def boundingRect(self):
+        extra = (16) / 2.0 # Icon size divided by two
+
+        return QtCore.QRectF(self.sourcePoint,
+                             QtCore.QSizeF(self.destPoint.x() - self.sourcePoint.x(),
+                                           self.destPoint.y() - self.sourcePoint.y())).normalized().adjusted(-extra, -extra, extra, extra)
+
+    def adjust(self):
+        if not self.source() or not self.dest():
+            return
+
+        sourceCentre = self.source().boundingRect().center()
+        destCentre = self.dest().boundingRect().center()
+        line = QtCore.QLineF(self.mapFromItem(self.source(), sourceCentre.x(), sourceCentre.y()), self.mapFromItem(self.dest(), destCentre.x(), destCentre.y()))
+        length = line.length()
+
+        if length == 0.0:
+            return
+
+        edgeOffset = QtCore.QPointF((line.dx() * 10) / length, (line.dy() * 10) / length)
+
+        self.prepareGeometryChange()
+        self.sourcePoint = line.p1() + edgeOffset
+        self.destPoint = line.p2() - edgeOffset
+
+    def paint(self, painter, option, widget):
+        midPoint = (self.destPoint + self.sourcePoint) / 2
+        # Draw the line itself.
+        line = QtCore.QLineF(self.sourcePoint, self.destPoint)
+
+        if line.length() == 0.0:
+            return
+
+        painter.setPen(QtGui.QPen(QtCore.Qt.black, 1, QtCore.Qt.DashLine, QtCore.Qt.RoundCap, QtCore.Qt.RoundJoin))
+        painter.drawLine(line)
+
+        painter.drawPixmap(midPoint.x() - 8, midPoint.y() - 8, self.pixmap)
 
 class Edge(QtGui.QGraphicsItem):
     Pi = math.pi
@@ -108,10 +161,11 @@ class Edge(QtGui.QGraphicsItem):
 class Node(QtGui.QGraphicsItem):
     Type = QtGui.QGraphicsItem.UserType + 1
 
-    def __init__(self, pixmap, workspaceGraphicsView):
+    def __init__(self, step, workspaceGraphicsView):
         QtGui.QGraphicsItem.__init__(self)
 
-        self.pixmap = pixmap
+        self.step = step
+        self.pixmap = step.pixmap.scaled(64, 64, aspectRatioMode=QtCore.Qt.KeepAspectRatio, transformMode=QtCore.Qt.FastTransformation)
         self.graph = weakref.ref(workspaceGraphicsView)
         self.edgeList = []
         self.newPos = QtCore.QPointF()
@@ -128,7 +182,13 @@ class Node(QtGui.QGraphicsItem):
         self.selected = state
         self.update()
 
+    def _removeDeadwood(self):
+        prunedEdgeList = [ edge for edge in self.edgeList if edge() ]
+        self.edgeList = prunedEdgeList
+
+
     def hasEdgeToDestination(self, node):
+        self._removeDeadwood()
         for edge in self.edgeList:
             if edge().dest() == node:
                 return True
@@ -154,6 +214,7 @@ class Node(QtGui.QGraphicsItem):
     def itemChange(self, change, value):
 
         if change == QtGui.QGraphicsItem.ItemPositionChange:
+            self._removeDeadwood()
             for edge in self.edgeList:
                 edge().adjust()
 
@@ -186,6 +247,11 @@ class WorkspaceGraphicsView(QtGui.QGraphicsView):
     def __init__(self, parent=None):
         QtGui.QGraphicsView.__init__(self, parent)
         self.selectedNodes = []
+        self.errorIconTimer = QtCore.QTimer()
+        self.errorIconTimer.setInterval(3000)
+        self.errorIconTimer.setSingleShot(True)
+        self.errorIconTimer.timeout.connect(self.errorIconTimeout)
+        self.errorIcon = None
 
         sceneWidth = 800
         sceneHeight = 1.618 * sceneWidth
@@ -211,12 +277,13 @@ class WorkspaceGraphicsView(QtGui.QGraphicsView):
     def connectNodes(self, node1, node2):
         # Check if nodes are already connected
         if not node1.hasEdgeToDestination(node2):
-#        if node1.
-            self.scene().addItem(Edge(node1, node2))
-#            for x in self.selectedNodes:
-#                x.setSelected(False)
-
-#        self.clearSelection()
+            if node1.step.canConnect(node2.step):
+                self.scene().addItem(Edge(node1, node2))
+            else:
+                # add temporary line ???
+                self.errorIcon = ErrorItem(node1, node2)
+                self.scene().addItem(self.errorIcon)
+                self.errorIconTimer.start()
 
     def clearSelection(self):
         for node in self.selectedNodes:
@@ -234,6 +301,11 @@ class WorkspaceGraphicsView(QtGui.QGraphicsView):
 
         if len(self.selectedNodes) == 2:
             self.connectNodes(self.selectedNodes[0], self.selectedNodes[1])
+
+
+    def errorIconTimeout(self):
+        self.scene().removeItem(self.errorIcon)
+        del self.errorIcon
 
     def drawBackground(self, painter, rect):
         # Shadow.
@@ -258,12 +330,13 @@ class WorkspaceGraphicsView(QtGui.QGraphicsView):
         if event.mimeData().hasFormat("image/x-workspace-step"):
             pieceData = event.mimeData().data("image/x-workspace-step")
             stream = QtCore.QDataStream(pieceData, QtCore.QIODevice.ReadOnly)
-            pixmap = QtGui.QPixmap()
+            newStep = WorkspaceStep()
             hotspot = QtCore.QPoint()
 
-            stream >> pixmap >> hotspot
+            step = WorkspaceStep.deserialize(newStep, stream)
+            stream >> hotspot
 
-            node = Node(pixmap, self)
+            node = Node(step, self)
             node.setPos(self.mapToScene(event.pos() - hotspot))
             self.scene().addItem(node)
 #            ic = self.scene().addPixmap(pixmap)

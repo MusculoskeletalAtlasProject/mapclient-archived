@@ -17,12 +17,10 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     You should have received a copy of the GNU General Public License
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
-import sys
 from PyQt4 import QtGui
-from workspace.MountPoint import WorkspaceStep
 
-import imagesource.Resources_rc
-from workspace.Workspace import WorkspaceStepPort
+#import imagesource.Resources_rc
+from workspace.WorkspaceStep import WorkspaceStep
 
 class ImageSourceStep(WorkspaceStep):
     '''
@@ -35,37 +33,20 @@ class ImageSourceStep(WorkspaceStep):
         '''
         Constructor
         '''
+        super(ImageSourceStep, self).__init__()
         self.name = 'image source'
-        self.ports = []
         self.pixmap = QtGui.QPixmap(':/imagesource/icons/landscapeimages.png')
-        port = WorkspaceStepPort()
-        port.addProperty(('pho#workspace#port', 'provides', 'images'))
-        self.ports.append(port)
+        self.addPort(('pho#workspace#port', 'provides', 'images'))
 
 
-    def serialize(self, stream):
-        description = bytearray(self.description, sys.stdout.encoding)
-        stream.writeUInt32(len(description))
-        stream.writeRawData(description)
-
-        name = bytearray(self.name, sys.stdout.encoding)
-        stream.writeUInt32(len(name))
-        stream.writeRawData(name)
-
-        stream << self.pixmap
-
-        return stream
-
-    @staticmethod
-    def deserialize(stream):
-        newStep = ImageSourceStep()
-        descriptionLen = stream.readUInt32()
-        newStep.description = stream.readRawData(descriptionLen).decode(sys.stdout.encoding)
-
-        nameLen = stream.readUInt32()
-        newStep.name = stream.readRawData(nameLen).decode(sys.stdout.encoding)
-
-        stream >> newStep.pixmap
-
-        return newStep
+#    def serialize(self, stream):
+#        stream = super(ImageSourceStep, self).serialize(stream)
+#
+#        return stream
+#
+#    @staticmethod
+#    def deserialize(newStep, stream):
+#        super(ImageSourceStep, newStep).deserialize(newStep, stream)
+#
+#        return newStep
 

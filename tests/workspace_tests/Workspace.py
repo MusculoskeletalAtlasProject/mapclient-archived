@@ -25,7 +25,7 @@ for name in API_NAMES:
 
 import unittest
 import os, tempfile
-#from core.PluginFramework import loadPlugins
+from PyQt4 import QtCore
 
 TEST_WORKSPACE_DIR_NAME = '/new_workspace_jihuuui'
 
@@ -84,14 +84,14 @@ class WorkspaceTestCase(unittest.TestCase):
         os.rmdir(tempDir)
 
     def testPort(self):
-        from workspace.Workspace import WorkspaceStepPort
+        from workspace.WorkspaceStep import WorkspaceStepPort
         port = WorkspaceStepPort()
         port.addProperty(('pho#workspace#port', 'uses', 'images'))
         self.assertIn('pho#workspace#port', port.subj)
 
 
     def testPortConnect(self):
-        from workspace.Workspace import WorkspaceStepPort
+        from workspace.WorkspaceStep import WorkspaceStepPort
         portIn = WorkspaceStepPort()
         portIn.addProperty(('pho#workspace#port', 'uses', 'images'))
         portOut = WorkspaceStepPort()
@@ -102,8 +102,35 @@ class WorkspaceTestCase(unittest.TestCase):
         self.assertEqual(portOut.canConnect(portIn), True)
         self.assertEqual(portOut.canConnect(port2), False)
 
-    def testDummy(self):
-        pass
+    def testPortSerialization(self):
+        from workspace.WorkspaceStep import WorkspaceStepPort
+        myPort = WorkspaceStepPort()
+        myPort.addProperty(('somesubj', 'somepred', 'someobj'))
+        myPort.addProperty(('anothersubj', 'anotherpred', 'anotherobj'))
+        itemData = QtCore.QByteArray()
+        writeDataStream = QtCore.QDataStream(itemData, QtCore.QIODevice.WriteOnly)
+
+        writeDataStream = myPort.serialize(writeDataStream)
+
+        readDataStream = QtCore.QDataStream(itemData, QtCore.QIODevice.ReadOnly)
+        passedPort = WorkspaceStepPort()
+        retPort = WorkspaceStepPort.deserialize(passedPort, readDataStream)
+        self.assertIn('somesubj', retPort.subj)
+        self.assertIn('somepred', retPort.pred)
+        self.assertIn('someobj', retPort.obj)
+        self.assertIn('anothersubj', retPort.subj)
+
+    def testStepConnection(self):
+        from workspace.WorkspaceStep import WorkspaceStep
+        step1 = WorkspaceStep()
+        step1.addPort(('pho#workspace#port', 'provides', 'images'))
+        step2 = WorkspaceStep()
+        step2.addPort(('pho#workspace#port', 'uses', 'images'))
+        step2.addPort(('pho#workspace#port', 'uses', 'dicom'))
+        step2.addPort(('pho#workspace#port', 'provides', 'pointcloud'))
+
+        self.assertEqual(step1.canConnect(step2), True)
+
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testNew']

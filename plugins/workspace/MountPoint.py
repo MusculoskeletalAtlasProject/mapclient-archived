@@ -35,4 +35,4 @@ Plugins can inherit this mount point to add a workspace step.
  * deserialize 
 
 '''
-WorkspaceStep = PluginFramework.MetaPluginMountPoint('WorkspaceStep', (object,), {'category': 'General'})
+WorkspaceStepMountPoint = PluginFramework.MetaPluginMountPoint('WorkspaceStep', (object,), {'category': 'General'})

@@ -106,7 +106,7 @@ class MetaPluginMountPoint(type):
       of loose coupling, there needs to be a neutral location, somewhere between
       the plugins and the code that uses them, that each side of the system can
       look at, without having to know the details of the other side. Trac calls
-      this is an 'extension point'.
+      this an 'extension point'.
     * A way to register a plugin at a particular mount point. Since internal code
       can't (or at the very least, shouldn't have to) look around to find plugins 
       that might work for it, there needs to be a way for plugins to announce their
