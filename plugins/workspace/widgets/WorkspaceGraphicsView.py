@@ -175,12 +175,16 @@ class Node(QtGui.QGraphicsItem):
         self.setCacheMode(self.DeviceCoordinateCache)
         self.setZValue(-1)
         self.selected = False
-        self.configured = False
 
-        self.configureMenu = QtGui.QMenu(self.graph())
-        configureAction = QtGui.QAction('Configure', self.configureMenu)
+        self.contextMenu = QtGui.QMenu(self.graph())
+        configureAction = QtGui.QAction('Configure', self.contextMenu)
         configureAction.triggered.connect(self.step.configure)
-        self.configureMenu.addAction(configureAction)
+        self.contextMenu.addAction(configureAction)
+        portsMenu = QtGui.QMenu('Ports', self.contextMenu)
+        self.contextMenu.addMenu(portsMenu)
+        for port in step.ports:
+            pass
+
 
     def type(self):
         return Node.Type
@@ -221,7 +225,7 @@ class Node(QtGui.QGraphicsItem):
                 painter.drawRoundedRect(self.boundingRect(), 5, 5)
 
             painter.drawPixmap(0, 0, self.pixmap)
-            if not self.configured:
+            if not self.step.isConfigured():
                 painter.drawPixmap(40, 40, self.configure_red)
 
     def itemChange(self, change, value):
@@ -234,7 +238,7 @@ class Node(QtGui.QGraphicsItem):
         return QtGui.QGraphicsItem.itemChange(self, change, value)
 
     def contextMenuEvent(self, event):
-        self.configureMenu.exec_(event.screenPos())
+        self.contextMenu.exec_(event.screenPos())
 
     def mousePressEvent(self, event):
         self.update()
@@ -270,6 +274,7 @@ class WorkspaceGraphicsView(QtGui.QGraphicsView):
 
     def __init__(self, parent=None):
         QtGui.QGraphicsView.__init__(self, parent)
+        self.undoStack = QtGui.QUndoStack(self)
         self.selectedNodes = []
         self.errorIconTimer = QtCore.QTimer()
         self.errorIconTimer.setInterval(3000)

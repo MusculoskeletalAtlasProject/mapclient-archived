@@ -102,23 +102,18 @@ class WorkspaceTestCase(unittest.TestCase):
         self.assertEqual(portOut.canConnect(portIn), True)
         self.assertEqual(portOut.canConnect(port2), False)
 
-    def testPortSerialization(self):
+    def testPortDescription(self):
         from workspace.WorkspaceStep import WorkspaceStepPort
-        myPort = WorkspaceStepPort()
-        myPort.addProperty(('somesubj', 'somepred', 'someobj'))
-        myPort.addProperty(('anothersubj', 'anotherpred', 'anotherobj'))
-        itemData = QtCore.QByteArray()
-        writeDataStream = QtCore.QDataStream(itemData, QtCore.QIODevice.WriteOnly)
+        port = WorkspaceStepPort()
+        port.addProperty(('pho#workspace#port', 'uses', 'images'))
+        port.addProperty(('pho#workspace#port', 'provides', 'pointcloud'))
+        port.addProperty(('pho#workspace#port', 'uses', 'dicom'))
 
-        writeDataStream = myPort.serialize(writeDataStream)
+        objs = port.getObjs('pho#workspace#port')
+        self.assertIn('images', objs)
+        self.assertIn('dicom', objs)
+        self.assertIn('pointcloud', objs)
 
-        readDataStream = QtCore.QDataStream(itemData, QtCore.QIODevice.ReadOnly)
-        passedPort = WorkspaceStepPort()
-        retPort = WorkspaceStepPort.deserialize(passedPort, readDataStream)
-        self.assertIn('somesubj', retPort.subj)
-        self.assertIn('somepred', retPort.pred)
-        self.assertIn('someobj', retPort.obj)
-        self.assertIn('anothersubj', retPort.subj)
 
     def testStepConnection(self):
         from workspace.WorkspaceStep import WorkspaceStep

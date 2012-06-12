@@ -18,7 +18,6 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
 import sys
-from PyQt4 import QtGui
 from workspace.MountPoint import WorkspaceStepMountPoint
 
 class WorkspaceStepPort(object):
@@ -30,44 +29,35 @@ class WorkspaceStepPort(object):
         self.pred = {}
         self.obj = {}
 
-    def serialize(self, stream):
-        keyCount = len(self.subj)
-        stream.writeUInt32(keyCount)
-        for key in self.subj:
-            triple = self.subj[key]
-            for mem in triple:
-                name = bytearray(mem, sys.stdout.encoding)
-                stream.writeUInt32(len(name))
-                stream.writeRawData(name)
-
-        return stream
-
-    @staticmethod
-    def deserialize(newStepPort, stream):
-        keyCount = stream.readUInt32()
-        for _ in range(keyCount):
-            subjLen = stream.readUInt32()
-            subj = stream.readRawData(subjLen).decode(sys.stdout.encoding)
-            predLen = stream.readUInt32()
-            pred = stream.readRawData(predLen).decode(sys.stdout.encoding)
-            objLen = stream.readUInt32()
-            obj = stream.readRawData(objLen).decode(sys.stdout.encoding)
-            newStepPort.addProperty((subj, pred, obj))
-
-        return newStepPort
-
     def addProperty(self, rdftriple):
-        self.subj[rdftriple[0]] = rdftriple
-        self.pred[rdftriple[1]] = rdftriple
-        self.obj[rdftriple[2]] = rdftriple
+        if rdftriple[0] in self.subj:
+            self.subj[rdftriple[0]].append(rdftriple)
+        else:
+            self.subj[rdftriple[0]] = [rdftriple]
+
+        if rdftriple[1] in self.pred:
+            self.pred[rdftriple[1]].append(rdftriple)
+        else:
+            self.pred[rdftriple[1]] = [rdftriple]
+
+        if rdftriple[2] in self.obj:
+            self.obj[rdftriple[2]].append(rdftriple)
+        else:
+            self.obj[rdftriple[2]] = [rdftriple]
+
+    def getObjs(self, subj):
+        return [triple[2] for triple in self.subj[subj]]
 
     def canConnect(self, other):
         if 'pho#workspace#port' in self.subj and 'pho#workspace#port' in other.subj:
-            mine = self.subj['pho#workspace#port']
-            thiers = other.subj['pho#workspace#port']
-            if mine[1] == 'provides' and thiers[1] == 'uses':
-                if mine[2] == thiers[2]:
-                    return True
+            myPorts = self.subj['pho#workspace#port']
+            thierPorts = other.subj['pho#workspace#port']
+            mineProvides = [triple for triple in myPorts if 'provides' == triple[1]]
+            thiersUses = [triple for triple in thierPorts if 'uses' == triple[1]]
+            for mine in mineProvides:
+                for thiers in thiersUses:
+                    if mine[2] == thiers[2]:
+                        return True
 
         return False
 
@@ -91,40 +81,6 @@ class WorkspaceStep(WorkspaceStepMountPoint):
 
     def isConfigured(self):
         return self.configured
-
-
-#    def serialize(self, stream):
-#        name = bytearray(self.name, sys.stdout.encoding)
-#        stream.writeUInt32(len(name))
-#        stream.writeRawData(name)
-#
-#        portLen = len(self.ports)
-#        stream.writeUInt32(portLen)
-#        for port in self.ports:
-#            stream = port.serialize(stream)
-#
-#        stream << self.pixmap
-
-#        return stream
-
-#    @staticmethod
-#    def deserialize(newStep, stream):
-#        # Clear any legacy information that needs to be removed
-#        newStep.name = 'empty'
-#        newStep.ports = []
-#        newStep.pixmap = QtGui.QPixmap()
-#        nameLen = stream.readUInt32()
-#        newStep.name = stream.readRawData(nameLen).decode(sys.stdout.encoding)
-#
-#        portLen = stream.readUInt32()
-#        for _ in range(portLen):
-#            newStepPort = WorkspaceStepPort()
-#            port = WorkspaceStepPort.deserialize(newStepPort, stream)
-#            newStep.ports.append(port)
-#
-#        stream >> newStep.pixmap
-#
-#        return newStep
 
     def addPort(self, triple):
         port = WorkspaceStepPort()
