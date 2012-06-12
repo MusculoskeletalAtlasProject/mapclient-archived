@@ -1,5 +1,7 @@
 <RCC>
   <qresource prefix="/workspace/" >
     <file>images/cross.jpg</file>
+    <file>images/configure_red.png</file>
+    <file>images/configure_green.png</file>
   </qresource>
 </RCC>

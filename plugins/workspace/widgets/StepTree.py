@@ -17,7 +17,7 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     You should have received a copy of the GNU General Public License
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
-
+import sys
 from PyQt4 import QtCore, QtGui
 
 class StepTree(QtGui.QTreeWidget):
@@ -82,7 +82,12 @@ class StepTree(QtGui.QTreeWidget):
         pixmap = pixmap.scaled(64, 64, aspectRatioMode=QtCore.Qt.KeepAspectRatio, transformMode=QtCore.Qt.FastTransformation)
         hotspot = QtCore.QPoint(pixmap.width() / 2, pixmap.height() / 2)
 
-        dataStream = step.serialize(dataStream)
+        name = bytearray(step.name, sys.stdout.encoding)
+        dataStream.writeUInt32(len(name))
+        dataStream.writeRawData(name)
+
+#        dataStream = step.serialize(dataStream)
+#        dataStream << pixmap
         dataStream << hotspot
 
         mimeData = QtCore.QMimeData()

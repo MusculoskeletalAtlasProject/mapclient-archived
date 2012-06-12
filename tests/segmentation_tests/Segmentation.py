@@ -18,7 +18,7 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
 import unittest
-from PyQt4 import QtGui, QtCore
+from PyQt4 import QtGui#, QtCore
 
 class SegmentationTestCase(unittest.TestCase):
 
@@ -31,25 +31,25 @@ class SegmentationTestCase(unittest.TestCase):
         self.assertEqual(myStep.name, 'segmentation')
         app.argc() # eclipse warning killer
 
-    def testSerialisation(self):
-        import sys
-        app = QtGui.QApplication(sys.argv)
-        from segmentation.SegmentationStep import Step
-        from workspace.WorkspaceStep import WorkspaceStep
-        myStep = Step()
-
-        itemData = QtCore.QByteArray()
-        writeDataStream = QtCore.QDataStream(itemData, QtCore.QIODevice.WriteOnly)
-
-        writeDataStream = myStep.serialize(writeDataStream)
-
-        readDataStream = QtCore.QDataStream(itemData, QtCore.QIODevice.ReadOnly)
-        passedStep = WorkspaceStep()
-        retStep = Step.deserialize(passedStep, readDataStream)
-        self.assertEqual(retStep.name, 'segmentation')
-        self.assertNotEqual(retStep.pixmap, None)
-        self.assertEqual(len(retStep.ports), 2)
-        app.argc() # eclipse warning killer
+#    def testSerialisation(self):
+#        import sys
+#        app = QtGui.QApplication(sys.argv)
+#        from segmentation.SegmentationStep import Step
+#        from workspace.WorkspaceStep import WorkspaceStep
+#        myStep = Step()
+#
+#        itemData = QtCore.QByteArray()
+#        writeDataStream = QtCore.QDataStream(itemData, QtCore.QIODevice.WriteOnly)
+#
+#        writeDataStream = myStep.serialize(writeDataStream)
+#
+#        readDataStream = QtCore.QDataStream(itemData, QtCore.QIODevice.ReadOnly)
+#        passedStep = WorkspaceStep()
+#        retStep = Step.deserialize(passedStep, readDataStream)
+#        self.assertEqual(retStep.name, 'segmentation')
+#        self.assertNotEqual(retStep.pixmap, None)
+#        self.assertEqual(len(retStep.ports), 2)
+#        app.argc() # eclipse warning killer
 
 
 if __name__ == "__main__":

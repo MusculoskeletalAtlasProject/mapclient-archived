@@ -131,6 +131,15 @@ class WorkspaceTestCase(unittest.TestCase):
 
         self.assertEqual(step1.canConnect(step2), True)
 
+    def testWorkspaceStepFactory(self):
+        import sys
+        from PyQt4 import QtGui
+        app = QtGui.QApplication(sys.argv)
+        from workspace.WorkspaceStep import WorkspaceStepFactory
+        self.assertRaises(ValueError, WorkspaceStepFactory, ('james'))
+        self.assertEqual(WorkspaceStepFactory('segmentation').name, 'segmentation')
+        app.argc()
+
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testNew']

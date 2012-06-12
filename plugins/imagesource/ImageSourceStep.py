@@ -38,15 +38,6 @@ class ImageSourceStep(WorkspaceStep):
         self.pixmap = QtGui.QPixmap(':/imagesource/icons/landscapeimages.png')
         self.addPort(('pho#workspace#port', 'provides', 'images'))
 
-
-#    def serialize(self, stream):
-#        stream = super(ImageSourceStep, self).serialize(stream)
-#
-#        return stream
-#
-#    @staticmethod
-#    def deserialize(newStep, stream):
-#        super(ImageSourceStep, newStep).deserialize(newStep, stream)
-#
-#        return newStep
+    def configure(self):
+        print('configure image source step')
 

@@ -35,14 +35,6 @@ class Step(WorkspaceStep):
         self.addPort(('pho#workspace#port', 'uses', 'images'))
         self.addPort(('pho#workspace#port', 'provides', 'pointcloud'))
 
-#    def serialize(self, stream):
-#        stream = super(Step, self).serialize(stream)
-#
-#        return stream
-#
-#    @staticmethod
-#    def deserialize(newStep, stream):
-#        super(Step, newStep).deserialize(newStep, stream)
-#
-#        return newStep
+    def configure(self):
+        print('configure the segmentation step')
 

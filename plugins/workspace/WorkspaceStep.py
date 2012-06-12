@@ -84,39 +84,47 @@ class WorkspaceStep(WorkspaceStepMountPoint):
         self.name = 'empty'
         self.ports = []
         self.pixmap = None
+        self.configured = False
 
-    def serialize(self, stream):
-        name = bytearray(self.name, sys.stdout.encoding)
-        stream.writeUInt32(len(name))
-        stream.writeRawData(name)
+    def configure(self):
+        raise NotImplementedError
 
-        portLen = len(self.ports)
-        stream.writeUInt32(portLen)
-        for port in self.ports:
-            stream = port.serialize(stream)
+    def isConfigured(self):
+        return self.configured
 
-        stream << self.pixmap
 
-        return stream
+#    def serialize(self, stream):
+#        name = bytearray(self.name, sys.stdout.encoding)
+#        stream.writeUInt32(len(name))
+#        stream.writeRawData(name)
+#
+#        portLen = len(self.ports)
+#        stream.writeUInt32(portLen)
+#        for port in self.ports:
+#            stream = port.serialize(stream)
+#
+#        stream << self.pixmap
 
-    @staticmethod
-    def deserialize(newStep, stream):
-        # Clear any legacy information that needs to be removed
-        newStep.name = 'empty'
-        newStep.ports = []
-        newStep.pixmap = QtGui.QPixmap()
-        nameLen = stream.readUInt32()
-        newStep.name = stream.readRawData(nameLen).decode(sys.stdout.encoding)
+#        return stream
 
-        portLen = stream.readUInt32()
-        for _ in range(portLen):
-            newStepPort = WorkspaceStepPort()
-            port = WorkspaceStepPort.deserialize(newStepPort, stream)
-            newStep.ports.append(port)
-
-        stream >> newStep.pixmap
-
-        return newStep
+#    @staticmethod
+#    def deserialize(newStep, stream):
+#        # Clear any legacy information that needs to be removed
+#        newStep.name = 'empty'
+#        newStep.ports = []
+#        newStep.pixmap = QtGui.QPixmap()
+#        nameLen = stream.readUInt32()
+#        newStep.name = stream.readRawData(nameLen).decode(sys.stdout.encoding)
+#
+#        portLen = stream.readUInt32()
+#        for _ in range(portLen):
+#            newStepPort = WorkspaceStepPort()
+#            port = WorkspaceStepPort.deserialize(newStepPort, stream)
+#            newStep.ports.append(port)
+#
+#        stream >> newStep.pixmap
+#
+#        return newStep
 
     def addPort(self, triple):
         port = WorkspaceStepPort()
@@ -132,4 +140,9 @@ class WorkspaceStep(WorkspaceStepMountPoint):
 
         return False
 
+def WorkspaceStepFactory(step_name):
+    for step in WorkspaceStepMountPoint.getPlugins():
+        if step_name == step.name:
+            return step
 
+    raise ValueError

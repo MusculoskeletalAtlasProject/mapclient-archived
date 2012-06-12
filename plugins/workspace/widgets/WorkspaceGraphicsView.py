@@ -17,9 +17,9 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     You should have received a copy of the GNU General Public License
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
-import weakref, math
+import weakref, math, sys
 from PyQt4 import QtCore, QtGui
-from workspace.WorkspaceStep import WorkspaceStep
+from workspace.WorkspaceStep import WorkspaceStepFactory
 
 class ErrorItem(QtGui.QGraphicsItem):
 
@@ -166,6 +166,7 @@ class Node(QtGui.QGraphicsItem):
 
         self.step = step
         self.pixmap = step.pixmap.scaled(64, 64, aspectRatioMode=QtCore.Qt.KeepAspectRatio, transformMode=QtCore.Qt.FastTransformation)
+        self.configure_red = QtGui.QPixmap(':/workspace/images/configure_red.png').scaled(24, 24, aspectRatioMode=QtCore.Qt.KeepAspectRatio, transformMode=QtCore.Qt.FastTransformation)
         self.graph = weakref.ref(workspaceGraphicsView)
         self.edgeList = []
         self.newPos = QtCore.QPointF()
@@ -174,6 +175,12 @@ class Node(QtGui.QGraphicsItem):
         self.setCacheMode(self.DeviceCoordinateCache)
         self.setZValue(-1)
         self.selected = False
+        self.configured = False
+
+        self.configureMenu = QtGui.QMenu(self.graph())
+        configureAction = QtGui.QAction('Configure', self.configureMenu)
+        configureAction.triggered.connect(self.step.configure)
+        self.configureMenu.addAction(configureAction)
 
     def type(self):
         return Node.Type
@@ -183,6 +190,10 @@ class Node(QtGui.QGraphicsItem):
         self.update()
 
     def _removeDeadwood(self):
+        '''
+        Unfortunately the weakref doesn't work correctly for c based classes.  This function 
+        removes any None type references in edgeList.
+        '''
         prunedEdgeList = [ edge for edge in self.edgeList if edge() ]
         self.edgeList = prunedEdgeList
 
@@ -210,6 +221,8 @@ class Node(QtGui.QGraphicsItem):
                 painter.drawRoundedRect(self.boundingRect(), 5, 5)
 
             painter.drawPixmap(0, 0, self.pixmap)
+            if not self.configured:
+                painter.drawPixmap(40, 40, self.configure_red)
 
     def itemChange(self, change, value):
 
@@ -220,27 +233,38 @@ class Node(QtGui.QGraphicsItem):
 
         return QtGui.QGraphicsItem.itemChange(self, change, value)
 
+    def contextMenuEvent(self, event):
+        self.configureMenu.exec_(event.screenPos())
+
     def mousePressEvent(self, event):
         self.update()
-        modifiers = QtGui.QApplication.keyboardModifiers()
-        if modifiers == QtCore.Qt.ControlModifier:
+        buttons = event.buttons()
+        if buttons == QtCore.Qt.RightButton:
             pass
         else:
-            self.graph().clearSelection()
+            modifiers = QtGui.QApplication.keyboardModifiers()
+            if modifiers == QtCore.Qt.ControlModifier:
+                pass
+            else:
+                self.graph().clearSelection()
 
         QtGui.QGraphicsItem.mousePressEvent(self, event)
 
     def mouseReleaseEvent(self, event):
         self.update()
         QtGui.QGraphicsItem.mouseReleaseEvent(self, event)
-        modifiers = QtGui.QApplication.keyboardModifiers()
-        if modifiers == QtCore.Qt.ControlModifier:
-            self.selected = not self.selected
-            self.graph().nodeSelected(self, self.selected)
+        buttons = event.buttons()
+        if buttons == QtCore.Qt.RightButton:
+            pass
         else:
-            self.graph().clearSelection()
-            self.selected = True
-            self.graph().nodeSelected(self, self.selected)
+            modifiers = QtGui.QApplication.keyboardModifiers()
+            if modifiers == QtCore.Qt.ControlModifier:
+                self.selected = not self.selected
+                self.graph().nodeSelected(self, self.selected)
+            else:
+                self.graph().clearSelection()
+                self.selected = True
+                self.graph().nodeSelected(self, self.selected)
 
 class WorkspaceGraphicsView(QtGui.QGraphicsView):
 
@@ -253,7 +277,7 @@ class WorkspaceGraphicsView(QtGui.QGraphicsView):
         self.errorIconTimer.timeout.connect(self.errorIconTimeout)
         self.errorIcon = None
 
-        sceneWidth = 800
+        sceneWidth = 500
         sceneHeight = 1.618 * sceneWidth
         scene = QtGui.QGraphicsScene(self)
         scene.setSceneRect(-sceneHeight // 2, -sceneWidth // 2, sceneHeight, sceneWidth)
@@ -330,10 +354,13 @@ class WorkspaceGraphicsView(QtGui.QGraphicsView):
         if event.mimeData().hasFormat("image/x-workspace-step"):
             pieceData = event.mimeData().data("image/x-workspace-step")
             stream = QtCore.QDataStream(pieceData, QtCore.QIODevice.ReadOnly)
-            newStep = WorkspaceStep()
+#            newStep = WorkspaceStep()
             hotspot = QtCore.QPoint()
 
-            step = WorkspaceStep.deserialize(newStep, stream)
+#            step = WorkspaceStep.deserialize(newStep, stream)
+            nameLen = stream.readUInt32()
+            name = stream.readRawData(nameLen).decode(sys.stdout.encoding)
+            step = WorkspaceStepFactory(name)
             stream >> hotspot
 
             node = Node(step, self)
