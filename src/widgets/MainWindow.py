@@ -23,7 +23,8 @@ from PyQt4.QtGui import QMainWindow, QMenu, QKeySequence
 from PyQt4.QtCore import QSettings, QSize, QPoint
 
 from widgets.MainWindowUi import Ui_MainWindow
-from core.PluginFramework import MenuOption
+from core.PluginFramework import MenuOption, StackedWidgetMountPoint
+from PyQt4.uic.Compiler.qtproxies import QtCore
 
 class MainWindow(QMainWindow):
     '''
@@ -38,45 +39,54 @@ class MainWindow(QMainWindow):
 
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
-#        stackedWidget = QtGui.QStackedWidget(self)
-#        stackedWidget.setObjectName('stackedWidget')
-#        self.setCentralWidget(stackedWidget)
         self._makeConnections()
         self._readSettings()
 
-        self.menuPlugins = MenuOption.getPlugins()
-        for plugin in self.menuPlugins:
-            plugin.parent = self
-            pluginAction = QtGui.QAction(plugin.actionLabel, plugin)
-            pluginAction.triggered.connect(plugin.execute)
-            pluginAction.setObjectName(plugin.actionLabel)
-            pluginAction.setShortcut(QKeySequence(plugin.shortcut))
-            pluginAction.setStatusTip(plugin.statustip)
-            if len(plugin.actionLabel) == 0:
-                pluginAction.setSeparator(True)
+        for stackedWidgetPage in StackedWidgetMountPoint.getPlugins(self):
+            if not hasattr(self, stackedWidgetPage.name):
+                setattr(self, stackedWidgetPage.name, stackedWidgetPage)
+                stackedWidget = self.centralWidget().findChild(QtGui.QStackedWidget, 'stackedWidget')
+                stackedWidgetPage.widgetIndex = stackedWidget.addWidget(stackedWidgetPage.getWidget(stackedWidget))
+#            stackedWidgetPage.widgetIndex = index
+#            index = stackedWidget.addWidget(WorkspaceWidget(stackedWidget))
+#            mainWindow.workspaceManager.widgetIndex = index
 
-            pluginMenu = self.ui.menubar.findChild(QtGui.QMenu, plugin.menuName)
-            if not pluginMenu:
-                menu = QMenu(plugin.menuLabel, self.ui.menubar)
-                menu.setObjectName(plugin.menuName)
-                self.ui.menubar.insertMenu(self.ui.menubar.actions()[-1], menu)
-                pluginMenu = menu
-
-            if plugin.subMenuLabel:
-                menu = pluginMenu.findChild(QtGui.QMenu, name=plugin.subMenuName)
-                if not menu:
-                    menu = QMenu(plugin.subMenuLabel, pluginMenu)
-                    menu.setObjectName(plugin.subMenuName)
-                    firstAction = pluginMenu.actions()[0]
-                    pluginMenu.insertMenu(firstAction, menu)
-
-                pluginMenu = menu
-
-            if len(pluginMenu.actions()) > 0:
-                firstAction = pluginMenu.actions()[0]
-                pluginMenu.insertAction(firstAction, pluginAction)
-            else:
-                pluginMenu.addAction(pluginAction)
+#        self.menuPlugins = MenuOption.getPlugins()
+#        for plugin in self.menuPlugins:
+#            plugin.parent = self
+#            pluginAction = None
+#            if hasattr(plugin, 'actionLabel'):
+#                pluginAction = QtGui.QAction(plugin.actionLabel, plugin)
+#                pluginAction.triggered.connect(plugin.execute)
+#                pluginAction.setObjectName(plugin.actionLabel)
+#                pluginAction.setShortcut(QKeySequence(plugin.shortcut))
+#                pluginAction.setStatusTip(plugin.statustip)
+#                if len(plugin.actionLabel) == 0:
+#                    pluginAction.setSeparator(True)
+#
+#            pluginMenu = self.ui.menubar.findChild(QtGui.QMenu, plugin.menuName)
+#            if not pluginMenu:
+#                menu = QMenu(plugin.menuLabel, self.ui.menubar)
+#                menu.setObjectName(plugin.menuName)
+#                self.ui.menubar.insertMenu(self.ui.menubar.actions()[-1], menu)
+#                pluginMenu = menu
+#
+#            if plugin.subMenuLabel:
+#                menu = pluginMenu.findChild(QtGui.QMenu, name=plugin.subMenuName)
+#                if not menu:
+#                    menu = QMenu(plugin.subMenuLabel, pluginMenu)
+#                    menu.setObjectName(plugin.subMenuName)
+#                    firstAction = pluginMenu.actions()[0]
+#                    pluginMenu.insertMenu(firstAction, menu)
+#
+#                pluginMenu = menu
+#
+#            firstAction = QtGui.QAction(self)
+#            if len(pluginMenu.actions()) > 0:
+#                firstAction = pluginMenu.actions()[0]
+#
+#            if pluginAction:
+#                pluginMenu.insertAction(firstAction, pluginAction)
 
     def _writeSettings(self):
         settings = QSettings()

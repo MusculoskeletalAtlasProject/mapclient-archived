@@ -25,6 +25,19 @@ from workspace.Workspace import Manager, getWorkspaceManagerCreateIfNecessary
 # Placed in reverse order so that when the menu options are inserted before any 
 # other action the desired order is achieved.
 
+class WorkspaceEditMenu(PluginFramework.MenuOption):
+    '''
+    '''
+    def __init__(self):
+        QtCore.QObject.__init__(self)
+        self.parent = None
+        self.menuLabel = '&Edit'
+        self.menuName = 'menu_Edit'
+#        self.actionLabel
+
+    def execute(self):
+        pass
+
 class WorkspaceViewMenu(PluginFramework.MenuOption):
     '''
     '''
@@ -40,19 +53,6 @@ class WorkspaceViewMenu(PluginFramework.MenuOption):
     def execute(self):
         pass
 #        self.parent.setCentralWidget(WorkspaceWidget(self.parent))
-
-class WorkspaceEditMenu(PluginFramework.MenuOption):
-    '''
-    '''
-    def __init__(self):
-        QtCore.QObject.__init__(self)
-        self.parent = None
-        self.menuLabel = '&Edit'
-        self.menuName = 'menu_Edit'
-#        self.actionLabel
-
-    def execute(self):
-        pass
 
 class WorkspaceCloseMenu(PluginFramework.MenuOption):
     '''

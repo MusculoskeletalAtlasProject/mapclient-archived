@@ -20,6 +20,7 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
 import os
 from PyQt4 import QtCore, QtGui
 from settings import Info
+from core import PluginFramework
 from workspace.widgets.WorkspaceWidget import WorkspaceWidget
 
 def workspaceConfigurationExists(location):
@@ -44,27 +45,110 @@ class Workspace(object):
         self.version = version
 
 def getWorkspaceManagerCreateIfNecessary(mainWindow):
-    if not hasattr(mainWindow, 'workspaceManager'):
-        setattr(mainWindow, 'workspaceManager', Manager())
-        stackedWidget = mainWindow.centralWidget().findChild(QtGui.QStackedWidget, 'stackedWidget')
-        index = stackedWidget.addWidget(WorkspaceWidget(stackedWidget))
-        mainWindow.workspaceManager.widgetIndex = index
+#    if not hasattr(mainWindow, 'workspaceManager'):
+#        setattr(mainWindow, 'workspaceManager', Manager(mainWindow))
+#        stackedWidget = mainWindow.centralWidget().findChild(QtGui.QStackedWidget, 'stackedWidget')
+#        index = stackedWidget.addWidget(WorkspaceWidget(stackedWidget))
+#        mainWindow.workspaceManager.widgetIndex = index
 
     return mainWindow.workspaceManager
 
-class Manager(object):
+
+class UndoManager(object):
+    '''
+    This class is the undo redo manager for multiple undo stacks. It is a
+    singleton class. 
+    
+    Don't inherit from this class.
+    '''
+    _instance = None
+    undoAction = None
+    redoAction = None
+    stack = None
+
+    def __new__(cls, *args, **kwargs):
+        if not cls._instance:
+            cls._instance = super(UndoManager, cls).__new__(
+                                cls, *args, **kwargs)
+        return cls._instance
+
+    def createUndoAction(self, parent):
+        self.undoAction = QtGui.QAction('Undo', parent)
+        self.undoAction.triggered.connect(self.undo)
+        if self.stack:
+            self.undoAction.setEnabled(self.stack.canUndo())
+        else:
+            self.undoAction.setEnabled(False)
+
+        return self.undoAction
+
+    def createRedoAction(self, parent):
+        self.redoAction = QtGui.QAction('Redo', parent)
+        self.redoAction.triggered.connect(self.redo)
+        if self.stack:
+            self.redoAction.setEnabled(self.stack.canRedo())
+        else:
+            self.redoAction.setEnabled(False)
+
+        return self.redoAction
+
+    def setCurrentStack(self, stack):
+        if self.stack:
+            self.stack.canRedoChanged.disconnect(self._canRedoChanged)
+            self.stack.canUndoChanged.disconnect(self._canUndoChanged)
+
+        self.stack = stack
+        self.redoAction.setEnabled(stack.canRedo())
+        self.undoAction.setEnabled(stack.canUndo())
+        stack.canUndoChanged.connect(self._canUndoChanged)
+        stack.canRedoChanged.connect(self._canRedoChanged)
+
+    def currentStack(self):
+        return self.stack
+
+    def undo(self):
+        self.stack.undo()
+
+    def redo(self):
+        self.stack.redo()
+
+    def _canRedoChanged(self, canRedo):
+        self.redoAction.setEnabled(canRedo)
+
+    def _canUndoChanged(self, canUndo):
+        self.undoAction.setEnabled(canUndo)
+
+
+class Manager(PluginFramework.StackedWidgetMountPoint):
     '''
     This class managers the workspace.
     '''
-    location = None
-    widgetIndex = -1
 
-    def __init__(self):
+    def __init__(self, mainWindow):
         '''
         Constructor
         '''
-        pass
+        self.name = 'workspaceManager'
+        self.widget = None
+        self.widgetIndex = -1
+        self.mainWindow = mainWindow
+        self.undoManager = UndoManager()
 
+        undoAction = self.undoManager.createUndoAction(mainWindow)
+        undoAction.setShortcut(QtGui.QKeySequence('Ctrl+Z'))
+        redoAction = self.undoManager.createRedoAction(mainWindow)
+        redoAction.setShortcut(QtGui.QKeySequence('Ctrl+Shift+Z'))
+
+        editMenu = mainWindow.findChild(QtGui.QMenu, 'menu_Edit')
+#        editMenu.addAction(undoAction)
+#        editMenu.addAction(redoAction)
+
+
+    def getWidget(self, parent):
+        if not self.widget:
+            self.widget = WorkspaceWidget(parent)
+
+        return self.widget
 
     def new(self, location):
         '''

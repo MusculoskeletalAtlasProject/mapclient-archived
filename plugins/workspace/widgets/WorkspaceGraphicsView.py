@@ -73,6 +73,21 @@ class ErrorItem(QtGui.QGraphicsItem):
 
         painter.drawPixmap(midPoint.x() - 8, midPoint.y() - 8, self.pixmap)
 
+class CommandAddEdge(QtGui.QUndoCommand):
+    '''
+    '''
+    def __init__(self, scene, edge):
+        super(CommandAddEdge, self).__init__()
+        self.scene = scene
+        self.edge = edge
+
+    def redo(self):
+        self.scene.addItem(self.edge)
+
+    def undo(self):
+        self.scene.removeItem(self.edge)
+
+
 class Edge(QtGui.QGraphicsItem):
     Pi = math.pi
     TwoPi = 2.0 * Pi
@@ -307,7 +322,10 @@ class WorkspaceGraphicsView(QtGui.QGraphicsView):
         # Check if nodes are already connected
         if not node1.hasEdgeToDestination(node2):
             if node1.step.canConnect(node2.step):
-                self.scene().addItem(Edge(node1, node2))
+                edge = Edge(node1, node2)
+                command = CommandAddEdge(self.scene(), edge)
+                self.undoStack.push(command)
+#                self.scene().addItem(Edge(node1, node2))
             else:
                 # add temporary line ???
                 self.errorIcon = ErrorItem(node1, node2)
