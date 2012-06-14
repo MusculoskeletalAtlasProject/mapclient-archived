@@ -18,15 +18,13 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
 
-from PyQt4 import QtGui
-from PyQt4.QtGui import QMainWindow, QMenu, QKeySequence
-from PyQt4.QtCore import QSettings, QSize, QPoint
+from PyQt4 import QtCore, QtGui
 
 from widgets.MainWindowUi import Ui_MainWindow
-from core.PluginFramework import MenuOption, StackedWidgetMountPoint
-from PyQt4.uic.Compiler.qtproxies import QtCore
+from core.PluginFramework import StackedWidgetMountPoint
+from core.UndoManager import UndoManager
 
-class MainWindow(QMainWindow):
+class MainWindow(QtGui.QMainWindow):
     '''
     This is the main window for the MAP Client.
     '''
@@ -35,12 +33,23 @@ class MainWindow(QMainWindow):
         '''
         Constructor
         '''
-        QMainWindow.__init__(self)
+        QtGui.QMainWindow.__init__(self)
 
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
         self._makeConnections()
         self._readSettings()
+        self.undoManager = UndoManager()
+
+#        undoManager = self.mainWindow.workspaceManager.undoManager
+        undoAction = self.undoManager.createUndoAction(self.ui.menu_Edit)
+        undoAction.setShortcut(QtGui.QKeySequence('Ctrl+Z'))
+        redoAction = self.undoManager.createRedoAction(self.ui.menu_Edit)
+        redoAction.setShortcut(QtGui.QKeySequence('Ctrl+Shift+Z'))
+
+        self.ui.menu_Edit.addAction(undoAction)
+        self.ui.menu_Edit.addAction(redoAction)
+
         self.ui.stackedWidget.currentChanged.connect(self.centralWidgetChanged)
 
         for stackedWidgetPage in StackedWidgetMountPoint.getPlugins(self):
@@ -49,22 +58,25 @@ class MainWindow(QMainWindow):
                 stackedWidgetPage.setWidgetIndex(self.ui.stackedWidget.addWidget(stackedWidgetPage.getWidget()))
 
     def _writeSettings(self):
-        settings = QSettings()
+        settings = QtCore.QSettings()
         settings.beginGroup('MainWindow')
         settings.setValue('size', self.size())
         settings.setValue('pos', self.pos())
         settings.endGroup()
 
     def _readSettings(self):
-        settings = QSettings()
+        settings = QtCore.QSettings()
         settings.beginGroup('MainWindow')
-        self.resize(settings.value('size', QSize(600, 400)))
-        self.move(settings.value('pos', QPoint(100, 100)))
+        self.resize(settings.value('size', QtCore.QSize(600, 400)))
+        self.move(settings.value('pos', QtCore.QPoint(100, 100)))
         settings.endGroup()
 
     def _makeConnections(self):
         self.ui.action_Quit.triggered.connect(self.quitApplication)
         self.ui.action_About.triggered.connect(self.about)
+
+    def setUndoStack(self, stack):
+        self.undoManager.setCurrentStack(stack)
 
     def centralWidgetChanged(self, index):
         widget = self.ui.stackedWidget.currentWidget()

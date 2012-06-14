@@ -51,8 +51,7 @@ class WorkspaceWidget(QtGui.QWidget):
 
 
     def setActive(self):
-        self.mainWindow.workspaceManager.setUndoStack(self.ui.graphicsView.undoStack)
-#        print(self.ui.graphicsView.undoStack)
+        self.mainWindow.setUndoStack(self.ui.graphicsView.undoStack)
 
     def _setActionProperties(self, action, name, slot, shortcut='', statustip=''):
         action.setObjectName(name)
@@ -84,7 +83,6 @@ class WorkspaceWidget(QtGui.QWidget):
     def _createMenuItems(self):
         menu_File = self.mainWindow.ui.menubar.findChild(QtGui.QMenu, 'menu_File')
         lastFileMenuAction = menu_File.actions()[-1]
-        lastMenuBarAction = self.mainWindow.ui.menubar.actions()[-1]
         menu_New = menu_File.findChild(QtGui.QMenu, name='&New')
         if not menu_New:
             menu_New = QtGui.QMenu('&New', menu_File)
@@ -102,23 +100,4 @@ class WorkspaceWidget(QtGui.QWidget):
         menu_File.insertSeparator(lastFileMenuAction)
         menu_File.insertAction(lastFileMenuAction, self.action_Close)
         menu_File.insertSeparator(lastFileMenuAction)
-
-        menu_Edit = self.mainWindow.ui.menubar.findChild(QtGui.QMenu, 'menu_Edit')
-        if not menu_Edit:
-            menu_Edit = QtGui.QMenu('&Edit', self.mainWindow.ui.menubar)
-            menu_Edit.setObjectName('menu_Edit')
-
-        self.mainWindow.ui.menubar.insertMenu(lastMenuBarAction, menu_Edit)
-        undoManager = self.mainWindow.workspaceManager.undoManager
-        undoAction = undoManager.createUndoAction(menu_Edit)
-        undoAction.setShortcut(QtGui.QKeySequence('Ctrl+Z'))
-        redoAction = undoManager.createRedoAction(menu_Edit)
-        redoAction.setShortcut(QtGui.QKeySequence('Ctrl+Shift+Z'))
-
-        editMenuActions = menu_Edit.actions()
-        lastEditMenuAction = QtGui.QAction(self)
-        if len(editMenuActions) > 0:
-            lastEditMenuAction = editMenuActions[-1]
-        menu_Edit.insertAction(lastEditMenuAction, undoAction)
-        menu_Edit.insertAction(lastEditMenuAction, redoAction)
 
