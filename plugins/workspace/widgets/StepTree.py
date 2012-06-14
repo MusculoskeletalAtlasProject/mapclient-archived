@@ -29,16 +29,10 @@ class StepTree(QtGui.QTreeWidget):
         size = QtCore.QSize(self.stepIconSize, self.stepIconSize)
         self.setIconSize(size)
         self.setColumnCount(1)
-#        self.setHeaderLabel('Steps')
         self.setHeaderHidden(True)
         self.setIndentation(0)
 
         self.setMinimumWidth(250)
-#        self.itemClicked.connect(self.expand)
-#        mself.setSpacing(10)
-#        self.setViewMode(QtGui.QListWidget.IconMode)
-#        self.setAcceptDrops(False)
-#        self.setDropIndicatorShown(True)
 
     def findParentItem(self, category):
         parentItem = None

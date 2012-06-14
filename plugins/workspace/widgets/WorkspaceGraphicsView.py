@@ -368,6 +368,12 @@ class WorkspaceGraphicsView(QtGui.QGraphicsView):
         gradient = QtGui.QLinearGradient(sceneRect.topLeft(), sceneRect.bottomRight())
         gradient.setColorAt(0, QtGui.QColor('aliceblue'))
         gradient.setColorAt(1, QtGui.QColor('lightskyblue'))
+#        if self.isEnabled():
+#            gradient.setColorAt(0, QtGui.QColor('aliceblue'))
+#            gradient.setColorAt(1, QtGui.QColor('lightskyblue'))
+#        else:
+#            gradient.setColorAt(0, QtGui.QColor('lightgrey'))
+#            gradient.setColorAt(1, QtGui.QColor('darkgrey'))
         painter.fillRect(rect.intersect(sceneRect), QtGui.QBrush(gradient))
         painter.setBrush(QtCore.Qt.NoBrush)
         painter.drawRect(sceneRect)

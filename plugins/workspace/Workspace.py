@@ -131,24 +131,21 @@ class Manager(PluginFramework.StackedWidgetMountPoint):
         self.name = 'workspaceManager'
         self.widget = None
         self.widgetIndex = -1
+        self.location = None
         self.mainWindow = mainWindow
         self.undoManager = UndoManager()
 
-        undoAction = self.undoManager.createUndoAction(mainWindow)
-        undoAction.setShortcut(QtGui.QKeySequence('Ctrl+Z'))
-        redoAction = self.undoManager.createRedoAction(mainWindow)
-        redoAction.setShortcut(QtGui.QKeySequence('Ctrl+Shift+Z'))
+    def setWidgetIndex(self, index):
+        self.widgetIndex = index
 
-        editMenu = mainWindow.findChild(QtGui.QMenu, 'menu_Edit')
-#        editMenu.addAction(undoAction)
-#        editMenu.addAction(redoAction)
-
-
-    def getWidget(self, parent):
+    def getWidget(self):
         if not self.widget:
-            self.widget = WorkspaceWidget(parent)
+            self.widget = WorkspaceWidget(self.mainWindow)
 
         return self.widget
+
+    def setUndoStack(self, stack):
+        self.undoManager.setCurrentStack(stack)
 
     def new(self, location):
         '''
@@ -194,6 +191,9 @@ class Manager(PluginFramework.StackedWidgetMountPoint):
         Close the current workspace
         '''
         self.location = None
+
+    def isWorkspaceOpen(self):
+        return not self.location == None
 
 
 
