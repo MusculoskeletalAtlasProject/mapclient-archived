@@ -76,17 +76,51 @@ class ErrorItem(QtGui.QGraphicsItem):
 class CommandAddEdge(QtGui.QUndoCommand):
     '''
     '''
-    def __init__(self, scene, edge):
+    def __init__(self, scene, node1, node2):
         super(CommandAddEdge, self).__init__()
         self.scene = scene
-        self.edge = edge
+        self.node1 = node1
+        self.node2 = node2
+        self.edge = None
 
     def redo(self):
+        self.edge = Edge(self.node1, self.node2)
         self.scene.addItem(self.edge)
 
     def undo(self):
         self.scene.removeItem(self.edge)
+        del self.edge
 
+class CommandAddNode(QtGui.QUndoCommand):
+    '''
+    '''
+    def __init__(self, scene, node):
+        super(CommandAddNode, self).__init__()
+        self.scene = scene
+        self.node = node
+
+    def redo(self):
+        self.scene.addItem(self.node)
+
+    def undo(self):
+        self.scene.removeItem(self.node)
+
+class CommandNodeMove(QtGui.QUndoCommand):
+    '''
+    '''
+    def __init__(self, node, startPos, endPos):
+        super(CommandNodeMove, self).__init__()
+        self.node = node
+        self.startPos = startPos
+        self.endPos = endPos
+
+    def redo(self):
+        self.node.setPos(self.endPos)
+        self.node.update()
+
+    def undo(self):
+        self.node.setPos(self.startPos)
+        self.node.update()
 
 class Edge(QtGui.QGraphicsItem):
     Pi = math.pi
@@ -124,7 +158,6 @@ class Edge(QtGui.QGraphicsItem):
             return
 
         edgeOffset = QtCore.QPointF((line.dx() * 10) / length, (line.dy() * 10) / length)
-
         self.prepareGeometryChange()
         self.sourcePoint = line.p1() + edgeOffset
         self.destPoint = line.p2() - edgeOffset
@@ -205,6 +238,8 @@ class Node(QtGui.QGraphicsItem):
         return Node.Type
 
     def setSelected(self, state):
+        if self.selected != state:
+            print('selection change')
         self.selected = state
         self.update()
 
@@ -245,7 +280,30 @@ class Node(QtGui.QGraphicsItem):
 
     def itemChange(self, change, value):
 
-        if change == QtGui.QGraphicsItem.ItemPositionChange:
+        if change == QtGui.QGraphicsItem.ItemPositionChange and self.scene():
+            newPos = value
+            bRect = self.boundingRect()
+            xp1 = bRect.x() + newPos.x()
+            yp1 = bRect.y() + newPos.y()
+            xp2 = bRect.x() + bRect.width() + newPos.x()
+            yp2 = bRect.y() + bRect.height() + newPos.y()
+            bRect.setCoords(xp1, yp1, xp2, yp2)
+            rect = self.scene().sceneRect()
+            if not rect.contains(bRect):
+                x1 = max(bRect.left(), rect.left()) + 2.0 # plus bounding rectangle adjust
+                x2 = min(bRect.x() + bRect.width(), rect.x() + rect.width()) - bRect.width() + 2.0
+                y1 = max(bRect.top(), rect.top()) + 2.0 # plus bounding rectangle adjust
+                y2 = min(bRect.bottom(), rect.bottom()) - bRect.height() + 2.0
+                if newPos.x() != x1:
+                    newPos.setX(x1)
+                elif newPos.x() != x2:
+                    newPos.setX(x2)
+                if newPos.y() != y1:
+                    newPos.setY(y1)
+                elif newPos.y() != y2:
+                    newPos.setY(y2)
+                return newPos
+        elif change == QtGui.QGraphicsItem.ItemPositionHasChanged:
             self._removeDeadwood()
             for edge in self.edgeList:
                 edge().adjust()
@@ -253,37 +311,37 @@ class Node(QtGui.QGraphicsItem):
         return QtGui.QGraphicsItem.itemChange(self, change, value)
 
     def contextMenuEvent(self, event):
-        self.contextMenu.exec_(event.screenPos())
+        print('context event')
+        super(Node, self).contextMenuEvent(event)
+#        self.update()
+#        self.contextMenu.exec_(event.screenPos())
 
     def mousePressEvent(self, event):
-        self.update()
-        buttons = event.buttons()
-        if buttons == QtCore.Qt.RightButton:
+        QtGui.QGraphicsItem.mousePressEvent(self, event)
+        modifiers = QtGui.QApplication.keyboardModifiers()
+        if modifiers == QtCore.Qt.ControlModifier:
             pass
         else:
-            modifiers = QtGui.QApplication.keyboardModifiers()
-            if modifiers == QtCore.Qt.ControlModifier:
-                pass
-            else:
-                self.graph().clearSelection()
+            self.graph().clearSelection()
 
-        QtGui.QGraphicsItem.mousePressEvent(self, event)
+        self.eventStartPos = self.pos()
+        self.update()
 
     def mouseReleaseEvent(self, event):
-        self.update()
-        QtGui.QGraphicsItem.mouseReleaseEvent(self, event)
-        buttons = event.buttons()
-        if buttons == QtCore.Qt.RightButton:
-            pass
+#        self.update()
+        modifiers = QtGui.QApplication.keyboardModifiers()
+        if modifiers == QtCore.Qt.ControlModifier:
+            self.selected = not self.selected
+            self.graph().nodeSelected(self, self.selected)
         else:
-            modifiers = QtGui.QApplication.keyboardModifiers()
-            if modifiers == QtCore.Qt.ControlModifier:
-                self.selected = not self.selected
-                self.graph().nodeSelected(self, self.selected)
-            else:
-                self.graph().clearSelection()
-                self.selected = True
-                self.graph().nodeSelected(self, self.selected)
+            self.graph().clearSelection()
+            self.selected = True
+            self.graph().nodeSelected(self, self.selected)
+
+        if self.pos() != self.eventStartPos:
+            command = CommandNodeMove(self, self.eventStartPos, self.pos())
+            self.graph().undoStack.push(command)
+        QtGui.QGraphicsItem.mouseReleaseEvent(self, event)
 
 class WorkspaceGraphicsView(QtGui.QGraphicsView):
 
@@ -322,12 +380,14 @@ class WorkspaceGraphicsView(QtGui.QGraphicsView):
         # Check if nodes are already connected
         if not node1.hasEdgeToDestination(node2):
             if node1.step.canConnect(node2.step):
-                edge = Edge(node1, node2)
-                command = CommandAddEdge(self.scene(), edge)
+                command = CommandAddEdge(self.scene(), node1, node2)
                 self.undoStack.push(command)
-#                self.scene().addItem(Edge(node1, node2))
             else:
                 # add temporary line ???
+                if self.errorIconTimer.isActive():
+                    self.errorIconTimer.stop()
+                    self.errorIconTimeout()
+
                 self.errorIcon = ErrorItem(node1, node2)
                 self.scene().addItem(self.errorIcon)
                 self.errorIconTimer.start()
@@ -392,13 +452,14 @@ class WorkspaceGraphicsView(QtGui.QGraphicsView):
             step = WorkspaceStepFactory(name)
             stream >> hotspot
 
+            position = self.mapToScene(event.pos() - hotspot)
             node = Node(step, self)
-            node.setPos(self.mapToScene(event.pos() - hotspot))
-            self.scene().addItem(node)
-#            ic = self.scene().addPixmap(pixmap)
-#            ic.setFlag(QtGui.QGraphicsItem.ItemIsMovable)
-#            ic.setFlag(QtGui.QGraphicsItem.ItemSendsGeometryChanges)
-#            ic.setPos(self.mapToScene(event.pos() - hotspot))
+            node.setPos(position)
+            command = CommandAddNode(self.scene(), node)
+            self.undoStack.push(command)
+#            node = Node(step, self)
+#            node.setPos(self.mapToScene(event.pos() - hotspot))
+#            self.scene().addItem(node)
 
             event.setDropAction(QtCore.Qt.MoveAction);
             event.accept();
