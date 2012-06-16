@@ -18,135 +18,133 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
 
-from PyQt4 import QtCore, QtGui
-from core import PluginFramework
-from workspace.Workspace import Manager, getWorkspaceManagerCreateIfNecessary
+#from PyQt4 import QtCore, QtGui
+#from core import PluginFramework
+#from workspace.Workspace import Manager, getWorkspaceManagerCreateIfNecessary
 
 # Placed in reverse order so that when the menu options are inserted before any 
 # other action the desired order is achieved.
 
-class WorkspaceEditMenu(PluginFramework.MenuOption):
-    '''
-    '''
-    def __init__(self):
-        QtCore.QObject.__init__(self)
-        self.parent = None
-        self.menuLabel = '&Edit'
-        self.menuName = 'menu_Edit'
-#        self.actionLabel
-
-    def execute(self):
-        pass
-
-class WorkspaceViewMenu(PluginFramework.MenuOption):
-    '''
-    '''
-    parent = None
-    menuLabel = '&Window'
-    menuName = 'menu_Window'
-    actionLabel = 'Workspace'
-    statustip = 'Show the workspace window'
-
-    def __init__(self):
-        QtCore.QObject.__init__(self)
-
-    def execute(self):
-        pass
-#        self.parent.setCentralWidget(WorkspaceWidget(self.parent))
-
-class WorkspaceCloseMenu(PluginFramework.MenuOption):
-    '''
-    classdocs
-    '''
-
-    parent = None
-    menuLabel = '&File'
-    menuName = 'menu_File'
-    actionLabel = '&Close'
-    shortcut = 'Ctrl+W'
-    statustip = 'Close open workspace'
-
-    def __init__(self):
-        '''
-        Constructor
-        '''
-        QtCore.QObject.__init__(self)
-
-    def execute(self):
-        m = Manager()
-        m.close()
-
-
-class WorkspaceSeparatorMenu(PluginFramework.MenuOption):
-    '''
-    classdocs
-    '''
-
-    parent = None
-    menuLabel = '&File'
-    menuName = 'menu_File'
-    actionLabel = ''
-
-    def __init__(self):
-        '''
-        Constructor
-        '''
-        QtCore.QObject.__init__(self)
-
-    def execute(self):
-        pass
-
-
-class WorkspaceOpenMenu(PluginFramework.MenuOption):
-    '''
-    classdocs
-    '''
-
-    parent = None
-    menuLabel = '&File'
-    menuName = 'menu_File'
-    actionLabel = '&Open'
-    shortcut = 'Ctrl+O'
-    statustip = 'Open a workspace'
-
-    def __init__(self):
-        '''
-        Constructor
-        '''
-        QtCore.QObject.__init__(self)
-
-    def execute(self):
-        workspaceDir = QtGui.QFileDialog.getExistingDirectory(caption='Open Workspace', options=QtGui.QFileDialog.ShowDirsOnly | QtGui.QFileDialog.DontResolveSymlinks | QtGui.QFileDialog.ReadOnly)
-        if len(workspaceDir) > 0:
-            m = getWorkspaceManagerCreateIfNecessary(self.parent)
-            m.load(workspaceDir)
-
-
-class WorkspaceNewWorkspaceMenu(PluginFramework.MenuOption):
-    '''
-    classdocs
-    '''
-
-    parent = None
-    menuLabel = '&File'
-    menuName = 'menu_File'
-    subMenuLabel = '&New'
-    subMenuName = 'menu_New'
-    actionLabel = '&Workspace'
-    shortcut = 'Ctrl+N'
-    statustip = 'Create a new workspace'
-
-    def __init__(self):
-        '''
-        Constructor
-        '''
-        QtCore.QObject.__init__(self)
-
-    def execute(self):
-        workspaceDir = QtGui.QFileDialog.getExistingDirectory(self.parent, caption='Select Workspace Directory')
-        if len(workspaceDir) > 0:
-            m = getWorkspaceManagerCreateIfNecessary(self.parent)
-            m.new(workspaceDir)
-
-
-
+#class WorkspaceEditMenu(PluginFramework.MenuOption):
+#    '''
+#    '''
+#    def __init__(self):
+#        QtCore.QObject.__init__(self)
+#        self.parent = None
+#        self.menuLabel = '&Edit'
+#        self.menuName = 'menu_Edit'
+##        self.actionLabel
+#
+#    def execute(self):
+#        pass
+#
+#class WorkspaceViewMenu(PluginFramework.MenuOption):
+#    '''
+#    '''
+#    parent = None
+#    menuLabel = '&Window'
+#    menuName = 'menu_Window'
+#    actionLabel = 'Workspace'
+#    statustip = 'Show the workspace window'
+#
+#    def __init__(self):
+#        QtCore.QObject.__init__(self)
+#
+#    def execute(self):
+#        pass
+##        self.parent.setCentralWidget(WorkspaceWidget(self.parent))
+#
+#class WorkspaceCloseMenu(PluginFramework.MenuOption):
+#    '''
+#    classdocs
+#    '''
+#
+#    parent = None
+#    menuLabel = '&File'
+#    menuName = 'menu_File'
+#    actionLabel = '&Close'
+#    shortcut = 'Ctrl+W'
+#    statustip = 'Close open workspace'
+#
+#    def __init__(self):
+#        '''
+#        Constructor
+#        '''
+#        QtCore.QObject.__init__(self)
+#
+#    def execute(self):
+#        m = Manager()
+#        m.close()
+#
+#
+#class WorkspaceSeparatorMenu(PluginFramework.MenuOption):
+#    '''
+#    classdocs
+#    '''
+#
+#    parent = None
+#    menuLabel = '&File'
+#    menuName = 'menu_File'
+#    actionLabel = ''
+#
+#    def __init__(self):
+#        '''
+#        Constructor
+#        '''
+#        QtCore.QObject.__init__(self)
+#
+#    def execute(self):
+#        pass
+#
+#
+#class WorkspaceOpenMenu(PluginFramework.MenuOption):
+#    '''
+#    classdocs
+#    '''
+#
+#    parent = None
+#    menuLabel = '&File'
+#    menuName = 'menu_File'
+#    actionLabel = '&Open'
+#    shortcut = 'Ctrl+O'
+#    statustip = 'Open a workspace'
+#
+#    def __init__(self):
+#        '''
+#        Constructor
+#        '''
+#        QtCore.QObject.__init__(self)
+#
+#    def execute(self):
+#        workspaceDir = QtGui.QFileDialog.getExistingDirectory(caption='Open Workspace', options=QtGui.QFileDialog.ShowDirsOnly | QtGui.QFileDialog.DontResolveSymlinks | QtGui.QFileDialog.ReadOnly)
+#        if len(workspaceDir) > 0:
+#            m = getWorkspaceManagerCreateIfNecessary(self.parent)
+#            m.load(workspaceDir)
+#
+#
+#class WorkspaceNewWorkspaceMenu(PluginFramework.MenuOption):
+#    '''
+#    classdocs
+#    '''
+#
+#    parent = None
+#    menuLabel = '&File'
+#    menuName = 'menu_File'
+#    subMenuLabel = '&New'
+#    subMenuName = 'menu_New'
+#    actionLabel = '&Workspace'
+#    shortcut = 'Ctrl+N'
+#    statustip = 'Create a new workspace'
+#
+#    def __init__(self):
+#        '''
+#        Constructor
+#        '''
+#        QtCore.QObject.__init__(self)
+#
+#    def execute(self):
+#        workspaceDir = QtGui.QFileDialog.getExistingDirectory(self.parent, caption='Select Workspace Directory')
+#        if len(workspaceDir) > 0:
+#            m = getWorkspaceManagerCreateIfNecessary(self.parent)
+#            m.new(workspaceDir)
+#

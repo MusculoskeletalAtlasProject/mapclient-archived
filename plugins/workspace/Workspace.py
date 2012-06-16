@@ -27,6 +27,7 @@ def workspaceConfigurationExists(location):
     return os.path.exists(location + '/' + Info.WORKSPACE_NAME)
 
 def getWorkspaceConfiguration(location):
+    print('getting workspace config:', location + '/' + Info.WORKSPACE_NAME)
     return QtCore.QSettings(location + '/' + Info.WORKSPACE_NAME, QtCore.QSettings.IniFormat)
 
 class WorkspaceError(Exception):
@@ -67,6 +68,9 @@ class Manager(PluginFramework.StackedWidgetMountPoint):
         self.widget = None
         self.widgetIndex = -1
         self.location = None
+        self.previousLocation = None
+        self.saveStateIndex = 0
+        self.currentStateIndex = 0
         self.mainWindow = mainWindow
 
     def setWidgetIndex(self, index):
@@ -77,6 +81,17 @@ class Manager(PluginFramework.StackedWidgetMountPoint):
             self.widget = WorkspaceWidget(self.mainWindow)
 
         return self.widget
+
+    def undoStackIndexChanged(self, index):
+        if self.saveStateIndex == index:
+            self.mainWindow.setWindowTitle(Info.APPLICATION_NAME + ' - ' + self.location)
+        elif self.saveStateIndex == self.currentStateIndex:
+            self.mainWindow.setWindowTitle(Info.APPLICATION_NAME + ' - ' + self.location + ' *')
+
+        self.currentStateIndex = index
+
+    def isModified(self):
+        return self.saveStateIndex == self.currentStateIndex
 
     def new(self, location):
         '''
@@ -92,6 +107,7 @@ class Manager(PluginFramework.StackedWidgetMountPoint):
             os.mkdir(location)
 
         self.location = location
+        self.mainWindow.setWindowTitle(Info.APPLICATION_NAME + ' - ' + location)
         ws = getWorkspaceConfiguration(location)
         ws.setValue('version', Info.VERSION_STRING)
 
@@ -116,15 +132,37 @@ class Manager(PluginFramework.StackedWidgetMountPoint):
             raise WorkspaceError('Version mismatch in workspace expected: %s got: %s' % (Info.VERSION_STRING, ws.value('version')))
 
         self.location = location
+        ws = getWorkspaceConfiguration(location)
+        self.widget.loadState(ws)
+        self.saveStateIndex = self.currentStateIndex = 0
+        self.mainWindow.setWindowTitle(Info.APPLICATION_NAME + ' - ' + location)
+
+    def save(self):
+        ws = getWorkspaceConfiguration(self.location)
+        self.widget.saveState(ws)
+        self.saveStateIndex = self.currentStateIndex
+        self.mainWindow.setWindowTitle(Info.APPLICATION_NAME + ' - ' + self.location)
 
     def close(self):
         '''
         Close the current workspace
         '''
         self.location = None
+        self.mainWindow.setWindowTitle(Info.APPLICATION_NAME)
 
     def isWorkspaceOpen(self):
         return not self.location == None
+
+    def writeSettings(self, settings):
+        settings.beginGroup(self.name)
+        settings.setValue('previousLocation', self.widget.previousLocation)
+        settings.endGroup()
+
+    def readSettings(self, settings):
+        settings.beginGroup(self.name)
+        self.widget.previousLocation = settings.value('previousLocation', '')
+        settings.endGroup()
+
 
 
 

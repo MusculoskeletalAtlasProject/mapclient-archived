@@ -25,9 +25,22 @@ for name in API_NAMES:
 
 import unittest
 import os, tempfile
-from PyQt4 import QtCore
+#from PyQt4 import QtCore
 
 TEST_WORKSPACE_DIR_NAME = '/new_workspace_jihuuui'
+
+class FakeWidget(object):
+
+    def loadState(self, ws):
+        pass
+
+    def saveState(self, ws):
+        pass
+
+class FakeMainWindow(object):
+
+    def setWindowTitle(self, value):
+        pass
 
 class WorkspaceTestCase(unittest.TestCase):
 
@@ -46,7 +59,7 @@ class WorkspaceTestCase(unittest.TestCase):
         from workspace.Workspace import Manager
         dirName = tempfile.mkdtemp(prefix='new_workspace_')
         try:
-            ws = Manager()
+            ws = Manager(FakeMainWindow())
             ws.new(dirName)
             assert(os.path.exists(dirName + '/workspace.conf'))
         finally:
@@ -55,7 +68,7 @@ class WorkspaceTestCase(unittest.TestCase):
 
     def testNewWithNone(self):
         from workspace.Workspace import Manager, WorkspaceError
-        ws = Manager()
+        ws = Manager(FakeMainWindow())
         try:
             ws.new(None)
         except WorkspaceError:
@@ -64,7 +77,7 @@ class WorkspaceTestCase(unittest.TestCase):
     def testNewWithNonexistentDir(self):
         from workspace.Workspace import Manager
         tempDir = tempfile.gettempdir() + TEST_WORKSPACE_DIR_NAME
-        ws = Manager()
+        ws = Manager(FakeMainWindow())
         ws.new(tempDir)
         assert(os.path.exists(tempDir + '/workspace.conf'))
 
@@ -72,10 +85,19 @@ class WorkspaceTestCase(unittest.TestCase):
         os.remove(tempDir + '/workspace.conf')
         os.rmdir(tempDir)
 
+    def testSave(self):
+        from workspace.Workspace import Manager
+        tempDir = tempfile.gettempdir() + TEST_WORKSPACE_DIR_NAME
+        ws = Manager(FakeMainWindow())
+        ws.widget = FakeWidget()
+        ws.new(tempDir)
+        ws.save()
+
     def testOpen(self):
         from workspace.Workspace import Manager
         tempDir = tempfile.gettempdir() + TEST_WORKSPACE_DIR_NAME
-        ws = Manager()
+        ws = Manager(FakeMainWindow())
+        ws.widget = FakeWidget()
         ws.new(tempDir)
         ws.load(tempDir)
 
@@ -109,11 +131,23 @@ class WorkspaceTestCase(unittest.TestCase):
         port.addProperty(('pho#workspace#port', 'provides', 'pointcloud'))
         port.addProperty(('pho#workspace#port', 'uses', 'dicom'))
 
-        objs = port.getObjs('pho#workspace#port')
-        self.assertIn('images', objs)
-        self.assertIn('dicom', objs)
-        self.assertIn('pointcloud', objs)
+        objs = port.getTriplesForObj('images')
+        self.assertIn('images', objs[0])
+#        self.assertIn('dicom', objs)
+#        self.assertIn('pointcloud', objs)
 
+    def testPortPredicates(self):
+        from workspace.WorkspaceStep import WorkspaceStepPort
+        port = WorkspaceStepPort()
+        port.addProperty(('pho#workspace#port', 'uses', 'images'))
+        port.addProperty(('pho#workspace#port', 'provides', 'pointcloud'))
+        port.addProperty(('pho#workspace#port', 'uses', 'dicom'))
+
+        preds = port.getTriplesForPred('uses')
+        self.assertIn(('pho#workspace#port', 'uses', 'images'), preds)
+        self.assertNotIn(('pho#workspace#port', 'provides', 'pointcloud'), preds)
+        preds = port.getTriplesForPred('nope')
+        self.assert_(len(preds) == 0)
 
     def testStepConnection(self):
         from workspace.WorkspaceStep import WorkspaceStep

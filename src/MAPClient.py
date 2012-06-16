@@ -71,7 +71,9 @@ def winmain():
     if loadDefaultPlugins:
         fileDir = os.path.dirname(os.path.abspath(__file__))
         inbuiltPluginDir = os.path.realpath(fileDir + '/../plugins')
+        sys.path.insert(0, inbuiltPluginDir)
         loadPlugins(inbuiltPluginDir)
+        del sys.path[0]
 
     from widgets.MainWindow import MainWindow
     window = MainWindow()

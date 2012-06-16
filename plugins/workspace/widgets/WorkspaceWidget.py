@@ -33,8 +33,10 @@ class WorkspaceWidget(QtGui.QWidget):
         self.mainWindow = mainWindow
         self.ui = Ui_WorkspaceWidget()
         self.ui.setupUi(self)
+        self.ui.graphicsView.undoStack.indexChanged.connect(self.undoStackIndexChanged)
         self.action_Close = None # Keep a handle to this for modifying the Ui.
         self._createMenuItems()
+        self.previousLocation = ''
 
         self.workspaceStepPlugins = WorkspaceStepMountPoint.getPlugins()
         self.stepTree = self.findChild(QtGui.QWidget, "stepTree")
@@ -48,7 +50,12 @@ class WorkspaceWidget(QtGui.QWidget):
         workspaceOpen = self.mainWindow.workspaceManager.isWorkspaceOpen()
         self.action_Close.setEnabled(workspaceOpen)
         self.setEnabled(workspaceOpen)
+        self.action_Save.setEnabled(not self.mainWindow.workspaceManager.isModified())
 
+
+    def undoStackIndexChanged(self, index):
+        self.mainWindow.workspaceManager.undoStackIndexChanged(index)
+        self.updateUi()
 
     def setActive(self):
         self.mainWindow.setUndoStack(self.ui.graphicsView.undoStack)
@@ -62,22 +69,38 @@ class WorkspaceWidget(QtGui.QWidget):
 
 
     def new(self):
-        workspaceDir = QtGui.QFileDialog.getExistingDirectory(self.mainWindow, caption='Select Workspace Directory')
+        workspaceDir = QtGui.QFileDialog.getExistingDirectory(self.mainWindow, caption='Select Workspace Directory', directory=self.previousLocation)
         if len(workspaceDir) > 0:
             m = self.mainWindow.workspaceManager
             m.new(workspaceDir)
+            self.previousLocation = workspaceDir
             self.updateUi()
 
     def load(self):
-        workspaceDir = QtGui.QFileDialog.getExistingDirectory(self.mainWindow, caption='Open Workspace', options=QtGui.QFileDialog.ShowDirsOnly | QtGui.QFileDialog.DontResolveSymlinks | QtGui.QFileDialog.ReadOnly)
+        workspaceDir = QtGui.QFileDialog.getExistingDirectory(self.mainWindow, caption='Open Workspace', directory=self.previousLocation, options=QtGui.QFileDialog.ShowDirsOnly | QtGui.QFileDialog.DontResolveSymlinks | QtGui.QFileDialog.ReadOnly)
         if len(workspaceDir) > 0:
             m = self.mainWindow.workspaceManager
             m.load(workspaceDir)
+            self.previousLocation = workspaceDir
             self.updateUi()
 
     def close(self):
         m = self.mainWindow.workspaceManager
         m.close()
+        self.ui.graphicsView.clear()
+        self.updateUi()
+
+    def save(self):
+        m = self.mainWindow.workspaceManager
+        m.save()
+        self.updateUi()
+
+    def saveState(self, ws):
+        self.ui.graphicsView.saveState(ws)
+        self.updateUi()
+
+    def loadState(self, ws):
+        self.ui.graphicsView.loadState(ws)
         self.updateUi()
 
     def _createMenuItems(self):
@@ -93,11 +116,15 @@ class WorkspaceWidget(QtGui.QWidget):
         self._setActionProperties(action_Open, 'action_Open', self.load, 'Ctrl+O', 'Open an existing workspace')
         self.action_Close = QtGui.QAction('&Close', menu_File)
         self._setActionProperties(self.action_Close, 'action_Close', self.close, 'Ctrl+W', 'Close open workspace')
+        self.action_Save = QtGui.QAction('&Save', menu_File)
+        self._setActionProperties(self.action_Save, 'action_Save', self.save, 'Ctrl+S', 'Save workspace')
 
         menu_New.insertAction(QtGui.QAction(self), action_New)
         menu_File.insertMenu(lastFileMenuAction, menu_New)
         menu_File.insertAction(lastFileMenuAction, action_Open)
         menu_File.insertSeparator(lastFileMenuAction)
         menu_File.insertAction(lastFileMenuAction, self.action_Close)
+        menu_File.insertSeparator(lastFileMenuAction)
+        menu_File.insertAction(lastFileMenuAction, self.action_Save)
         menu_File.insertSeparator(lastFileMenuAction)
 

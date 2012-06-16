@@ -91,6 +91,36 @@ class CommandAddEdge(QtGui.QUndoCommand):
         self.scene.removeItem(self.edge)
         del self.edge
 
+class CommandSelectionChange(QtGui.QUndoCommand):
+    '''
+    '''
+    def __init__(self, selection, previous):
+        super(CommandSelectionChange, self).__init__()
+        self.selection = selection
+        self.previousSelection = previous
+
+    def redo(self):
+        if len(self.selection) > 0:
+            self.selection[0].scene().blockSignals(True)
+        for item in self.selection:
+            item.setSelected(True)
+        if len(self.selection) > 0:
+            self.selection[0].scene().blockSignals(False)
+
+    def undo(self):
+        if len(self.selection) > 0:
+            self.selection[0].scene().blockSignals(True)
+        if len(self.previousSelection) > 0:
+            self.previousSelection[0].scene().blockSignals(True)
+        for item in self.selection:
+            item.setSelected(False)
+        for item in self.previousSelection:
+            item.setSelected(True)
+        if len(self.selection) > 0:
+            self.selection[0].scene().blockSignals(False)
+        if len(self.previousSelection) > 0:
+            self.previousSelection[0].scene().blockSignals(False)
+
 class CommandAddNode(QtGui.QUndoCommand):
     '''
     '''
@@ -108,19 +138,24 @@ class CommandAddNode(QtGui.QUndoCommand):
 class CommandNodeMove(QtGui.QUndoCommand):
     '''
     '''
-    def __init__(self, node, startPos, endPos):
+    def __init__(self, selection, posDifferential):
         super(CommandNodeMove, self).__init__()
-        self.node = node
-        self.startPos = startPos
-        self.endPos = endPos
+        self.selection = selection
+        self.posDifferential = posDifferential
+        self.init = False
 
     def redo(self):
-        self.node.setPos(self.endPos)
-        self.node.update()
+        # Attempting to get around the repositioning of the node
+        # as redo is called automatically on push to the stack
+        if not self.init:
+            self.init = True
+        else:
+            for node in self.selection:
+                node.moveBy(self.posDifferential.x(), self.posDifferential.y())
 
     def undo(self):
-        self.node.setPos(self.startPos)
-        self.node.update()
+        for node in self.selection:
+            node.moveBy(-self.posDifferential.x(), -self.posDifferential.y())
 
 class Edge(QtGui.QGraphicsItem):
     Pi = math.pi
@@ -205,6 +240,29 @@ class Edge(QtGui.QGraphicsItem):
 #        painter.drawPolygon(QtGui.QPolygonF([line.p1(), sourceArrowP1, sourceArrowP2]))
             painter.drawPolygon(QtGui.QPolygonF([midPoint, destArrowP1, destArrowP2]))
 
+def ensureItemInScene(scene, item, newPos):
+    bRect = item.boundingRect()
+    xp1 = bRect.x() + newPos.x()
+    yp1 = bRect.y() + newPos.y()
+    xp2 = bRect.x() + bRect.width() + newPos.x()
+    yp2 = bRect.y() + bRect.height() + newPos.y()
+    bRect.setCoords(xp1, yp1, xp2, yp2)
+    rect = scene.sceneRect()
+    if not rect.contains(bRect):
+        x1 = max(bRect.left(), rect.left()) + 2.0 # plus bounding rectangle adjust
+        x2 = min(bRect.x() + bRect.width(), rect.x() + rect.width()) - bRect.width() + 2.0
+        y1 = max(bRect.top(), rect.top()) + 2.0 # plus bounding rectangle adjust
+        y2 = min(bRect.bottom(), rect.bottom()) - bRect.height() + 2.0
+        if newPos.x() != x1:
+            newPos.setX(x1)
+        elif newPos.x() != x2:
+            newPos.setX(x2)
+        if newPos.y() != y1:
+            newPos.setY(y1)
+        elif newPos.y() != y2:
+            newPos.setY(y2)
+
+    return newPos
 
 class Node(QtGui.QGraphicsItem):
     Type = QtGui.QGraphicsItem.UserType + 1
@@ -220,28 +278,36 @@ class Node(QtGui.QGraphicsItem):
         self.newPos = QtCore.QPointF()
         self.setFlag(QtGui.QGraphicsItem.ItemIsMovable)
         self.setFlag(QtGui.QGraphicsItem.ItemSendsGeometryChanges)
+        self.setFlag(QtGui.QGraphicsItem.ItemIsSelectable)
         self.setCacheMode(self.DeviceCoordinateCache)
         self.setZValue(-1)
-        self.selected = False
+#        self.selected = False
 
         self.contextMenu = QtGui.QMenu(self.graph())
         configureAction = QtGui.QAction('Configure', self.contextMenu)
         configureAction.triggered.connect(self.step.configure)
         self.contextMenu.addAction(configureAction)
-        portsMenu = QtGui.QMenu('Ports', self.contextMenu)
-        self.contextMenu.addMenu(portsMenu)
+        portsProvidesTip = ''
+        portsUsesTip = ''
         for port in step.ports:
-            pass
+            triples = port.getTriplesForPred('uses')
+            for triple in triples:
+                portsUsesTip += '<li>' + triple[2] + '</li>'
+            triples = port.getTriplesForPred('provides')
+            for triple in triples:
+                portsProvidesTip += '<li>' + triple[2] + '</li>'
+
+        if len(portsUsesTip) > 0:
+            portsUsesTip = '<font color="#FFFF00"><h4>Uses</h4><ul>' + portsUsesTip + '</ul></font>'
+        if len(portsProvidesTip) > 0:
+            portsProvidesTip = '<font color="#33FF33"><h4>Provides</h4><ul>' + portsProvidesTip + '</ul></font>'
+
+        tip = portsProvidesTip + portsUsesTip
+        self.setToolTip(tip)
 
 
     def type(self):
         return Node.Type
-
-    def setSelected(self, state):
-        if self.selected != state:
-            print('selection change')
-        self.selected = state
-        self.update()
 
     def _removeDeadwood(self):
         '''
@@ -270,7 +336,7 @@ class Node(QtGui.QGraphicsItem):
                              self.pixmap.height() + 2 * adjust)
 
     def paint(self, painter, option, widget):
-            if option.state & QtGui.QStyle.State_Sunken or self.selected:
+            if option.state & QtGui.QStyle.State_Selected: #or self.selected:
                 painter.setBrush(QtCore.Qt.darkGray)
                 painter.drawRoundedRect(self.boundingRect(), 5, 5)
 
@@ -279,30 +345,8 @@ class Node(QtGui.QGraphicsItem):
                 painter.drawPixmap(40, 40, self.configure_red)
 
     def itemChange(self, change, value):
-
         if change == QtGui.QGraphicsItem.ItemPositionChange and self.scene():
-            newPos = value
-            bRect = self.boundingRect()
-            xp1 = bRect.x() + newPos.x()
-            yp1 = bRect.y() + newPos.y()
-            xp2 = bRect.x() + bRect.width() + newPos.x()
-            yp2 = bRect.y() + bRect.height() + newPos.y()
-            bRect.setCoords(xp1, yp1, xp2, yp2)
-            rect = self.scene().sceneRect()
-            if not rect.contains(bRect):
-                x1 = max(bRect.left(), rect.left()) + 2.0 # plus bounding rectangle adjust
-                x2 = min(bRect.x() + bRect.width(), rect.x() + rect.width()) - bRect.width() + 2.0
-                y1 = max(bRect.top(), rect.top()) + 2.0 # plus bounding rectangle adjust
-                y2 = min(bRect.bottom(), rect.bottom()) - bRect.height() + 2.0
-                if newPos.x() != x1:
-                    newPos.setX(x1)
-                elif newPos.x() != x2:
-                    newPos.setX(x2)
-                if newPos.y() != y1:
-                    newPos.setY(y1)
-                elif newPos.y() != y2:
-                    newPos.setY(y2)
-                return newPos
+            return ensureItemInScene(self.scene(), self, value)
         elif change == QtGui.QGraphicsItem.ItemPositionHasChanged:
             self._removeDeadwood()
             for edge in self.edgeList:
@@ -318,28 +362,28 @@ class Node(QtGui.QGraphicsItem):
 
     def mousePressEvent(self, event):
         QtGui.QGraphicsItem.mousePressEvent(self, event)
-        modifiers = QtGui.QApplication.keyboardModifiers()
-        if modifiers == QtCore.Qt.ControlModifier:
-            pass
-        else:
-            self.graph().clearSelection()
+#        modifiers = QtGui.QApplication.keyboardModifiers()
+#        if modifiers == QtCore.Qt.ControlModifier:
+#            pass
+#        else:
+#            self.graph().clearSelection()
 
         self.eventStartPos = self.pos()
-        self.update()
+#        self.update()
 
     def mouseReleaseEvent(self, event):
 #        self.update()
-        modifiers = QtGui.QApplication.keyboardModifiers()
-        if modifiers == QtCore.Qt.ControlModifier:
-            self.selected = not self.selected
-            self.graph().nodeSelected(self, self.selected)
-        else:
-            self.graph().clearSelection()
-            self.selected = True
-            self.graph().nodeSelected(self, self.selected)
+#        modifiers = QtGui.QApplication.keyboardModifiers()
+#        if modifiers == QtCore.Qt.ControlModifier:
+#            self.selected = not self.selected
+#            self.graph().nodeSelected(self, self.selected)
+#        else:
+#            self.graph().clearSelection()
+#            self.selected = True
+#            self.graph().nodeSelected(self, self.selected)
 
         if self.pos() != self.eventStartPos:
-            command = CommandNodeMove(self, self.eventStartPos, self.pos())
+            command = CommandNodeMove(self.scene().selectedItems(), self.pos() - self.eventStartPos)
             self.graph().undoStack.push(command)
         QtGui.QGraphicsItem.mouseReleaseEvent(self, event)
 
@@ -354,11 +398,13 @@ class WorkspaceGraphicsView(QtGui.QGraphicsView):
         self.errorIconTimer.setSingleShot(True)
         self.errorIconTimer.timeout.connect(self.errorIconTimeout)
         self.errorIcon = None
+#        self.undoStack.indexChanged.connect(self.workspaceModified)
 
         sceneWidth = 500
         sceneHeight = 1.618 * sceneWidth
         scene = QtGui.QGraphicsScene(self)
         scene.setSceneRect(-sceneHeight // 2, -sceneWidth // 2, sceneHeight, sceneWidth)
+        scene.selectionChanged.connect(self.selectionChanged)
 #        scene.setItemIndexMethod(QtGui.QGraphicsScene.NoIndex)
 
         self.setScene(scene)
@@ -371,10 +417,52 @@ class WorkspaceGraphicsView(QtGui.QGraphicsView):
 #        self.setMinimumSize(sceneHeight + 20, sceneWidth + 20)
 #        self.setMaximumSize(sceneHeight + 20, sceneWidth + 20)
 
-    def clear(self):
-        self.piecePixmaps = []
-        self.update()
+    def saveState(self, ws):
+        sceneItems = self.scene().items()
+        nodeList = []
+        for item in sceneItems:
+            if item.type() == Node.Type:
+                nodeList.append(item)
+        ws.beginGroup('nodes')
+        ws.beginWriteArray('nodelist')
+        nodeIndex = 0
+        for node in nodeList:
+#                print('save node', item)
+            ws.setArrayIndex(nodeIndex)
+            ws.setValue('name', node.step.name)
+            ws.setValue('position', node.pos())
+            for edge in node.edgeList:
+                if edge.source() == node:
+                    print('source node')
+                    indecies = [i for i, x in enumerate(nodeList) if x == edge.dest()]
+                    print('indexes', indecies)
+                else:
+                    print('destination node', edge.dest(), node)
+            nodeIndex += 1
+        ws.endArray()
+        ws.endGroup()
 
+    def loadState(self, ws):
+        self.clear()
+        self.undoStack.clear()
+        ws.beginGroup('nodes')
+        nodeCount = ws.beginReadArray('nodelist')
+        for i in range(nodeCount):
+            ws.setArrayIndex(i)
+            name = ws.value('name')
+            position = ws.value('position')
+            step = WorkspaceStepFactory(name)
+            node = Node(step, self)
+            node.setPos(position)
+            command = CommandAddNode(self.scene(), node)
+            self.undoStack.push(command)
+        ws.endArray()
+        ws.endGroup()
+        self.undoStack.clear()
+
+    def clear(self):
+        self.scene().clear()
+#        self.update()
 
     def connectNodes(self, node1, node2):
         # Check if nodes are already connected
@@ -392,12 +480,17 @@ class WorkspaceGraphicsView(QtGui.QGraphicsView):
                 self.scene().addItem(self.errorIcon)
                 self.errorIconTimer.start()
 
-    def clearSelection(self):
-        for node in self.selectedNodes:
-            node.selected = False
-            node.update()
+    def selectionChanged(self):
+        # Search the undo stack to get the previous selection
+        previousSelection = []
+        for index in range(self.undoStack.count(), 0, -1):
+            com = self.undoStack.command(index - 1)
+            if type(com) is CommandSelectionChange:
+                previousSelection = com.selection
+                break
 
-        self.selectedNodes = []
+        command = CommandSelectionChange(self.scene().selectedItems(), previousSelection)
+        self.undoStack.push(command)
 
     def nodeSelected(self, node, state):
         if state == True and node not in self.selectedNodes:
@@ -454,7 +547,7 @@ class WorkspaceGraphicsView(QtGui.QGraphicsView):
 
             position = self.mapToScene(event.pos() - hotspot)
             node = Node(step, self)
-            node.setPos(position)
+            node.setPos(ensureItemInScene(self.scene(), node, position))
             command = CommandAddNode(self.scene(), node)
             self.undoStack.push(command)
 #            node = Node(step, self)

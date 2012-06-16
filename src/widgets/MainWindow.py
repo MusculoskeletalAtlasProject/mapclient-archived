@@ -38,7 +38,6 @@ class MainWindow(QtGui.QMainWindow):
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
         self._makeConnections()
-        self._readSettings()
         self.undoManager = UndoManager()
 
 #        undoManager = self.mainWindow.workspaceManager.undoManager
@@ -51,11 +50,15 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.menu_Edit.addAction(redoAction)
 
         self.ui.stackedWidget.currentChanged.connect(self.centralWidgetChanged)
+        self.stackedWidgetPages = StackedWidgetMountPoint.getPlugins(self)
 
-        for stackedWidgetPage in StackedWidgetMountPoint.getPlugins(self):
+        for stackedWidgetPage in self.stackedWidgetPages:
             if not hasattr(self, stackedWidgetPage.name):
                 setattr(self, stackedWidgetPage.name, stackedWidgetPage)
                 stackedWidgetPage.setWidgetIndex(self.ui.stackedWidget.addWidget(stackedWidgetPage.getWidget()))
+
+        self._readSettings()
+
 
     def _writeSettings(self):
         settings = QtCore.QSettings()
@@ -63,6 +66,8 @@ class MainWindow(QtGui.QMainWindow):
         settings.setValue('size', self.size())
         settings.setValue('pos', self.pos())
         settings.endGroup()
+        for stackedWidgetPage in self.stackedWidgetPages:
+            stackedWidgetPage.writeSettings(settings)
 
     def _readSettings(self):
         settings = QtCore.QSettings()
@@ -70,6 +75,8 @@ class MainWindow(QtGui.QMainWindow):
         self.resize(settings.value('size', QtCore.QSize(600, 400)))
         self.move(settings.value('pos', QtCore.QPoint(100, 100)))
         settings.endGroup()
+        for stackedWidgetPage in self.stackedWidgetPages:
+            stackedWidgetPage.readSettings(settings)
 
     def _makeConnections(self):
         self.ui.action_Quit.triggered.connect(self.quitApplication)

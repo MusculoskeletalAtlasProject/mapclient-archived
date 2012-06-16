@@ -17,7 +17,6 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     You should have received a copy of the GNU General Public License
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
-import sys
 from workspace.MountPoint import WorkspaceStepMountPoint
 
 class WorkspaceStepPort(object):
@@ -45,8 +44,19 @@ class WorkspaceStepPort(object):
         else:
             self.obj[rdftriple[2]] = [rdftriple]
 
-    def getObjs(self, subj):
-        return [triple[2] for triple in self.subj[subj]]
+    def getTriplesForObj(self, obj):
+        if obj in self.obj:
+            return self.obj[obj]
+
+        return []
+#        return [triple[2] for triple in self.obj[obj]]
+
+    def getTriplesForPred(self, pred):
+        if pred in self.pred:
+            return self.pred[pred]
+
+        return []
+#        return [triple for triple in self.pred[pred]]
 
     def canConnect(self, other):
         if 'pho#workspace#port' in self.subj and 'pho#workspace#port' in other.subj:
