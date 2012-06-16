@@ -281,8 +281,8 @@ class Node(QtGui.QGraphicsItem):
         self.setFlag(QtGui.QGraphicsItem.ItemIsSelectable)
         self.setCacheMode(self.DeviceCoordinateCache)
         self.setZValue(-1)
-#        self.selected = False
 
+        self.contextEvent = False
         self.contextMenu = QtGui.QMenu(self.graph())
         configureAction = QtGui.QAction('Configure', self.contextMenu)
         configureAction.triggered.connect(self.step.configure)
@@ -356,11 +356,17 @@ class Node(QtGui.QGraphicsItem):
 
     def contextMenuEvent(self, event):
         print('context event')
+        self.contextEvent = True
         super(Node, self).contextMenuEvent(event)
 #        self.update()
-#        self.contextMenu.exec_(event.screenPos())
+        self.contextMenu.exec_(event.screenPos())
+        self.contextEvent = False
+        print('done')
 
     def mousePressEvent(self, event):
+        if self.contextEvent:
+            return
+
         QtGui.QGraphicsItem.mousePressEvent(self, event)
 #        modifiers = QtGui.QApplication.keyboardModifiers()
 #        if modifiers == QtCore.Qt.ControlModifier:
@@ -369,9 +375,15 @@ class Node(QtGui.QGraphicsItem):
 #            self.graph().clearSelection()
 
         self.eventStartPos = self.pos()
-#        self.update()
+
+#    def mouseMoveEvent(self, event):
+#        if self.contextEvent:
+#            return
+#        QtGui.QGraphicsItem.mouseMoveEvent(self, event)
 
     def mouseReleaseEvent(self, event):
+        if self.contextEvent:
+            return
 #        self.update()
 #        modifiers = QtGui.QApplication.keyboardModifiers()
 #        if modifiers == QtCore.Qt.ControlModifier:
@@ -398,14 +410,12 @@ class WorkspaceGraphicsView(QtGui.QGraphicsView):
         self.errorIconTimer.setSingleShot(True)
         self.errorIconTimer.timeout.connect(self.errorIconTimeout)
         self.errorIcon = None
-#        self.undoStack.indexChanged.connect(self.workspaceModified)
 
         sceneWidth = 500
         sceneHeight = 1.618 * sceneWidth
         scene = QtGui.QGraphicsScene(self)
         scene.setSceneRect(-sceneHeight // 2, -sceneWidth // 2, sceneHeight, sceneWidth)
         scene.selectionChanged.connect(self.selectionChanged)
-#        scene.setItemIndexMethod(QtGui.QGraphicsScene.NoIndex)
 
         self.setScene(scene)
         self.setCacheMode(QtGui.QGraphicsView.CacheBackground)
@@ -414,8 +424,6 @@ class WorkspaceGraphicsView(QtGui.QGraphicsView):
 #        self.setResizeAnchor(QtGui.QGraphicsView.AnchorViewCenter)
 
         self.setAcceptDrops(True)
-#        self.setMinimumSize(sceneHeight + 20, sceneWidth + 20)
-#        self.setMaximumSize(sceneHeight + 20, sceneWidth + 20)
 
     def saveState(self, ws):
         sceneItems = self.scene().items()
@@ -427,7 +435,6 @@ class WorkspaceGraphicsView(QtGui.QGraphicsView):
         ws.beginWriteArray('nodelist')
         nodeIndex = 0
         for node in nodeList:
-#                print('save node', item)
             ws.setArrayIndex(nodeIndex)
             ws.setValue('name', node.step.name)
             ws.setValue('position', node.pos())
@@ -462,7 +469,6 @@ class WorkspaceGraphicsView(QtGui.QGraphicsView):
 
     def clear(self):
         self.scene().clear()
-#        self.update()
 
     def connectNodes(self, node1, node2):
         # Check if nodes are already connected
@@ -530,16 +536,13 @@ class WorkspaceGraphicsView(QtGui.QGraphicsView):
         painter.fillRect(rect.intersect(sceneRect), QtGui.QBrush(gradient))
         painter.setBrush(QtCore.Qt.NoBrush)
         painter.drawRect(sceneRect)
-#        print(QtGui.QColor.colorNames())
 
     def dropEvent(self, event):
         if event.mimeData().hasFormat("image/x-workspace-step"):
             pieceData = event.mimeData().data("image/x-workspace-step")
             stream = QtCore.QDataStream(pieceData, QtCore.QIODevice.ReadOnly)
-#            newStep = WorkspaceStep()
             hotspot = QtCore.QPoint()
 
-#            step = WorkspaceStep.deserialize(newStep, stream)
             nameLen = stream.readUInt32()
             name = stream.readRawData(nameLen).decode(sys.stdout.encoding)
             step = WorkspaceStepFactory(name)
@@ -550,9 +553,6 @@ class WorkspaceGraphicsView(QtGui.QGraphicsView):
             node.setPos(ensureItemInScene(self.scene(), node, position))
             command = CommandAddNode(self.scene(), node)
             self.undoStack.push(command)
-#            node = Node(step, self)
-#            node.setPos(self.mapToScene(event.pos() - hotspot))
-#            self.scene().addItem(node)
 
             event.setDropAction(QtCore.Qt.MoveAction);
             event.accept();
