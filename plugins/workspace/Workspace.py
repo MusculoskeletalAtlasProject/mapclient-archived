@@ -27,7 +27,6 @@ def workspaceConfigurationExists(location):
     return os.path.exists(location + '/' + Info.WORKSPACE_NAME)
 
 def getWorkspaceConfiguration(location):
-    print('getting workspace config:', location + '/' + Info.WORKSPACE_NAME)
     return QtCore.QSettings(location + '/' + Info.WORKSPACE_NAME, QtCore.QSettings.IniFormat)
 
 class WorkspaceError(Exception):

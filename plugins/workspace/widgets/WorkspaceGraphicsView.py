@@ -29,7 +29,7 @@ class ErrorItem(QtGui.QGraphicsItem):
         self.dest = weakref.ref(destNode)
         self.sourcePoint = QtCore.QPointF()
         self.destPoint = QtCore.QPointF()
-        self.pixmap = QtGui.QPixmap(':/workspace/images/cross.jpg').scaled(16, 16, aspectRatioMode=QtCore.Qt.KeepAspectRatio, transformMode=QtCore.Qt.FastTransformation)
+        self.pixmap = QtGui.QPixmap(':/workspace/images/cancel_256.png').scaled(16, 16, aspectRatioMode=QtCore.Qt.KeepAspectRatio, transformMode=QtCore.Qt.FastTransformation)
         self.source().addEdge(self)
         self.dest().addEdge(self)
         self.setZValue(-1.5)
@@ -91,8 +91,42 @@ class CommandAddEdge(QtGui.QUndoCommand):
         self.scene.removeItem(self.edge)
         del self.edge
 
+class CommandDeleteSelection(QtGui.QUndoCommand):
+    '''
+    '''
+    def __init__(self, scene, selection):
+        super(CommandDeleteSelection, self).__init__()
+        self.scene = scene
+        self.selection = selection
+        self.edges = {} # Need to keep the edges alive in case of undo
+        self.edgeUnique = {} # Keep a record of edges marked for deletion to avoid repetition
+        for item in self.selection:
+            self.edges[item] = []
+            for edge in item.edgeList:
+                if edge() not in self.edgeUnique:
+                    self.edges[item].append(edge())
+                    self.edgeUnique[edge()] = 1
+
+    def redo(self):
+        self.scene.blockSignals(True)
+        for item in self.selection:
+            self.scene.removeItem(item)
+            for edge in self.edges[item]:
+                self.scene.removeItem(edge)
+        self.scene.blockSignals(False)
+
+    def undo(self):
+        self.scene.blockSignals(True)
+        for item in self.selection:
+            self.scene.addItem(item)
+            for edge in self.edges[item]:
+                self.scene.addItem(edge)
+        self.scene.blockSignals(False)
+
 class CommandSelectionChange(QtGui.QUndoCommand):
     '''
+    We block signals  when setting the selection so that we
+    don't end up in a recursive loop.
     '''
     def __init__(self, selection, previous):
         super(CommandSelectionChange, self).__init__()
@@ -156,6 +190,46 @@ class CommandNodeMove(QtGui.QUndoCommand):
     def undo(self):
         for node in self.selection:
             node.moveBy(-self.posDifferential.x(), -self.posDifferential.y())
+
+class ArrowLine(QtGui.QGraphicsLineItem):
+
+    def __init__(self, *args, **kwargs):
+        super(ArrowLine, self).__init__(*args, **kwargs)
+        self.arrowSize = 10.0
+        self.setZValue(-2.0)
+
+    def boundingRect(self):
+
+        penWidth = 1
+        extra = (penWidth + self.arrowSize) / 2.0
+        line = self.line()
+        return QtCore.QRectF(line.p1(),
+                             QtCore.QSizeF(line.p2().x() - line.p1().x(),
+                                           line.p2().y() - line.p1().y())).normalized().adjusted(-extra, -extra, extra, extra)
+
+    def paint(self, painter, option, widget):
+        super(ArrowLine, self).paint(painter, option, widget)
+
+        line = self.line()
+        if line.length() == 0:
+            return
+
+        angle = math.acos(line.dx() / line.length())
+#        print('angle: ', angle)
+        if line.dy() >= 0:
+            angle = Edge.TwoPi - angle
+        # Draw the arrows if there's enough room.
+        if line.dy() * line.dy() + line.dx() * line.dx() > 200 * self.arrowSize:
+            midPoint = (line.p1() + line.p2()) / 2
+
+            destArrowP1 = midPoint + QtCore.QPointF(math.sin(angle - Edge.Pi / 3) * self.arrowSize,
+                                                          math.cos(angle - Edge.Pi / 3) * self.arrowSize)
+            destArrowP2 = midPoint + QtCore.QPointF(math.sin(angle - Edge.Pi + Edge.Pi / 3) * self.arrowSize,
+                                                          math.cos(angle - Edge.Pi + Edge.Pi / 3) * self.arrowSize)
+
+            painter.setBrush(QtCore.Qt.black)
+#        painter.drawPolygon(QtGui.QPolygonF([line.p1(), sourceArrowP1, sourceArrowP2]))
+            painter.drawPolygon(QtGui.QPolygonF([midPoint, destArrowP1, destArrowP2]))
 
 class Edge(QtGui.QGraphicsItem):
     Pi = math.pi
@@ -282,7 +356,8 @@ class Node(QtGui.QGraphicsItem):
         self.setCacheMode(self.DeviceCoordinateCache)
         self.setZValue(-1)
 
-        self.contextEvent = False
+        self.connectLine = None
+
         self.contextMenu = QtGui.QMenu(self.graph())
         configureAction = QtGui.QAction('Configure', self.contextMenu)
         configureAction.triggered.connect(self.step.configure)
@@ -355,16 +430,17 @@ class Node(QtGui.QGraphicsItem):
         return QtGui.QGraphicsItem.itemChange(self, change, value)
 
     def contextMenuEvent(self, event):
-        print('context event')
-        self.contextEvent = True
         super(Node, self).contextMenuEvent(event)
 #        self.update()
         self.contextMenu.exec_(event.screenPos())
-        self.contextEvent = False
-        print('done')
 
     def mousePressEvent(self, event):
-        if self.contextEvent:
+        modifiers = QtGui.QApplication.keyboardModifiers()
+        if modifiers & QtCore.Qt.ShiftModifier:
+            centre = self.boundingRect().center()
+            self.connectLine = ArrowLine(QtCore.QLineF(self.mapToScene(centre),
+                                         event.scenePos()))
+            self.scene().addItem(self.connectLine)
             return
 
         QtGui.QGraphicsItem.mousePressEvent(self, event)
@@ -376,13 +452,24 @@ class Node(QtGui.QGraphicsItem):
 
         self.eventStartPos = self.pos()
 
-#    def mouseMoveEvent(self, event):
+    def mouseMoveEvent(self, event):
+#        modifiers = QtGui.QApplication.keyboardModifiers()
+        if self.connectLine:
+            newLine = QtCore.QLineF(self.connectLine.line().p1(), event.scenePos());
+            self.connectLine.setLine(newLine)
+            return
 #        if self.contextEvent:
 #            return
-#        QtGui.QGraphicsItem.mouseMoveEvent(self, event)
+        QtGui.QGraphicsItem.mouseMoveEvent(self, event)
 
     def mouseReleaseEvent(self, event):
-        if self.contextEvent:
+#        modifiers = QtGui.QApplication.keyboardModifiers()
+        if self.connectLine:
+            item = self.scene().itemAt(event.scenePos())
+            if item.type() == Node.Type:
+                self.graph().connectNodes(self, item)
+            self.scene().removeItem(self.connectLine)
+            self.connectLine = None
             return
 #        self.update()
 #        modifiers = QtGui.QApplication.keyboardModifiers()
@@ -431,6 +518,8 @@ class WorkspaceGraphicsView(QtGui.QGraphicsView):
         for item in sceneItems:
             if item.type() == Node.Type:
                 nodeList.append(item)
+
+        ws.remove('nodes')
         ws.beginGroup('nodes')
         ws.beginWriteArray('nodelist')
         nodeIndex = 0
@@ -438,13 +527,19 @@ class WorkspaceGraphicsView(QtGui.QGraphicsView):
             ws.setArrayIndex(nodeIndex)
             ws.setValue('name', node.step.name)
             ws.setValue('position', node.pos())
+            ws.beginWriteArray('edgeList')
+            edgeIndex = 0
             for edge in node.edgeList:
-                if edge.source() == node:
+                if edge().source() == node:
+                    ws.setArrayIndex(edgeIndex)
                     print('source node')
-                    indecies = [i for i, x in enumerate(nodeList) if x == edge.dest()]
+                    indecies = [i for i, x in enumerate(nodeList) if x == edge().dest()]
+                    ws.setValue('connectedTo', indecies[0])
                     print('indexes', indecies)
+                    edgeIndex += 1
                 else:
-                    print('destination node', edge.dest(), node)
+                    print('destination node', edge().dest(), node)
+            ws.endArray()
             nodeIndex += 1
         ws.endArray()
         ws.endGroup()
@@ -454,6 +549,8 @@ class WorkspaceGraphicsView(QtGui.QGraphicsView):
         self.undoStack.clear()
         ws.beginGroup('nodes')
         nodeCount = ws.beginReadArray('nodelist')
+        nodeList = []
+        edgeConnections = []
         for i in range(nodeCount):
             ws.setArrayIndex(i)
             name = ws.value('name')
@@ -461,10 +558,24 @@ class WorkspaceGraphicsView(QtGui.QGraphicsView):
             step = WorkspaceStepFactory(name)
             node = Node(step, self)
             node.setPos(position)
+            nodeList.append(node)
             command = CommandAddNode(self.scene(), node)
             self.undoStack.push(command)
+            edgeCount = ws.beginReadArray('edgeList')
+            for j in range(edgeCount):
+                ws.setArrayIndex(j)
+                connectedTo = int(ws.value('connectedTo'))
+                edgeConnections.append((i, connectedTo))
+            ws.endArray()
         ws.endArray()
         ws.endGroup()
+        for edge in edgeConnections:
+            node1 = nodeList[edge[0]]
+            node2 = nodeList[edge[1]]
+            command = CommandAddEdge(self.scene(), node1, node2)
+            self.undoStack.push(command)
+
+
         self.undoStack.clear()
 
     def clear(self):
@@ -508,6 +619,14 @@ class WorkspaceGraphicsView(QtGui.QGraphicsView):
         if len(self.selectedNodes) == 2:
             self.connectNodes(self.selectedNodes[0], self.selectedNodes[1])
 
+    def keyPressEvent(self, event):
+#        super(WorkspaceGraphicsView, self).keyPressEvent(event)
+        if event.key() == QtCore.Qt.Key_Backspace or event.key() == QtCore.Qt.Key_Delete:
+            command = CommandDeleteSelection(self.scene(), self.scene().selectedItems())
+            self.undoStack.push(command)
+            event.accept()
+        else:
+            event.ignore()
 
     def errorIconTimeout(self):
         self.scene().removeItem(self.errorIcon)
@@ -553,6 +672,9 @@ class WorkspaceGraphicsView(QtGui.QGraphicsView):
             node.setPos(ensureItemInScene(self.scene(), node, position))
             command = CommandAddNode(self.scene(), node)
             self.undoStack.push(command)
+            self.scene().blockSignals(True)
+            node.setSelected(True)
+            self.scene().blockSignals(False)
 
             event.setDropAction(QtCore.Qt.MoveAction);
             event.accept();
