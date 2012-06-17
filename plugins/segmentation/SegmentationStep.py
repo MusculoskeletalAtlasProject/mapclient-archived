@@ -30,7 +30,7 @@ class Step(WorkspaceStep):
         Constructor
         '''
         super(Step, self).__init__()
-        self.name = 'segmentation'
+        self.name = 'Segmentation'
         self.pixmap = QtGui.QPixmap(':/segmentation/icons/seg.gif')
         self.addPort(('pho#workspace#port', 'uses', 'images'))
         self.addPort(('pho#workspace#port', 'provides', 'pointcloud'))
