@@ -138,7 +138,7 @@ class PluginsAt(object):
         return [p() for p in self.mount.plugins]
 
 
-import traceback
+#import traceback
 class MetaPluginMountPoint(type):
     '''
     * A way to declare a mount point for plugins. Since plugins are an example 
