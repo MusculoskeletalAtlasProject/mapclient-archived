@@ -532,13 +532,9 @@ class WorkspaceGraphicsView(QtGui.QGraphicsView):
             for edge in node.edgeList:
                 if edge().source() == node:
                     ws.setArrayIndex(edgeIndex)
-                    print('source node')
                     indecies = [i for i, x in enumerate(nodeList) if x == edge().dest()]
                     ws.setValue('connectedTo', indecies[0])
-                    print('indexes', indecies)
                     edgeIndex += 1
-                else:
-                    print('destination node', edge().dest(), node)
             ws.endArray()
             nodeIndex += 1
         ws.endArray()
