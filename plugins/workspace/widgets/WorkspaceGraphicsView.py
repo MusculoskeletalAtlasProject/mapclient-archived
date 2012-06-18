@@ -133,27 +133,31 @@ class CommandSelectionChange(QtGui.QUndoCommand):
         self.selection = selection
         self.previousSelection = previous
 
-    def redo(self):
+    def blockSignalsAndClear(self):
         if len(self.selection) > 0:
             self.selection[0].scene().blockSignals(True)
-        for item in self.selection:
-            item.setSelected(True)
+            self.selection[0].scene().clearSelection()
+        if len(self.selection) == 0 and len(self.previousSelection) > 0:
+            self.previousSelection[0].scene().blockSignals(True)
+            self.previousSelection[0].scene().clearSelection()
+
+    def unblockSignals(self):
         if len(self.selection) > 0:
             self.selection[0].scene().blockSignals(False)
+        if len(self.selection) == 0 and len(self.previousSelection) > 0:
+            self.previousSelection[0].scene().blockSignals(False)
+
+    def redo(self):
+        self.blockSignalsAndClear()
+        for item in self.selection:
+            item.setSelected(True)
+        self.unblockSignals()
 
     def undo(self):
-        if len(self.selection) > 0:
-            self.selection[0].scene().blockSignals(True)
-        if len(self.previousSelection) > 0:
-            self.previousSelection[0].scene().blockSignals(True)
-        for item in self.selection:
-            item.setSelected(False)
+        self.blockSignalsAndClear()
         for item in self.previousSelection:
             item.setSelected(True)
-        if len(self.selection) > 0:
-            self.selection[0].scene().blockSignals(False)
-        if len(self.previousSelection) > 0:
-            self.previousSelection[0].scene().blockSignals(False)
+        self.unblockSignals()
 
 class CommandAddNode(QtGui.QUndoCommand):
     '''
@@ -596,10 +600,20 @@ class WorkspaceGraphicsView(QtGui.QGraphicsView):
     def selectionChanged(self):
         # Search the undo stack to get the previous selection
         previousSelection = []
+        previousSelectionFound = False
         for index in range(self.undoStack.count(), 0, -1):
             com = self.undoStack.command(index - 1)
             if type(com) is CommandSelectionChange:
                 previousSelection = com.selection
+                previousSelectionFound = True
+            elif type(com) is QtGui.QUndoCommand:
+                for childIndex in range(com.childCount(), 0, -1):
+                    childCom = com.child(childIndex)
+                    if type(childCom) is CommandSelectionChange:
+                        previousSelection = childCom.selection
+                        previousSelectionFound = True
+                        break
+            if previousSelectionFound:
                 break
 
         command = CommandSelectionChange(self.scene().selectedItems(), previousSelection)
@@ -666,11 +680,13 @@ class WorkspaceGraphicsView(QtGui.QGraphicsView):
             position = self.mapToScene(event.pos() - hotspot)
             node = Node(step, self)
             node.setPos(ensureItemInScene(self.scene(), node, position))
+
+            self.undoStack.beginMacro('Add node')
             command = CommandAddNode(self.scene(), node)
             self.undoStack.push(command)
-            self.scene().blockSignals(True)
+            self.scene().clearSelection()
             node.setSelected(True)
-            self.scene().blockSignals(False)
+            self.undoStack.endMacro()
 
             event.setDropAction(QtCore.Qt.MoveAction);
             event.accept();
