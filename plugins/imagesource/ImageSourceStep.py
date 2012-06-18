@@ -35,7 +35,7 @@ class ImageSourceStep(WorkspaceStep):
         '''
         super(ImageSourceStep, self).__init__()
         self.name = 'Image source'
-        self.pixmap = QtGui.QPixmap(':/imagesource/icons/landscapeimages.png')
+#        self.pixmap = QtGui.QPixmap(':/imagesource/icons/landscapeimages.png')
         self.addPort(('pho#workspace#port', 'provides', 'images'))
 
     def configure(self):

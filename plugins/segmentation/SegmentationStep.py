@@ -37,7 +37,8 @@ class Step(WorkspaceStep):
         if os.name == 'posix' and 'DISPLAY' not in os.environ:
             self.pixmap = None
         else:
-            self.pixmap = QtGui.QPixmap(':/segmentation/icons/seg.gif')
+            print('nope')
+#            self.pixmap = QtGui.QPixmap(':/segmentation/icons/seg.gif')
         self.addPort(('pho#workspace#port', 'uses', 'images'))
         self.addPort(('pho#workspace#port', 'provides', 'pointcloud'))
 
