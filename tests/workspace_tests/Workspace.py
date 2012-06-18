@@ -39,15 +39,23 @@ class FakeMainWindow(object):
 class WorkspaceTestCase(unittest.TestCase):
 
 
-    def setUp(self):
-        pass
-#        fileDir = os.path.dirname(__file__)
-#        inbuiltPluginDir = os.path.realpath(fileDir + '/../../plugins')
-#        
-#        loadPlugins(inbuiltPluginDir)
+    def assertIn(self, a, b, *args, **kwargs):
+        ''''Python < v2.7 compatibility.  Assert "a" in "b"'''
+        try:
+            f = super(WorkspaceTestCase, self).assertIn
+        except AttributeError:
+            self.assertTrue(a in b, *args, **kwargs)
+        else:
+            f(a, b, *args, **kwargs)
 
-    def tearDown(self):
-        pass
+    def assertNotIn(self, a, b, *args, **kwargs):
+        ''''Python < v2.7 compatibility.  Assert "a" NOT in "b"'''
+        try:
+            f = super(WorkspaceTestCase, self).assertNotIn
+        except AttributeError:
+            self.assertFalse(a in b, *args, **kwargs)
+        else:
+            f(a, b, *args, **kwargs)
 
     def testNew(self):
         from workspace.Workspace import Manager
