@@ -163,7 +163,7 @@ class WorkspaceTestCase(unittest.TestCase):
         self.assertEqual(step1.canConnect(step2), True)
 
     def testWorkspaceStepFactory(self):
-        import os, sys
+        import sys
         # If on a posix system with no display set we are probably testing headless
         # and cannot do QPixmap
         if os.name == 'posix' and 'DISPLAY' not in os.environ:
@@ -175,6 +175,7 @@ class WorkspaceTestCase(unittest.TestCase):
         self.assertEqual(WorkspaceStepFactory('Segmentation').name, 'Segmentation')
         self.assertRaises(ValueError, WorkspaceStepFactory, ('james'))
         app.argc()
+        Step()
 
 
 if __name__ == "__main__":
