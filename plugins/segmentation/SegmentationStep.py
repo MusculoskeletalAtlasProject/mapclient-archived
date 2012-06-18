@@ -17,7 +17,7 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     You should have received a copy of the GNU General Public License
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
-import os
+#import os
 from PyQt4 import QtGui
 from workspace.WorkspaceStep import WorkspaceStep
 
@@ -32,15 +32,16 @@ class Step(WorkspaceStep):
         '''
         super(Step, self).__init__()
         self.name = 'Segmentation'
-        # If on a posix system with no display set we are probably testing and cannot do
-        # QPixmap
-        if os.name == 'posix' and 'DISPLAY' not in os.environ:
-            self.pixmap = None
-        else:
-            print('nope')
-#            self.pixmap = QtGui.QPixmap(':/segmentation/icons/seg.gif')
+#        # If on a posix system with no display set we are probably testing and cannot do
+#        # QPixmap
+#        if os.name == 'posix' and 'DISPLAY' not in os.environ:
+#            self.pixmap = None
+#        else:
+#            print('nope')
+        self.pixmap = QtGui.QPixmap(':/segmentation/icons/seg.gif')
         self.addPort(('pho#workspace#port', 'uses', 'images'))
         self.addPort(('pho#workspace#port', 'provides', 'pointcloud'))
+        print('stop')
 
     def configure(self):
         print('configure the segmentation step')
