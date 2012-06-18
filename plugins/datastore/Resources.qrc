@@ -1,0 +1,5 @@
+<RCC>
+  <qresource prefix="/datastore/">
+    <file>icons/datastore_200.png</file>
+  </qresource>
+</RCC>

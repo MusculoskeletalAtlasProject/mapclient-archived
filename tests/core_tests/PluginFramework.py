@@ -20,21 +20,22 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
 import os, sys, unittest
 from core.PluginFramework import loadPlugins
 from Utils import ConsumeOutput
-    
+
 class PluginFrameworkTestCase(unittest.TestCase):
 
+
     def testLoadPlugins(self):
-        old_stdout = sys.stdout
-        sys.stdout = redirectStdout = ConsumeOutput()
         fileDir = os.path.dirname(__file__)
-        inbuiltPluginDir = os.path.realpath(fileDir + '/../../plugins/workspace')
-        #print(inbuiltPluginDir)
+        inbuiltPluginDir = os.path.realpath(fileDir + '/../../plugins')
+
+        old_stdout = sys.stdout
+        sys.stdout = redirectstdout = ConsumeOutput()
+        sys.path.insert(0, inbuiltPluginDir)
         loadPlugins(inbuiltPluginDir)
 
         sys.stdout = old_stdout
-        #print(redirectStdout.messages)
-        assert("Plugin 'MenuOptions' version 0.1.0 by Hugh Sorby loaded" in redirectStdout.messages)
-        #print(redirectStdout.messages[0])
+        assert("Plugin 'workspace' version 0.2.0 by Hugh Sorby loaded" in redirectstdout.messages)
+
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testLoadPlugins']
