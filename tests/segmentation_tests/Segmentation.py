@@ -18,14 +18,14 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
 import os, unittest
-from PyQt4 import QtGui
+from PyQt4 import QtGui, QtCore
 
 class SegmentationTestCase(unittest.TestCase):
 
 
     def testPlugin(self):
         import sys
-        app = QtGui.QApplication(sys.argv)
+        app = QtCore.QCoreApplication(sys.argv)
         fileDir = os.path.dirname(__file__)
         inbuiltPluginDir = os.path.realpath(fileDir + '/../../plugins')
 #        loadPlugins(inbuiltPluginDir)
