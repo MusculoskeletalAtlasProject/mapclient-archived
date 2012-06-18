@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>WorkspaceWidget</class>
+ <widget class="QWidget" name="WorkspaceWidget">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>400</width>
+    <height>300</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string/>
+  </property>
+  <layout class="QHBoxLayout" name="horizontalLayout">
+   <item>
+    <widget class="QSplitter" name="splitter">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <widget class="StepTree" name="stepTree" native="true"/>
+     <widget class="WorkspaceGraphicsView" name="graphicsView"/>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>StepTree</class>
+   <extends>QWidget</extends>
+   <header>workspace.widgets.StepTree</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>WorkspaceGraphicsView</class>
+   <extends>QGraphicsView</extends>
+   <header>workspace.widgets.WorkspaceGraphicsView</header>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections/>
+</ui>

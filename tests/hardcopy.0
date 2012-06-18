@@ -1,0 +1,53 @@
+[hsorby@tuatara tests]$ ls
+AllTests.py  AllTests.pyc  core_tests  __init__.py  __init__.pyc  __pycache__  settings_tests  Utils.py  Utils.pyc  widgets_tests  workspace_tests
+[hsorby@tuatara tests]$ python AllTests.py
+Traceback (most recent call last):
+  File "AllTests.py", line 26, in <module>
+    tests.addTests(SettingsTests.suite())
+  File "/home/hsorby/work/musculoskeletalatlas/mapclient/pmr2interface/tests/settings_tests/SettingsTests.py", line 23, in suite
+    from settings_tests.Info import InfoTestCase
+  File "/home/hsorby/work/musculoskeletalatlas/mapclient/pmr2interface/tests/settings_tests/Info.py", line 22, in <module>
+    from settings import Info
+ImportError: No module named settings
+[hsorby@tuatara tests]$
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
