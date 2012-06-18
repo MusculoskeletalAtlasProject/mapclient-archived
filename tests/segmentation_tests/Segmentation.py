@@ -25,7 +25,11 @@ class SegmentationTestCase(unittest.TestCase):
 
     def testPlugin(self):
         import sys
-        app = QtCore.QCoreApplication(sys.argv)
+        # If on a posix system with no display set we are probably testing headless
+        # and cannot do QPixmap
+        if os.name == 'posix' and 'DISPLAY' not in os.environ:
+            return
+        app = QtGui.QApplication(sys.argv)
         fileDir = os.path.dirname(__file__)
         inbuiltPluginDir = os.path.realpath(fileDir + '/../../plugins')
 #        loadPlugins(inbuiltPluginDir)
