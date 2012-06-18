@@ -166,7 +166,7 @@ class WorkspaceTestCase(unittest.TestCase):
         app = QtGui.QApplication(sys.argv)
         from workspace.WorkspaceStep import WorkspaceStepFactory
         self.assertRaises(ValueError, WorkspaceStepFactory, ('james'))
-        self.assertEqual(WorkspaceStepFactory('segmentation').name, 'segmentation')
+        self.assertEqual(WorkspaceStepFactory('Segmentation').name, 'Segmentation')
         app.argc()
 
 
