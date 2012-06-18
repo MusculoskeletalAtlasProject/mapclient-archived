@@ -17,16 +17,50 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     You should have received a copy of the GNU General Public License
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
-import unittest
-
+import os, unittest
+from PyQt4 import QtGui, QtCore
 
 class SegmentationTestCase(unittest.TestCase):
 
 
     def testPlugin(self):
-        from segmentation.Step import Step
-        print(Step.description)
-        print(Step.icon)
+        import sys
+        # If on a posix system with no display set we are probably testing headless
+        # and cannot do QPixmap
+        if os.name == 'posix' and 'DISPLAY' not in os.environ:
+            return
+        app = QtGui.QApplication(sys.argv)
+        fileDir = os.path.dirname(__file__)
+        inbuiltPluginDir = os.path.realpath(fileDir + '/../../plugins')
+#        loadPlugins(inbuiltPluginDir)
+
+        sys.path.insert(0, inbuiltPluginDir)
+#        from workspace.Workspace import Manager
+        from segmentation.SegmentationStep import Step
+        myStep = Step()
+        self.assertEqual(myStep.name, 'Segmentation')
+        app.argc() # eclipse warning killer
+        del sys.path[0]
+
+#    def testSerialisation(self):
+#        import sys
+#        app = QtGui.QApplication(sys.argv)
+#        from segmentation.SegmentationStep import Step
+#        from workspace.WorkspaceStep import WorkspaceStep
+#        myStep = Step()
+#
+#        itemData = QtCore.QByteArray()
+#        writeDataStream = QtCore.QDataStream(itemData, QtCore.QIODevice.WriteOnly)
+#
+#        writeDataStream = myStep.serialize(writeDataStream)
+#
+#        readDataStream = QtCore.QDataStream(itemData, QtCore.QIODevice.ReadOnly)
+#        passedStep = WorkspaceStep()
+#        retStep = Step.deserialize(passedStep, readDataStream)
+#        self.assertEqual(retStep.name, 'segmentation')
+#        self.assertNotEqual(retStep.pixmap, None)
+#        self.assertEqual(len(retStep.ports), 2)
+#        app.argc() # eclipse warning killer
 
 
 if __name__ == "__main__":

@@ -26,29 +26,34 @@ for name in API_NAMES:
 
 import os, sys, locale
 from core.PluginFramework import loadPlugins
+from settings import Info
 
 # Ensure the MAP Client module directory is in the system path so relative 'import' statements work
 base_path = os.path.dirname(os.path.abspath(__file__))
 if sys.path.count(base_path) == 0:
     sys.path.insert(0, base_path)
-    
 
-# This method starts MAP Client
-def main():
-    '''
-    Initialise common settings and check the operating environment before starting the application.
-    '''
 
-    from settings import Info
+def progheader():
+    '''
+    Display program header
+    '''
     programHeader = '   MAP Client (version %s)   ' % Info.ABOUT['version']
     print('-' * len(programHeader))
     print(programHeader)
     print('-' * len(programHeader))
 
+# This method starts MAP Client
+def winmain():
+    '''
+    Initialise common settings and check the operating environment before starting the application.
+    '''
+
+    progheader()
     # import the locale, and set the locale. This is used for 
     # locale-aware number to string formatting
     locale.setlocale(locale.LC_ALL, '')
-    
+
     from PyQt4 import QtGui, QtCore
     app = QtGui.QApplication(sys.argv)
 
@@ -56,9 +61,9 @@ def main():
     QtCore.QCoreApplication.setOrganizationName(Info.ORGANISATION_NAME)
     QtCore.QCoreApplication.setOrganizationDomain(Info.ORGANISATION_DOMAIN)
     QtCore.QCoreApplication.setApplicationName(Info.APPLICATION_NAME)
-    
+
     from PyQt4.QtCore import QSettings
-    settings = QSettings()    
+    settings = QSettings()
     settings.beginGroup('Plugins')
     loadDefaultPlugins = settings.value('load_defaults', True)
     settings.endGroup()
@@ -66,15 +71,56 @@ def main():
     if loadDefaultPlugins:
         fileDir = os.path.dirname(os.path.abspath(__file__))
         inbuiltPluginDir = os.path.realpath(fileDir + '/../plugins')
+        sys.path.insert(0, inbuiltPluginDir)
         loadPlugins(inbuiltPluginDir)
+        del sys.path[0]
 
     from widgets.MainWindow import MainWindow
     window = MainWindow()
     window.show()
-    
+
     sys.exit(app.exec_())
-    
+
+class ConsumeOutput(object):
+    def __init__(self):
+        self.messages = list()
+
+    def write(self, message):
+        self.messages.append(message)
+
+def main():
+#    progheader()
+    locale.setlocale(locale.LC_ALL, '')
+
+    from optparse import OptionParser
+    from PyQt4 import QtCore
+    app = QtCore.QCoreApplication(sys.argv)
+
+    # Set the default organisation name and application name used to store application settings
+    QtCore.QCoreApplication.setOrganizationName(Info.ORGANISATION_NAME)
+    QtCore.QCoreApplication.setOrganizationDomain(Info.ORGANISATION_DOMAIN)
+    QtCore.QCoreApplication.setApplicationName(Info.APPLICATION_NAME)
+
+    old_stdout = sys.stdout
+    sys.stdout = redirectstdout = ConsumeOutput()
+    progheader()
+    sys.stdout = old_stdout
+    versionstring = ''.join(redirectstdout.messages)
+
+    progname = os.path.splitext(__file__)[0]
+    usage = 'usage: {0} [options] workspace\n    Execute the given workspace'.format(progname)
+    parser = OptionParser(usage, version=versionstring)
+    options, args = parser.parse_args()
+
+    print(sys.argv)
+    print(options, args)
+
+    # Possibly don't need to run app.exec_()
+    sys.exit(app.quit())
 
 
 if __name__ == '__main__':
-    main()
+    if len(sys.argv) == 1: # No command line args
+        winmain()
+    else:
+        main()

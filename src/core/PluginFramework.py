@@ -25,17 +25,52 @@ http://martyalchin.com/2008/jan/10/simple-plugin-framework/
 
 import os, sys, imp, pkgutil
 
+class LoadDepth(object):
+    depth = 0
+
 def loadPlugins(pkgDir):
     ii = pkgutil.ImpImporter(pkgDir)
+#    sys.path.insert(0, pkgDir)
+    LoadDepth.depth += 1
+    try:
+        for moduleName, isPkg in ii.iter_modules():
+#        projectName = os.path.basename(pkgDir)
+            if isPkg:
+                pkgPath = os.path.join(pkgDir, moduleName)
+                initPackage(pkgPath)
+#                project = __import__(moduleName)
+#                print(moduleName)
+#                sys.modules[moduleName] = project
+
+                loadPlugins(pkgPath)
+            else:
+                loadModule(moduleName, pkgDir)
+#            print(moduleName)
+    finally:
+#        print(sys.path)
+#        del sys.path[0]
+        LoadDepth.depth -= 1
+#        print(sys.path)
+
+def loadPlugins2(pkgDir):
+    ii = pkgutil.ImpImporter(pkgDir)
+    LoadDepth.depth += 1
+#    print(LoadDepth.depth)
     for moduleName, isPkg in ii.iter_modules():
         if isPkg:
             pkgPath = os.path.join(pkgDir, moduleName)
             module = initPackage(pkgPath)
-            if module:
+#            print(pkgPath)
+            if module and pkgDir not in sys.path and LoadDepth.depth == 1:
                 sys.path.append(pkgDir)
+#                print(pkgDir)
+#            __import__(moduleName)
             loadPlugins(pkgPath)
         else:
+#            print(moduleName, pkgDir)
             loadModule(moduleName, pkgDir)
+
+    LoadDepth.depth -= 1
 
 def initPackage(pkgDir):
     fp, path, description = imp.find_module('__init__', [pkgDir])
@@ -48,21 +83,25 @@ def initPackage(pkgDir):
 #    finally:
 #        if fp:
 #            fp.close()
+    if LoadDepth.depth == 1:
+        print("Plugin '{0}' version {1} by {2} loaded".format(pkgDir.split(os.sep)[-1], module.__version__, module.__author__))
+    fp.close()
 
     return module
 
 def loadModule(moduleName, moduleDir):
     fp, path, description = imp.find_module(moduleName, [moduleDir])
 
-    module = imp.load_module(moduleDir, fp, path, description)
+    imp.load_module(moduleDir, fp, path, description)
+#    print('======= module', module)
 
-    moduleVersion = '-.-.-'
-    if hasattr(module, '__version__'):
-        moduleVersion = module.__version__
-    moduleAuthor = '?'
-    if hasattr(module, '__author__'):
-        moduleAuthor = module.__author__
-    print("Plugin '{0}' version {1} by {2} loaded".format(moduleName, moduleVersion, moduleAuthor))
+#    moduleVersion = '-.-.-'
+#    if hasattr(module, '__version__'):
+#        moduleVersion = module.__version__
+#    moduleAuthor = '?'
+#    if hasattr(module, '__author__'):
+#        moduleAuthor = module.__author__
+#    print("Plugin '{0}' version {1} by {2} loaded".format(moduleName, moduleVersion, moduleAuthor))
     fp.close()
 #    try:
 #        module = imp.load_module(moduleDir, fp, path, description)
@@ -99,14 +138,14 @@ class PluginsAt(object):
         return [p() for p in self.mount.plugins]
 
 
-
+#import traceback
 class MetaPluginMountPoint(type):
     '''
     * A way to declare a mount point for plugins. Since plugins are an example 
       of loose coupling, there needs to be a neutral location, somewhere between
       the plugins and the code that uses them, that each side of the system can
       look at, without having to know the details of the other side. Trac calls
-      this is an 'extension point'.
+      this an 'extension point'.
     * A way to register a plugin at a particular mount point. Since internal code
       can't (or at the very least, shouldn't have to) look around to find plugins 
       that might work for it, there needs to be a way for plugins to announce their
@@ -133,6 +172,11 @@ class MetaPluginMountPoint(type):
             # Simply appending it to the list is all that's needed to keep
             # track of it later.
             cls.plugins.append(cls)
+
+#        traceback.print_stack()
+#        for item in sys.modules:
+#            print(item)
+#        print('=========', cls, name)
 
     def getPlugins(self, *args, **kwargs):
         return [p(*args, **kwargs) for p in self.plugins]
@@ -171,6 +215,21 @@ class MetaQObjectPluginMountPoint(MetaQObject, MetaPluginMountPoint):
 # 
 #''' 
 #
+
+'''
+Plugins can inherit this mount point to extend
+
+ A plugin that registers this mount point must have attributes
+ * None
+ 
+ A plugin that registers this mount point could have attributes
+ * None
+ 
+ It must implement
+ * pass 
+ 
+'''
+StackedWidgetMountPoint = MetaPluginMountPoint('StackedWidget', (object,), {})
 
 
 '''

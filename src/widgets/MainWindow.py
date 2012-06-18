@@ -18,14 +18,13 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
 
-from PyQt4 import QtGui
-from PyQt4.QtGui import QMainWindow, QMenu, QKeySequence
-from PyQt4.QtCore import QSettings, QSize, QPoint
+from PyQt4 import QtCore, QtGui
 
 from widgets.MainWindowUi import Ui_MainWindow
-from core.PluginFramework import MenuOption
+from core.PluginFramework import StackedWidgetMountPoint
+from core.UndoManager import UndoManager
 
-class MainWindow(QMainWindow):
+class MainWindow(QtGui.QMainWindow):
     '''
     This is the main window for the MAP Client.
     '''
@@ -34,64 +33,61 @@ class MainWindow(QMainWindow):
         '''
         Constructor
         '''
-        QMainWindow.__init__(self)
+        QtGui.QMainWindow.__init__(self)
 
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
         self._makeConnections()
+        self.undoManager = UndoManager()
+
+#        undoManager = self.mainWindow.workspaceManager.undoManager
+        undoAction = self.undoManager.createUndoAction(self.ui.menu_Edit)
+        undoAction.setShortcut(QtGui.QKeySequence('Ctrl+Z'))
+        redoAction = self.undoManager.createRedoAction(self.ui.menu_Edit)
+        redoAction.setShortcut(QtGui.QKeySequence('Ctrl+Shift+Z'))
+
+        self.ui.menu_Edit.addAction(undoAction)
+        self.ui.menu_Edit.addAction(redoAction)
+
+        self.ui.stackedWidget.currentChanged.connect(self.centralWidgetChanged)
+        self.stackedWidgetPages = StackedWidgetMountPoint.getPlugins(self)
+
+        for stackedWidgetPage in self.stackedWidgetPages:
+            if not hasattr(self, stackedWidgetPage.name):
+                setattr(self, stackedWidgetPage.name, stackedWidgetPage)
+                stackedWidgetPage.setWidgetIndex(self.ui.stackedWidget.addWidget(stackedWidgetPage.getWidget()))
+
         self._readSettings()
 
-        self.menuPlugins = MenuOption.getPlugins()
-        for plugin in self.menuPlugins:
-            plugin.parent = self
-            pluginAction = QtGui.QAction(plugin.actionLabel, plugin)
-            pluginAction.triggered.connect(plugin.execute)
-            pluginAction.setObjectName(plugin.actionLabel)
-            pluginAction.setShortcut(QKeySequence(plugin.shortcut))
-            pluginAction.setStatusTip(plugin.statustip)
-            if len(plugin.actionLabel) == 0:
-                pluginAction.setSeparator(True)
-
-            pluginMenu = self.ui.menubar.findChild(QtGui.QMenu, plugin.menuName)
-            if not pluginMenu:
-                menu = QMenu(plugin.menuLabel)
-                menu.setObjectName(plugin.menuName)
-                self.ui.menubar.insertMenu(self.ui.menubar.children()[1], menu)
-                pluginMenu = menu
-
-            if plugin.subMenuLabel:
-                menu = pluginMenu.findChild(QtGui.QMenu, name=plugin.subMenuName)
-                if not menu:
-                    menu = QMenu(plugin.subMenuLabel, pluginMenu)
-                    menu.setObjectName(plugin.subMenuName)
-                    firstAction = pluginMenu.actions()[0]
-                    pluginMenu.insertMenu(firstAction, menu)
-
-                pluginMenu = menu
-
-            if len(pluginMenu.actions()) > 0:
-                firstAction = pluginMenu.actions()[0]
-                pluginMenu.insertAction(firstAction, pluginAction)
-            else:
-                pluginMenu.addAction(pluginAction)
 
     def _writeSettings(self):
-        settings = QSettings()
+        settings = QtCore.QSettings()
         settings.beginGroup('MainWindow')
         settings.setValue('size', self.size())
         settings.setValue('pos', self.pos())
         settings.endGroup()
+        for stackedWidgetPage in self.stackedWidgetPages:
+            stackedWidgetPage.writeSettings(settings)
 
     def _readSettings(self):
-        settings = QSettings()
+        settings = QtCore.QSettings()
         settings.beginGroup('MainWindow')
-        self.resize(settings.value('size', QSize(600, 400)))
-        self.move(settings.value('pos', QPoint(100, 100)))
+        self.resize(settings.value('size', QtCore.QSize(600, 400)))
+        self.move(settings.value('pos', QtCore.QPoint(100, 100)))
         settings.endGroup()
+        for stackedWidgetPage in self.stackedWidgetPages:
+            stackedWidgetPage.readSettings(settings)
 
     def _makeConnections(self):
         self.ui.action_Quit.triggered.connect(self.quitApplication)
         self.ui.action_About.triggered.connect(self.about)
+
+    def setUndoStack(self, stack):
+        self.undoManager.setCurrentStack(stack)
+
+    def centralWidgetChanged(self, index):
+        widget = self.ui.stackedWidget.currentWidget()
+        widget.setActive()
 
     def closeEvent(self, event):
         self.quitApplication()
@@ -105,6 +101,3 @@ class MainWindow(QMainWindow):
         dlg = AboutDialog(self)
         dlg.setModal(True)
         dlg.exec_()
-
-    def thisOne(self):
-        print('here I am')

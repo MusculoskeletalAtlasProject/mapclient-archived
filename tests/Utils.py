@@ -21,6 +21,72 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
 class ConsumeOutput(object):
     def __init__(self):
         self.messages = list()
-        
+
     def write(self, message):
         self.messages.append(message)
+
+import unittest
+
+class UnitTestOutputTestCase(unittest.TestCase):
+
+    def test1(self):
+        [p, f] = parseUnitTestOutput('py1.log')
+        assert(p == 9)
+        assert(f == 0)
+
+    def test2(self):
+        [p, f] = parseUnitTestOutput('py2.log')
+        assert(p == 8)
+        assert(f == 1)
+
+    def test3(self):
+        [p, f] = parseUnitTestOutput('py3.log')
+        assert(p == 12)
+        assert(f == 2)
+
+    def test4(self):
+        [p, f] = parseUnitTestOutput('py4.log')
+        assert(p == 13)
+        assert(f == 1)
+
+import re
+
+def parseUnitTestOutput(filename):
+    '''
+    Function for parsing unittest output for gathering pass and fail counts. 
+    '''
+    f = open(filename)
+    lines = f.readlines()
+
+    lines.reverse()
+    if len(lines) >= 3:
+        statusLine = lines[0].rstrip('\r\n')
+        totalLine = lines[2].rstrip('\r\n')
+
+        m = re.match('Ran (\d+)', totalLine)
+        total = int(m.group(1))
+        if statusLine == 'OK':
+            passed = total
+            failed = 0
+        else:
+            errorDesc = ['failures', 'errors']
+            failed = 0
+            for errorType in errorDesc:
+                m = re.match('.*{0}=(\d+)'.format(errorType), statusLine)
+                if m:
+                    failed += int(m.group(1))
+
+            passed = total - failed
+    else:
+        passed = 0
+        failed = 0
+
+    return passed, failed
+
+def suite():
+    tests = unittest.TestSuite()
+    tests.addTests(unittest.TestLoader().loadTestsFromTestCase(UnitTestOutputTestCase))
+    return tests
+
+if __name__ == '__main__':
+    unittest.TextTestRunner().run(suite())
