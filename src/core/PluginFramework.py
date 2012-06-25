@@ -256,3 +256,19 @@ Plugins can inherit this mount point in order to add to the menu of the GUI.
  '''
 MenuOption = MetaQObjectPluginMountPoint('MenuOption', (QObject,), {'subMenuLabel': None, 'subMenuName': None, 'shortcut': None, 'statustip': ''})
 
+'''
+Plugins can inherit this mount point to add a tool to the tool menu.  It is passed two 
+keyword arguments, the tool menu ('menu_Tool') and the parent widget ('parent').
+
+ A plugin that registers this mount point must have attributes
+ * None
+ 
+ A plugin that registers this mount point could have attributes
+ * None
+ 
+ It must implement
+ * pass 
+ 
+'''
+ToolMountPoint = MetaPluginMountPoint('ToolMountPoint', (object,), {})
+

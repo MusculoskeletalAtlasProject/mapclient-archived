@@ -18,6 +18,7 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
 from PyQt4 import QtGui
+from core.PluginFramework import ToolMountPoint
 from workspace.widgets.WorkspaceWidgetUi import Ui_WorkspaceWidget
 from workspace.MountPoint import WorkspaceStepMountPoint
 
@@ -43,6 +44,9 @@ class WorkspaceWidget(QtGui.QWidget):
         for step in self.workspaceStepPlugins:
             if step.name != 'empty':
                 self.stepTree.addStep(step)
+
+        # load tools
+        self.toolPlugins = ToolMountPoint.getPlugins(self.menu_Tools, self)
 
         self.updateUi()
 
@@ -104,7 +108,8 @@ class WorkspaceWidget(QtGui.QWidget):
         self.updateUi()
 
     def _createMenuItems(self):
-        menu_File = self.mainWindow.ui.menubar.findChild(QtGui.QMenu, 'menu_File')
+        menubar = self.mainWindow.ui.menubar
+        menu_File = menubar.findChild(QtGui.QMenu, 'menu_File')
         lastFileMenuAction = menu_File.actions()[-1]
         menu_New = menu_File.findChild(QtGui.QMenu, name='&New')
         if not menu_New:
@@ -127,4 +132,19 @@ class WorkspaceWidget(QtGui.QWidget):
         menu_File.insertSeparator(lastFileMenuAction)
         menu_File.insertAction(lastFileMenuAction, self.action_Save)
         menu_File.insertSeparator(lastFileMenuAction)
+
+        lastMenubarAction = menubar.actions()[-1]
+        self.menu_Tools = menubar.findChild(QtGui.QMenu, 'menu_Tools')
+        if not self.menu_Tools:
+            self.menu_Tools = QtGui.QMenu('&Tools', menubar)
+
+        self.menu_Window = menubar.findChild(QtGui.QMenu, 'menu_Window')
+        if not self.menu_Window:
+            self.menu_Window = QtGui.QMenu('&Window', menubar)
+
+
+        menubar.insertMenu(lastMenubarAction, self.menu_Tools)
+        menubar.insertMenu(lastMenubarAction, self.menu_Window)
+
+
 

@@ -17,11 +17,27 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     You should have received a copy of the GNU General Public License
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
-__version__ = '0.1.0'
-__author__ = 'Hugh Sorby'
+from PyQt4 import QtGui
+from core.PluginFramework import ToolMountPoint
+from pmr2register.RegisterDialog import RegisterDialog
 
-import sip
-API_NAMES = ["QDate", "QDateTime", "QString", "QTextStream", "QTime", "QUrl", "QVariant"]
-API_VERSION = 2
-for name in API_NAMES:
-    sip.setapi(name, API_VERSION)
+class RegisterTool(ToolMountPoint):
+
+    def __init__(self, menu_Tool, parent):
+        self.parent = parent
+        # add action to menu
+        lastMenuAction = None
+        if menu_Tool.actions():
+            lastMenuAction = menu_Tool.actions()[-1]
+
+        action_Register = QtGui.QAction('&PMR Register', menu_Tool)
+        action_Register.setObjectName('action_Register')
+        action_Register.triggered.connect(self.onRegister)
+        menu_Tool.insertAction(lastMenuAction, action_Register)
+
+    def onRegister(self):
+        dlg = RegisterDialog(self.parent)
+        dlg.show()
+        dlg.exec_()
+
+
