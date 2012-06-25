@@ -74,13 +74,16 @@ class WorkspaceStepPort(object):
 
 class WorkspaceStep(WorkspaceStepMountPoint):
     '''
-    A step that acts like the step plugin duck
+    A step that acts like the step plugin duck.  Takes an optional manager argument 
+    that implements a function addStep.  Any derived WorkspaceStep must call the manager.addStep
+    function (if the manager exists) at the end of it's initialisation if it wants to be visible.
     '''
 
-    def __init__(self):
+    def __init__(self, manager=None):
         '''
         Constructor
         '''
+        self.manager = manager
         self.name = 'empty'
         self.ports = []
         self.pixmap = None
@@ -106,8 +109,8 @@ class WorkspaceStep(WorkspaceStepMountPoint):
 
         return False
 
-def WorkspaceStepFactory(step_name):
-    for step in WorkspaceStepMountPoint.getPlugins():
+def WorkspaceStepFactory(step_name, *args, **kwargs):
+    for step in WorkspaceStepMountPoint.getPlugins(*args, **kwargs):
         if step_name == step.name:
             return step
 

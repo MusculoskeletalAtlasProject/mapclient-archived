@@ -39,11 +39,9 @@ class WorkspaceWidget(QtGui.QWidget):
         self._createMenuItems()
         self.previousLocation = ''
 
-        self.workspaceStepPlugins = WorkspaceStepMountPoint.getPlugins()
-        self.stepTree = self.findChild(QtGui.QWidget, "stepTree")
-        for step in self.workspaceStepPlugins:
-            if step.name != 'empty':
-                self.stepTree.addStep(step)
+        # load workspace steps
+        stepTree = self.findChild(QtGui.QWidget, "stepTree")
+        self.workspaceStepPlugins = WorkspaceStepMountPoint.getPlugins(stepTree)
 
         # load tools
         self.toolPlugins = ToolMountPoint.getPlugins(self.menu_Tools, self)

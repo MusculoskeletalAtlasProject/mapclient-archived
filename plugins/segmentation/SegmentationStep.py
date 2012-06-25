@@ -25,15 +25,17 @@ class Step(WorkspaceStep):
     A step that acts like the step plugin duck
     '''
 
-    def __init__(self):
+    def __init__(self, manager=None):
         '''
         Constructor
         '''
-        super(Step, self).__init__()
+        super(Step, self).__init__(manager)
         self.name = 'Segmentation'
         self.pixmap = QtGui.QPixmap(':/segmentation/icons/seg.gif')
         self.addPort(('pho#workspace#port', 'uses', 'images'))
         self.addPort(('pho#workspace#port', 'provides', 'pointcloud'))
+        if self.manager:
+            self.manager.addStep(self)
 
     def configure(self):
         print('configure the segmentation step')

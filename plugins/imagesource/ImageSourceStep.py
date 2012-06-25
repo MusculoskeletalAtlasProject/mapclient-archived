@@ -29,14 +29,16 @@ class ImageSourceStep(WorkspaceStep):
     It describes the location of an image/a set of images.
     It can be used as an image source.
     '''
-    def __init__(self):
+    def __init__(self, manager=None):
         '''
         Constructor
         '''
-        super(ImageSourceStep, self).__init__()
+        super(ImageSourceStep, self).__init__(manager)
         self.name = 'Image source'
         self.pixmap = QtGui.QPixmap(':/imagesource/icons/landscapeimages.png')
         self.addPort(('pho#workspace#port', 'provides', 'images'))
+        if self.manager:
+            self.manager.addStep(self)
 
     def configure(self):
         print('configure image source step')

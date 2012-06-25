@@ -29,14 +29,16 @@ class DataStoreStep(WorkspaceStep):
     It describes the location of an image/a set of images.
     It can be used as an image source.
     '''
-    def __init__(self):
+    def __init__(self, manager=None):
         '''
         Constructor
         '''
-        super(DataStoreStep, self).__init__()
+        super(DataStoreStep, self).__init__(manager)
         self.name = 'Data store'
         self.pixmap = QtGui.QPixmap(':/datastore/icons/datastore_200.png')
         self.addPort(('pho#workspace#port', 'uses', 'pointcloud'))
+        if self.manager:
+            self.manager.addStep(self)
 
     def configure(self):
         print('configure data store step')
