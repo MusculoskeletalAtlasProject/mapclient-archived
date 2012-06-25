@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui/RegisterDialog.ui'
 #
-# Created: Mon Jun 25 14:22:41 2012
+# Created: Mon Jun 25 15:11:13 2012
 #      by: PyQt4 UI code generator 4.9.1
 #
 # WARNING! All changes made in this file will be lost!
@@ -37,6 +37,12 @@ class Ui_PMRRegistrationTool(object):
         self.frame.setObjectName(_fromUtf8("frame"))
         self.horizontalLayout = QtGui.QHBoxLayout(self.frame)
         self.horizontalLayout.setObjectName(_fromUtf8("horizontalLayout"))
+        self.progressBar = QtGui.QProgressBar(self.frame)
+        self.progressBar.setEnabled(True)
+        self.progressBar.setProperty("value", 24)
+        self.progressBar.setTextVisible(True)
+        self.progressBar.setObjectName(_fromUtf8("progressBar"))
+        self.horizontalLayout.addWidget(self.progressBar)
         spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout.addItem(spacerItem)
         self.pushButton_Close = QtGui.QPushButton(self.frame)

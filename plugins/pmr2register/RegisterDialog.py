@@ -31,11 +31,15 @@ class RegisterDialog(QtGui.QDialog):
         '''
         Constructor
         '''
-        self.previousCursor = None
         super(RegisterDialog, self).__init__(parent)
+        self.timer = QtCore.QTimer()
+        self.timer.setSingleShot(True)
+        self.timer.timeout.connect(self.onLoadFinishDelayed)
         self.ui = RegisterDialogUi.Ui_PMRRegistrationTool()
         self.ui.setupUi(self)
+        self.ui.progressBar.hide()
         self.ui.webView.loadStarted.connect(self.onLoadStart)
+        self.ui.webView.loadProgress.connect(self.onLoadProgess)
         self.ui.webView.loadFinished.connect(self.onLoadFinish)
         self.ui.webView.page().networkAccessManager().sslErrors.connect(self.onSSLError)
         self.ui.webView.load(QtCore.QUrl("https://bioeng1033.bioeng.auckland.ac.nz/pmr/register"))
@@ -50,10 +54,16 @@ class RegisterDialog(QtGui.QDialog):
             nr.ignoreSslErrors()
 
     def onLoadStart(self):
-        print('onLoadStart')
+        self.ui.progressBar.show()
         self.previousCursor = self.ui.webView.cursor()
         self.ui.webView.setCursor(QtGui.QCursor(QtCore.Qt.WaitCursor))
 
     def onLoadFinish(self):
-        print('onLoadFinish')
-        self.ui.webView.setCursor(self.previousCursor)
+        # Add small delay to this signal so user can see 100%
+        self.timer.start(300)
+
+    def onLoadFinishDelayed(self):
+        self.ui.progressBar.hide()
+
+    def onLoadProgess(self, value):
+        self.ui.progressBar.setValue(value)
