@@ -21,10 +21,13 @@ import unittest
 
 
 def suite():
-    from segmentation_tests.Segmentation import SegmentationTestCase
+    from segmentation_tests.segmentation import SegmentationTestCase
     tests = unittest.TestSuite()
     tests.addTests(unittest.TestLoader().loadTestsFromTestCase(SegmentationTestCase))
     return tests
+
+def load_tests(loader, tests, pattern):
+    return suite()
 
 if __name__ == '__main__':
     unittest.TextTestRunner().run(suite())

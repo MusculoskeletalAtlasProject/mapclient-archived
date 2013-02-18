@@ -20,10 +20,13 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
 import unittest
 
 def suite():
-    from settings_tests.Info import InfoTestCase
+    from settings_tests.info import InfoTestCase
     tests = unittest.TestSuite()
     tests.addTests(unittest.TestLoader().loadTestsFromTestCase(InfoTestCase))
     return tests
+
+def load_tests(loader, tests, pattern):
+    return suite()
 
 if __name__ == '__main__':
     unittest.TextTestRunner().run(suite())

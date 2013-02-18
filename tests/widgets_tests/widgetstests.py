@@ -21,10 +21,13 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
 import unittest
 
 def suite():
-    from widgets_tests.MainWindow import MainWindowTestCase
+    from widgets_tests.mainwindow import MainWindowTestCase
     tests = unittest.TestSuite()
     tests.addTests(unittest.TestLoader().loadTestsFromTestCase(MainWindowTestCase))
     return tests
+
+def load_tests(loader, tests, pattern):
+    return suite()
 
 if __name__ == '__main__':
     unittest.TextTestRunner().run(suite())
