@@ -41,7 +41,7 @@
          <string/>
         </property>
         <property name="pixmap">
-         <pixmap resource="Resources.qrc">:/mapclient/images/AboutLogo.png</pixmap>
+         <pixmap resource="resources.qrc">:/mapclient/images/AboutLogo.png</pixmap>
         </property>
         <property name="alignment">
          <set>Qt::AlignCenter</set>
@@ -119,6 +119,7 @@
   </layout>
  </widget>
  <resources>
+  <include location="resources.qrc"/>
   <include location="Resources.qrc"/>
  </resources>
  <connections>
