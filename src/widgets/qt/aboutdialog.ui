@@ -120,7 +120,6 @@
  </widget>
  <resources>
   <include location="resources.qrc"/>
-  <include location="Resources.qrc"/>
  </resources>
  <connections>
   <connection>

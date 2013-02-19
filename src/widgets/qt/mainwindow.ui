@@ -14,7 +14,7 @@
    <string>MAP Client</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="Resources.qrc">
+   <iconset resource="resources.qrc">
     <normaloff>:/mapclient/images/Icon.png</normaloff>:/mapclient/images/Icon.png</iconset>
   </property>
   <property name="locale">
@@ -77,7 +77,7 @@
   </action>
  </widget>
  <resources>
-  <include location="Resources.qrc"/>
+  <include location="resources.qrc"/>
  </resources>
  <connections/>
 </ui>
