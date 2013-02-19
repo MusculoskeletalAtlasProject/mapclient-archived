@@ -19,7 +19,7 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
 '''
 import weakref, math, sys
 from PyQt4 import QtCore, QtGui
-from workspace.workspacestep import WorkspaceStepFactory
+from workspace_plugin.workspacestep import WorkspaceStepFactory
 
 class ErrorItem(QtGui.QGraphicsItem):
 

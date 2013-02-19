@@ -59,7 +59,7 @@ class WorkspaceTestCase(unittest.TestCase):
             f(a, b, *args, **kwargs)
 
     def testNew(self):
-        from workspace.workspace import Manager
+        from workspace_plugin.workspace import Manager
         dirName = tempfile.mkdtemp(prefix='new_workspace_')
         try:
             ws = Manager(FakeMainWindow())
@@ -70,7 +70,7 @@ class WorkspaceTestCase(unittest.TestCase):
             os.rmdir(dirName)
 
     def testNewWithNone(self):
-        from workspace.workspace import Manager, WorkspaceError
+        from workspace_plugin.workspace import Manager, WorkspaceError
         ws = Manager(FakeMainWindow())
         try:
             ws.new(None)
@@ -78,7 +78,7 @@ class WorkspaceTestCase(unittest.TestCase):
             pass
 
     def testNewWithNonexistentDir(self):
-        from workspace.workspace import Manager
+        from workspace_plugin.workspace import Manager
         tempDir = tempfile.gettempdir() + TEST_WORKSPACE_DIR_NAME
         ws = Manager(FakeMainWindow())
         ws.new(tempDir)
@@ -89,7 +89,7 @@ class WorkspaceTestCase(unittest.TestCase):
         os.rmdir(tempDir)
 
     def testSave(self):
-        from workspace.workspace import Manager
+        from workspace_plugin.workspace import Manager
             
         tempDir = tempfile.gettempdir() + TEST_WORKSPACE_DIR_NAME
         ws = Manager(FakeMainWindow())
@@ -98,7 +98,7 @@ class WorkspaceTestCase(unittest.TestCase):
         ws.save()
 
     def testOpen(self):
-        from workspace.workspace import Manager
+        from workspace_plugin.workspace import Manager
         tempDir = tempfile.gettempdir() + TEST_WORKSPACE_DIR_NAME
         ws = Manager(FakeMainWindow())
         ws.widget = FakeWidget()
@@ -110,14 +110,14 @@ class WorkspaceTestCase(unittest.TestCase):
         os.rmdir(tempDir)
 
     def testPort(self):
-        from workspace.workspacestep import WorkspaceStepPort
+        from workspace_plugin.workspacestep import WorkspaceStepPort
         port = WorkspaceStepPort()
         port.addProperty(('pho#workspace#port', 'uses', 'images'))
         self.assertIn('pho#workspace#port', port.subj)
 
 
     def testPortConnect(self):
-        from workspace.workspacestep import WorkspaceStepPort
+        from workspace_plugin.workspacestep import WorkspaceStepPort
         portIn = WorkspaceStepPort()
         portIn.addProperty(('pho#workspace#port', 'uses', 'images'))
         portOut = WorkspaceStepPort()
@@ -129,7 +129,7 @@ class WorkspaceTestCase(unittest.TestCase):
         self.assertEqual(portOut.canConnect(port2), False)
 
     def testPortDescription(self):
-        from workspace.workspacestep import WorkspaceStepPort
+        from workspace_plugin.workspacestep import WorkspaceStepPort
         port = WorkspaceStepPort()
         port.addProperty(('pho#workspace#port', 'uses', 'images'))
         port.addProperty(('pho#workspace#port', 'provides', 'pointcloud'))
@@ -141,7 +141,7 @@ class WorkspaceTestCase(unittest.TestCase):
 #        self.assertIn('pointcloud', objs)
 
     def testPortPredicates(self):
-        from workspace.workspacestep import WorkspaceStepPort
+        from workspace_plugin.workspacestep import WorkspaceStepPort
         port = WorkspaceStepPort()
         port.addProperty(('pho#workspace#port', 'uses', 'images'))
         port.addProperty(('pho#workspace#port', 'provides', 'pointcloud'))
@@ -154,7 +154,7 @@ class WorkspaceTestCase(unittest.TestCase):
         self.assertEqual(0, len(preds))
 
     def testStepConnection(self):
-        from workspace.workspacestep import WorkspaceStep
+        from workspace_plugin.workspacestep import WorkspaceStep
         step1 = WorkspaceStep()
         step1.addPort(('pho#workspace#port', 'provides', 'images'))
         step2 = WorkspaceStep()
@@ -173,7 +173,7 @@ class WorkspaceTestCase(unittest.TestCase):
         from PyQt4 import QtGui
         app = QtGui.QApplication(sys.argv)
         from segmentation.segmentationstep import Step
-        from workspace.workspacestep import WorkspaceStepFactory
+        from workspace_plugin.workspacestep import WorkspaceStepFactory
         self.assertEqual(WorkspaceStepFactory('Segmentation').name, 'Segmentation')
         self.assertRaises(ValueError, WorkspaceStepFactory, ('james'))
         app.argc()

@@ -21,7 +21,7 @@ import os
 from PyQt4 import QtCore
 from settings import info
 from core import pluginframework
-from workspace.widgets.workspacewidget import WorkspaceWidget
+from workspace_plugin.widgets.workspacewidget import WorkspaceWidget
 
 def workspaceConfigurationExists(location):
     return os.path.exists(location + '/' + info.WORKSPACE_NAME)

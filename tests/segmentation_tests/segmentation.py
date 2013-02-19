@@ -18,7 +18,7 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
 import os, unittest
-from PyQt4 import QtGui, QtCore
+from PyQt4 import QtGui
 
 class SegmentationTestCase(unittest.TestCase):
 
