@@ -172,7 +172,7 @@ class WorkspaceTestCase(unittest.TestCase):
             return
         from PyQt4 import QtGui
         app = QtGui.QApplication(sys.argv)
-        from segmentation.segmentationstep import Step
+        from segmentation_plugin.segmentationstep import Step
         from workspace_plugin.workspacestep import WorkspaceStepFactory
         self.assertEqual(WorkspaceStepFactory('Segmentation').name, 'Segmentation')
         self.assertRaises(ValueError, WorkspaceStepFactory, ('james'))
