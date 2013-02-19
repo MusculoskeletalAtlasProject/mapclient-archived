@@ -18,7 +18,7 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
 from PyQt4 import QtGui
-from workspace.WorkspaceStep import WorkspaceStep
+from workspace.workspacestep import WorkspaceStep
 
 class Step(WorkspaceStep):
     '''

@@ -18,7 +18,7 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
 
-from core import PluginFramework
+from core import pluginframework
 
 '''
 Plugins can inherit this mount point to add a workspace step.
@@ -35,4 +35,4 @@ Plugins can inherit this mount point to add a workspace step.
  * deserialize 
 
 '''
-WorkspaceStepMountPoint = PluginFramework.MetaPluginMountPoint('WorkspaceStepMountPoint', (object,), {'category': 'General'})
+WorkspaceStepMountPoint = pluginframework.MetaPluginMountPoint('WorkspaceStepMountPoint', (object,), {'category': 'General'})

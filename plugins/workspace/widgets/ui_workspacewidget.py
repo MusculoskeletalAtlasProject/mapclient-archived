@@ -36,5 +36,5 @@ class Ui_WorkspaceWidget(object):
     def retranslateUi(self, WorkspaceWidget):
         pass
 
-from workspace.widgets.StepTree import StepTree
-from workspace.widgets.WorkspaceGraphicsView import WorkspaceGraphicsView
+from workspace.widgets.steptree import StepTree
+from workspace.widgets.workspacegraphicsview import WorkspaceGraphicsView

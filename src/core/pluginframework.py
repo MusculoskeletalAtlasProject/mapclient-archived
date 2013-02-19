@@ -92,6 +92,7 @@ def initPackage(pkgDir):
 def loadModule(moduleName, moduleDir):
     fp, path, description = imp.find_module(moduleName, [moduleDir])
 
+    print(moduleDir)
     imp.load_module(moduleDir, fp, path, description)
 #    print('======= module', module)
 

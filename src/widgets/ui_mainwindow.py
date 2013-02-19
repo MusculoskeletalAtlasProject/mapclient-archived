@@ -67,4 +67,4 @@ class Ui_MainWindow(object):
         self.action_Quit.setStatusTip(QtGui.QApplication.translate("MainWindow", "Quit the application", None, QtGui.QApplication.UnicodeUTF8))
         self.action_Quit.setShortcut(QtGui.QApplication.translate("MainWindow", "Ctrl+Q", None, QtGui.QApplication.UnicodeUTF8))
 
-import widgets.Resources_rc
+import widgets.resources_rc

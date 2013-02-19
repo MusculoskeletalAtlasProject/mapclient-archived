@@ -18,8 +18,8 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
 import os, sys, unittest
-from core.PluginFramework import loadPlugins
-from Utils import ConsumeOutput
+from core.pluginframework import loadPlugins
+from utils import ConsumeOutput
 
 class PluginFrameworkTestCase(unittest.TestCase):
 

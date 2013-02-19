@@ -20,9 +20,9 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
 
 from PyQt4 import QtCore, QtGui
 
-from widgets.MainWindowUi import Ui_MainWindow
-from core.PluginFramework import StackedWidgetMountPoint
-from core.UndoManager import UndoManager
+from widgets.ui_mainwindow import Ui_MainWindow
+from core.pluginframework import StackedWidgetMountPoint
+from core.undomanager import UndoManager
 
 class MainWindow(QtGui.QMainWindow):
     '''
@@ -97,7 +97,7 @@ class MainWindow(QtGui.QMainWindow):
         QtGui.qApp.quit()
 
     def about(self):
-        from widgets.AboutDialog import AboutDialog
+        from widgets.aboutdialog import AboutDialog
         dlg = AboutDialog(self)
         dlg.setModal(True)
         dlg.exec_()

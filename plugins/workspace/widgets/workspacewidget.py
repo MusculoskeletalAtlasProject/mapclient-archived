@@ -18,8 +18,8 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
 from PyQt4 import QtGui
-from widgets.ui_WorkspaceWidgetUi import Ui_WorkspaceWidget
-from mountpoint import WorkspaceStepMountPoint
+from workspace.widgets.ui_workspacewidget import Ui_WorkspaceWidget
+from workspace.mountpoint import WorkspaceStepMountPoint
 
 class WorkspaceWidget(QtGui.QWidget):
     '''

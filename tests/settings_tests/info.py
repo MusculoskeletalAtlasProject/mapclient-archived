@@ -19,40 +19,40 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
 '''
 import unittest
 
-from settings import Info
+from settings import info
 
 class InfoTestCase(unittest.TestCase):
 
 
     def testABOUT(self):
-        assert(len(Info.ABOUT.keys()) == 4)
-        assert('name' in Info.ABOUT)
-        assert('version' in Info.ABOUT)
-        assert('license' in Info.ABOUT)
-        assert('description' in Info.ABOUT)
+        assert(len(info.ABOUT.keys()) == 4)
+        assert('name' in info.ABOUT)
+        assert('version' in info.ABOUT)
+        assert('license' in info.ABOUT)
+        assert('description' in info.ABOUT)
         
     def testCREDITS(self):
-        assert(len(Info.CREDITS.keys()) == 3)
-        assert('programming' in Info.CREDITS)
-        assert('artwork' in Info.CREDITS)
-        assert('documentation' in Info.CREDITS)
-        for contributor in Info.CREDITS['programming']:
+        assert(len(info.CREDITS.keys()) == 3)
+        assert('programming' in info.CREDITS)
+        assert('artwork' in info.CREDITS)
+        assert('documentation' in info.CREDITS)
+        for contributor in info.CREDITS['programming']:
             assert(len(contributor.keys()) == 2)
             assert('name' in contributor)
             assert('email' in contributor)
-        for contributor in Info.CREDITS['artwork']:
+        for contributor in info.CREDITS['artwork']:
             assert(len(contributor.keys()) == 2)
             assert('name' in contributor)
             assert('email' in contributor)
-        for contributor in Info.CREDITS['documentation']:
+        for contributor in info.CREDITS['documentation']:
             assert(len(contributor.keys()) == 2)
             assert('name' in contributor)
             assert('email' in contributor)
             
     def testNames(self):
-        assert(Info.APPLICATION_NAME == 'MAP Client')
-        assert(Info.ORGANISATION_NAME == 'Musculo Skeletal')
-        assert(Info.ORGANISATION_DOMAIN == 'musculoskeletal.org')
+        assert(info.APPLICATION_NAME == 'MAP Client')
+        assert(info.ORGANISATION_NAME == 'Musculo Skeletal')
+        assert(info.ORGANISATION_DOMAIN == 'musculoskeletal.org')
 
 
 if __name__ == "__main__":

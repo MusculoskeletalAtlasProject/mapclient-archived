@@ -25,8 +25,8 @@ for name in API_NAMES:
     sip.setapi(name, API_VERSION)
 
 import os, sys, locale
-from core.PluginFramework import loadPlugins
-from settings import Info
+from core.pluginframework import loadPlugins
+from settings import info
 
 # Ensure the MAP Client module directory is in the system path so relative 'import' statements work
 base_path = os.path.dirname(os.path.abspath(__file__))
@@ -38,7 +38,7 @@ def progheader():
     '''
     Display program header
     '''
-    programHeader = '   MAP Client (version %s)   ' % Info.ABOUT['version']
+    programHeader = '   MAP Client (version %s)   ' % info.ABOUT['version']
     print('-' * len(programHeader))
     print(programHeader)
     print('-' * len(programHeader))
@@ -58,9 +58,9 @@ def winmain():
     app = QtGui.QApplication(sys.argv)
 
     # Set the default organisation name and application name used to store application settings
-    QtCore.QCoreApplication.setOrganizationName(Info.ORGANISATION_NAME)
-    QtCore.QCoreApplication.setOrganizationDomain(Info.ORGANISATION_DOMAIN)
-    QtCore.QCoreApplication.setApplicationName(Info.APPLICATION_NAME)
+    QtCore.QCoreApplication.setOrganizationName(info.ORGANISATION_NAME)
+    QtCore.QCoreApplication.setOrganizationDomain(info.ORGANISATION_DOMAIN)
+    QtCore.QCoreApplication.setApplicationName(info.APPLICATION_NAME)
 
     from PyQt4.QtCore import QSettings
     settings = QSettings()
@@ -75,7 +75,7 @@ def winmain():
         loadPlugins(inbuiltPluginDir)
         del sys.path[0]
 
-    from widgets.MainWindow import MainWindow
+    from widgets.mainwindow import MainWindow
     window = MainWindow()
     window.show()
 
@@ -97,9 +97,9 @@ def main():
     app = QtCore.QCoreApplication(sys.argv)
 
     # Set the default organisation name and application name used to store application settings
-    QtCore.QCoreApplication.setOrganizationName(Info.ORGANISATION_NAME)
-    QtCore.QCoreApplication.setOrganizationDomain(Info.ORGANISATION_DOMAIN)
-    QtCore.QCoreApplication.setApplicationName(Info.APPLICATION_NAME)
+    QtCore.QCoreApplication.setOrganizationName(info.ORGANISATION_NAME)
+    QtCore.QCoreApplication.setOrganizationDomain(info.ORGANISATION_DOMAIN)
+    QtCore.QCoreApplication.setApplicationName(info.APPLICATION_NAME)
 
     old_stdout = sys.stdout
     sys.stdout = redirectstdout = ConsumeOutput()

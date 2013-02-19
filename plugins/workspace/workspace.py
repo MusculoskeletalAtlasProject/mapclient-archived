@@ -19,15 +19,15 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
 '''
 import os
 from PyQt4 import QtCore
-from settings import Info
-from core import PluginFramework
-from workspace.widgets.WorkspaceWidget import WorkspaceWidget
+from settings import info
+from core import pluginframework
+from workspace.widgets.workspacewidget import WorkspaceWidget
 
 def workspaceConfigurationExists(location):
-    return os.path.exists(location + '/' + Info.WORKSPACE_NAME)
+    return os.path.exists(location + '/' + info.WORKSPACE_NAME)
 
 def getWorkspaceConfiguration(location):
-    return QtCore.QSettings(location + '/' + Info.WORKSPACE_NAME, QtCore.QSettings.IniFormat)
+    return QtCore.QSettings(location + '/' + info.WORKSPACE_NAME, QtCore.QSettings.IniFormat)
 
 class WorkspaceError(Exception):
     pass
@@ -54,7 +54,7 @@ def getWorkspaceManagerCreateIfNecessary(mainWindow):
     return mainWindow.workspaceManager
 
 
-class Manager(PluginFramework.StackedWidgetMountPoint):
+class Manager(pluginframework.StackedWidgetMountPoint):
     '''
     This class managers the workspace.
     '''
@@ -83,9 +83,9 @@ class Manager(PluginFramework.StackedWidgetMountPoint):
 
     def undoStackIndexChanged(self, index):
         if self.saveStateIndex == index:
-            self.mainWindow.setWindowTitle(Info.APPLICATION_NAME + ' - ' + self.location)
+            self.mainWindow.setWindowTitle(info.APPLICATION_NAME + ' - ' + self.location)
         elif self.saveStateIndex == self.currentStateIndex:
-            self.mainWindow.setWindowTitle(Info.APPLICATION_NAME + ' - ' + self.location + ' *')
+            self.mainWindow.setWindowTitle(info.APPLICATION_NAME + ' - ' + self.location + ' *')
 
         self.currentStateIndex = index
 
@@ -106,9 +106,9 @@ class Manager(PluginFramework.StackedWidgetMountPoint):
             os.mkdir(location)
 
         self.location = location
-        self.mainWindow.setWindowTitle(Info.APPLICATION_NAME + ' - ' + location)
+        self.mainWindow.setWindowTitle(info.APPLICATION_NAME + ' - ' + location)
         ws = getWorkspaceConfiguration(location)
-        ws.setValue('version', Info.VERSION_STRING)
+        ws.setValue('version', info.VERSION_STRING)
 
 
 
@@ -127,27 +127,27 @@ class Manager(PluginFramework.StackedWidgetMountPoint):
             raise WorkspaceError('No workspace located at %s' % location)
 
         ws = getWorkspaceConfiguration(location)
-        if ws.value('version') != Info.VERSION_STRING:
-            raise WorkspaceError('Version mismatch in workspace expected: %s got: %s' % (Info.VERSION_STRING, ws.value('version')))
+        if ws.value('version') != info.VERSION_STRING:
+            raise WorkspaceError('Version mismatch in workspace expected: %s got: %s' % (info.VERSION_STRING, ws.value('version')))
 
         self.location = location
         ws = getWorkspaceConfiguration(location)
         self.widget.loadState(ws)
         self.saveStateIndex = self.currentStateIndex = 0
-        self.mainWindow.setWindowTitle(Info.APPLICATION_NAME + ' - ' + location)
+        self.mainWindow.setWindowTitle(info.APPLICATION_NAME + ' - ' + location)
 
     def save(self):
         ws = getWorkspaceConfiguration(self.location)
         self.widget.saveState(ws)
         self.saveStateIndex = self.currentStateIndex
-        self.mainWindow.setWindowTitle(Info.APPLICATION_NAME + ' - ' + self.location)
+        self.mainWindow.setWindowTitle(info.APPLICATION_NAME + ' - ' + self.location)
 
     def close(self):
         '''
         Close the current workspace
         '''
         self.location = None
-        self.mainWindow.setWindowTitle(Info.APPLICATION_NAME)
+        self.mainWindow.setWindowTitle(info.APPLICATION_NAME)
 
     def isWorkspaceOpen(self):
         return not self.location == None
