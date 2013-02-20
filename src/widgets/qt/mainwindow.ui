@@ -15,7 +15,7 @@
   </property>
   <property name="windowIcon">
    <iconset resource="resources.qrc">
-    <normaloff>:/mapclient/images/Icon.png</normaloff>:/mapclient/images/Icon.png</iconset>
+    <normaloff>:/mapclient/images/icon.png</normaloff>:/mapclient/images/icon.png</iconset>
   </property>
   <property name="locale">
    <locale language="English" country="UnitedKingdom"/>

@@ -19,6 +19,8 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
 '''
 import unittest
 import os, tempfile
+
+from core.workspace import WorkspaceManager, WorkspaceError
 #from mpl_toolkits.axes_grid1.axes_grid import im
 #from PyQt4 import QtCore
 
@@ -59,10 +61,9 @@ class WorkspaceTestCase(unittest.TestCase):
             f(a, b, *args, **kwargs)
 
     def testNew(self):
-        from core.workspace import Manager
         dirName = tempfile.mkdtemp(prefix='new_workspace_')
         try:
-            ws = Manager(FakeMainWindow())
+            ws = WorkspaceManager(FakeMainWindow())
             ws.new(dirName)
             assert(os.path.exists(dirName + '/workspace.conf'))
         finally:
@@ -70,17 +71,15 @@ class WorkspaceTestCase(unittest.TestCase):
             os.rmdir(dirName)
 
     def testNewWithNone(self):
-        from core.workspace import Manager, WorkspaceError
-        ws = Manager(FakeMainWindow())
+        ws = WorkspaceManager(FakeMainWindow())
         try:
             ws.new(None)
         except WorkspaceError:
             pass
 
     def testNewWithNonexistentDir(self):
-        from core.workspace import Manager
         tempDir = tempfile.gettempdir() + TEST_WORKSPACE_DIR_NAME
-        ws = Manager(FakeMainWindow())
+        ws = WorkspaceManager(FakeMainWindow())
         ws.new(tempDir)
         assert(os.path.exists(tempDir + '/workspace.conf'))
 
@@ -89,18 +88,15 @@ class WorkspaceTestCase(unittest.TestCase):
         os.rmdir(tempDir)
 
     def testSave(self):
-        from core.workspace import Manager
-            
         tempDir = tempfile.gettempdir() + TEST_WORKSPACE_DIR_NAME
-        ws = Manager(FakeMainWindow())
+        ws = WorkspaceManager(FakeMainWindow())
         ws.widget = FakeWidget()
         ws.new(tempDir)
         ws.save()
 
     def testOpen(self):
-        from core.workspace import Manager
         tempDir = tempfile.gettempdir() + TEST_WORKSPACE_DIR_NAME
-        ws = Manager(FakeMainWindow())
+        ws = WorkspaceManager(FakeMainWindow())
         ws.widget = FakeWidget()
         ws.new(tempDir)
         ws.load(tempDir)

@@ -44,7 +44,7 @@ class Ui_AboutDialog(object):
         self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
         self.label_2 = QtGui.QLabel(self.frame)
         self.label_2.setText(_fromUtf8(""))
-        self.label_2.setPixmap(QtGui.QPixmap(_fromUtf8(":/mapclient/images/AboutLogo.png")))
+        self.label_2.setPixmap(QtGui.QPixmap(_fromUtf8(":/mapclient/images/about_logo.png")))
         self.label_2.setAlignment(QtCore.Qt.AlignCenter)
         self.label_2.setObjectName(_fromUtf8("label_2"))
         self.verticalLayout.addWidget(self.label_2)
@@ -89,4 +89,4 @@ class Ui_AboutDialog(object):
         self.btn_License.setText(_translate("AboutDialog", "&License", None))
         self.btn_Close.setText(_translate("AboutDialog", "&Close", None))
 
-import resources_rc
+import widgets.resources_rc

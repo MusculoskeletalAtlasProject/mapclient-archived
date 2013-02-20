@@ -54,7 +54,7 @@ def getWorkspaceManagerCreateIfNecessary(mainWindow):
     return mainWindow.workspaceManager
 
 
-class Manager(pluginframework.StackedWidgetMountPoint):
+class WorkspaceManager():
     '''
     This class managers the workspace.
     '''

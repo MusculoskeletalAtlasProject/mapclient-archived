@@ -52,7 +52,6 @@ class WorkspaceWidget(QtGui.QWidget):
         self.setEnabled(workspaceOpen)
         self.action_Save.setEnabled(not self.mainWindow.workspaceManager.isModified())
 
-
     def undoStackIndexChanged(self, index):
         self.mainWindow.workspaceManager.undoStackIndexChanged(index)
         self.updateUi()
