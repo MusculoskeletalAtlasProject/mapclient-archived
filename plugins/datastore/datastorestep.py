@@ -20,7 +20,7 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
 from PyQt4 import QtGui
 
 #import imagesource.Resources_rc
-from workspace_plugin.workspacestep import WorkspaceStep
+from core.workspacestep import WorkspaceStep
 
 class DataStoreStep(WorkspaceStep):
     '''

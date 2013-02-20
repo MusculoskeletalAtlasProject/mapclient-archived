@@ -19,6 +19,8 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
 '''
 import unittest
 import os, tempfile
+
+from core.workspace import WorkspaceManager, WorkspaceError
 #from mpl_toolkits.axes_grid1.axes_grid import im
 #from PyQt4 import QtCore
 
@@ -59,10 +61,9 @@ class WorkspaceTestCase(unittest.TestCase):
             f(a, b, *args, **kwargs)
 
     def testNew(self):
-        from workspace_plugin.workspace import Manager
         dirName = tempfile.mkdtemp(prefix='new_workspace_')
         try:
-            ws = Manager(FakeMainWindow())
+            ws = WorkspaceManager(FakeMainWindow())
             ws.new(dirName)
             assert(os.path.exists(dirName + '/workspace.conf'))
         finally:
@@ -70,17 +71,15 @@ class WorkspaceTestCase(unittest.TestCase):
             os.rmdir(dirName)
 
     def testNewWithNone(self):
-        from workspace_plugin.workspace import Manager, WorkspaceError
-        ws = Manager(FakeMainWindow())
+        ws = WorkspaceManager(FakeMainWindow())
         try:
             ws.new(None)
         except WorkspaceError:
             pass
 
     def testNewWithNonexistentDir(self):
-        from workspace_plugin.workspace import Manager
         tempDir = tempfile.gettempdir() + TEST_WORKSPACE_DIR_NAME
-        ws = Manager(FakeMainWindow())
+        ws = WorkspaceManager(FakeMainWindow())
         ws.new(tempDir)
         assert(os.path.exists(tempDir + '/workspace.conf'))
 
@@ -89,18 +88,15 @@ class WorkspaceTestCase(unittest.TestCase):
         os.rmdir(tempDir)
 
     def testSave(self):
-        from workspace_plugin.workspace import Manager
-            
         tempDir = tempfile.gettempdir() + TEST_WORKSPACE_DIR_NAME
-        ws = Manager(FakeMainWindow())
+        ws = WorkspaceManager(FakeMainWindow())
         ws.widget = FakeWidget()
         ws.new(tempDir)
         ws.save()
 
     def testOpen(self):
-        from workspace_plugin.workspace import Manager
         tempDir = tempfile.gettempdir() + TEST_WORKSPACE_DIR_NAME
-        ws = Manager(FakeMainWindow())
+        ws = WorkspaceManager(FakeMainWindow())
         ws.widget = FakeWidget()
         ws.new(tempDir)
         ws.load(tempDir)
@@ -110,14 +106,14 @@ class WorkspaceTestCase(unittest.TestCase):
         os.rmdir(tempDir)
 
     def testPort(self):
-        from workspace_plugin.workspacestep import WorkspaceStepPort
+        from core.workspacestep import WorkspaceStepPort
         port = WorkspaceStepPort()
         port.addProperty(('pho#workspace#port', 'uses', 'images'))
         self.assertIn('pho#workspace#port', port.subj)
 
 
     def testPortConnect(self):
-        from workspace_plugin.workspacestep import WorkspaceStepPort
+        from core.workspacestep import WorkspaceStepPort
         portIn = WorkspaceStepPort()
         portIn.addProperty(('pho#workspace#port', 'uses', 'images'))
         portOut = WorkspaceStepPort()
@@ -129,7 +125,7 @@ class WorkspaceTestCase(unittest.TestCase):
         self.assertEqual(portOut.canConnect(port2), False)
 
     def testPortDescription(self):
-        from workspace_plugin.workspacestep import WorkspaceStepPort
+        from core.workspacestep import WorkspaceStepPort
         port = WorkspaceStepPort()
         port.addProperty(('pho#workspace#port', 'uses', 'images'))
         port.addProperty(('pho#workspace#port', 'provides', 'pointcloud'))
@@ -141,7 +137,7 @@ class WorkspaceTestCase(unittest.TestCase):
 #        self.assertIn('pointcloud', objs)
 
     def testPortPredicates(self):
-        from workspace_plugin.workspacestep import WorkspaceStepPort
+        from core.workspacestep import WorkspaceStepPort
         port = WorkspaceStepPort()
         port.addProperty(('pho#workspace#port', 'uses', 'images'))
         port.addProperty(('pho#workspace#port', 'provides', 'pointcloud'))
@@ -154,7 +150,7 @@ class WorkspaceTestCase(unittest.TestCase):
         self.assertEqual(0, len(preds))
 
     def testStepConnection(self):
-        from workspace_plugin.workspacestep import WorkspaceStep
+        from core.workspacestep import WorkspaceStep
         step1 = WorkspaceStep()
         step1.addPort(('pho#workspace#port', 'provides', 'images'))
         step2 = WorkspaceStep()
@@ -173,7 +169,7 @@ class WorkspaceTestCase(unittest.TestCase):
         from PyQt4 import QtGui
         app = QtGui.QApplication(sys.argv)
         from segmentation_plugin.segmentationstep import Step
-        from workspace_plugin.workspacestep import WorkspaceStepFactory
+        from core.workspacestep import WorkspaceStepFactory
         self.assertEqual(WorkspaceStepFactory('Segmentation').name, 'Segmentation')
         self.assertRaises(ValueError, WorkspaceStepFactory, ('james'))
         app.argc()

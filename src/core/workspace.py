@@ -21,7 +21,7 @@ import os
 from PyQt4 import QtCore
 from settings import info
 from core import pluginframework
-from workspace_plugin.widgets.workspacewidget import WorkspaceWidget
+from widgets.workspacewidget import WorkspaceWidget
 
 def workspaceConfigurationExists(location):
     return os.path.exists(location + '/' + info.WORKSPACE_NAME)
@@ -54,7 +54,7 @@ def getWorkspaceManagerCreateIfNecessary(mainWindow):
     return mainWindow.workspaceManager
 
 
-class Manager(pluginframework.StackedWidgetMountPoint):
+class WorkspaceManager():
     '''
     This class managers the workspace.
     '''

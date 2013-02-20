@@ -19,7 +19,7 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
 '''
 import weakref, math, sys
 from PyQt4 import QtCore, QtGui
-from workspace_plugin.workspacestep import WorkspaceStepFactory
+from core.workspacestep import WorkspaceStepFactory
 
 class ErrorItem(QtGui.QGraphicsItem):
 
@@ -29,7 +29,7 @@ class ErrorItem(QtGui.QGraphicsItem):
         self.dest = weakref.ref(destNode)
         self.sourcePoint = QtCore.QPointF()
         self.destPoint = QtCore.QPointF()
-        self.pixmap = QtGui.QPixmap(':/workspace/images/cancel_256.png').scaled(16, 16, aspectRatioMode=QtCore.Qt.KeepAspectRatio, transformMode=QtCore.Qt.FastTransformation)
+        self.pixmap = QtGui.QPixmap(':/workflow/images/cancel_256.png').scaled(16, 16, aspectRatioMode=QtCore.Qt.KeepAspectRatio, transformMode=QtCore.Qt.FastTransformation)
         self.source().addEdge(self)
         self.dest().addEdge(self)
         self.setZValue(-1.5)
@@ -350,7 +350,7 @@ class Node(QtGui.QGraphicsItem):
 
         self.step = step
         self.pixmap = step.pixmap.scaled(64, 64, aspectRatioMode=QtCore.Qt.KeepAspectRatio, transformMode=QtCore.Qt.FastTransformation)
-        self.configure_red = QtGui.QPixmap(':/workspace/images/configure_red.png').scaled(24, 24, aspectRatioMode=QtCore.Qt.KeepAspectRatio, transformMode=QtCore.Qt.FastTransformation)
+        self.configure_red = QtGui.QPixmap(':/workflow/images/configure_red.png').scaled(24, 24, aspectRatioMode=QtCore.Qt.KeepAspectRatio, transformMode=QtCore.Qt.FastTransformation)
         self.graph = weakref.ref(workspaceGraphicsView)
         self.edgeList = []
         self.newPos = QtCore.QPointF()
