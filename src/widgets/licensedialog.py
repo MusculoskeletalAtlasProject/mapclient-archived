@@ -19,7 +19,7 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
 '''
 
 from PyQt4.QtGui import QDialog
-from widgets.LicenseDialogUi import Ui_LicenseDialog
+from widgets.ui_licensedialog import Ui_LicenseDialog
 
 class LicenseDialog(QDialog):
     '''

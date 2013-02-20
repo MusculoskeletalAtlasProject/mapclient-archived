@@ -23,6 +23,7 @@ from PyQt4 import QtCore, QtGui
 from widgets.ui_mainwindow import Ui_MainWindow
 from core.pluginframework import StackedWidgetMountPoint
 from core.undomanager import UndoManager
+from core.workspace import WorkspaceManager
 
 class MainWindow(QtGui.QMainWindow):
     '''
@@ -51,6 +52,7 @@ class MainWindow(QtGui.QMainWindow):
 
         self.ui.stackedWidget.currentChanged.connect(self.centralWidgetChanged)
         self.stackedWidgetPages = StackedWidgetMountPoint.getPlugins(self)
+        self.stackedWidgetPages.insert(0, WorkspaceManager(self))
 
         for stackedWidgetPage in self.stackedWidgetPages:
             if not hasattr(self, stackedWidgetPage.name):

@@ -221,16 +221,16 @@ class MetaQObjectPluginMountPoint(MetaQObject, MetaPluginMountPoint):
 Plugins can inherit this mount point to extend
 
  A plugin that registers this mount point must have attributes
- * None
+ * name
  
  A plugin that registers this mount point could have attributes
  * None
  
  It must implement
- * pass 
+ * setWidgetIndex 
  
 '''
-StackedWidgetMountPoint = MetaPluginMountPoint('StackedWidget', (object,), {})
+StackedWidgetMountPoint = MetaPluginMountPoint('StackedWidgetMountPoint', (object,), {})
 
 
 '''
