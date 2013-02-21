@@ -19,7 +19,7 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
 '''
 from PyQt4 import QtGui
 from widgets.ui_workspacewidget import Ui_WorkspaceWidget
-from core.mountpoint import WorkspaceStepMountPoint
+from mountpoints.workspacestep import WorkspaceStepMountPoint
 
 class WorkspaceWidget(QtGui.QWidget):
     '''

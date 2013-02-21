@@ -19,4 +19,7 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
 '''
 __version__ = '0.1.0'
 __author__ = 'Hugh Sorby'
-#import Resource_qrc
+
+import datastorestep.resources_rc
+import datastorestep.step
+

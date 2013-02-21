@@ -20,9 +20,9 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
 from PyQt4 import QtGui
 
 #import imagesource.Resources_rc
-from core.workspacestep import WorkspaceStep
+from mountpoints.workspacestep import WorkspaceStepMountPoint
 
-class DataStoreStep(WorkspaceStep):
+class DataStoreStep(WorkspaceStepMountPoint):
     '''
     A step satisfies the step plugin duck.
     

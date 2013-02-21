@@ -25,7 +25,7 @@ for name in API_NAMES:
     sip.setapi(name, API_VERSION)
 
 import os, sys, locale
-from core.pluginframework import loadPlugins
+from core.pluginframework import getPlugins, loadPlugin
 from settings import info
 
 # Ensure the MAP Client module directory is in the system path so relative 'import' statements work
@@ -71,9 +71,9 @@ def winmain():
     if loadDefaultPlugins:
         fileDir = os.path.dirname(os.path.abspath(__file__))
         inbuiltPluginDir = os.path.realpath(fileDir + '/../plugins')
-        sys.path.insert(0, inbuiltPluginDir)
-        loadPlugins(inbuiltPluginDir)
-        del sys.path[0]
+        
+        for p in getPlugins(inbuiltPluginDir):
+            loadPlugin(p)
 
     from widgets.mainwindow import MainWindow
     window = MainWindow()
@@ -89,7 +89,6 @@ class ConsumeOutput(object):
         self.messages.append(message)
 
 def main():
-#    progheader()
     locale.setlocale(locale.LC_ALL, '')
 
     from optparse import OptionParser
@@ -120,7 +119,7 @@ def main():
 
 
 if __name__ == '__main__':
-    if len(sys.argv) == 1: # No command line args
+    if len(sys.argv) == 1: # No command line arguments
         winmain()
     else:
         main()

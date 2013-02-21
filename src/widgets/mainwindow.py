@@ -21,7 +21,7 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
 from PyQt4 import QtCore, QtGui
 
 from widgets.ui_mainwindow import Ui_MainWindow
-from core.pluginframework import StackedWidgetMountPoint
+from mountpoints.stackedwidget import StackedWidgetMountPoint
 from core.undomanager import UndoManager
 from core.workspace import WorkspaceManager
 

@@ -30,13 +30,13 @@ class SegmentationTestCase(unittest.TestCase):
         if os.name == 'posix' and 'DISPLAY' not in os.environ:
             return
         app = QtGui.QApplication(sys.argv)
-        fileDir = os.path.dirname(__file__)
-        inbuiltPluginDir = os.path.realpath(fileDir + '/../../plugins')
+        #fileDir = os.path.dirname(__file__)
+        #inbuiltPluginDir = os.path.realpath(fileDir + '/../../plugins')
 #        loadPlugins(inbuiltPluginDir)
 
-        sys.path.insert(0, inbuiltPluginDir)
+        #sys.path.insert(0, inbuiltPluginDir)
 #        from workspace.Workspace import Manager
-        from segmentation_plugin.segmentationstep import Step
+        from segmentationstep.step import Step
         myStep = Step()
         self.assertEqual(myStep.name, 'Segmentation')
         app.argc() # eclipse warning killer

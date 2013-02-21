@@ -20,8 +20,15 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
 import os
 from PyQt4 import QtCore
 from settings import info
-from core import pluginframework
 from widgets.workspacewidget import WorkspaceWidget
+from mountpoints.workspacestep import WorkspaceStepMountPoint
+
+def workspaceStepFactory(step_name):
+    for step in WorkspaceStepMountPoint.getPlugins():
+        if step_name == step.name:
+            return step
+        
+    raise ValueError
 
 def workspaceConfigurationExists(location):
     return os.path.exists(location + '/' + info.WORKSPACE_NAME)
@@ -43,16 +50,6 @@ class Workspace(object):
     def __init__(self, location, version):
         self.location = location
         self.version = version
-
-def getWorkspaceManagerCreateIfNecessary(mainWindow):
-#    if not hasattr(mainWindow, 'workspaceManager'):
-#        setattr(mainWindow, 'workspaceManager', Manager(mainWindow))
-#        stackedWidget = mainWindow.centralWidget().findChild(QtGui.QStackedWidget, 'stackedWidget')
-#        index = stackedWidget.addWidget(WorkspaceWidget(stackedWidget))
-#        mainWindow.workspaceManager.widgetIndex = index
-
-    return mainWindow.workspaceManager
-
 
 class WorkspaceManager():
     '''
