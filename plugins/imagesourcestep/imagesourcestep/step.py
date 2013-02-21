@@ -17,11 +17,27 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     You should have received a copy of the GNU General Public License
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
-__version__ = '0.1.0'
-__author__ = 'Hugh Sorby'
+from PyQt4 import QtGui
 
-import sip
-API_NAMES = ["QDate", "QDateTime", "QString", "QTextStream", "QTime", "QUrl", "QVariant"]
-API_VERSION = 2
-for name in API_NAMES:
-    sip.setapi(name, API_VERSION)
+#import imagesource.Resources_rc
+from mountpoints.workspacestep import WorkspaceStepMountPoint
+
+class ImageSourceStep(WorkspaceStepMountPoint):
+    '''
+    A step satisfies the step plugin duck.
+    
+    It describes the location of an image/a set of images.
+    It can be used as an image source.
+    '''
+    def __init__(self):
+        '''
+        Constructor
+        '''
+        super(ImageSourceStep, self).__init__()
+        self.name = 'Image source'
+        self.pixmap = QtGui.QPixmap(':/imagesource/icons/landscapeimages.png')
+        self.addPort(('pho#workspace#port', 'provides', 'images'))
+
+    def configure(self):
+        print('configure image source step')
+

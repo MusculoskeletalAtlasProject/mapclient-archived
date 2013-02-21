@@ -17,24 +17,9 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     You should have received a copy of the GNU General Public License
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
-from PyQt4 import QtGui
-from core.workspacestep import WorkspaceStep
+__version__ = '0.1.0'
+__author__ = 'Hugh Sorby'
 
-class Step(WorkspaceStep):
-    '''
-    A step that acts like the step plugin duck
-    '''
-
-    def __init__(self):
-        '''
-        Constructor
-        '''
-        super(Step, self).__init__()
-        self.name = 'Segmentation'
-        self.pixmap = QtGui.QPixmap(':/segmentation/icons/seg.gif')
-        self.addPort(('pho#workspace#port', 'uses', 'images'))
-        self.addPort(('pho#workspace#port', 'provides', 'pointcloud'))
-
-    def configure(self):
-        print('configure the segmentation step')
+import segmentationstep.resources_rc
+import segmentationstep.step
 

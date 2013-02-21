@@ -21,6 +21,11 @@ import unittest
 import os, tempfile
 
 from core.workspace import WorkspaceManager, WorkspaceError
+from mountpoints.workspacestep import WorkspaceStepPort, WorkspaceStepMountPoint
+
+class WorkspaceStep(WorkspaceStepMountPoint):
+    pass
+
 #from mpl_toolkits.axes_grid1.axes_grid import im
 #from PyQt4 import QtCore
 
@@ -106,14 +111,12 @@ class WorkspaceTestCase(unittest.TestCase):
         os.rmdir(tempDir)
 
     def testPort(self):
-        from core.workspacestep import WorkspaceStepPort
         port = WorkspaceStepPort()
         port.addProperty(('pho#workspace#port', 'uses', 'images'))
         self.assertIn('pho#workspace#port', port.subj)
 
 
     def testPortConnect(self):
-        from core.workspacestep import WorkspaceStepPort
         portIn = WorkspaceStepPort()
         portIn.addProperty(('pho#workspace#port', 'uses', 'images'))
         portOut = WorkspaceStepPort()
@@ -125,7 +128,6 @@ class WorkspaceTestCase(unittest.TestCase):
         self.assertEqual(portOut.canConnect(port2), False)
 
     def testPortDescription(self):
-        from core.workspacestep import WorkspaceStepPort
         port = WorkspaceStepPort()
         port.addProperty(('pho#workspace#port', 'uses', 'images'))
         port.addProperty(('pho#workspace#port', 'provides', 'pointcloud'))
@@ -137,7 +139,6 @@ class WorkspaceTestCase(unittest.TestCase):
 #        self.assertIn('pointcloud', objs)
 
     def testPortPredicates(self):
-        from core.workspacestep import WorkspaceStepPort
         port = WorkspaceStepPort()
         port.addProperty(('pho#workspace#port', 'uses', 'images'))
         port.addProperty(('pho#workspace#port', 'provides', 'pointcloud'))
@@ -150,7 +151,6 @@ class WorkspaceTestCase(unittest.TestCase):
         self.assertEqual(0, len(preds))
 
     def testStepConnection(self):
-        from core.workspacestep import WorkspaceStep
         step1 = WorkspaceStep()
         step1.addPort(('pho#workspace#port', 'provides', 'images'))
         step2 = WorkspaceStep()
@@ -168,12 +168,12 @@ class WorkspaceTestCase(unittest.TestCase):
             return
         from PyQt4 import QtGui
         app = QtGui.QApplication(sys.argv)
-        from segmentation_plugin.segmentationstep import Step
-        from core.workspacestep import WorkspaceStepFactory
-        self.assertEqual(WorkspaceStepFactory('Segmentation').name, 'Segmentation')
-        self.assertRaises(ValueError, WorkspaceStepFactory, ('james'))
+        #from segmentation_plugin.segmentationstep import Step
+        from mountpoints.workspacestep import workspaceStepFactory
+        self.assertEqual(workspaceStepFactory('Segmentation').name, 'Segmentation')
+        self.assertRaises(ValueError, workspaceStepFactory, ('james'))
         app.argc()
-        Step()
+        #Step()
 
 
 if __name__ == "__main__":

@@ -18,26 +18,23 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
 from PyQt4 import QtGui
+from mountpoints.workspacestep import WorkspaceStepMountPoint
 
-#import imagesource.Resources_rc
-from core.workspacestep import WorkspaceStep
+class Step(WorkspaceStepMountPoint):
+    '''
+    A step that acts like the step plugin duck
+    '''
 
-class ImageSourceStep(WorkspaceStep):
-    '''
-    A step satisfies the step plugin duck.
-    
-    It describes the location of an image/a set of images.
-    It can be used as an image source.
-    '''
     def __init__(self):
         '''
         Constructor
         '''
-        super(ImageSourceStep, self).__init__()
-        self.name = 'Image source'
-        self.pixmap = QtGui.QPixmap(':/imagesource/icons/landscapeimages.png')
-        self.addPort(('pho#workspace#port', 'provides', 'images'))
+        super(Step, self).__init__()
+        self.name = 'Segmentation'
+        self.pixmap = QtGui.QPixmap(':/segmentation/icons/seg.gif')
+        self.addPort(('pho#workspace#port', 'uses', 'images'))
+        self.addPort(('pho#workspace#port', 'provides', 'pointcloud'))
 
     def configure(self):
-        print('configure image source step')
+        print('configure the segmentation step')
 
