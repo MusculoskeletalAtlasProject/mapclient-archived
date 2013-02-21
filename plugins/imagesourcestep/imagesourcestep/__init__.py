@@ -17,22 +17,9 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     You should have received a copy of the GNU General Public License
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
+__version__ = '0.1.0'
+__author__ = 'Hugh Sorby'
 
-from core import pluginframework
+import imagesourcestep.resources_rc
+import imagesourcestep.step
 
-'''
-Plugins can inherit this mount point to add a workspace step.
-
- A plugin that registers this mount point must have attributes
- * pixmap
- * name
- 
- A plugin that registers this mount point could have attributes
- * category
- 
- It must implement
- * serialize
- * deserialize 
-
-'''
-WorkspaceStepMountPoint = pluginframework.MetaPluginMountPoint('WorkspaceStepMountPoint', (object,), {'category': 'General'})

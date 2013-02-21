@@ -23,120 +23,138 @@ Inspired by Marty Alchin's Simple plugin framework.
 http://martyalchin.com/2008/jan/10/simple-plugin-framework/
 '''
 
-import os, sys, imp, pkgutil
+import os, imp
 
-class LoadDepth(object):
-    depth = 0
+MAIN_MODULE = '__init__'
 
-def loadPlugins(pkgDir):
-    ii = pkgutil.ImpImporter(pkgDir)
-#    sys.path.insert(0, pkgDir)
-    LoadDepth.depth += 1
-    try:
-        for moduleName, isPkg in ii.iter_modules():
-#        projectName = os.path.basename(pkgDir)
-            if isPkg:
-                pkgPath = os.path.join(pkgDir, moduleName)
-                initPackage(pkgPath)
-#                project = __import__(moduleName)
-#                print(moduleName)
-#                sys.modules[moduleName] = project
+def getPlugins(pluginDirectory):
+    plugins = []
+    possibleplugins = os.listdir(pluginDirectory)
+    for i in possibleplugins:
+        #print('possible plugin: ' + i)
+        location = os.path.join(pluginDirectory, i)
+        if not os.path.isdir(location) or not MAIN_MODULE + '.py' in os.listdir(location):
+            continue
+        info = imp.find_module(MAIN_MODULE, [location])
+        plugins.append({'name': i, 'info': info})
+        
+    return plugins
 
-                loadPlugins(pkgPath)
-            else:
-                loadModule(moduleName, pkgDir)
-#            print(moduleName)
-    finally:
-#        print(sys.path)
-#        del sys.path[0]
-        LoadDepth.depth -= 1
-#        print(sys.path)
+def loadPlugin(plugin):
+    return imp.load_module(MAIN_MODULE, *plugin['info'])
 
-def loadPlugins2(pkgDir):
-    ii = pkgutil.ImpImporter(pkgDir)
-    LoadDepth.depth += 1
-#    print(LoadDepth.depth)
-    for moduleName, isPkg in ii.iter_modules():
-        if isPkg:
-            pkgPath = os.path.join(pkgDir, moduleName)
-            module = initPackage(pkgPath)
-#            print(pkgPath)
-            if module and pkgDir not in sys.path and LoadDepth.depth == 1:
-                sys.path.append(pkgDir)
-#                print(pkgDir)
-#            __import__(moduleName)
-            loadPlugins(pkgPath)
-        else:
-#            print(moduleName, pkgDir)
-            loadModule(moduleName, pkgDir)
-
-    LoadDepth.depth -= 1
-
-def initPackage(pkgDir):
-    fp, path, description = imp.find_module('__init__', [pkgDir])
-    module = imp.load_module(pkgDir, fp, path, description)
+#class LoadDepth(object):
+#    depth = 0
+#
+#def loadPlugins(pkgDir):
+#    ii = pkgutil.ImpImporter(pkgDir)
+##    sys.path.insert(0, pkgDir)
+#    LoadDepth.depth += 1
 #    try:
-#        module = imp.load_module(pkgDir, fp, path, description)
-#    except:
-#        module = None
-#        print('Failed to initialise package {0}.'.format(pkgDir))
+#        for moduleName, isPkg in ii.iter_modules():
+##        projectName = os.path.basename(pkgDir)
+#            if isPkg:
+#                pkgPath = os.path.join(pkgDir, moduleName)
+#                initPackage(pkgPath)
+##                project = __import__(moduleName)
+##                print(moduleName)
+##                sys.modules[moduleName] = project
+#
+#                loadPlugins(pkgPath)
+#            else:
+#                loadModule(moduleName, pkgDir)
+##            print(moduleName)
 #    finally:
-#        if fp:
-#            fp.close()
-    if LoadDepth.depth == 1:
-        print("Plugin '{0}' version {1} by {2} loaded".format(pkgDir.split(os.sep)[-1], module.__version__, module.__author__))
-    fp.close()
-
-    return module
-
-def loadModule(moduleName, moduleDir):
-    fp, path, description = imp.find_module(moduleName, [moduleDir])
-
-    print(moduleDir)
-    imp.load_module(moduleDir, fp, path, description)
-#    print('======= module', module)
-
-#    moduleVersion = '-.-.-'
-#    if hasattr(module, '__version__'):
-#        moduleVersion = module.__version__
-#    moduleAuthor = '?'
-#    if hasattr(module, '__author__'):
-#        moduleAuthor = module.__author__
-#    print("Plugin '{0}' version {1} by {2} loaded".format(moduleName, moduleVersion, moduleAuthor))
-    fp.close()
-#    try:
-#        module = imp.load_module(moduleDir, fp, path, description)
-#    
-#        moduleVersion = '-.-.-'
-#        if hasattr(module, '__version__'):
-#            moduleVersion = module.__version__
-#        moduleAuthor = '?'
-#        if hasattr(module, '__author__'):
-#            moduleAuthor = module.__author__
-#        print("Plugin '{0}' version {1} by {2} loaded".format(moduleName, moduleVersion, moduleAuthor))
-#    except:
-#        # non modules will fail
-#        print("Plugin '{0}' not loaded".format(moduleName))
-#    finally:
-#        if fp:
-#            fp.close()
-
-class PluginsAt(object):
-    '''
-    Descriptor to get plugins on a given mount point.
-    '''
-    def __init__(self, mount_point):
-        '''
-        Initialise the descriptor with the mount point wanted.
-        Eg: PluginsAt(PluginFramework.MenuOption) to get extensions that change the GUI Menu.
-        '''
-        self.mount = mount_point
-
-    def __get__(self, instance, owner=None):
-        '''
-        Plugins are instantiated with the object that is calling them.
-        '''
-        return [p() for p in self.mount.plugins]
+##        print(sys.path)
+##        del sys.path[0]
+#        LoadDepth.depth -= 1
+##        print(sys.path)
+#
+#def loadPlugins2(pkgDir):
+#    ii = pkgutil.ImpImporter(pkgDir)
+#    LoadDepth.depth += 1
+##    print(LoadDepth.depth)
+#    for moduleName, isPkg in ii.iter_modules():
+#        if isPkg:
+#            pkgPath = os.path.join(pkgDir, moduleName)
+#            module = initPackage(pkgPath)
+##            print(pkgPath)
+#            if module and pkgDir not in sys.path and LoadDepth.depth == 1:
+#                sys.path.append(pkgDir)
+##                print(pkgDir)
+##            __import__(moduleName)
+#            loadPlugins(pkgPath)
+#        else:
+##            print(moduleName, pkgDir)
+#            loadModule(moduleName, pkgDir)
+#
+#    LoadDepth.depth -= 1
+#
+#def initPackage(pkgDir):
+#    fp, path, description = imp.find_module('__init__', [pkgDir])
+#    module = imp.load_module(pkgDir, fp, path, description)
+##    try:
+##        module = imp.load_module(pkgDir, fp, path, description)
+##    except:
+##        module = None
+##        print('Failed to initialise package {0}.'.format(pkgDir))
+##    finally:
+##        if fp:
+##            fp.close()
+#    if LoadDepth.depth == 1:
+#        print("Plugin '{0}' version {1} by {2} loaded".format(pkgDir.split(os.sep)[-1], module.__version__, module.__author__))
+#    fp.close()
+#
+#    return module
+#
+#def loadModule(moduleName, moduleDir):
+#    fp, path, description = imp.find_module(moduleName, [moduleDir])
+#
+#    print(moduleDir)
+#    imp.load_module(moduleDir, fp, path, description)
+##    print('======= module', module)
+#
+##    moduleVersion = '-.-.-'
+##    if hasattr(module, '__version__'):
+##        moduleVersion = module.__version__
+##    moduleAuthor = '?'
+##    if hasattr(module, '__author__'):
+##        moduleAuthor = module.__author__
+##    print("Plugin '{0}' version {1} by {2} loaded".format(moduleName, moduleVersion, moduleAuthor))
+#    fp.close()
+##    try:
+##        module = imp.load_module(moduleDir, fp, path, description)
+##    
+##        moduleVersion = '-.-.-'
+##        if hasattr(module, '__version__'):
+##            moduleVersion = module.__version__
+##        moduleAuthor = '?'
+##        if hasattr(module, '__author__'):
+##            moduleAuthor = module.__author__
+##        print("Plugin '{0}' version {1} by {2} loaded".format(moduleName, moduleVersion, moduleAuthor))
+##    except:
+##        # non modules will fail
+##        print("Plugin '{0}' not loaded".format(moduleName))
+##    finally:
+##        if fp:
+##            fp.close()
+#
+#class PluginsAt(object):
+#    '''
+#    Descriptor to get plugins on a given mount point.
+#    '''
+#    def __init__(self, mount_point):
+#        '''
+#        Initialise the descriptor with the mount point wanted.
+#        Eg: PluginsAt(PluginFramework.MenuOption) to get extensions that change the GUI Menu.
+#        '''
+#        self.mount = mount_point
+#
+#    def __get__(self, instance, owner=None):
+#        '''
+#        Plugins are instantiated with the object that is calling them.
+#        '''
+#        return [p() for p in self.mount.plugins]
 
 
 #import traceback
@@ -216,44 +234,4 @@ class MetaQObjectPluginMountPoint(MetaQObject, MetaPluginMountPoint):
 # 
 #''' 
 #
-
-'''
-Plugins can inherit this mount point to extend
-
- A plugin that registers this mount point must have attributes
- * name
- 
- A plugin that registers this mount point could have attributes
- * None
- 
- It must implement
- * setWidgetIndex 
- 
-'''
-StackedWidgetMountPoint = MetaPluginMountPoint('StackedWidgetMountPoint', (object,), {})
-
-
-'''
-Plugins can inherit this mount point in order to add to the menu of the GUI.
-
- A plugin that registers this mount point must have attributes
- * parent
- * menuLabel
- * menuName
- * actionLabel
- 
- A plugin that registers this mount point could have attributes
- * subMenuLabel
- * subMenuName
- * shortcut
- * statustip
-  
- It must implement
- * def execute(self):
- 
- And it must call
- * QObject.__init__(self)
- in it's __init__ function
- '''
-MenuOption = MetaQObjectPluginMountPoint('MenuOption', (QObject,), {'subMenuLabel': None, 'subMenuName': None, 'shortcut': None, 'statustip': ''})
 

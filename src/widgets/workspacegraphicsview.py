@@ -19,7 +19,7 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
 '''
 import weakref, math, sys
 from PyQt4 import QtCore, QtGui
-from core.workspacestep import WorkspaceStepFactory
+from mountpoints.workspacestep import workspaceStepFactory
 
 class ErrorItem(QtGui.QGraphicsItem):
 
@@ -555,7 +555,7 @@ class WorkspaceGraphicsView(QtGui.QGraphicsView):
             ws.setArrayIndex(i)
             name = ws.value('name')
             position = ws.value('position')
-            step = WorkspaceStepFactory(name)
+            step = workspaceStepFactory(name)
             node = Node(step, self)
             node.setPos(position)
             nodeList.append(node)
@@ -674,7 +674,7 @@ class WorkspaceGraphicsView(QtGui.QGraphicsView):
 
             nameLen = stream.readUInt32()
             name = stream.readRawData(nameLen).decode(sys.stdout.encoding)
-            step = WorkspaceStepFactory(name)
+            step = workspaceStepFactory(name)
             stream >> hotspot
 
             position = self.mapToScene(event.pos() - hotspot)

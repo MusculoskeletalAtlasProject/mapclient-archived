@@ -18,7 +18,7 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
 import os, sys, unittest
-from core.pluginframework import loadPlugins
+from core.pluginframework import getPlugins, loadPlugin
 from utils import ConsumeOutput
 
 class PluginFrameworkTestCase(unittest.TestCase):
@@ -31,10 +31,11 @@ class PluginFrameworkTestCase(unittest.TestCase):
         old_stdout = sys.stdout
         sys.stdout = redirectstdout = ConsumeOutput()
         sys.path.insert(0, inbuiltPluginDir)
-        loadPlugins(inbuiltPluginDir)
+        for p in getPlugins(inbuiltPluginDir):
+            loadPlugin(p)
 
         sys.stdout = old_stdout
-        self.assertTrue("Plugin 'segmentation_plugin' version 0.1.0 by Hugh Sorby loaded" in redirectstdout.messages)
+        self.assertTrue("Plugin 'segmentationstep' version 0.1.0 by Hugh Sorby loaded" in redirectstdout.messages)
 
 
 if __name__ == "__main__":
