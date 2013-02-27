@@ -64,7 +64,7 @@ class WorkspaceManager():
         self.widget = None
         self.widgetIndex = -1
         self.location = None
-        self.previousLocation = None
+        self._previousLocation = None
         self.saveStateIndex = 0
         self.currentStateIndex = 0
         self.mainWindow = mainWindow
@@ -151,12 +151,12 @@ class WorkspaceManager():
 
     def writeSettings(self, settings):
         settings.beginGroup(self.name)
-        settings.setValue('previousLocation', self.widget.previousLocation)
+        settings.setValue('_previousLocation', self.widget._previousLocation)
         settings.endGroup()
 
     def readSettings(self, settings):
         settings.beginGroup(self.name)
-        self.widget.previousLocation = settings.value('previousLocation', '')
+        self.widget._previousLocation = settings.value('_previousLocation', '')
         settings.endGroup()
 
 

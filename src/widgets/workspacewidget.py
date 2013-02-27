@@ -34,9 +34,10 @@ class WorkspaceWidget(QtGui.QWidget):
         self._ui = Ui_WorkspaceWidget()
         self._ui.setupUi(self)
         self._ui.graphicsView.undoStack.indexChanged.connect(self.undoStackIndexChanged)
+        self._ui.graphicsView.mainWindow = mainWindow
         self.action_Close = None # Keep a handle to this for modifying the Ui.
         self._createMenuItems()
-        self.previousLocation = ''
+        self._previousLocation = ''
 
         self.workspaceStepPlugins = WorkspaceStepMountPoint.getPlugins()
         self.stepTree = self.findChild(QtGui.QWidget, "stepTree")
@@ -67,19 +68,19 @@ class WorkspaceWidget(QtGui.QWidget):
 
 
     def new(self):
-        workspaceDir = QtGui.QFileDialog.getExistingDirectory(self.mainWindow, caption='Select Workspace Directory', directory=self.previousLocation)
+        workspaceDir = QtGui.QFileDialog.getExistingDirectory(self.mainWindow, caption='Select Workspace Directory', directory=self._previousLocation)
         if len(workspaceDir) > 0:
             m = self.mainWindow.workspaceManager
             m.new(workspaceDir)
-            self.previousLocation = workspaceDir
+            self._previousLocation = workspaceDir
             self.updateUi()
 
     def load(self):
-        workspaceDir = QtGui.QFileDialog.getExistingDirectory(self.mainWindow, caption='Open Workspace', directory=self.previousLocation, options=QtGui.QFileDialog.ShowDirsOnly | QtGui.QFileDialog.DontResolveSymlinks | QtGui.QFileDialog.ReadOnly)
+        workspaceDir = QtGui.QFileDialog.getExistingDirectory(self.mainWindow, caption='Open Workspace', directory=self._previousLocation, options=QtGui.QFileDialog.ShowDirsOnly | QtGui.QFileDialog.DontResolveSymlinks | QtGui.QFileDialog.ReadOnly)
         if len(workspaceDir) > 0:
             m = self.mainWindow.workspaceManager
             m.load(workspaceDir)
-            self.previousLocation = workspaceDir
+            self._previousLocation = workspaceDir
             self.updateUi()
 
     def close(self):
