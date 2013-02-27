@@ -38,7 +38,7 @@ class SegmentationTestCase(unittest.TestCase):
 #        from workspace.Workspace import Manager
         from segmentationstep.step import Step
         myStep = Step()
-        self.assertEqual(myStep.name, 'Segmentation')
+        self.assertEqual(myStep._name, 'Segmentation')
         app.argc() # eclipse warning killer
         del sys.path[0]
 

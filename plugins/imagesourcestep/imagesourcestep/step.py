@@ -19,8 +19,8 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
 '''
 from PyQt4 import QtGui
 
-#import imagesource.Resources_rc
 from mountpoints.workspacestep import WorkspaceStepMountPoint
+from imagesourcestep.widgets.configuredialog import ConfigureDialog, ConfigureDialogState
 
 class ImageSourceStep(WorkspaceStepMountPoint):
     '''
@@ -34,10 +34,16 @@ class ImageSourceStep(WorkspaceStepMountPoint):
         Constructor
         '''
         super(ImageSourceStep, self).__init__()
-        self.name = 'Image source'
-        self.pixmap = QtGui.QPixmap(':/imagesource/icons/landscapeimages.png')
+        self._name = 'Image source'
+        self._pixmap = QtGui.QPixmap(':/imagesource/icons/landscapeimages.png')
         self.addPort(('pho#workspace#port', 'provides', 'images'))
+        self._configured = False
+        self._state = ConfigureDialogState()
 
     def configure(self):
-        print('configure image source step')
-
+        d = ConfigureDialog(self._state)
+        d.setModal(True)
+        if d.exec_():
+            self._state = d.getState()
+        
+        self._configured = d.validate()

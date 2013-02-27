@@ -76,11 +76,11 @@ class WorkspaceStepPort(object):
 Plugins can inherit this mount point to add a workspace step.
 
  A plugin that registers this mount point must have attributes
- * pixmap
- * name
+ * _pixmap
+ * _name
  
  A plugin that registers this mount point could have attributes
- * category
+ * _category
  
  It must implement
  * serialize
@@ -96,26 +96,27 @@ def _workspace_step_init(self):
     '''
     Constructor
     '''
-    self.name = 'empty'
-    self.ports = []
-    self.pixmap = None
-    self.configured = False
+    self._location = None
+    self._name = ''
+    self._ports = []
+    self._pixmap = None
+    self._configured = False
 
-def _workspace_step_configure(self):
+def _workspace_step_configure(self, location):
     raise NotImplementedError
 
 def _workspace_step_isConfigured(self):
-    return self.configured
+    return self._configured
 
 def _workspace_step_addPort(self, triple):
     port = WorkspaceStepPort()
     port.addProperty(triple)
-    self.ports.append(port)
+    self._ports.append(port)
 
 def _workspace_step_canConnect(self, other):
     # Try to find compatible ports
-    for port in self.ports:
-        for otherPort in other.ports:
+    for port in self._ports:
+        for otherPort in other._ports:
             if port.canConnect(otherPort):
                 return True
 
@@ -133,7 +134,7 @@ WorkspaceStepMountPoint = pluginframework.MetaPluginMountPoint('WorkspaceStepMou
 
 def workspaceStepFactory(step_name):
     for step in WorkspaceStepMountPoint.getPlugins():
-        if step_name == step.name:
+        if step_name == step._name:
             return step
         
     raise ValueError

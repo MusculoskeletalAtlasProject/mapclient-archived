@@ -30,13 +30,13 @@ class AboutDialog(QDialog):
         Constructor
         '''
         QDialog.__init__(self, parent)
-        self.ui = Ui_AboutDialog()
-        self.ui.setupUi(self)
-        self.makeConnections()
+        self._ui = Ui_AboutDialog()
+        self._ui.setupUi(self)
+        self._makeConnections()
         
-    def makeConnections(self):
-        self.ui.btn_Credits.clicked.connect(self.showCreditsDialog)
-        self.ui.btn_License.clicked.connect(self.showLicenseDialog)
+    def _makeConnections(self):
+        self._ui.btn_Credits.clicked.connect(self.showCreditsDialog)
+        self._ui.btn_License.clicked.connect(self.showLicenseDialog)
         
     def showCreditsDialog(self):
         from widgets.creditsdialog import CreditsDialog

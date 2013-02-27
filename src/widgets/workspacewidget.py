@@ -31,9 +31,9 @@ class WorkspaceWidget(QtGui.QWidget):
         '''
         QtGui.QWidget.__init__(self)
         self.mainWindow = mainWindow
-        self.ui = Ui_WorkspaceWidget()
-        self.ui.setupUi(self)
-        self.ui.graphicsView.undoStack.indexChanged.connect(self.undoStackIndexChanged)
+        self._ui = Ui_WorkspaceWidget()
+        self._ui.setupUi(self)
+        self._ui.graphicsView.undoStack.indexChanged.connect(self.undoStackIndexChanged)
         self.action_Close = None # Keep a handle to this for modifying the Ui.
         self._createMenuItems()
         self.previousLocation = ''
@@ -41,8 +41,7 @@ class WorkspaceWidget(QtGui.QWidget):
         self.workspaceStepPlugins = WorkspaceStepMountPoint.getPlugins()
         self.stepTree = self.findChild(QtGui.QWidget, "stepTree")
         for step in self.workspaceStepPlugins:
-            if step.name != 'empty':
-                self.stepTree.addStep(step)
+            self.stepTree.addStep(step)
 
         self.updateUi()
 
@@ -57,7 +56,7 @@ class WorkspaceWidget(QtGui.QWidget):
         self.updateUi()
 
     def setActive(self):
-        self.mainWindow.setUndoStack(self.ui.graphicsView.undoStack)
+        self.mainWindow.setUndoStack(self._ui.graphicsView.undoStack)
 
     def _setActionProperties(self, action, name, slot, shortcut='', statustip=''):
         action.setObjectName(name)
@@ -86,7 +85,7 @@ class WorkspaceWidget(QtGui.QWidget):
     def close(self):
         m = self.mainWindow.workspaceManager
         m.close()
-        self.ui.graphicsView.clear()
+        self._ui.graphicsView.clear()
         self.updateUi()
 
     def save(self):
@@ -95,15 +94,15 @@ class WorkspaceWidget(QtGui.QWidget):
         self.updateUi()
 
     def saveState(self, ws):
-        self.ui.graphicsView.saveState(ws)
+        self._ui.graphicsView.saveState(ws)
         self.updateUi()
 
     def loadState(self, ws):
-        self.ui.graphicsView.loadState(ws)
+        self._ui.graphicsView.loadState(ws)
         self.updateUi()
 
     def _createMenuItems(self):
-        menu_File = self.mainWindow.ui.menubar.findChild(QtGui.QMenu, 'menu_File')
+        menu_File = self.mainWindow._ui.menubar.findChild(QtGui.QMenu, 'menu_File')
         lastFileMenuAction = menu_File.actions()[-1]
         menu_New = menu_File.findChild(QtGui.QMenu, name='&New')
         if not menu_New:

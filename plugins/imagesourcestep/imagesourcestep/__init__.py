@@ -20,6 +20,6 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
 __version__ = '0.1.0'
 __author__ = 'Hugh Sorby'
 
-import imagesourcestep.resources_rc
+import imagesourcestep.widgets.resources_rc
 import imagesourcestep.step
 

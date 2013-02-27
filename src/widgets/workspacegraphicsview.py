@@ -349,7 +349,7 @@ class Node(QtGui.QGraphicsItem):
         QtGui.QGraphicsItem.__init__(self)
 
         self.step = step
-        self.pixmap = step.pixmap.scaled(64, 64, aspectRatioMode=QtCore.Qt.KeepAspectRatio, transformMode=QtCore.Qt.FastTransformation)
+        self.pixmap = step._pixmap.scaled(64, 64, aspectRatioMode=QtCore.Qt.KeepAspectRatio, transformMode=QtCore.Qt.FastTransformation)
         self.configure_red = QtGui.QPixmap(':/workflow/images/configure_red.png').scaled(24, 24, aspectRatioMode=QtCore.Qt.KeepAspectRatio, transformMode=QtCore.Qt.FastTransformation)
         self.graph = weakref.ref(workspaceGraphicsView)
         self.edgeList = []
@@ -368,7 +368,7 @@ class Node(QtGui.QGraphicsItem):
         self.contextMenu.addAction(configureAction)
         portsProvidesTip = ''
         portsUsesTip = ''
-        for port in step.ports:
+        for port in step._ports:
             triples = port.getTriplesForPred('uses')
             for triple in triples:
                 portsUsesTip += '<li>' + triple[2] + '</li>'
