@@ -31,6 +31,7 @@ class SegmentationStep(WorkspaceStepMountPoint):
         '''
         super(SegmentationStep, self).__init__()
         self._name = 'Segmentation'
+        self._identifier = 'squiggly'
         self._pixmap = QtGui.QPixmap(':/segmentation/icons/seg.gif')
         self.addPort(('pho#workspace#port', 'uses', 'images'))
         self.addPort(('pho#workspace#port', 'provides', 'pointcloud'))
@@ -38,3 +39,15 @@ class SegmentationStep(WorkspaceStepMountPoint):
     def configure(self):
         print('configure the segmentation step')
 
+    def getIdentifier(self):
+        return self._identifier
+    
+    def setIdentifier(self, identifier):
+        self._identifier = identifier
+        
+    def serialize(self, location):
+        pass #QtCore.QSettings(location + '/' + info.WORKSPACE_NAME, QtCore.QSettings.IniFormat)
+        
+    def deserialize(self, location):
+        pass
+    

@@ -19,10 +19,12 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
 '''
 import os
 
-from PyQt4 import QtGui
+from PyQt4 import QtGui, QtCore
 
 from mountpoints.workspacestep import WorkspaceStepMountPoint
 from imagesourcestep.widgets.configuredialog import ConfigureDialog, ConfigureDialogState
+
+STEP_SERIALISATION_FILENAME = 'step.conf'
 
 class ImageSourceStep(WorkspaceStepMountPoint):
     '''
@@ -48,7 +50,26 @@ class ImageSourceStep(WorkspaceStepMountPoint):
         if d.exec_():
             self._state = d.getState()
             step_location = os.path.join(location, self._state.identifier())
-            if not step_location:
+            if not os.path.exists(step_location):
                 os.mkdir(step_location)
+                
+            self.serialize(step_location)
         
         self._configured = d.validate()
+        
+    def getIdentifier(self):
+        return self._state.identifier()
+    
+    def setIdentifier(self, identifier):
+        self._state.setIdentifier(identifier)
+        
+    def serialize(self, location):
+        s = QtCore.QSettings(os.path.join(location, STEP_SERIALISATION_FILENAME), QtCore.QSettings.IniFormat)
+        self._state.save(s)
+        
+    def deserialize(self, location):
+        s = QtCore.QSettings(os.path.join(location, STEP_SERIALISATION_FILENAME), QtCore.QSettings.IniFormat)
+        self._state.load(s)
+        d = ConfigureDialog(self._state)
+        self._configured = d.validate()
+    

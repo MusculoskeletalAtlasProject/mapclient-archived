@@ -44,11 +44,32 @@ class ConfigureDialogState(object):
     def identifier(self):
         return self._identifier
     
+    def setIdentifier(self, identifier):
+        self._identifier = identifier
+    
     def copyTo(self):
         return self._copyTo
     
     def imageType(self):
         return self._imageType
+    
+    def save(self, conf):
+        conf.beginGroup('status')
+        conf.setValue('identifier', self._identifier)
+        conf.setValue('localLocation', self._localLocation)
+        conf.setValue('copyTo', self._copyTo)
+        conf.setValue('pmrLocation', self._pmrLocation)
+        conf.setValue('imageType', self._imageType)
+        conf.endGroup()
+    
+    def load(self, conf):
+        conf.beginGroup('status')
+        self._identifier = conf.value('identifier')
+        self._localLocation = conf.value('localLocation')
+        self._copyTo = bool(conf.value('copyTo'))
+        self._pmrLocation = conf.value('pmrLocation')
+        self._imageType = int(conf.value('imageType'))
+        conf.endGroup()
         
         
 class ConfigureDialog(QDialog):

@@ -112,6 +112,12 @@ def _workspace_step_getIdentifier(self):
 def _workspace_step_setIdentifier(self):
     raise NotImplementedError
 
+def _workspace_step_serialize(self):
+    raise NotImplementedError
+
+def _workspace_step_deserialize(self):
+    raise NotImplementedError
+
 def _workspace_step_isConfigured(self):
     return self._configured
 
@@ -142,6 +148,8 @@ attr_dict['isConfigured'] = _workspace_step_isConfigured
 attr_dict['addPort'] = _workspace_step_addPort
 attr_dict['canConnect'] = _workspace_step_canConnect
 attr_dict['getName'] = _workspace_step_getName
+attr_dict['deserialize'] = _workspace_step_deserialize
+attr_dict['serialize'] = _workspace_step_serialize
 
 
 WorkspaceStepMountPoint = pluginframework.MetaPluginMountPoint('WorkspaceStepMountPoint', (object,), attr_dict)
