@@ -18,17 +18,11 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
 import os
+
 from PyQt4 import QtCore
+
 from settings import info
 from widgets.workspacewidget import WorkspaceWidget
-from mountpoints.workspacestep import WorkspaceStepMountPoint
-
-def workspaceStepFactory(step_name):
-    for step in WorkspaceStepMountPoint.getPlugins():
-        if step_name == step.name:
-            return step
-        
-    raise ValueError
 
 def workspaceConfigurationExists(location):
     return os.path.exists(location + '/' + info.WORKSPACE_NAME)
