@@ -46,16 +46,16 @@ class StepTree(QtGui.QTreeWidget):
 
     def addStep(self, step):
 
-        parentItem = self.findParentItem(step.category)
+        parentItem = self.findParentItem(step._category)
         if parentItem == None:
             parentItem = QtGui.QTreeWidgetItem(self)
-            parentItem.setText(0, step.category)
+            parentItem.setText(0, step._category)
 
         if not parentItem.isExpanded():
             parentItem.setExpanded(True)
 
         stepItem = QtGui.QTreeWidgetItem(parentItem)
-        stepItem.setText(0, step._name)
+        stepItem.setText(0, step.getName())
         stepItem.setIcon(0, QtGui.QIcon(step._pixmap))
         stepItem.setData(0, QtCore.Qt.UserRole, step)
         stepItem.setFlags(QtCore.Qt.ItemIsEnabled)
@@ -76,7 +76,7 @@ class StepTree(QtGui.QTreeWidget):
         pixmap = pixmap.scaled(64, 64, aspectRatioMode=QtCore.Qt.KeepAspectRatio, transformMode=QtCore.Qt.FastTransformation)
         hotspot = QtCore.QPoint(pixmap.width() / 2, pixmap.height() / 2)
 
-        name = bytearray(step._name, sys.stdout.encoding)
+        name = bytearray(step.getName(), sys.stdout.encoding)
         dataStream.writeUInt32(len(name))
         dataStream.writeRawData(name)
 

@@ -345,7 +345,7 @@ def ensureItemInScene(scene, item, newPos):
 class Node(QtGui.QGraphicsItem):
     Type = QtGui.QGraphicsItem.UserType + 1
 
-    def __init__(self, step, workspaceGraphicsView):
+    def __init__(self, step, location, workspaceGraphicsView):
         QtGui.QGraphicsItem.__init__(self)
 
         self.step = step
@@ -364,7 +364,7 @@ class Node(QtGui.QGraphicsItem):
 
         self.contextMenu = QtGui.QMenu(self.graph())
         configureAction = QtGui.QAction('Configure', self.contextMenu)
-        configureAction.triggered.connect(self.step.configure)
+        configureAction.triggered.connect(lambda: self.step.configure(location))
         self.contextMenu.addAction(configureAction)
         portsProvidesTip = ''
         portsUsesTip = ''
@@ -494,6 +494,7 @@ class WorkspaceGraphicsView(QtGui.QGraphicsView):
 
     def __init__(self, parent=None):
         QtGui.QGraphicsView.__init__(self, parent)
+        self.mainWindow = None
         self.undoStack = QtGui.QUndoStack(self)
         self.selectedNodes = []
         self.errorIconTimer = QtCore.QTimer()
@@ -529,7 +530,7 @@ class WorkspaceGraphicsView(QtGui.QGraphicsView):
         nodeIndex = 0
         for node in nodeList:
             ws.setArrayIndex(nodeIndex)
-            ws.setValue('name', node.step.name)
+            ws.setValue('name', node.step.getName())
             ws.setValue('position', node.pos())
             ws.beginWriteArray('edgeList')
             edgeIndex = 0
@@ -547,6 +548,7 @@ class WorkspaceGraphicsView(QtGui.QGraphicsView):
     def loadState(self, ws):
         self.clear()
         self.undoStack.clear()
+        location = self.mainWindow.workspaceManager.location
         ws.beginGroup('nodes')
         nodeCount = ws.beginReadArray('nodelist')
         nodeList = []
@@ -556,7 +558,7 @@ class WorkspaceGraphicsView(QtGui.QGraphicsView):
             name = ws.value('name')
             position = ws.value('position')
             step = workspaceStepFactory(name)
-            node = Node(step, self)
+            node = Node(step, location, self)
             node.setPos(position)
             nodeList.append(node)
             command = CommandAddNode(self.scene(), node)
@@ -678,7 +680,8 @@ class WorkspaceGraphicsView(QtGui.QGraphicsView):
             stream >> hotspot
 
             position = self.mapToScene(event.pos() - hotspot)
-            node = Node(step, self)
+            location = self.mainWindow.workspaceManager.location
+            node = Node(step, location, self)
             node.setPos(ensureItemInScene(self.scene(), node, position))
 
             self.undoStack.beginMacro('Add node')

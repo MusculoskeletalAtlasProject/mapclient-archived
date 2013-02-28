@@ -17,6 +17,8 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     You should have received a copy of the GNU General Public License
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
+import os
+
 from PyQt4 import QtGui
 
 from mountpoints.workspacestep import WorkspaceStepMountPoint
@@ -40,10 +42,13 @@ class ImageSourceStep(WorkspaceStepMountPoint):
         self._configured = False
         self._state = ConfigureDialogState()
 
-    def configure(self):
+    def configure(self, location):
         d = ConfigureDialog(self._state)
         d.setModal(True)
         if d.exec_():
             self._state = d.getState()
+            step_location = os.path.join(location, self._state.identifier())
+            if not step_location:
+                os.mkdir(step_location)
         
         self._configured = d.validate()

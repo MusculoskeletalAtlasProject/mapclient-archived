@@ -20,7 +20,7 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
 from PyQt4 import QtGui
 from mountpoints.workspacestep import WorkspaceStepMountPoint
 
-class Step(WorkspaceStepMountPoint):
+class SegmentationStep(WorkspaceStepMountPoint):
     '''
     A step that acts like the step plugin duck
     '''
@@ -29,7 +29,7 @@ class Step(WorkspaceStepMountPoint):
         '''
         Constructor
         '''
-        super(Step, self).__init__()
+        super(SegmentationStep, self).__init__()
         self._name = 'Segmentation'
         self._pixmap = QtGui.QPixmap(':/segmentation/icons/seg.gif')
         self.addPort(('pho#workspace#port', 'uses', 'images'))

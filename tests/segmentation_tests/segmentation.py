@@ -36,18 +36,18 @@ class SegmentationTestCase(unittest.TestCase):
 
         #sys.path.insert(0, inbuiltPluginDir)
 #        from workspace.Workspace import Manager
-        from segmentationstep.step import Step
-        myStep = Step()
-        self.assertEqual(myStep._name, 'Segmentation')
+        from segmentationstep.step import SegmentationStep
+        myStep = SegmentationStep()
+        self.assertEqual(myStep.getName(), 'Segmentation')
         app.argc() # eclipse warning killer
         del sys.path[0]
 
 #    def testSerialisation(self):
 #        import sys
 #        app = QtGui.QApplication(sys.argv)
-#        from segmentation.SegmentationStep import Step
+#        from segmentation.SegmentationStep import SegmentationStep
 #        from workspace.WorkspaceStep import WorkspaceStep
-#        myStep = Step()
+#        myStep = SegmentationStep()
 #
 #        itemData = QtCore.QByteArray()
 #        writeDataStream = QtCore.QDataStream(itemData, QtCore.QIODevice.WriteOnly)
@@ -56,7 +56,7 @@ class SegmentationTestCase(unittest.TestCase):
 #
 #        readDataStream = QtCore.QDataStream(itemData, QtCore.QIODevice.ReadOnly)
 #        passedStep = WorkspaceStep()
-#        retStep = Step.deserialize(passedStep, readDataStream)
+#        retStep = SegmentationStep.deserialize(passedStep, readDataStream)
 #        self.assertEqual(retStep.name, 'segmentation')
 #        self.assertNotEqual(retStep.pixmap, None)
 #        self.assertEqual(len(retStep.ports), 2)
