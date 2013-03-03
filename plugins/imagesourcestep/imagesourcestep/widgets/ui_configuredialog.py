@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'qt/configuredialog.ui'
 #
-# Created: Fri Mar  1 14:06:42 2013
+# Created: Mon Mar  4 11:08:06 2013
 #      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -146,7 +146,7 @@ class Ui_ConfigureDialog(object):
         self.label_6.setBuddy(self.imageSourceTypeComboBox)
 
         self.retranslateUi(ConfigureDialog)
-        self.tabWidget.setCurrentIndex(1)
+        self.tabWidget.setCurrentIndex(0)
         QtCore.QObject.connect(self.buttonBox, QtCore.SIGNAL(_fromUtf8("accepted()")), ConfigureDialog.accept)
         QtCore.QObject.connect(self.buttonBox, QtCore.SIGNAL(_fromUtf8("rejected()")), ConfigureDialog.reject)
         QtCore.QMetaObject.connectSlotsByName(ConfigureDialog)
@@ -154,16 +154,13 @@ class Ui_ConfigureDialog(object):
     def retranslateUi(self, ConfigureDialog):
         ConfigureDialog.setWindowTitle(_translate("ConfigureDialog", "Configure - Image Source", None))
         self.label.setText(_translate("ConfigureDialog", "Identifier:", None))
-        self.identifierLineEdit.setPlaceholderText(_translate("ConfigureDialog", "<unique step identifier>", None))
         self.label_3.setText(_translate("ConfigureDialog", "Location:", None))
-        self.localLineEdit.setPlaceholderText(_translate("ConfigureDialog", "<image file(s)>", None))
         self.previousLocationLabel.setText(_translate("ConfigureDialog", "rubbish", None))
         self.localDirectoryCheckBox.setText(_translate("ConfigureDialog", "Directory:", None))
         self.localButton.setText(_translate("ConfigureDialog", "...", None))
         self.copyToWorkspaceCheckBox.setText(_translate("ConfigureDialog", "Copy to workspace", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.localTab), _translate("ConfigureDialog", "Local file system", None))
         self.label_5.setText(_translate("ConfigureDialog", "Location:", None))
-        self.pmrLineEdit.setPlaceholderText(_translate("ConfigureDialog", "<PMR image repository>", None))
         self.pmrButton.setText(_translate("ConfigureDialog", "...", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.pmrTab), _translate("ConfigureDialog", "Physiome Model Repository", None))
         self.label_6.setText(_translate("ConfigureDialog", "Image Source Type:", None))

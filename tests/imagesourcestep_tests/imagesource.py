@@ -54,14 +54,15 @@ class ImageSourceTestCase(unittest.TestCase):
         self.assertEqual(otherstate.identifier(), 'here2')
         self.assertEqual(otherstate.location(), 'anywhere')
         
-    @unittest.skipIf(DISABLE_GUI_TESTS, 'GUI tests are disabled')
-    def testConfigure(self):
-        if self.pixmap_unavailable:
-            return
-        
-        from imagesourcestep.step import ImageSourceStep
-        mystep = ImageSourceStep()
-        mystep.configure()
+    if sys.version_info >= (2, 7, 0):
+        @unittest.skipIf(DISABLE_GUI_TESTS, 'GUI tests are disabled')
+        def testConfigure(self):
+            if self.pixmap_unavailable:
+                return
+            
+            from imagesourcestep.step import ImageSourceStep
+            mystep = ImageSourceStep()
+            mystep.configure()
         
     def testConfigureDialog(self):
         if self.pixmap_unavailable:

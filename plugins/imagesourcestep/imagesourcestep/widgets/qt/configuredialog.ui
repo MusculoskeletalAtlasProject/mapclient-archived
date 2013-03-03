@@ -33,18 +33,14 @@
          </widget>
         </item>
         <item>
-         <widget class="QLineEdit" name="identifierLineEdit">
-          <property name="placeholderText">
-           <string>&lt;unique step identifier&gt;</string>
-          </property>
-         </widget>
+         <widget class="QLineEdit" name="identifierLineEdit"/>
         </item>
        </layout>
       </item>
       <item>
        <widget class="QTabWidget" name="tabWidget">
         <property name="currentIndex">
-         <number>1</number>
+         <number>0</number>
         </property>
         <widget class="QWidget" name="localTab">
          <attribute name="title">
@@ -74,9 +70,6 @@
               <property name="styleSheet">
                <string notr="true">selection-color: red;
 color: green</string>
-              </property>
-              <property name="placeholderText">
-               <string>&lt;image file(s)&gt;</string>
               </property>
              </widget>
             </item>
@@ -200,11 +193,7 @@ color: green</string>
              </widget>
             </item>
             <item>
-             <widget class="QLineEdit" name="pmrLineEdit">
-              <property name="placeholderText">
-               <string>&lt;PMR image repository&gt;</string>
-              </property>
-             </widget>
+             <widget class="QLineEdit" name="pmrLineEdit"/>
             </item>
             <item>
              <widget class="QPushButton" name="pmrButton">
