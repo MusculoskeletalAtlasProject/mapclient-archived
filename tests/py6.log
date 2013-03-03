@@ -1,0 +1,17 @@
+Traceback (most recent call last):
+  File "/usr/local/lib/python2.6/dist-packages/Twisted-11.0.0-py2.6-linux-x86_64.egg/twisted/internet/defer.py", line 286, in addCallbacks
+    self._runCallbacks()
+  File "/usr/local/lib/python2.6/dist-packages/Twisted-11.0.0-py2.6-linux-x86_64.egg/twisted/internet/defer.py", line 542, in _runCallbacks
+    current.result = callback(current.result, *args, **kw)
+  File "/usr/local/lib/python2.6/dist-packages/Twisted-11.0.0-py2.6-linux-x86_64.egg/twisted/internet/defer.py", line 361, in callback
+    self._startRunCallbacks(result)
+  File "/usr/local/lib/python2.6/dist-packages/Twisted-11.0.0-py2.6-linux-x86_64.egg/twisted/internet/defer.py", line 455, in _startRunCallbacks
+    self._runCallbacks()
+--- <exception caught here> ---
+  File "/usr/local/lib/python2.6/dist-packages/Twisted-11.0.0-py2.6-linux-x86_64.egg/twisted/internet/defer.py", line 542, in _runCallbacks
+    current.result = callback(current.result, *args, **kw)
+  File "/usr/local/lib/python2.6/dist-packages/buildbot-0.8.6p1-py2.6.egg/buildbot/process/buildstep.py", line 802, in <lambda>
+    d.addCallback(lambda res: self.evaluateCommand(cmd)) # returns results
+  File "/home/bbmaster/musculoskeletal/bats/steps/shell.py", line 33, in evaluateCommand
+    total = int(m.group(1))
+exceptions.AttributeError: 'NoneType' object has no attribute 'group'
