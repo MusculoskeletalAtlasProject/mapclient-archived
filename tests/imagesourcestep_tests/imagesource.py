@@ -7,7 +7,11 @@ import os, sys
 import unittest
 
 from PyQt4 import QtGui
-from PyQt4.QtTest import QTest
+try:
+    from PyQt4.QtTest import QTest
+    HAVE_QTTEST = True
+except ImportError:
+    HAVE_QTTEST = False
 
 DISABLE_GUI_TESTS = True
 
@@ -64,22 +68,23 @@ class ImageSourceTestCase(unittest.TestCase):
             mystep = ImageSourceStep()
             mystep.configure()
         
-    def testConfigureDialog(self):
-        if self.pixmap_unavailable:
-            return
-        
-        from imagesourcestep.widgets.configuredialog import ConfigureDialog, ConfigureDialogState
-        state = ConfigureDialogState()
-        d = ConfigureDialog(state)
-        
-        self.assertEqual(d._ui.buttonBox.button(QtGui.QDialogButtonBox.Ok).isEnabled(), False)
-        QTest.keyClicks(d._ui.identifierLineEdit, 'hello')
-        QTest.keyClicks(d._ui.localLineEdit, 'here')
-        self.assertEqual(d._ui.buttonBox.button(QtGui.QDialogButtonBox.Ok).isEnabled(), True)
-        #QTest.mouseClick(d._ui.buttonBox.button(QtGui.QDialogButtonBox.Ok), QtCore.Qt.LeftButton)
-        newstate = d.getState()
-        self.assertEqual(newstate.identifier(), 'hello')
-        self.assertEqual(newstate.location(), 'here')
+    if HAVE_QTTEST:
+        def testConfigureDialog(self):
+            if self.pixmap_unavailable:
+                return
+            
+            from imagesourcestep.widgets.configuredialog import ConfigureDialog, ConfigureDialogState
+            state = ConfigureDialogState()
+            d = ConfigureDialog(state)
+            
+            self.assertEqual(d._ui.buttonBox.button(QtGui.QDialogButtonBox.Ok).isEnabled(), False)
+            QTest.keyClicks(d._ui.identifierLineEdit, 'hello')
+            QTest.keyClicks(d._ui.localLineEdit, 'here')
+            self.assertEqual(d._ui.buttonBox.button(QtGui.QDialogButtonBox.Ok).isEnabled(), True)
+            #QTest.mouseClick(d._ui.buttonBox.button(QtGui.QDialogButtonBox.Ok), QtCore.Qt.LeftButton)
+            newstate = d.getState()
+            self.assertEqual(newstate.identifier(), 'hello')
+            self.assertEqual(newstate.location(), 'here')
         
 
 if __name__ == "__main__":
