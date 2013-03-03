@@ -1,3 +1,4 @@
+#!/usr/bin/python
 '''
 MAP Client, a program to generate detailed musculoskeletal models for OpenSim.
     Copyright (C) 2012  University of Auckland
@@ -48,6 +49,12 @@ class UnitTestOutputTestCase(unittest.TestCase):
         [p, f] = parseUnitTestOutput('py4.log')
         assert(p == 13)
         assert(f == 1)
+        
+    def test5(self):
+        [p, f] = parseUnitTestOutput('py5.log')
+        self.assertEqual(p, 21)
+        self.assertEqual(f, 0)
+      
 
 import re
 
@@ -65,7 +72,7 @@ def parseUnitTestOutput(filename):
 
         m = re.match('Ran (\d+)', totalLine)
         total = int(m.group(1))
-        if statusLine == 'OK':
+        if statusLine.startswith('OK'):
             passed = total
             failed = 0
         else:
