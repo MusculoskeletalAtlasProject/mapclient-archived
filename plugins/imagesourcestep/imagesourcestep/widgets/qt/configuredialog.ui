@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>523</width>
-    <height>273</height>
+    <width>529</width>
+    <height>274</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -44,9 +44,9 @@
       <item>
        <widget class="QTabWidget" name="tabWidget">
         <property name="currentIndex">
-         <number>0</number>
+         <number>1</number>
         </property>
-        <widget class="QWidget" name="tab">
+        <widget class="QWidget" name="localTab">
          <attribute name="title">
           <string>Local file system</string>
          </attribute>
@@ -72,15 +72,42 @@
             <item>
              <widget class="QLineEdit" name="localLineEdit">
               <property name="styleSheet">
-               <string notr="true">selection-color: red</string>
+               <string notr="true">selection-color: red;
+color: green</string>
               </property>
               <property name="placeholderText">
-               <string>&lt;image file/directory&gt;</string>
+               <string>&lt;image file(s)&gt;</string>
               </property>
              </widget>
             </item>
             <item>
-             <widget class="QPushButton" name="pushButton">
+             <widget class="QLabel" name="previousLocationLabel">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>0</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="text">
+               <string>rubbish</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QCheckBox" name="localDirectoryCheckBox">
+              <property name="layoutDirection">
+               <enum>Qt::RightToLeft</enum>
+              </property>
+              <property name="text">
+               <string>Directory:</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="localButton">
               <property name="font">
                <font>
                 <weight>75</weight>
@@ -149,7 +176,7 @@
           </item>
          </layout>
         </widget>
-        <widget class="QWidget" name="tab_2">
+        <widget class="QWidget" name="pmrTab">
          <attribute name="title">
           <string>Physiome Model Repository</string>
          </attribute>
@@ -158,6 +185,12 @@
            <layout class="QHBoxLayout" name="horizontalLayout_5">
             <item>
              <widget class="QLabel" name="label_5">
+              <property name="minimumSize">
+               <size>
+                <width>71</width>
+                <height>0</height>
+               </size>
+              </property>
               <property name="text">
                <string>Location:</string>
               </property>
@@ -174,7 +207,7 @@
              </widget>
             </item>
             <item>
-             <widget class="QPushButton" name="pushButton_2">
+             <widget class="QPushButton" name="pmrButton">
               <property name="font">
                <font>
                 <weight>75</weight>
@@ -255,12 +288,6 @@
        </layout>
       </item>
      </layout>
-     <zorder>identifierLineEdit</zorder>
-     <zorder>label</zorder>
-     <zorder>label_6</zorder>
-     <zorder>imageSourceTypeComboBox</zorder>
-     <zorder>label_5</zorder>
-     <zorder>tabWidget</zorder>
     </widget>
    </item>
    <item>

@@ -36,7 +36,7 @@ class SegmentationStep(WorkspaceStepMountPoint):
         self.addPort(('pho#workspace#port', 'uses', 'images'))
         self.addPort(('pho#workspace#port', 'provides', 'pointcloud'))
 
-    def configure(self):
+    def configure(self, location):
         print('configure the segmentation step')
 
     def getIdentifier(self):

@@ -39,7 +39,7 @@ class DataStoreStep(WorkspaceStepMountPoint):
         self._pixmap = QtGui.QPixmap(':/datastore/icons/datastore_200.png')
         self.addPort(('pho#workspace#port', 'uses', 'pointcloud'))
 
-    def configure(self):
+    def configure(self, location):
         print('configure data store step')
 
     def getIdentifier(self):
