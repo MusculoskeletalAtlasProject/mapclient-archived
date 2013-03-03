@@ -31,28 +31,39 @@ import unittest
 class UnitTestOutputTestCase(unittest.TestCase):
 
     def test1(self):
-        [p, f] = parseUnitTestOutput('py1.log')
-        assert(p == 9)
-        assert(f == 0)
+        [rc, p, f] = parseUnitTestOutput('py1.log')
+        self.assertEqual(rc, 0)
+        self.assertEqual(p, 9)
+        self.assertEqual(f, 0)
 
     def test2(self):
-        [p, f] = parseUnitTestOutput('py2.log')
-        assert(p == 8)
-        assert(f == 1)
+        [rc, p, f] = parseUnitTestOutput('py2.log')
+        self.assertEqual(rc, 1)
+        self.assertEqual(p, 8)
+        self.assertEqual(f, 1)
 
     def test3(self):
-        [p, f] = parseUnitTestOutput('py3.log')
-        assert(p == 12)
-        assert(f == 2)
+        [rc, p, f] = parseUnitTestOutput('py3.log')
+        self.assertEqual(rc, 1)
+        self.assertEqual(p, 12)
+        self.assertEqual(f, 2)
 
     def test4(self):
-        [p, f] = parseUnitTestOutput('py4.log')
-        assert(p == 13)
-        assert(f == 1)
+        [rc, p, f] = parseUnitTestOutput('py4.log')
+        self.assertEqual(rc, 1)
+        self.assertEqual(p, 13)
+        self.assertEqual(f, 1)
         
     def test5(self):
-        [p, f] = parseUnitTestOutput('py5.log')
+        [rc, p, f] = parseUnitTestOutput('py5.log')
+        self.assertEqual(rc, 0)
         self.assertEqual(p, 21)
+        self.assertEqual(f, 0)
+      
+    def test6(self):
+        [rc, p, f] = parseUnitTestOutput('py6.log')
+        self.assertEqual(rc, 1)
+        self.assertEqual(p, 0)
         self.assertEqual(f, 0)
       
 
@@ -65,30 +76,31 @@ def parseUnitTestOutput(filename):
     f = open(filename)
     lines = f.readlines()
 
+    rc = 1
+    passed = 0
+    failed = 0
     lines.reverse()
     if len(lines) >= 3:
         statusLine = lines[0].rstrip('\r\n')
         totalLine = lines[2].rstrip('\r\n')
 
         m = re.match('Ran (\d+)', totalLine)
-        total = int(m.group(1))
-        if statusLine.startswith('OK'):
-            passed = total
-            failed = 0
-        else:
-            errorDesc = ['failures', 'errors']
-            failed = 0
-            for errorType in errorDesc:
-                m = re.match('.*{0}=(\d+)'.format(errorType), statusLine)
-                if m:
-                    failed += int(m.group(1))
+        if m:
+            total = int(m.group(1))
+            if statusLine.startswith('OK'):
+                passed = total
+                if total > 0:
+                    rc = 0
+            else:
+                errorDesc = ['failures', 'errors']
+                for errorType in errorDesc:
+                    m = re.match('.*{0}=(\d+)'.format(errorType), statusLine)
+                    if m:
+                        failed += int(m.group(1))
+    
+                passed = total - failed
 
-            passed = total - failed
-    else:
-        passed = 0
-        failed = 0
-
-    return passed, failed
+    return rc, passed, failed
 
 def suite():
     tests = unittest.TestSuite()
