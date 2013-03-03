@@ -20,7 +20,7 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
 from PyQt4 import QtGui
 from mountpoints.workspacestep import WorkspaceStepMountPoint
 
-class Step(WorkspaceStepMountPoint):
+class SegmentationStep(WorkspaceStepMountPoint):
     '''
     A step that acts like the step plugin duck
     '''
@@ -29,12 +29,25 @@ class Step(WorkspaceStepMountPoint):
         '''
         Constructor
         '''
-        super(Step, self).__init__()
-        self.name = 'Segmentation'
-        self.pixmap = QtGui.QPixmap(':/segmentation/icons/seg.gif')
+        super(SegmentationStep, self).__init__()
+        self._name = 'Segmentation'
+        self._identifier = 'squiggly'
+        self._pixmap = QtGui.QPixmap(':/segmentation/icons/seg.gif')
         self.addPort(('pho#workspace#port', 'uses', 'images'))
         self.addPort(('pho#workspace#port', 'provides', 'pointcloud'))
 
-    def configure(self):
+    def configure(self, location):
         print('configure the segmentation step')
 
+    def getIdentifier(self):
+        return self._identifier
+    
+    def setIdentifier(self, identifier):
+        self._identifier = identifier
+        
+    def serialize(self, location):
+        pass #QtCore.QSettings(location + '/' + info.WORKSPACE_NAME, QtCore.QSettings.IniFormat)
+        
+    def deserialize(self, location):
+        pass
+    

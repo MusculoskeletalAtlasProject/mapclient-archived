@@ -17,10 +17,14 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     You should have received a copy of the GNU General Public License
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
-from PyQt4 import QtGui
+import os
 
-#import imagesource.Resources_rc
+from PyQt4 import QtGui, QtCore
+
 from mountpoints.workspacestep import WorkspaceStepMountPoint
+from imagesourcestep.widgets.configuredialog import ConfigureDialog, ConfigureDialogState
+
+STEP_SERIALISATION_FILENAME = 'step.conf'
 
 class ImageSourceStep(WorkspaceStepMountPoint):
     '''
@@ -34,10 +38,38 @@ class ImageSourceStep(WorkspaceStepMountPoint):
         Constructor
         '''
         super(ImageSourceStep, self).__init__()
-        self.name = 'Image source'
-        self.pixmap = QtGui.QPixmap(':/imagesource/icons/landscapeimages.png')
+        self._name = 'Image source'
+        self._pixmap = QtGui.QPixmap(':/imagesource/icons/landscapeimages.png')
         self.addPort(('pho#workspace#port', 'provides', 'images'))
+        self._configured = False
+        self._state = ConfigureDialogState()
 
-    def configure(self):
-        print('configure image source step')
-
+    def configure(self, location):
+        d = ConfigureDialog(self._state)
+        d.setModal(True)
+        if d.exec_():
+            self._state = d.getState()
+            step_location = os.path.join(location, self._state.identifier())
+            if not os.path.exists(step_location):
+                os.mkdir(step_location)
+                
+            self.serialize(step_location)
+        
+        self._configured = d.validate()
+        
+    def getIdentifier(self):
+        return self._state.identifier()
+    
+    def setIdentifier(self, identifier):
+        self._state.setIdentifier(identifier)
+        
+    def serialize(self, location):
+        s = QtCore.QSettings(os.path.join(location, STEP_SERIALISATION_FILENAME), QtCore.QSettings.IniFormat)
+        self._state.save(s)
+        
+    def deserialize(self, location):
+        s = QtCore.QSettings(os.path.join(location, STEP_SERIALISATION_FILENAME), QtCore.QSettings.IniFormat)
+        self._state.load(s)
+        d = ConfigureDialog(self._state)
+        self._configured = d.validate()
+    
