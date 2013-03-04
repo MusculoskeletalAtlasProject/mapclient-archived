@@ -32,6 +32,6 @@ class LicenseDialog(QDialog):
         Constructor
         '''
         QDialog.__init__(self, parent)
-        self.ui = Ui_LicenseDialog()
-        self.ui.setupUi(self)
+        self._ui = Ui_LicenseDialog()
+        self._ui.setupUi(self)
         

@@ -38,6 +38,9 @@ def suite():
     from segmentation_tests import segmentationtests
     tests.addTests(segmentationtests.suite())
     
+    from imagesourcestep_tests import imagesourcesteptests
+    tests.addTests(imagesourcesteptests.suite())
+    
     return tests
 
 def load_tests(loader, tests, pattern):

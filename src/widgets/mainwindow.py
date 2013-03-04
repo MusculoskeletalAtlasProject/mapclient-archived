@@ -36,28 +36,28 @@ class MainWindow(QtGui.QMainWindow):
         '''
         QtGui.QMainWindow.__init__(self)
 
-        self.ui = Ui_MainWindow()
-        self.ui.setupUi(self)
+        self._ui = Ui_MainWindow()
+        self._ui.setupUi(self)
         self._makeConnections()
         self.undoManager = UndoManager()
 
 #        undoManager = self.mainWindow.workspaceManager.undoManager
-        undoAction = self.undoManager.createUndoAction(self.ui.menu_Edit)
+        undoAction = self.undoManager.createUndoAction(self._ui.menu_Edit)
         undoAction.setShortcut(QtGui.QKeySequence('Ctrl+Z'))
-        redoAction = self.undoManager.createRedoAction(self.ui.menu_Edit)
+        redoAction = self.undoManager.createRedoAction(self._ui.menu_Edit)
         redoAction.setShortcut(QtGui.QKeySequence('Ctrl+Shift+Z'))
 
-        self.ui.menu_Edit.addAction(undoAction)
-        self.ui.menu_Edit.addAction(redoAction)
+        self._ui.menu_Edit.addAction(undoAction)
+        self._ui.menu_Edit.addAction(redoAction)
 
-        self.ui.stackedWidget.currentChanged.connect(self.centralWidgetChanged)
+        self._ui.stackedWidget.currentChanged.connect(self.centralWidgetChanged)
         self.stackedWidgetPages = StackedWidgetMountPoint.getPlugins(self)
         self.stackedWidgetPages.insert(0, WorkspaceManager(self))
 
         for stackedWidgetPage in self.stackedWidgetPages:
             if not hasattr(self, stackedWidgetPage.name):
                 setattr(self, stackedWidgetPage.name, stackedWidgetPage)
-                stackedWidgetPage.setWidgetIndex(self.ui.stackedWidget.addWidget(stackedWidgetPage.getWidget()))
+                stackedWidgetPage.setWidgetIndex(self._ui.stackedWidget.addWidget(stackedWidgetPage.getWidget()))
 
         self._readSettings()
 
@@ -81,14 +81,14 @@ class MainWindow(QtGui.QMainWindow):
             stackedWidgetPage.readSettings(settings)
 
     def _makeConnections(self):
-        self.ui.action_Quit.triggered.connect(self.quitApplication)
-        self.ui.action_About.triggered.connect(self.about)
+        self._ui.action_Quit.triggered.connect(self.quitApplication)
+        self._ui.action_About.triggered.connect(self.about)
 
     def setUndoStack(self, stack):
         self.undoManager.setCurrentStack(stack)
 
     def centralWidgetChanged(self, index):
-        widget = self.ui.stackedWidget.currentWidget()
+        widget = self._ui.stackedWidget.currentWidget()
         widget.setActive()
 
     def closeEvent(self, event):

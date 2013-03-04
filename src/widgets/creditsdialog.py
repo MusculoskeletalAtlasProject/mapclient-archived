@@ -33,8 +33,8 @@ class CreditsDialog(QDialog):
         Constructor
         '''
         QDialog.__init__(self, parent)
-        self.ui = Ui_CreditsDialog()
-        self.ui.setupUi(self)
+        self._ui = Ui_CreditsDialog()
+        self._ui.setupUi(self)
         
         creditsTab = QTabWidget()
         creditSections = info.CREDITS.keys()
@@ -54,5 +54,5 @@ class CreditsDialog(QDialog):
         vbox = QVBoxLayout()
         vbox.setContentsMargins(0, 0, 0, 0)
         vbox.addWidget(creditsTab)
-        self.ui.frame_CreditsTab.setLayout(vbox)
+        self._ui.frame_CreditsTab.setLayout(vbox)
         
