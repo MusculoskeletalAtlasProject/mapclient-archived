@@ -23,13 +23,11 @@ class ImageSourceTestCase(unittest.TestCase):
             self.pixmap_unavailable = True
         else:
             self.pixmap_unavailable = False
-
-        self.my_test_app = QtGui.QApplication(sys.argv)
-
+            self.my_test_app = QtGui.QApplication(sys.argv)
 
     def tearDown(self):
-        del self.my_test_app
-
+        if not self.pixmap_unavailable:
+            del self.my_test_app
 
     def testStep(self):
         if self.pixmap_unavailable:
@@ -41,9 +39,6 @@ class ImageSourceTestCase(unittest.TestCase):
         self.assertFalse(mystep.isConfigured())
 
     def testStepStatus(self):
-        if self.pixmap_unavailable:
-            return
-        
         from imagesourcestep.widgets.configuredialog import ConfigureDialogState
         state = ConfigureDialogState()
         
