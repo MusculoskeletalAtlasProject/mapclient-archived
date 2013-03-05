@@ -17,25 +17,17 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     You should have received a copy of the GNU General Public License
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
-__version__ = '0.1.0'
-__author__ = 'Hugh Sorby'
 
-import os, sys
-import sip
+import unittest
 
-API_NAMES = ["QDate", "QDateTime", "QString", "QTextStream", "QTime", "QUrl", "QVariant"]
-API_VERSION = 2
-for name in API_NAMES:
-    sip.setapi(name, API_VERSION)
+def suite():
+    from widgets_tests.mainwindow import MainWindowTestCase
+    tests = unittest.TestSuite()
+    tests.addTests(unittest.TestLoader().loadTestsFromTestCase(MainWindowTestCase))
+    return tests
 
-current_dir = os.path.dirname(os.path.abspath(__file__))
-if current_dir not in sys.path:
-    # Using __file__ will not work if py2exe is used,
-    # Possible problem of OSX10.6 also.
-    sys.path.insert(0, current_dir)
+def load_tests(loader, tests, pattern):
+    return suite()
 
-import manager
-
-( _, tail ) = os.path.split(current_dir)
-print("Plugin '{0}' version {1} by {2} loaded".format(tail, __version__, __author__))
-
+if __name__ == '__main__':
+    unittest.TextTestRunner().run(suite())

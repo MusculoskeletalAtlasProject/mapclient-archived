@@ -1,3 +1,4 @@
+
 '''
 MAP Client, a program to generate detailed musculoskeletal models for OpenSim.
     Copyright (C) 2012  University of Auckland
@@ -17,25 +18,31 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     You should have received a copy of the GNU General Public License
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
-__version__ = '0.1.0'
-__author__ = 'Hugh Sorby'
+from PyQt4.QtCore import QObject
 
-import os, sys
-import sip
+from core.pluginframework import MetaQObjectPluginMountPoint
 
-API_NAMES = ["QDate", "QDateTime", "QString", "QTextStream", "QTime", "QUrl", "QVariant"]
-API_VERSION = 2
-for name in API_NAMES:
-    sip.setapi(name, API_VERSION)
+'''
+Plugins can inherit this mount point in order to add to the menu of the GUI.
 
-current_dir = os.path.dirname(os.path.abspath(__file__))
-if current_dir not in sys.path:
-    # Using __file__ will not work if py2exe is used,
-    # Possible problem of OSX10.6 also.
-    sys.path.insert(0, current_dir)
-
-import manager
-
-( _, tail ) = os.path.split(current_dir)
-print("Plugin '{0}' version {1} by {2} loaded".format(tail, __version__, __author__))
+ A plugin that registers this mount point must have attributes
+ * parent
+ * menuLabel
+ * menuName
+ * actionLabel
+ 
+ A plugin that registers this mount point could have attributes
+ * subMenuLabel
+ * subMenuName
+ * shortcut
+ * statustip
+  
+ It must implement
+ * def execute(self):
+ 
+ And it must call
+ * QObject.__init__(self)
+ in it's __init__ function
+ '''
+MenuOptionMountPoint = MetaQObjectPluginMountPoint('MenuOptionMountPoint', (QObject,), {'subMenuLabel': None, 'subMenuName': None, 'shortcut': None, 'statustip': ''})
 

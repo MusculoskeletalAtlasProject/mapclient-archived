@@ -17,25 +17,30 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     You should have received a copy of the GNU General Public License
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
-__version__ = '0.1.0'
-__author__ = 'Hugh Sorby'
+VERSION_MAJOR = 0
+VERSION_MINOR = 5
+VERSION_PATCH = 0
+VERSION_STRING = str(VERSION_MAJOR) + "." + str(VERSION_MINOR) + "." + str(VERSION_PATCH)
+GPL_VERSION = '3'
+APPLICATION_NAME = 'MAP Client'
+ORGANISATION_NAME = 'Musculo Skeletal'
+ORGANISATION_DOMAIN = 'musculoskeletal.org'
 
-import os, sys
-import sip
+# Contributors list
+HS = {'name': 'Hugh Sorby', 'email': 'h.sorby@auckland.ac.nz'}
 
-API_NAMES = ["QDate", "QDateTime", "QString", "QTextStream", "QTime", "QUrl", "QVariant"]
-API_VERSION = 2
-for name in API_NAMES:
-    sip.setapi(name, API_VERSION)
+CREDITS = {
+           'programming'  : [HS],
+           'artwork'      : [HS],
+           'documentation': [HS]
+           }
 
-current_dir = os.path.dirname(os.path.abspath(__file__))
-if current_dir not in sys.path:
-    # Using __file__ will not work if py2exe is used,
-    # Possible problem of OSX10.6 also.
-    sys.path.insert(0, current_dir)
+ABOUT = {
+         'name'       : APPLICATION_NAME,
+         'version'    : VERSION_STRING,
+         'license'    : 'GNU GPL v.' + GPL_VERSION,
+         'description': 'Create and manage detailed musculoskeletal models for OpenSim.'
+         }
 
-import manager
-
-( _, tail ) = os.path.split(current_dir)
-print("Plugin '{0}' version {1} by {2} loaded".format(tail, __version__, __author__))
-
+# APPLICATION
+WORKSPACE_NAME = 'workspace.conf'

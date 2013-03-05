@@ -17,25 +17,21 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     You should have received a copy of the GNU General Public License
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
-__version__ = '0.1.0'
-__author__ = 'Hugh Sorby'
 
-import os, sys
-import sip
+from PyQt4.QtGui import QDialog
+from widgets.ui_licensedialog import Ui_LicenseDialog
 
-API_NAMES = ["QDate", "QDateTime", "QString", "QTextStream", "QTime", "QUrl", "QVariant"]
-API_VERSION = 2
-for name in API_NAMES:
-    sip.setapi(name, API_VERSION)
+class LicenseDialog(QDialog):
+    '''
+    Dialog for displaying the license.
+    '''
 
-current_dir = os.path.dirname(os.path.abspath(__file__))
-if current_dir not in sys.path:
-    # Using __file__ will not work if py2exe is used,
-    # Possible problem of OSX10.6 also.
-    sys.path.insert(0, current_dir)
 
-import manager
-
-( _, tail ) = os.path.split(current_dir)
-print("Plugin '{0}' version {1} by {2} loaded".format(tail, __version__, __author__))
-
+    def __init__(self, parent=None):
+        '''
+        Constructor
+        '''
+        QDialog.__init__(self, parent)
+        self._ui = Ui_LicenseDialog()
+        self._ui.setupUi(self)
+        
