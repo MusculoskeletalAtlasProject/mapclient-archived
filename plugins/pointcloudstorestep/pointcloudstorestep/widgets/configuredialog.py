@@ -32,6 +32,7 @@ class ConfigureDialogState(object):
     dialog state can be persistent.
     '''
     
+    
     def __init__(self, identifier=''):
         self._identifier = identifier
         
