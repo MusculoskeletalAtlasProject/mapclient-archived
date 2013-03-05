@@ -31,8 +31,8 @@ class PointCloudStoreStep(WorkspaceStepMountPoint):
     '''
     A step satisfies the step plugin duck.
     
-    It describes the location of an image/a set of images.
-    It can be used as an image source.
+    It stores point cloud data.
+    It can be used as a point cloud data store.
     '''
     def __init__(self):
         '''
