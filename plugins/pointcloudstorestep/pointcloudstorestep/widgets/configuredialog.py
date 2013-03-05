@@ -95,4 +95,4 @@ class ConfigureDialog(QDialog):
             self._ui.identifierLineEdit.setStyleSheet(REQUIRED_STYLE_SHEET)
 
         return identifierValid
-                
+
