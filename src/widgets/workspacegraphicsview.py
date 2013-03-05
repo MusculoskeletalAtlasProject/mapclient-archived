@@ -17,7 +17,7 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     You should have received a copy of the GNU General Public License
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
-import weakref, math, sys
+import weakref, math, sys, os
 from PyQt4 import QtCore, QtGui
 from mountpoints.workspacestep import workspaceStepFactory
 
@@ -345,11 +345,11 @@ def ensureItemInScene(scene, item, newPos):
 class Node(QtGui.QGraphicsItem):
     Type = QtGui.QGraphicsItem.UserType + 1
 
-    def __init__(self, step, workspaceGraphicsView):
+    def __init__(self, step, location, workspaceGraphicsView):
         QtGui.QGraphicsItem.__init__(self)
 
         self.step = step
-        self.pixmap = step.pixmap.scaled(64, 64, aspectRatioMode=QtCore.Qt.KeepAspectRatio, transformMode=QtCore.Qt.FastTransformation)
+        self.pixmap = step._pixmap.scaled(64, 64, aspectRatioMode=QtCore.Qt.KeepAspectRatio, transformMode=QtCore.Qt.FastTransformation)
         self.configure_red = QtGui.QPixmap(':/workflow/images/configure_red.png').scaled(24, 24, aspectRatioMode=QtCore.Qt.KeepAspectRatio, transformMode=QtCore.Qt.FastTransformation)
         self.graph = weakref.ref(workspaceGraphicsView)
         self.edgeList = []
@@ -364,11 +364,11 @@ class Node(QtGui.QGraphicsItem):
 
         self.contextMenu = QtGui.QMenu(self.graph())
         configureAction = QtGui.QAction('Configure', self.contextMenu)
-        configureAction.triggered.connect(self.step.configure)
+        configureAction.triggered.connect(lambda: self.step.configure(location))
         self.contextMenu.addAction(configureAction)
         portsProvidesTip = ''
         portsUsesTip = ''
-        for port in step.ports:
+        for port in step._ports:
             triples = port.getTriplesForPred('uses')
             for triple in triples:
                 portsUsesTip += '<li>' + triple[2] + '</li>'
@@ -435,65 +435,48 @@ class Node(QtGui.QGraphicsItem):
 
     def contextMenuEvent(self, event):
         super(Node, self).contextMenuEvent(event)
-#        self.update()
         self.contextMenu.exec_(event.screenPos())
 
     def mousePressEvent(self, event):
+        QtGui.QGraphicsItem.mousePressEvent(self, event)
         modifiers = QtGui.QApplication.keyboardModifiers()
-        if modifiers & QtCore.Qt.ShiftModifier:
+        if event.button() == QtCore.Qt.RightButton:
+            event.ignore()
+        elif modifiers & QtCore.Qt.ShiftModifier:
             centre = self.boundingRect().center()
             self.connectLine = ArrowLine(QtCore.QLineF(self.mapToScene(centre),
                                          event.scenePos()))
             self.scene().addItem(self.connectLine)
-            return
-
-        QtGui.QGraphicsItem.mousePressEvent(self, event)
-#        modifiers = QtGui.QApplication.keyboardModifiers()
-#        if modifiers == QtCore.Qt.ControlModifier:
-#            pass
-#        else:
-#            self.graph().clearSelection()
-
-        self.eventStartPos = self.pos()
+        else:
+            self.eventStartPos = self.pos()
 
     def mouseMoveEvent(self, event):
-#        modifiers = QtGui.QApplication.keyboardModifiers()
         if self.connectLine:
             newLine = QtCore.QLineF(self.connectLine.line().p1(), event.scenePos());
             self.connectLine.setLine(newLine)
-            return
-#        if self.contextEvent:
-#            return
-        QtGui.QGraphicsItem.mouseMoveEvent(self, event)
+        else:
+            QtGui.QGraphicsItem.mouseMoveEvent(self, event)
+        
 
     def mouseReleaseEvent(self, event):
-#        modifiers = QtGui.QApplication.keyboardModifiers()
+        QtGui.QGraphicsItem.mouseReleaseEvent(self, event)
+
         if self.connectLine:
             item = self.scene().itemAt(event.scenePos())
             if item.type() == Node.Type:
                 self.graph().connectNodes(self, item)
             self.scene().removeItem(self.connectLine)
             self.connectLine = None
-            return
-#        self.update()
-#        modifiers = QtGui.QApplication.keyboardModifiers()
-#        if modifiers == QtCore.Qt.ControlModifier:
-#            self.selected = not self.selected
-#            self.graph().nodeSelected(self, self.selected)
-#        else:
-#            self.graph().clearSelection()
-#            self.selected = True
-#            self.graph().nodeSelected(self, self.selected)
-
-        if self.pos() != self.eventStartPos:
+        elif self.pos() != self.eventStartPos:
             command = CommandNodeMove(self.scene().selectedItems(), self.pos() - self.eventStartPos)
             self.graph().undoStack.push(command)
-        QtGui.QGraphicsItem.mouseReleaseEvent(self, event)
+        
 
 class WorkspaceGraphicsView(QtGui.QGraphicsView):
 
     def __init__(self, parent=None):
         QtGui.QGraphicsView.__init__(self, parent)
+        self.mainWindow = None
         self.undoStack = QtGui.QUndoStack(self)
         self.selectedNodes = []
         self.errorIconTimer = QtCore.QTimer()
@@ -523,14 +506,19 @@ class WorkspaceGraphicsView(QtGui.QGraphicsView):
             if item.type() == Node.Type:
                 nodeList.append(item)
 
+        location = self.mainWindow.workspaceManager.location
         ws.remove('nodes')
         ws.beginGroup('nodes')
         ws.beginWriteArray('nodelist')
         nodeIndex = 0
         for node in nodeList:
+            if node.step.isConfigured():
+                step_location = os.path.join(location, node.step.getIdentifier())
+                node.step.serialize(step_location)
             ws.setArrayIndex(nodeIndex)
-            ws.setValue('name', node.step.name)
+            ws.setValue('name', node.step.getName())
             ws.setValue('position', node.pos())
+            ws.setValue('identifier', node.step.getIdentifier())
             ws.beginWriteArray('edgeList')
             edgeIndex = 0
             for edge in node.edgeList:
@@ -547,6 +535,7 @@ class WorkspaceGraphicsView(QtGui.QGraphicsView):
     def loadState(self, ws):
         self.clear()
         self.undoStack.clear()
+        location = self.mainWindow.workspaceManager.location
         ws.beginGroup('nodes')
         nodeCount = ws.beginReadArray('nodelist')
         nodeList = []
@@ -555,8 +544,12 @@ class WorkspaceGraphicsView(QtGui.QGraphicsView):
             ws.setArrayIndex(i)
             name = ws.value('name')
             position = ws.value('position')
+            identifier = ws.value('identifier')
             step = workspaceStepFactory(name)
-            node = Node(step, self)
+            step.setIdentifier(identifier)
+            step_location = os.path.join(location, identifier)
+            step.deserialize(step_location)
+            node = Node(step, location, self)
             node.setPos(position)
             nodeList.append(node)
             command = CommandAddNode(self.scene(), node)
@@ -678,7 +671,8 @@ class WorkspaceGraphicsView(QtGui.QGraphicsView):
             stream >> hotspot
 
             position = self.mapToScene(event.pos() - hotspot)
-            node = Node(step, self)
+            location = self.mainWindow.workspaceManager.location
+            node = Node(step, location, self)
             node.setPos(ensureItemInScene(self.scene(), node, position))
 
             self.undoStack.beginMacro('Add node')

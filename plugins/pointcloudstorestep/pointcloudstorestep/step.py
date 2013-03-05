@@ -22,26 +22,26 @@ import os
 from PyQt4 import QtGui, QtCore
 
 from mountpoints.workspacestep import WorkspaceStepMountPoint
-from imagesourcestep.widgets.configuredialog import ConfigureDialog, ConfigureDialogState
+
+from pointcloudstorestep.widgets.configuredialog import ConfigureDialog, ConfigureDialogState
 
 STEP_SERIALISATION_FILENAME = 'step.conf'
 
-class ImageSourceStep(WorkspaceStepMountPoint):
+class PointCloudStoreStep(WorkspaceStepMountPoint):
     '''
     A step satisfies the step plugin duck.
     
-    It describes the location of an image/a set of images.
-    It can be used as an image source.
+    It stores point cloud data.
+    It can be used as a point cloud data store.
     '''
     def __init__(self):
         '''
         Constructor
         '''
-        super(ImageSourceStep, self).__init__()
-        self._name = 'Image source'
-        self._pixmap = QtGui.QPixmap(':/imagesource/icons/landscapeimages.png')
-        self.addPort(('pho#workspace#port', 'provides', 'images'))
-        self._configured = False
+        super(PointCloudStoreStep, self).__init__()
+        self._name = 'Point Cloud Store'
+        self._pixmap = QtGui.QPixmap(':/pointcloudstore/icons/pointcloudstore.png')
+        self.addPort(('pho#workspace#port', 'uses', 'pointcloud'))
         self._state = ConfigureDialogState()
 
     def configure(self, location):
@@ -56,12 +56,12 @@ class ImageSourceStep(WorkspaceStepMountPoint):
             self.serialize(step_location)
         
         self._configured = d.validate()
-        
+
     def getIdentifier(self):
         return self._state.identifier()
     
     def setIdentifier(self, identifier):
-        self._state.setIdentifier(identifier)
+        self._state.setIdentifer(identifier)
         
     def serialize(self, location):
         s = QtCore.QSettings(os.path.join(location, STEP_SERIALISATION_FILENAME), QtCore.QSettings.IniFormat)

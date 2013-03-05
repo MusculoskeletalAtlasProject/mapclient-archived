@@ -170,7 +170,7 @@ class WorkspaceTestCase(unittest.TestCase):
         app = QtGui.QApplication(sys.argv)
         #from segmentation_plugin.segmentationstep import Step
         from mountpoints.workspacestep import workspaceStepFactory
-        self.assertEqual(workspaceStepFactory('Segmentation').name, 'Segmentation')
+        self.assertEqual(workspaceStepFactory('Segmentation').getName(), 'Segmentation')
         self.assertRaises(ValueError, workspaceStepFactory, ('james'))
         app.argc()
         #Step()

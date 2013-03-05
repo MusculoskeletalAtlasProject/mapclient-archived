@@ -75,17 +75,19 @@ class WorkspaceStepPort(object):
 '''
 Plugins can inherit this mount point to add a workspace step.
 
- A plugin that registers this mount point must have attributes
- * pixmap
- * name
- 
- A plugin that registers this mount point could have attributes
- * category
- 
- It must implement
- * serialize
- * deserialize 
+A plugin that registers this mount point must have:
+  - An attribute _pixmap that is a QPixmap icon for a visual representation of the step
+  - Implement a function 'configure'
+  - Implement a function 'setIdentifier'
+  - Implement a function 'getIdentifier'
+  - Implement a function 'serialize'
+  - Implement a function 'deserialize'
 
+
+A plugin that registers this mount point could have:
+  - An attribute _name that is a string representation of the name
+  - An attribute _category that is a string representation of the step's category
+  
 '''
 #class WorkspaceStep(WorkspaceStepMountPoint):
 #    '''
@@ -96,44 +98,65 @@ def _workspace_step_init(self):
     '''
     Constructor
     '''
-    self.name = 'empty'
-    self.ports = []
-    self.pixmap = None
-    self.configured = False
+    self._location = None
+    self._ports = []
+    self._pixmap = None
+    self._configured = False
 
-def _workspace_step_configure(self):
+def _workspace_step_configure(self, location):
+    raise NotImplementedError
+
+def _workspace_step_getIdentifier(self):
+    raise NotImplementedError
+
+def _workspace_step_setIdentifier(self):
+    raise NotImplementedError
+
+def _workspace_step_serialize(self):
+    raise NotImplementedError
+
+def _workspace_step_deserialize(self):
     raise NotImplementedError
 
 def _workspace_step_isConfigured(self):
-    return self.configured
+    return self._configured
 
 def _workspace_step_addPort(self, triple):
     port = WorkspaceStepPort()
     port.addProperty(triple)
-    self.ports.append(port)
+    self._ports.append(port)
 
 def _workspace_step_canConnect(self, other):
     # Try to find compatible ports
-    for port in self.ports:
-        for otherPort in other.ports:
+    for port in self._ports:
+        for otherPort in other._ports:
             if port.canConnect(otherPort):
                 return True
 
     return False
 
-attr_dict = {'category': 'General'}
+def _workspace_step_getName(self):
+    if hasattr(self, '_name'):
+        return self._name
+    
+    return self.__class__.__name__
+
+attr_dict = {'_category': 'General'}
 attr_dict['__init__'] = _workspace_step_init
 attr_dict['configure'] = _workspace_step_configure
 attr_dict['isConfigured'] = _workspace_step_isConfigured
 attr_dict['addPort'] = _workspace_step_addPort
 attr_dict['canConnect'] = _workspace_step_canConnect
+attr_dict['getName'] = _workspace_step_getName
+attr_dict['deserialize'] = _workspace_step_deserialize
+attr_dict['serialize'] = _workspace_step_serialize
 
 
 WorkspaceStepMountPoint = pluginframework.MetaPluginMountPoint('WorkspaceStepMountPoint', (object,), attr_dict)
 
 def workspaceStepFactory(step_name):
     for step in WorkspaceStepMountPoint.getPlugins():
-        if step_name == step.name:
+        if step_name == step.getName():
             return step
         
     raise ValueError
