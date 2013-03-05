@@ -27,6 +27,10 @@ REQUIRED_STYLE_SHEET = 'border: 1px solid red; border-radius: 3px'
 DEFAULT_STYLE_SHEET = 'border: 1px solid gray; border-radius: 3px'
 
 class ConfigureDialogState(object):
+    '''
+    Class to encapsulate the state of the configure dialog so that the 
+    dialog state can be persistent.
+    '''
     
     def __init__(self, identifier=''):
         self._identifier = identifier
