@@ -61,7 +61,7 @@ class PointCloudStoreTestCase(unittest.TestCase):
         def testConfigureDialog(self):
             if self.pixmap_unavailable:
                 return
-            
+
             from pointcloudstorestep.widgets.configuredialog import ConfigureDialog, ConfigureDialogState
             state = ConfigureDialogState()
             d = ConfigureDialog(state)
