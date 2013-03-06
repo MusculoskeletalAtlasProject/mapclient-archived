@@ -20,16 +20,16 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
 import unittest
 import os, tempfile
 
-from core.workspace import WorkspaceManager, WorkspaceError
-from mountpoints.workspacestep import WorkspaceStepPort, WorkspaceStepMountPoint
+from core.workflow import WorkflowManager, WorkflowError
+from mountpoints.workflowstep import WorkflowStepPort, WorkflowStepMountPoint
 
-class WorkspaceStep(WorkspaceStepMountPoint):
+class WorkflowStep(WorkflowStepMountPoint):
     pass
 
 #from mpl_toolkits.axes_grid1.axes_grid import im
 #from PyQt4 import QtCore
 
-TEST_WORKSPACE_DIR_NAME = '/new_workspace_jihuuui'
+TEST_WORKFLOW_DIR_NAME = '/new_workflow_jihuuui'
 
 class FakeWidget(object):
 
@@ -44,13 +44,13 @@ class FakeMainWindow(object):
     def setWindowTitle(self, value):
         pass
 
-class WorkspaceTestCase(unittest.TestCase):
+class WorkflowTestCase(unittest.TestCase):
 
 
     def assertIn(self, a, b, *args, **kwargs):
         ''''Python < v2.7 compatibility.  Assert "a" in "b"'''
         try:
-            f = super(WorkspaceTestCase, self).assertIn
+            f = super(WorkflowTestCase, self).assertIn
         except AttributeError:
             self.assertTrue(a in b, *args, **kwargs)
         else:
@@ -59,79 +59,79 @@ class WorkspaceTestCase(unittest.TestCase):
     def assertNotIn(self, a, b, *args, **kwargs):
         ''''Python < v2.7 compatibility.  Assert "a" NOT in "b"'''
         try:
-            f = super(WorkspaceTestCase, self).assertNotIn
+            f = super(WorkflowTestCase, self).assertNotIn
         except AttributeError:
             self.assertFalse(a in b, *args, **kwargs)
         else:
             f(a, b, *args, **kwargs)
 
     def testNew(self):
-        dirName = tempfile.mkdtemp(prefix='new_workspace_')
+        dirName = tempfile.mkdtemp(prefix='new_workflow_')
         try:
-            ws = WorkspaceManager(FakeMainWindow())
+            ws = WorkflowManager(FakeMainWindow())
             ws.new(dirName)
-            assert(os.path.exists(dirName + '/workspace.conf'))
+            assert(os.path.exists(dirName + '/workflow.conf'))
         finally:
-            os.remove(dirName + '/workspace.conf')
+            os.remove(dirName + '/workflow.conf')
             os.rmdir(dirName)
 
     def testNewWithNone(self):
-        ws = WorkspaceManager(FakeMainWindow())
+        ws = WorkflowManager(FakeMainWindow())
         try:
             ws.new(None)
-        except WorkspaceError:
+        except WorkflowError:
             pass
 
     def testNewWithNonexistentDir(self):
-        tempDir = tempfile.gettempdir() + TEST_WORKSPACE_DIR_NAME
-        ws = WorkspaceManager(FakeMainWindow())
+        tempDir = tempfile.gettempdir() + TEST_WORKFLOW_DIR_NAME
+        ws = WorkflowManager(FakeMainWindow())
         ws.new(tempDir)
-        assert(os.path.exists(tempDir + '/workspace.conf'))
+        assert(os.path.exists(tempDir + '/workflow.conf'))
 
         # Get rid of test  output
-        os.remove(tempDir + '/workspace.conf')
+        os.remove(tempDir + '/workflow.conf')
         os.rmdir(tempDir)
 
     def testSave(self):
-        tempDir = tempfile.gettempdir() + TEST_WORKSPACE_DIR_NAME
-        ws = WorkspaceManager(FakeMainWindow())
+        tempDir = tempfile.gettempdir() + TEST_WORKFLOW_DIR_NAME
+        ws = WorkflowManager(FakeMainWindow())
         ws.widget = FakeWidget()
         ws.new(tempDir)
         ws.save()
 
     def testOpen(self):
-        tempDir = tempfile.gettempdir() + TEST_WORKSPACE_DIR_NAME
-        ws = WorkspaceManager(FakeMainWindow())
+        tempDir = tempfile.gettempdir() + TEST_WORKFLOW_DIR_NAME
+        ws = WorkflowManager(FakeMainWindow())
         ws.widget = FakeWidget()
         ws.new(tempDir)
         ws.load(tempDir)
 
         # Get rid of test  output
-        os.remove(tempDir + '/workspace.conf')
+        os.remove(tempDir + '/workflow.conf')
         os.rmdir(tempDir)
 
     def testPort(self):
-        port = WorkspaceStepPort()
-        port.addProperty(('pho#workspace#port', 'uses', 'images'))
-        self.assertIn('pho#workspace#port', port.subj)
+        port = WorkflowStepPort()
+        port.addProperty(('pho#workflow#port', 'uses', 'images'))
+        self.assertIn('pho#workflow#port', port.subj)
 
 
     def testPortConnect(self):
-        portIn = WorkspaceStepPort()
-        portIn.addProperty(('pho#workspace#port', 'uses', 'images'))
-        portOut = WorkspaceStepPort()
-        portOut.addProperty(('pho#workspace#port', 'provides', 'images'))
-        port2 = WorkspaceStepPort()
-        port2.addProperty(('pho#workspace#port', 'uses', 'dicom'))
+        portIn = WorkflowStepPort()
+        portIn.addProperty(('pho#workflow#port', 'uses', 'images'))
+        portOut = WorkflowStepPort()
+        portOut.addProperty(('pho#workflow#port', 'provides', 'images'))
+        port2 = WorkflowStepPort()
+        port2.addProperty(('pho#workflow#port', 'uses', 'dicom'))
 
         self.assertEqual(portOut.canConnect(portIn), True)
         self.assertEqual(portOut.canConnect(port2), False)
 
     def testPortDescription(self):
-        port = WorkspaceStepPort()
-        port.addProperty(('pho#workspace#port', 'uses', 'images'))
-        port.addProperty(('pho#workspace#port', 'provides', 'pointcloud'))
-        port.addProperty(('pho#workspace#port', 'uses', 'dicom'))
+        port = WorkflowStepPort()
+        port.addProperty(('pho#workflow#port', 'uses', 'images'))
+        port.addProperty(('pho#workflow#port', 'provides', 'pointcloud'))
+        port.addProperty(('pho#workflow#port', 'uses', 'dicom'))
 
         objs = port.getTriplesForObj('images')
         self.assertIn('images', objs[0])
@@ -139,28 +139,28 @@ class WorkspaceTestCase(unittest.TestCase):
 #        self.assertIn('pointcloud', objs)
 
     def testPortPredicates(self):
-        port = WorkspaceStepPort()
-        port.addProperty(('pho#workspace#port', 'uses', 'images'))
-        port.addProperty(('pho#workspace#port', 'provides', 'pointcloud'))
-        port.addProperty(('pho#workspace#port', 'uses', 'dicom'))
+        port = WorkflowStepPort()
+        port.addProperty(('pho#workflow#port', 'uses', 'images'))
+        port.addProperty(('pho#workflow#port', 'provides', 'pointcloud'))
+        port.addProperty(('pho#workflow#port', 'uses', 'dicom'))
 
         preds = port.getTriplesForPred('uses')
-        self.assertIn(('pho#workspace#port', 'uses', 'images'), preds)
-        self.assertNotIn(('pho#workspace#port', 'provides', 'pointcloud'), preds)
+        self.assertIn(('pho#workflow#port', 'uses', 'images'), preds)
+        self.assertNotIn(('pho#workflow#port', 'provides', 'pointcloud'), preds)
         preds = port.getTriplesForPred('nope')
         self.assertEqual(0, len(preds))
 
     def testStepConnection(self):
-        step1 = WorkspaceStep()
-        step1.addPort(('pho#workspace#port', 'provides', 'images'))
-        step2 = WorkspaceStep()
-        step2.addPort(('pho#workspace#port', 'uses', 'images'))
-        step2.addPort(('pho#workspace#port', 'uses', 'dicom'))
-        step2.addPort(('pho#workspace#port', 'provides', 'pointcloud'))
+        step1 = WorkflowStep()
+        step1.addPort(('pho#workflow#port', 'provides', 'images'))
+        step2 = WorkflowStep()
+        step2.addPort(('pho#workflow#port', 'uses', 'images'))
+        step2.addPort(('pho#workflow#port', 'uses', 'dicom'))
+        step2.addPort(('pho#workflow#port', 'provides', 'pointcloud'))
 
         self.assertEqual(step1.canConnect(step2), True)
 
-    def testWorkspaceStepFactory(self):
+    def testWorkflowStepFactory(self):
         import sys
         # If on a posix system with no display set we are probably testing headless
         # and cannot do QPixmap
@@ -169,9 +169,9 @@ class WorkspaceTestCase(unittest.TestCase):
         from PyQt4 import QtGui
         app = QtGui.QApplication(sys.argv)
         #from segmentation_plugin.segmentationstep import Step
-        from mountpoints.workspacestep import workspaceStepFactory
-        self.assertEqual(workspaceStepFactory('Segmentation').getName(), 'Segmentation')
-        self.assertRaises(ValueError, workspaceStepFactory, ('james'))
+        from mountpoints.workflowstep import workflowStepFactory
+        self.assertEqual(workflowStepFactory('Segmentation').getName(), 'Segmentation')
+        self.assertRaises(ValueError, workflowStepFactory, ('james'))
         app.argc()
         #Step()
 

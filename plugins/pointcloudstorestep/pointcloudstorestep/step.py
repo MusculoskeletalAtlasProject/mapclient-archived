@@ -21,13 +21,13 @@ import os
 
 from PyQt4 import QtGui, QtCore
 
-from mountpoints.workspacestep import WorkspaceStepMountPoint
+from mountpoints.workflowstep import WorkflowStepMountPoint
 
 from pointcloudstorestep.widgets.configuredialog import ConfigureDialog, ConfigureDialogState
 
 STEP_SERIALISATION_FILENAME = 'step.conf'
 
-class PointCloudStoreStep(WorkspaceStepMountPoint):
+class PointCloudStoreStep(WorkflowStepMountPoint):
     '''
     A step satisfies the step plugin duck.
     
@@ -41,7 +41,7 @@ class PointCloudStoreStep(WorkspaceStepMountPoint):
         super(PointCloudStoreStep, self).__init__()
         self._name = 'Point Cloud Store'
         self._pixmap = QtGui.QPixmap(':/pointcloudstore/icons/pointcloudstore.png')
-        self.addPort(('pho#workspace#port', 'uses', 'pointcloud'))
+        self.addPort(('pho#workflow#port', 'uses', 'pointcloud'))
         self._state = ConfigureDialogState()
 
     def configure(self, location):

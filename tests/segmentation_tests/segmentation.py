@@ -35,7 +35,7 @@ class SegmentationTestCase(unittest.TestCase):
 #        loadPlugins(inbuiltPluginDir)
 
         #sys.path.insert(0, inbuiltPluginDir)
-#        from workspace.Workspace import Manager
+#        from workflow.Workflow import Manager
         from segmentationstep.step import SegmentationStep
         myStep = SegmentationStep()
         self.assertEqual(myStep.getName(), 'Segmentation')
@@ -46,7 +46,7 @@ class SegmentationTestCase(unittest.TestCase):
 #        import sys
 #        app = QtGui.QApplication(sys.argv)
 #        from segmentation.SegmentationStep import SegmentationStep
-#        from workspace.WorkspaceStep import WorkspaceStep
+#        from workflow.WorkflowStep import WorkflowStep
 #        myStep = SegmentationStep()
 #
 #        itemData = QtCore.QByteArray()
@@ -55,7 +55,7 @@ class SegmentationTestCase(unittest.TestCase):
 #        writeDataStream = myStep.serialize(writeDataStream)
 #
 #        readDataStream = QtCore.QDataStream(itemData, QtCore.QIODevice.ReadOnly)
-#        passedStep = WorkspaceStep()
+#        passedStep = WorkflowStep()
 #        retStep = SegmentationStep.deserialize(passedStep, readDataStream)
 #        self.assertEqual(retStep.name, 'segmentation')
 #        self.assertNotEqual(retStep.pixmap, None)

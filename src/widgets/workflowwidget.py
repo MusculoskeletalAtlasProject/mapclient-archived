@@ -18,10 +18,10 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
 from PyQt4 import QtGui
-from widgets.ui_workspacewidget import Ui_WorkspaceWidget
-from mountpoints.workspacestep import WorkspaceStepMountPoint
+from widgets.ui_workflowwidget import Ui_WorkflowWidget
+from mountpoints.workflowstep import WorkflowStepMountPoint
 
-class WorkspaceWidget(QtGui.QWidget):
+class WorkflowWidget(QtGui.QWidget):
     '''
     classdocs
     '''
@@ -31,7 +31,7 @@ class WorkspaceWidget(QtGui.QWidget):
         '''
         QtGui.QWidget.__init__(self)
         self.mainWindow = mainWindow
-        self._ui = Ui_WorkspaceWidget()
+        self._ui = Ui_WorkflowWidget()
         self._ui.setupUi(self)
         self._ui.graphicsView.undoStack.indexChanged.connect(self.undoStackIndexChanged)
         self._ui.graphicsView.mainWindow = mainWindow
@@ -39,21 +39,21 @@ class WorkspaceWidget(QtGui.QWidget):
         self._createMenuItems()
         self._previousLocation = ''
 
-        self.workspaceStepPlugins = WorkspaceStepMountPoint.getPlugins()
+        self.workflowStepPlugins = WorkflowStepMountPoint.getPlugins()
         self.stepTree = self.findChild(QtGui.QWidget, "stepTree")
-        for step in self.workspaceStepPlugins:
+        for step in self.workflowStepPlugins:
             self.stepTree.addStep(step)
 
         self.updateUi()
 
     def updateUi(self):
-        workspaceOpen = self.mainWindow.workspaceManager.isWorkspaceOpen()
-        self.action_Close.setEnabled(workspaceOpen)
-        self.setEnabled(workspaceOpen)
-        self.action_Save.setEnabled(not self.mainWindow.workspaceManager.isModified())
+        workflowOpen = self.mainWindow.workflowManager.isWorkflowOpen()
+        self.action_Close.setEnabled(workflowOpen)
+        self.setEnabled(workflowOpen)
+        self.action_Save.setEnabled(not self.mainWindow.workflowManager.isModified())
 
     def undoStackIndexChanged(self, index):
-        self.mainWindow.workspaceManager.undoStackIndexChanged(index)
+        self.mainWindow.workflowManager.undoStackIndexChanged(index)
         self.updateUi()
 
     def setActive(self):
@@ -68,29 +68,29 @@ class WorkspaceWidget(QtGui.QWidget):
 
 
     def new(self):
-        workspaceDir = QtGui.QFileDialog.getExistingDirectory(self.mainWindow, caption='Select Workspace Directory', directory=self._previousLocation)
-        if len(workspaceDir) > 0:
-            m = self.mainWindow.workspaceManager
-            m.new(workspaceDir)
-            self._previousLocation = workspaceDir
+        workflowDir = QtGui.QFileDialog.getExistingDirectory(self.mainWindow, caption='Select Workflow Directory', directory=self._previousLocation)
+        if len(workflowDir) > 0:
+            m = self.mainWindow.workflowManager
+            m.new(workflowDir)
+            self._previousLocation = workflowDir
             self.updateUi()
 
     def load(self):
-        workspaceDir = QtGui.QFileDialog.getExistingDirectory(self.mainWindow, caption='Open Workspace', directory=self._previousLocation, options=QtGui.QFileDialog.ShowDirsOnly | QtGui.QFileDialog.DontResolveSymlinks | QtGui.QFileDialog.ReadOnly)
-        if len(workspaceDir) > 0:
-            m = self.mainWindow.workspaceManager
-            m.load(workspaceDir)
-            self._previousLocation = workspaceDir
+        workflowDir = QtGui.QFileDialog.getExistingDirectory(self.mainWindow, caption='Open Workflow', directory=self._previousLocation, options=QtGui.QFileDialog.ShowDirsOnly | QtGui.QFileDialog.DontResolveSymlinks | QtGui.QFileDialog.ReadOnly)
+        if len(workflowDir) > 0:
+            m = self.mainWindow.workflowManager
+            m.load(workflowDir)
+            self._previousLocation = workflowDir
             self.updateUi()
 
     def close(self):
-        m = self.mainWindow.workspaceManager
+        m = self.mainWindow.workflowManager
         m.close()
         self._ui.graphicsView.clear()
         self.updateUi()
 
     def save(self):
-        m = self.mainWindow.workspaceManager
+        m = self.mainWindow.workflowManager
         m.save()
         self.updateUi()
 
@@ -109,14 +109,14 @@ class WorkspaceWidget(QtGui.QWidget):
         if not menu_New:
             menu_New = QtGui.QMenu('&New', menu_File)
 
-        action_New = QtGui.QAction('Workspace', menu_New)
-        self._setActionProperties(action_New, 'action_New', self.new, 'Ctrl+N', 'Create a new workspace')
+        action_New = QtGui.QAction('Workflow', menu_New)
+        self._setActionProperties(action_New, 'action_New', self.new, 'Ctrl+N', 'Create a new workflow')
         action_Open = QtGui.QAction('&Open', menu_File)
-        self._setActionProperties(action_Open, 'action_Open', self.load, 'Ctrl+O', 'Open an existing workspace')
+        self._setActionProperties(action_Open, 'action_Open', self.load, 'Ctrl+O', 'Open an existing workflow')
         self.action_Close = QtGui.QAction('&Close', menu_File)
-        self._setActionProperties(self.action_Close, 'action_Close', self.close, 'Ctrl+W', 'Close open workspace')
+        self._setActionProperties(self.action_Close, 'action_Close', self.close, 'Ctrl+W', 'Close open workflow')
         self.action_Save = QtGui.QAction('&Save', menu_File)
-        self._setActionProperties(self.action_Save, 'action_Save', self.save, 'Ctrl+S', 'Save workspace')
+        self._setActionProperties(self.action_Save, 'action_Save', self.save, 'Ctrl+S', 'Save workflow')
 
         menu_New.insertAction(QtGui.QAction(self), action_New)
         menu_File.insertMenu(lastFileMenuAction, menu_New)

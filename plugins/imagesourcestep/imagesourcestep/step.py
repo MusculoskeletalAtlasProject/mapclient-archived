@@ -21,12 +21,12 @@ import os
 
 from PyQt4 import QtGui, QtCore
 
-from mountpoints.workspacestep import WorkspaceStepMountPoint
+from mountpoints.workflowstep import WorkflowStepMountPoint
 from imagesourcestep.widgets.configuredialog import ConfigureDialog, ConfigureDialogState
 
 STEP_SERIALISATION_FILENAME = 'step.conf'
 
-class ImageSourceStep(WorkspaceStepMountPoint):
+class ImageSourceStep(WorkflowStepMountPoint):
     '''
     A step satisfies the step plugin duck.
     
@@ -40,7 +40,7 @@ class ImageSourceStep(WorkspaceStepMountPoint):
         super(ImageSourceStep, self).__init__()
         self._name = 'Image source'
         self._pixmap = QtGui.QPixmap(':/imagesource/icons/landscapeimages.png')
-        self.addPort(('pho#workspace#port', 'provides', 'images'))
+        self.addPort(('pho#workflow#port', 'provides', 'images'))
         self._configured = False
         self._state = ConfigureDialogState()
 

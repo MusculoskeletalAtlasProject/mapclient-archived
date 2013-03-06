@@ -107,7 +107,7 @@ def main():
     versionstring = ''.join(redirectstdout.messages)
 
     progname = os.path.splitext(__file__)[0]
-    usage = 'usage: {0} [options] workspace\n    Execute the given workspace'.format(progname)
+    usage = 'usage: {0} [options] workflow\n    Execute the given workflow'.format(progname)
     parser = OptionParser(usage, version=versionstring)
     options, args = parser.parse_args()
 
