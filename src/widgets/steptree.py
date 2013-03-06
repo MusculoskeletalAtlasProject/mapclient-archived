@@ -85,7 +85,7 @@ class StepTree(QtGui.QTreeWidget):
         dataStream << hotspot
 
         mimeData = QtCore.QMimeData()
-        mimeData.setData('image/x-workspace-step', itemData)
+        mimeData.setData('image/x-workflow-step', itemData)
 
         drag = QtGui.QDrag(self)
         drag.setMimeData(mimeData)

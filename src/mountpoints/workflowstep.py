@@ -20,9 +20,9 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
 
 from core import pluginframework
 
-class WorkspaceStepPort(object):
+class WorkflowStepPort(object):
     '''
-    Describes the location and properties of a port for a workspace step.
+    Describes the location and properties of a port for a workflow step.
     '''
     def __init__(self):
         self.subj = {}
@@ -60,9 +60,9 @@ class WorkspaceStepPort(object):
 #        return [triple for triple in self.pred[pred]]
 
     def canConnect(self, other):
-        if 'pho#workspace#port' in self.subj and 'pho#workspace#port' in other.subj:
-            myPorts = self.subj['pho#workspace#port']
-            thierPorts = other.subj['pho#workspace#port']
+        if 'pho#workflow#port' in self.subj and 'pho#workflow#port' in other.subj:
+            myPorts = self.subj['pho#workflow#port']
+            thierPorts = other.subj['pho#workflow#port']
             mineProvides = [triple for triple in myPorts if 'provides' == triple[1]]
             thiersUses = [triple for triple in thierPorts if 'uses' == triple[1]]
             for mine in mineProvides:
@@ -73,7 +73,7 @@ class WorkspaceStepPort(object):
         return False
 
 '''
-Plugins can inherit this mount point to add a workspace step.
+Plugins can inherit this mount point to add a workflow step.
 
 A plugin that registers this mount point must have:
   - An attribute _pixmap that is a QPixmap icon for a visual representation of the step
@@ -89,12 +89,12 @@ A plugin that registers this mount point could have:
   - An attribute _category that is a string representation of the step's category
   
 '''
-#class WorkspaceStep(WorkspaceStepMountPoint):
+#class WorkflowStep(WorkflowStepMountPoint):
 #    '''
 #    A step that acts like the step plugin duck
 #    '''
 #
-def _workspace_step_init(self):
+def _workflow_step_init(self):
     '''
     Constructor
     '''
@@ -103,30 +103,30 @@ def _workspace_step_init(self):
     self._pixmap = None
     self._configured = False
 
-def _workspace_step_configure(self, location):
+def _workflow_step_configure(self, location):
     raise NotImplementedError
 
-def _workspace_step_getIdentifier(self):
+def _workflow_step_getIdentifier(self):
     raise NotImplementedError
 
-def _workspace_step_setIdentifier(self):
+def _workflow_step_setIdentifier(self):
     raise NotImplementedError
 
-def _workspace_step_serialize(self):
+def _workflow_step_serialize(self):
     raise NotImplementedError
 
-def _workspace_step_deserialize(self):
+def _workflow_step_deserialize(self):
     raise NotImplementedError
 
-def _workspace_step_isConfigured(self):
+def _workflow_step_isConfigured(self):
     return self._configured
 
-def _workspace_step_addPort(self, triple):
-    port = WorkspaceStepPort()
+def _workflow_step_addPort(self, triple):
+    port = WorkflowStepPort()
     port.addProperty(triple)
     self._ports.append(port)
 
-def _workspace_step_canConnect(self, other):
+def _workflow_step_canConnect(self, other):
     # Try to find compatible ports
     for port in self._ports:
         for otherPort in other._ports:
@@ -135,27 +135,27 @@ def _workspace_step_canConnect(self, other):
 
     return False
 
-def _workspace_step_getName(self):
+def _workflow_step_getName(self):
     if hasattr(self, '_name'):
         return self._name
     
     return self.__class__.__name__
 
 attr_dict = {'_category': 'General'}
-attr_dict['__init__'] = _workspace_step_init
-attr_dict['configure'] = _workspace_step_configure
-attr_dict['isConfigured'] = _workspace_step_isConfigured
-attr_dict['addPort'] = _workspace_step_addPort
-attr_dict['canConnect'] = _workspace_step_canConnect
-attr_dict['getName'] = _workspace_step_getName
-attr_dict['deserialize'] = _workspace_step_deserialize
-attr_dict['serialize'] = _workspace_step_serialize
+attr_dict['__init__'] = _workflow_step_init
+attr_dict['configure'] = _workflow_step_configure
+attr_dict['isConfigured'] = _workflow_step_isConfigured
+attr_dict['addPort'] = _workflow_step_addPort
+attr_dict['canConnect'] = _workflow_step_canConnect
+attr_dict['getName'] = _workflow_step_getName
+attr_dict['deserialize'] = _workflow_step_deserialize
+attr_dict['serialize'] = _workflow_step_serialize
 
 
-WorkspaceStepMountPoint = pluginframework.MetaPluginMountPoint('WorkspaceStepMountPoint', (object,), attr_dict)
+WorkflowStepMountPoint = pluginframework.MetaPluginMountPoint('WorkflowStepMountPoint', (object,), attr_dict)
 
-def workspaceStepFactory(step_name):
-    for step in WorkspaceStepMountPoint.getPlugins():
+def workflowStepFactory(step_name):
+    for step in WorkflowStepMountPoint.getPlugins():
         if step_name == step.getName():
             return step
         

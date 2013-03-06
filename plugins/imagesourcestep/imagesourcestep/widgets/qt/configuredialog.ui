@@ -133,9 +133,9 @@ color: green</string>
              </spacer>
             </item>
             <item>
-             <widget class="QCheckBox" name="copyToWorkspaceCheckBox">
+             <widget class="QCheckBox" name="copyToWorkflowCheckBox">
               <property name="text">
-               <string>Copy to workspace</string>
+               <string>Copy to workflow</string>
               </property>
              </widget>
             </item>

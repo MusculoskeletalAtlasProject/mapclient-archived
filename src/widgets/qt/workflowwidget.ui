@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>WorkspaceWidget</class>
- <widget class="QWidget" name="WorkspaceWidget">
+ <class>WorkflowWidget</class>
+ <widget class="QWidget" name="WorkflowWidget">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -20,7 +20,7 @@
       <enum>Qt::Horizontal</enum>
      </property>
      <widget class="StepTree" name="stepTree" native="true"/>
-     <widget class="WorkspaceGraphicsView" name="graphicsView"/>
+     <widget class="WorkflowGraphicsView" name="graphicsView"/>
     </widget>
    </item>
   </layout>
@@ -29,13 +29,13 @@
   <customwidget>
    <class>StepTree</class>
    <extends>QWidget</extends>
-   <header>workspace.widgets.StepTree</header>
+   <header>widgets.steptree</header>
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>WorkspaceGraphicsView</class>
+   <class>WorkflowGraphicsView</class>
    <extends>QGraphicsView</extends>
-   <header>workspace.widgets.WorkspaceGraphicsView</header>
+   <header>widgets.workflowgraphicsview</header>
   </customwidget>
  </customwidgets>
  <resources/>

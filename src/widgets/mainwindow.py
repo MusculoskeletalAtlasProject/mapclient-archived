@@ -23,7 +23,7 @@ from PyQt4 import QtCore, QtGui
 from widgets.ui_mainwindow import Ui_MainWindow
 from mountpoints.stackedwidget import StackedWidgetMountPoint
 from core.undomanager import UndoManager
-from core.workspace import WorkspaceManager
+from core.workflow import WorkflowManager
 
 class MainWindow(QtGui.QMainWindow):
     '''
@@ -41,7 +41,7 @@ class MainWindow(QtGui.QMainWindow):
         self._makeConnections()
         self.undoManager = UndoManager()
 
-#        undoManager = self.mainWindow.workspaceManager.undoManager
+#        undoManager = self.mainWindow.workflowManager.undoManager
         undoAction = self.undoManager.createUndoAction(self._ui.menu_Edit)
         undoAction.setShortcut(QtGui.QKeySequence('Ctrl+Z'))
         redoAction = self.undoManager.createRedoAction(self._ui.menu_Edit)
@@ -52,7 +52,7 @@ class MainWindow(QtGui.QMainWindow):
 
         self._ui.stackedWidget.currentChanged.connect(self.centralWidgetChanged)
         self.stackedWidgetPages = StackedWidgetMountPoint.getPlugins(self)
-        self.stackedWidgetPages.insert(0, WorkspaceManager(self))
+        self.stackedWidgetPages.insert(0, WorkflowManager(self))
 
         for stackedWidgetPage in self.stackedWidgetPages:
             if not hasattr(self, stackedWidgetPage.name):

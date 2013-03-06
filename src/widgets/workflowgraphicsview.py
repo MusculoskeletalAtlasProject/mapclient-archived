@@ -19,7 +19,7 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
 '''
 import weakref, math, sys, os
 from PyQt4 import QtCore, QtGui
-from mountpoints.workspacestep import workspaceStepFactory
+from mountpoints.workflowstep import workflowStepFactory
 
 class ErrorItem(QtGui.QGraphicsItem):
 
@@ -345,13 +345,13 @@ def ensureItemInScene(scene, item, newPos):
 class Node(QtGui.QGraphicsItem):
     Type = QtGui.QGraphicsItem.UserType + 1
 
-    def __init__(self, step, location, workspaceGraphicsView):
+    def __init__(self, step, location, workflowGraphicsView):
         QtGui.QGraphicsItem.__init__(self)
 
         self.step = step
         self.pixmap = step._pixmap.scaled(64, 64, aspectRatioMode=QtCore.Qt.KeepAspectRatio, transformMode=QtCore.Qt.FastTransformation)
         self.configure_red = QtGui.QPixmap(':/workflow/images/configure_red.png').scaled(24, 24, aspectRatioMode=QtCore.Qt.KeepAspectRatio, transformMode=QtCore.Qt.FastTransformation)
-        self.graph = weakref.ref(workspaceGraphicsView)
+        self.graph = weakref.ref(workflowGraphicsView)
         self.edgeList = []
         self.newPos = QtCore.QPointF()
         self.setFlag(QtGui.QGraphicsItem.ItemIsMovable)
@@ -472,7 +472,7 @@ class Node(QtGui.QGraphicsItem):
             self.graph().undoStack.push(command)
         
 
-class WorkspaceGraphicsView(QtGui.QGraphicsView):
+class WorkflowGraphicsView(QtGui.QGraphicsView):
 
     def __init__(self, parent=None):
         QtGui.QGraphicsView.__init__(self, parent)
@@ -506,7 +506,7 @@ class WorkspaceGraphicsView(QtGui.QGraphicsView):
             if item.type() == Node.Type:
                 nodeList.append(item)
 
-        location = self.mainWindow.workspaceManager.location
+        location = self.mainWindow.workflowManager.location
         ws.remove('nodes')
         ws.beginGroup('nodes')
         ws.beginWriteArray('nodelist')
@@ -535,7 +535,7 @@ class WorkspaceGraphicsView(QtGui.QGraphicsView):
     def loadState(self, ws):
         self.clear()
         self.undoStack.clear()
-        location = self.mainWindow.workspaceManager.location
+        location = self.mainWindow.workflowManager.location
         ws.beginGroup('nodes')
         nodeCount = ws.beginReadArray('nodelist')
         nodeList = []
@@ -545,7 +545,7 @@ class WorkspaceGraphicsView(QtGui.QGraphicsView):
             name = ws.value('name')
             position = ws.value('position')
             identifier = ws.value('identifier')
-            step = workspaceStepFactory(name)
+            step = workflowStepFactory(name)
             step.setIdentifier(identifier)
             step_location = os.path.join(location, identifier)
             step.deserialize(step_location)
@@ -623,7 +623,7 @@ class WorkspaceGraphicsView(QtGui.QGraphicsView):
             self.connectNodes(self.selectedNodes[0], self.selectedNodes[1])
 
     def keyPressEvent(self, event):
-#        super(WorkspaceGraphicsView, self).keyPressEvent(event)
+#        super(WorkflowGraphicsView, self).keyPressEvent(event)
         if event.key() == QtCore.Qt.Key_Backspace or event.key() == QtCore.Qt.Key_Delete:
             command = CommandDeleteSelection(self.scene(), self.scene().selectedItems())
             self.undoStack.push(command)
@@ -660,18 +660,18 @@ class WorkspaceGraphicsView(QtGui.QGraphicsView):
         painter.drawRect(sceneRect)
 
     def dropEvent(self, event):
-        if event.mimeData().hasFormat("image/x-workspace-step"):
-            pieceData = event.mimeData().data("image/x-workspace-step")
+        if event.mimeData().hasFormat("image/x-workflow-step"):
+            pieceData = event.mimeData().data("image/x-workflow-step")
             stream = QtCore.QDataStream(pieceData, QtCore.QIODevice.ReadOnly)
             hotspot = QtCore.QPoint()
 
             nameLen = stream.readUInt32()
             name = stream.readRawData(nameLen).decode(sys.stdout.encoding)
-            step = workspaceStepFactory(name)
+            step = workflowStepFactory(name)
             stream >> hotspot
 
             position = self.mapToScene(event.pos() - hotspot)
-            location = self.mainWindow.workspaceManager.location
+            location = self.mainWindow.workflowManager.location
             node = Node(step, location, self)
             node.setPos(ensureItemInScene(self.scene(), node, position))
 
@@ -688,7 +688,7 @@ class WorkspaceGraphicsView(QtGui.QGraphicsView):
             event.ignore()
 
     def dragMoveEvent(self, event):
-        if event.mimeData().hasFormat("image/x-workspace-step"):
+        if event.mimeData().hasFormat("image/x-workflow-step"):
             event.setDropAction(QtCore.Qt.MoveAction);
             event.accept();
         else:
@@ -700,7 +700,7 @@ class WorkspaceGraphicsView(QtGui.QGraphicsView):
         event.accept()
 
     def dragEnterEvent(self, event):
-        if event.mimeData().hasFormat("image/x-workspace-step"):
+        if event.mimeData().hasFormat("image/x-workflow-step"):
             event.accept()
         else:
             event.ignore()

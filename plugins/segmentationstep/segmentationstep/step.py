@@ -18,9 +18,9 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
 from PyQt4 import QtGui
-from mountpoints.workspacestep import WorkspaceStepMountPoint
+from mountpoints.workflowstep import WorkflowStepMountPoint
 
-class SegmentationStep(WorkspaceStepMountPoint):
+class SegmentationStep(WorkflowStepMountPoint):
     '''
     A step that acts like the step plugin duck
     '''
@@ -33,8 +33,8 @@ class SegmentationStep(WorkspaceStepMountPoint):
         self._name = 'Segmentation'
         self._identifier = 'squiggly'
         self._pixmap = QtGui.QPixmap(':/segmentation/icons/seg.gif')
-        self.addPort(('pho#workspace#port', 'uses', 'images'))
-        self.addPort(('pho#workspace#port', 'provides', 'pointcloud'))
+        self.addPort(('pho#workflow#port', 'uses', 'images'))
+        self.addPort(('pho#workflow#port', 'provides', 'pointcloud'))
 
     def configure(self, location):
         print('configure the segmentation step')
@@ -46,7 +46,7 @@ class SegmentationStep(WorkspaceStepMountPoint):
         self._identifier = identifier
         
     def serialize(self, location):
-        pass #QtCore.QSettings(location + '/' + info.WORKSPACE_NAME, QtCore.QSettings.IniFormat)
+        pass #QtCore.QSettings(location + '/' + info.WORKFLOW_NAME, QtCore.QSettings.IniFormat)
         
     def deserialize(self, location):
         pass
