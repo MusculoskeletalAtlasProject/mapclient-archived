@@ -43,4 +43,4 @@ ABOUT = {
          }
 
 # APPLICATION
-WORKSPACE_NAME = 'workspace.conf'
+WORKFLOW_NAME = 'workflow.conf'

@@ -22,20 +22,20 @@ import os
 from PyQt4 import QtCore
 
 from settings import info
-from widgets.workspacewidget import WorkspaceWidget
+from widgets.workflowwidget import WorkflowWidget
 
-def workspaceConfigurationExists(location):
-    return os.path.exists(location + '/' + info.WORKSPACE_NAME)
+def workflowConfigurationExists(location):
+    return os.path.exists(location + '/' + info.WORKFLOW_NAME)
 
-def getWorkspaceConfiguration(location):
-    return QtCore.QSettings(location + '/' + info.WORKSPACE_NAME, QtCore.QSettings.IniFormat)
+def getWorkflowConfiguration(location):
+    return QtCore.QSettings(location + '/' + info.WORKFLOW_NAME, QtCore.QSettings.IniFormat)
 
-class WorkspaceError(Exception):
+class WorkflowError(Exception):
     pass
 
-class Workspace(object):
+class Workflow(object):
     '''
-    Holds information relating to a workspace.
+    Holds information relating to a workflow.
     '''
 
     location = None
@@ -45,16 +45,16 @@ class Workspace(object):
         self.location = location
         self.version = version
 
-class WorkspaceManager():
+class WorkflowManager():
     '''
-    This class managers the workspace.
+    This class managers the workflow.
     '''
 
     def __init__(self, mainWindow):
         '''
         Constructor
         '''
-        self.name = 'workspaceManager'
+        self.name = 'workflowManager'
         self.widget = None
         self.widgetIndex = -1
         self.location = None
@@ -68,7 +68,7 @@ class WorkspaceManager():
 
     def getWidget(self):
         if not self.widget:
-            self.widget = WorkspaceWidget(self.mainWindow)
+            self.widget = WorkflowWidget(self.mainWindow)
 
         return self.widget
 
@@ -85,62 +85,62 @@ class WorkspaceManager():
 
     def new(self, location):
         '''
-        Create a new workspace at the given location.  The location is a directory, if it doesn't exist
-        it will be created.  A file 'workspace.conf' is created in the directory at 'location' which holds
-        information relating to the workspace.  
+        Create a new workflow at the given location.  The location is a directory, if it doesn't exist
+        it will be created.  A file 'workflow.conf' is created in the directory at 'location' which holds
+        information relating to the workflow.  
         '''
 
         if location is None:
-            raise WorkspaceError('No location given to create new workspace.')
+            raise WorkflowError('No location given to create new workflow.')
 
         if not os.path.exists(location):
             os.mkdir(location)
 
         self.location = location
         self.mainWindow.setWindowTitle(info.APPLICATION_NAME + ' - ' + location)
-        ws = getWorkspaceConfiguration(location)
+        ws = getWorkflowConfiguration(location)
         ws.setValue('version', info.VERSION_STRING)
 
 
 
     def load(self, location):
         '''
-        Open a workspace from the given location.
+        Open a workflow from the given location.
         :param location:
         '''
         if location is None:
-            raise WorkspaceError('No location given to open workspace.')
+            raise WorkflowError('No location given to open workflow.')
 
         if not os.path.exists(location):
-            raise WorkspaceError('Location %s does not exist' % location)
+            raise WorkflowError('Location %s does not exist' % location)
 
-        if not workspaceConfigurationExists(location):
-            raise WorkspaceError('No workspace located at %s' % location)
+        if not workflowConfigurationExists(location):
+            raise WorkflowError('No workflow located at %s' % location)
 
-        ws = getWorkspaceConfiguration(location)
+        ws = getWorkflowConfiguration(location)
         if ws.value('version') != info.VERSION_STRING:
-            raise WorkspaceError('Version mismatch in workspace expected: %s got: %s' % (info.VERSION_STRING, ws.value('version')))
+            raise WorkflowError('Version mismatch in workflow expected: %s got: %s' % (info.VERSION_STRING, ws.value('version')))
 
         self.location = location
-        ws = getWorkspaceConfiguration(location)
+        ws = getWorkflowConfiguration(location)
         self.widget.loadState(ws)
         self.saveStateIndex = self.currentStateIndex = 0
         self.mainWindow.setWindowTitle(info.APPLICATION_NAME + ' - ' + location)
 
     def save(self):
-        ws = getWorkspaceConfiguration(self.location)
+        ws = getWorkflowConfiguration(self.location)
         self.widget.saveState(ws)
         self.saveStateIndex = self.currentStateIndex
         self.mainWindow.setWindowTitle(info.APPLICATION_NAME + ' - ' + self.location)
 
     def close(self):
         '''
-        Close the current workspace
+        Close the current workflow
         '''
         self.location = None
         self.mainWindow.setWindowTitle(info.APPLICATION_NAME)
 
-    def isWorkspaceOpen(self):
+    def isWorkflowOpen(self):
         return not self.location == None
 
     def writeSettings(self, settings):

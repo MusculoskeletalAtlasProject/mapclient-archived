@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'qt/configuredialog.ui'
 #
-# Created: Mon Mar  4 11:08:06 2013
+# Created: Wed Mar  6 13:25:35 2013
 #      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -81,9 +81,9 @@ class Ui_ConfigureDialog(object):
         self.horizontalLayout_4.setObjectName(_fromUtf8("horizontalLayout_4"))
         spacerItem = QtGui.QSpacerItem(71, 20, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout_4.addItem(spacerItem)
-        self.copyToWorkspaceCheckBox = QtGui.QCheckBox(self.localTab)
-        self.copyToWorkspaceCheckBox.setObjectName(_fromUtf8("copyToWorkspaceCheckBox"))
-        self.horizontalLayout_4.addWidget(self.copyToWorkspaceCheckBox)
+        self.copyToWorkflowCheckBox = QtGui.QCheckBox(self.localTab)
+        self.copyToWorkflowCheckBox.setObjectName(_fromUtf8("copyToWorkflowCheckBox"))
+        self.horizontalLayout_4.addWidget(self.copyToWorkflowCheckBox)
         spacerItem1 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout_4.addItem(spacerItem1)
         self.verticalLayout_3.addLayout(self.horizontalLayout_4)
@@ -158,7 +158,7 @@ class Ui_ConfigureDialog(object):
         self.previousLocationLabel.setText(_translate("ConfigureDialog", "rubbish", None))
         self.localDirectoryCheckBox.setText(_translate("ConfigureDialog", "Directory:", None))
         self.localButton.setText(_translate("ConfigureDialog", "...", None))
-        self.copyToWorkspaceCheckBox.setText(_translate("ConfigureDialog", "Copy to workspace", None))
+        self.copyToWorkflowCheckBox.setText(_translate("ConfigureDialog", "Copy to workflow", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.localTab), _translate("ConfigureDialog", "Local file system", None))
         self.label_5.setText(_translate("ConfigureDialog", "Location:", None))
         self.pmrButton.setText(_translate("ConfigureDialog", "...", None))

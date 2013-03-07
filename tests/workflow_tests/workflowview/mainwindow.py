@@ -188,11 +188,11 @@ class Edge(QtGui.QGraphicsItem):
 class Node(QtGui.QGraphicsItem):
     Type = QtGui.QGraphicsItem.UserType + 1
 
-    def __init__(self, pixmap, workspaceWidget):
+    def __init__(self, pixmap, workflowWidget):
         QtGui.QGraphicsItem.__init__(self)
 
         self.pixmap = pixmap
-        self.graph = weakref.ref(workspaceWidget)
+        self.graph = weakref.ref(workflowWidget)
         self.edgeList = []
         self.newPos = QtCore.QPointF()
         self.setFlag(QtGui.QGraphicsItem.ItemIsMovable)
@@ -244,7 +244,7 @@ class Node(QtGui.QGraphicsItem):
             self.selected = not self.selected
             self.graph().nodeSelected(self, self.selected)
 
-class WorkspaceWidget(QtGui.QGraphicsView):
+class WorkflowWidget(QtGui.QGraphicsView):
 
     def __init__(self, parent=None):
         QtGui.QGraphicsView.__init__(self, parent)
@@ -356,7 +356,7 @@ class MainWindow(QtGui.QMainWindow):
         '''
         super(MainWindow, self).__init__(parent)
         self.piecesList = None
-        self.workspaceWidget = None
+        self.workflowWidget = None
 
         self._makeConnections()
         self._setupWidgets()
@@ -372,10 +372,10 @@ class MainWindow(QtGui.QMainWindow):
 #        puzzleWidget = PuzzleWidget(400);
 
         self.piecesList = StepList(64, self)
-        self.workspaceWidget = WorkspaceWidget()
+        self.workflowWidget = WorkflowWidget()
 
         frameLayout.addWidget(self.piecesList)
-        frameLayout.addWidget(self.workspaceWidget)
+        frameLayout.addWidget(self.workflowWidget)
         self.setCentralWidget(frame);
 
     def _openImage(self, path=None):
@@ -394,7 +394,7 @@ class MainWindow(QtGui.QMainWindow):
                 return
 
             self.puzzleImage = newImage
-            self._setupWorkspaceView()
+            self._setupWorkflowView()
 
 
 

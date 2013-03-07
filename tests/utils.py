@@ -1,4 +1,3 @@
-#!/usr/bin/python
 '''
 MAP Client, a program to generate detailed musculoskeletal models for OpenSim.
     Copyright (C) 2012  University of Auckland
@@ -19,55 +18,14 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
 
+import re
+
 class ConsumeOutput(object):
     def __init__(self):
         self.messages = list()
 
     def write(self, message):
         self.messages.append(message)
-
-import unittest
-
-class UnitTestOutputTestCase(unittest.TestCase):
-
-    def test1(self):
-        [rc, p, f] = parseUnitTestOutput('py1.log')
-        self.assertEqual(rc, 0)
-        self.assertEqual(p, 9)
-        self.assertEqual(f, 0)
-
-    def test2(self):
-        [rc, p, f] = parseUnitTestOutput('py2.log')
-        self.assertEqual(rc, 1)
-        self.assertEqual(p, 8)
-        self.assertEqual(f, 1)
-
-    def test3(self):
-        [rc, p, f] = parseUnitTestOutput('py3.log')
-        self.assertEqual(rc, 1)
-        self.assertEqual(p, 12)
-        self.assertEqual(f, 2)
-
-    def test4(self):
-        [rc, p, f] = parseUnitTestOutput('py4.log')
-        self.assertEqual(rc, 1)
-        self.assertEqual(p, 13)
-        self.assertEqual(f, 1)
-        
-    def test5(self):
-        [rc, p, f] = parseUnitTestOutput('py5.log')
-        self.assertEqual(rc, 0)
-        self.assertEqual(p, 21)
-        self.assertEqual(f, 0)
-      
-    def test6(self):
-        [rc, p, f] = parseUnitTestOutput('py6.log')
-        self.assertEqual(rc, 1)
-        self.assertEqual(p, 0)
-        self.assertEqual(f, 0)
-      
-
-import re
 
 def parseUnitTestOutput(filename):
     '''
@@ -102,10 +60,3 @@ def parseUnitTestOutput(filename):
 
     return rc, passed, failed
 
-def suite():
-    tests = unittest.TestSuite()
-    tests.addTests(unittest.TestLoader().loadTestsFromTestCase(UnitTestOutputTestCase))
-    return tests
-
-if __name__ == '__main__':
-    unittest.TextTestRunner().run(suite())
