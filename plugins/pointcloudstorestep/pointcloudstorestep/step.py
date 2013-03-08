@@ -61,7 +61,7 @@ class PointCloudStoreStep(WorkflowStepMountPoint):
         return self._state.identifier()
     
     def setIdentifier(self, identifier):
-        self._state.setIdentifer(identifier)
+        self._state.setIdentifier(identifier)
         
     def serialize(self, location):
         s = QtCore.QSettings(os.path.join(location, STEP_SERIALISATION_FILENAME), QtCore.QSettings.IniFormat)

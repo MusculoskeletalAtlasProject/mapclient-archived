@@ -159,6 +159,6 @@ def workflowStepFactory(step_name):
         if step_name == step.getName():
             return step
         
-    raise ValueError
+    raise ValueError('Failed to find step named: ' + step_name)
 
 

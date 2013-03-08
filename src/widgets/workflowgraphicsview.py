@@ -635,6 +635,10 @@ class WorkflowGraphicsView(QtGui.QGraphicsView):
         self.scene().removeItem(self.errorIcon)
         del self.errorIcon
 
+    def changeEvent(self, event):
+        if event.type() == QtCore.QEvent.EnabledChange:
+            self.invalidateScene(self.sceneRect())
+       
     def drawBackground(self, painter, rect):
         # Shadow.
         sceneRect = self.sceneRect()
@@ -647,14 +651,12 @@ class WorkflowGraphicsView(QtGui.QGraphicsView):
 
         # Fill.
         gradient = QtGui.QLinearGradient(sceneRect.topLeft(), sceneRect.bottomRight())
-        gradient.setColorAt(0, QtGui.QColor('aliceblue'))
-        gradient.setColorAt(1, QtGui.QColor('lightskyblue'))
-#        if self.isEnabled():
-#            gradient.setColorAt(0, QtGui.QColor('aliceblue'))
-#            gradient.setColorAt(1, QtGui.QColor('lightskyblue'))
-#        else:
-#            gradient.setColorAt(0, QtGui.QColor('lightgrey'))
-#            gradient.setColorAt(1, QtGui.QColor('darkgrey'))
+        if self.isEnabled():
+            gradient.setColorAt(0, QtGui.QColor('aliceblue'))
+            gradient.setColorAt(1, QtGui.QColor('lightskyblue'))
+        else:
+            gradient.setColorAt(0, QtGui.QColor('lightgrey'))
+            gradient.setColorAt(1, QtGui.QColor('darkgrey'))
         painter.fillRect(rect.intersect(sceneRect), QtGui.QBrush(gradient))
         painter.setBrush(QtCore.Qt.NoBrush)
         painter.drawRect(sceneRect)
