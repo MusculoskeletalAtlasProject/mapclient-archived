@@ -21,8 +21,6 @@ import weakref, math
 
 from PyQt4 import QtCore, QtGui
 
-from core.workflowcommands import CommandMove
-
 class ErrorItem(QtGui.QGraphicsItem):
 
     def __init__(self, sourceNode, destNode):
@@ -85,13 +83,11 @@ class Edge(QtGui.QGraphicsItem):
     def __init__(self, sourceNode, destNode):
         QtGui.QGraphicsItem.__init__(self)
 
-        self.setFlag(QtGui.QGraphicsItem.ItemIsSelectable, True)
-        self.setFlag(QtGui.QGraphicsItem.ItemIsMovable)
-        self.setFlag(QtGui.QGraphicsItem.ItemSendsGeometryChanges)
+        self.setFlag(QtGui.QGraphicsItem.ItemIsSelectable)
         self.arrowSize = 10.0
         self.sourcePoint = QtCore.QPointF()
         self.destPoint = QtCore.QPointF()
-        self.setAcceptedMouseButtons(QtCore.Qt.NoButton)
+#        self.setAcceptedMouseButtons(QtCore.Qt.NoButton)
         self.source = weakref.ref(sourceNode)
         self.dest = weakref.ref(destNode)
         self.source().addEdge(self)
@@ -132,10 +128,7 @@ class Edge(QtGui.QGraphicsItem):
  
         return sceneRect
     
-#    def itemChange(self, change, value):
-#        print('edge - itemChange( ' + str(change) + ', ' + str(value) + ')')
-#        return QtGui.QGraphicsItem.itemChange(self, change, value)
-    
+
     def paint(self, painter, option, widget):
         if not self.source() or not self.dest():
             return
@@ -146,17 +139,13 @@ class Edge(QtGui.QGraphicsItem):
         if line.length() == 0.0:
             return
 
-        if self.isSelected():
-            print('me')
+        brush = QtGui.QBrush(QtCore.Qt.black)
         if option.state & (QtGui.QStyle.State_Selected | QtGui.QStyle.State_HasFocus): #or self.selected:
-            painter.setBrush(QtCore.Qt.darkGray)
-            painter.drawRoundedRect(self.boundingRect(), 5, 5)
-
-        painter.setPen(QtGui.QPen(QtCore.Qt.black, 1, QtCore.Qt.SolidLine, QtCore.Qt.RoundCap, QtCore.Qt.RoundJoin))
-        painter.drawLine(line)
+            brush = QtGui.QBrush(QtCore.Qt.red)
+        
+        painter.setBrush(brush)
 
         angle = math.acos(line.dx() / line.length())
-#        print('angle: ', angle)
         if line.dy() >= 0:
             angle = Edge.TwoPi - angle
 
@@ -170,10 +159,11 @@ class Edge(QtGui.QGraphicsItem):
             destArrowP2 = midPoint + QtCore.QPointF(math.sin(angle - Edge.Pi + Edge.Pi / 3) * self.arrowSize,
                                                           math.cos(angle - Edge.Pi + Edge.Pi / 3) * self.arrowSize)
 
-            painter.setBrush(QtCore.Qt.black)
-#        painter.drawPolygon(QtGui.QPolygonF([line.p1(), sourceArrowP1, sourceArrowP2]))
             painter.drawPolygon(QtGui.QPolygonF([midPoint, destArrowP1, destArrowP2]))
 
+        painter.setPen(QtGui.QPen(brush, 1, QtCore.Qt.SolidLine, QtCore.Qt.RoundCap, QtCore.Qt.RoundJoin))
+        # painter.setPen(QtGui.QPen(QtCore.Qt.SolidLine))
+        painter.drawLine(line)
 
 class Node(QtGui.QGraphicsItem):
     Type = QtGui.QGraphicsItem.UserType + 1
@@ -258,7 +248,6 @@ class Node(QtGui.QGraphicsItem):
                 painter.drawPixmap(40, 40, self.configure_red)
 
     def itemChange(self, change, value):
-#        print('node - itemChange( ' + str(change) + ', ' + str(value) + ')')
         if change == QtGui.QGraphicsItem.ItemPositionChange and self.scene():
             return ensureItemInScene(self.scene(), self, value)
         elif change == QtGui.QGraphicsItem.ItemPositionHasChanged:
@@ -268,49 +257,8 @@ class Node(QtGui.QGraphicsItem):
 
         return QtGui.QGraphicsItem.itemChange(self, change, value)
 
-    def contextMenuEvent(self, event):
-        super(Node, self).contextMenuEvent(event)
-        self.contextMenu.exec_(event.screenPos())
-
-    def mousePressEvent(self, event):
-        QtGui.QGraphicsItem.mousePressEvent(self, event)
-        modifiers = QtGui.QApplication.keyboardModifiers()
-        if event.button() == QtCore.Qt.RightButton:
-            event.ignore()
-        elif modifiers & QtCore.Qt.ShiftModifier:
-            centre = self.boundingRect().center()
-            self.connectLine = ArrowLine(QtCore.QLineF(self.mapToScene(centre),
-                                         event.scenePos()))
-            self.scene().addItem(self.connectLine)
-        else:
-            self.eventStartPos = self.pos()
-
-    def mouseMoveEvent(self, event):
-        if self.connectLine:
-            newLine = QtCore.QLineF(self.connectLine.line().p1(), event.scenePos());
-            self.connectLine.setLine(newLine)
-        else:
-            QtGui.QGraphicsItem.mouseMoveEvent(self, event)
-        
-
-    def mouseReleaseEvent(self, event):
-        QtGui.QGraphicsItem.mouseReleaseEvent(self, event)
-
-        if self.connectLine:
-            item = self.scene().itemAt(event.scenePos())
-            if item.type() == Node.Type:
-                self.graph().connectNodes(self, item)
-            self.scene().removeItem(self.connectLine)
-            self.connectLine = None
-        elif self.pos() != self.eventStartPos:
-            undoStack = self.graph().undoStack
-            undoStack.beginMacro('Move Step(s)')
-            diff = self.pos() - self.eventStartPos
-            for item in self.scene().selectedItems():
-                if item.type() == Node.Type:
-                    command = CommandMove(item, item.pos() - diff, item.pos())
-                    undoStack.push(command)
-            undoStack.endMacro()
+    def showContextMenu(self, pos):
+        self.contextMenu.popup(pos)
      
         
 class ArrowLine(QtGui.QGraphicsLineItem):
@@ -386,3 +334,4 @@ class WorkflowScene(QtGui.QGraphicsScene):
 
     def __init__(self, parent):
         QtGui.QGraphicsScene.__init__(self, -self.sceneHeight // 2, -self.sceneWidth // 2, self.sceneHeight, self.sceneWidth, parent)
+

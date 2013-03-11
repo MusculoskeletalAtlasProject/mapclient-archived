@@ -22,8 +22,8 @@ import sys, os
 from PyQt4 import QtCore, QtGui
 
 from mountpoints.workflowstep import workflowStepFactory
-from core.workflowcommands import CommandSelectionChange, CommandDeleteSelection, CommandAdd
-from core.workflowscene import WorkflowScene, Node, Edge, ErrorItem, ensureItemInScene
+from core.workflowcommands import CommandSelectionChange, CommandDeleteSelection, CommandAdd, CommandMove
+from core.workflowscene import WorkflowScene, Node, Edge, ErrorItem, ArrowLine, ensureItemInScene
 
 class WorkflowGraphicsView(QtGui.QGraphicsView):
 
@@ -37,6 +37,11 @@ class WorkflowGraphicsView(QtGui.QGraphicsView):
         self.errorIconTimer.setSingleShot(True)
         self.errorIconTimer.timeout.connect(self.errorIconTimeout)
         self.errorIcon = None
+        
+        self.connectLine = None
+        self.connectSourceNode = None
+        
+        self.selectionStartPos = None
 
         scene = WorkflowScene(self)
         scene.selectionChanged.connect(self.selectionChanged)
@@ -181,6 +186,52 @@ class WorkflowGraphicsView(QtGui.QGraphicsView):
             event.accept()
         else:
             event.ignore()
+            
+    def contextMenuEvent(self, event):
+        item = self.itemAt(event.pos())
+        if item and item.type() == Node.Type:
+            item.showContextMenu(event.globalPos())
+
+    def mousePressEvent(self, event):
+        modifiers = QtGui.QApplication.keyboardModifiers()
+        if event.button() == QtCore.Qt.RightButton:
+            event.ignore()
+        elif modifiers & QtCore.Qt.ShiftModifier:
+            item = self.scene().itemAt(self.mapToScene(event.pos()))
+            if item and item.type() == Node.Type:
+                centre = item.boundingRect().center()
+                self.connectSourceNode = item
+                self.connectLine = ArrowLine(QtCore.QLineF(item.mapToScene(centre),
+                                             self.mapToScene(event.pos())))
+                self.scene().addItem(self.connectLine)
+        else:
+            QtGui.QGraphicsView.mousePressEvent(self, event)
+            self.selectionStartPos = event.pos()
+            
+    def mouseMoveEvent(self, event):
+        if self.connectLine:
+            newLine = QtCore.QLineF(self.connectLine.line().p1(), self.mapToScene(event.pos()))
+            self.connectLine.setLine(newLine)
+        else:
+            QtGui.QGraphicsView.mouseMoveEvent(self, event)
+
+    def mouseReleaseEvent(self, event):
+        if self.connectLine:
+            item = self.scene().itemAt(self.mapToScene(event.pos()))
+            if item and item.type() == Node.Type:
+                self.connectNodes(self.connectSourceNode, item)
+            self.scene().removeItem(self.connectLine)
+            self.connectLine = None
+            self.connectSourceNode = None
+        else:
+            QtGui.QGraphicsView.mouseReleaseEvent(self, event)
+            diff = event.pos() - self.selectionStartPos
+            if diff.x() != 0 and diff.y() != 0:
+                self.undoStack.beginMacro('Move Step(s)')
+                for item in self.scene().selectedItems():
+                    if item.type() == Node.Type:
+                        self.undoStack.push(CommandMove(item, item.pos() - diff, item.pos()))
+                self.undoStack.endMacro()
 
     def errorIconTimeout(self):
         self.scene().removeItem(self.errorIcon)

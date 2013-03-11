@@ -19,6 +19,8 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
 '''
 from PyQt4 import QtGui
 
+from core.workflowscene import Node, Edge
+
 class CommandDeleteSelection(QtGui.QUndoCommand):
     '''
     '''
@@ -29,26 +31,31 @@ class CommandDeleteSelection(QtGui.QUndoCommand):
         self.edges = {} # Need to keep the edges alive in case of undo
         self.edgeUnique = {} # Keep a record of edges marked for deletion to avoid repetition
         for item in self.selection:
-            self.edges[item] = []
-            for edge in item.edgeList:
-                if edge() not in self.edgeUnique:
-                    self.edges[item].append(edge())
-                    self.edgeUnique[edge()] = 1
+            if item.Type == Node.Type:
+                self.edges[item] = []
+                for edge in item.edgeList:
+                    if edge() not in self.edgeUnique:
+                        self.edges[item].append(edge())
+                        self.edgeUnique[edge()] = 1
+            elif item.Type == Edge.Type:
+                self.edgeUnique[item] = 1
 
     def redo(self):
         self.scene.blockSignals(True)
         for item in self.selection:
             self.scene.removeItem(item)
-            for edge in self.edges[item]:
-                self.scene.removeItem(edge)
+            if item in self.edges:
+                for edge in self.edges[item]:
+                    self.scene.removeItem(edge)
         self.scene.blockSignals(False)
 
     def undo(self):
         self.scene.blockSignals(True)
         for item in self.selection:
             self.scene.addItem(item)
-            for edge in self.edges[item]:
-                self.scene.addItem(edge)
+            if item in self.edges:
+                for edge in self.edges[item]:
+                    self.scene.addItem(edge)
         self.scene.blockSignals(False)
 
 
