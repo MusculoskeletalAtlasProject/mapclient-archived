@@ -22,13 +22,15 @@ import os
 from PyQt4 import QtCore
 
 from settings import info
-from widgets.workflowwidget import WorkflowWidget
+
+def getWorkflowConfigurationAbsoluteFilename(location):
+    return os.path.join(location, info.WORKFLOW_NAME)
 
 def workflowConfigurationExists(location):
-    return os.path.exists(location + '/' + info.WORKFLOW_NAME)
+    return os.path.exists(getWorkflowConfigurationAbsoluteFilename(location))
 
 def getWorkflowConfiguration(location):
-    return QtCore.QSettings(location + '/' + info.WORKFLOW_NAME, QtCore.QSettings.IniFormat)
+    return QtCore.QSettings(getWorkflowConfigurationAbsoluteFilename(location), QtCore.QSettings.IniFormat)
 
 class WorkflowError(Exception):
     pass
@@ -76,6 +78,12 @@ class WorkflowManager():
 
     def title(self):
         return self._title
+    
+    def setLocation(self, location):
+        self._location = location
+        
+    def location(self):
+        return self._location
     
     def setPreviousLocation(self, location):
         self._previousLocation = location

@@ -30,7 +30,6 @@ class WorkflowGraphicsView(QtGui.QGraphicsView):
     def __init__(self, parent=None):
         QtGui.QGraphicsView.__init__(self, parent)
         self._mainWindow = None
-        self.undoStack = QtGui.QUndoStack(self)
         self.selectedNodes = []
         self.errorIconTimer = QtCore.QTimer()
         self.errorIconTimer.setInterval(3000)
@@ -53,79 +52,6 @@ class WorkflowGraphicsView(QtGui.QGraphicsView):
 #        self.setResizeAnchor(QtGui.QGraphicsView.AnchorViewCenter)
 
         self.setAcceptDrops(True)
-
-    def saveState(self, ws):
-        sceneItems = self.scene().items()
-        nodeList = []
-        for item in sceneItems:
-            if item.type() == Node.Type:
-                nodeList.append(item)
-
-        location = self._mainWindow.workflowManager._location
-        ws.remove('nodes')
-        ws.beginGroup('nodes')
-        ws.beginWriteArray('nodelist')
-        nodeIndex = 0
-        for node in nodeList:
-            if node.step.isConfigured():
-                step_location = os.path.join(location, node.step.getIdentifier())
-                node.step.serialize(step_location)
-            ws.setArrayIndex(nodeIndex)
-            ws.setValue('name', node.step.getName())
-            ws.setValue('position', node.pos())
-            ws.setValue('identifier', node.step.getIdentifier())
-            ws.beginWriteArray('edgeList')
-            edgeIndex = 0
-            for edge in node.edgeList:
-                if edge().source() == node:
-                    ws.setArrayIndex(edgeIndex)
-                    indecies = [i for i, x in enumerate(nodeList) if x == edge().dest()]
-                    ws.setValue('connectedTo', indecies[0])
-                    edgeIndex += 1
-            ws.endArray()
-            nodeIndex += 1
-        ws.endArray()
-        ws.endGroup()
-
-    def loadState(self, ws):
-        self.clear()
-        self.undoStack.clear()
-        location = self._mainWindow.workflowManager._location
-        ws.beginGroup('nodes')
-        nodeCount = ws.beginReadArray('nodelist')
-        nodeList = []
-        edgeConnections = []
-        for i in range(nodeCount):
-            ws.setArrayIndex(i)
-            name = ws.value('name')
-            position = ws.value('position')
-            identifier = ws.value('identifier')
-            step = workflowStepFactory(name)
-            step.setIdentifier(identifier)
-            step_location = os.path.join(location, identifier)
-            step.deserialize(step_location)
-            node = Node(step, location, self)
-            node.setPos(position)
-            nodeList.append(node)
-            command = CommandAdd(self.scene(), node)
-            self.undoStack.push(command)
-            edgeCount = ws.beginReadArray('edgeList')
-            for j in range(edgeCount):
-                ws.setArrayIndex(j)
-                connectedTo = int(ws.value('connectedTo'))
-                edgeConnections.append((i, connectedTo))
-            ws.endArray()
-        ws.endArray()
-        ws.endGroup()
-        for edge in edgeConnections:
-            node1 = nodeList[edge[0]]
-            node2 = nodeList[edge[1]]
-            command = CommandAdd(self.scene(), Edge(node1, node2))
-            #command = CommandAddEdge(self.scene(), node1, node2)
-            self.undoStack.push(command)
-
-
-        self.undoStack.clear()
 
     def clear(self):
         self.scene().clear()

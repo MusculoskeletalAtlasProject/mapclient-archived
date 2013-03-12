@@ -63,7 +63,7 @@ class WorkflowWidget(QtGui.QWidget):
         self._updateUi()
 
     def setActive(self):
-        self._mainWindow.setUndoStack(self._ui.graphicsView.undoStack)
+        self._mainWindow.setUndoStack(self.undoStack)
 
     def _setActionProperties(self, action, name, slot, shortcut='', statustip=''):
         action.setObjectName(name)

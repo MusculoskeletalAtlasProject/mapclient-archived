@@ -18,39 +18,19 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
 import unittest
-import os, tempfile
+import os
 
-from core.workflow import WorkflowManager, WorkflowError
 from mountpoints.workflowstep import WorkflowStepPort, WorkflowStepMountPoint
 
 class WorkflowStep(WorkflowStepMountPoint):
     pass
 
-#from mpl_toolkits.axes_grid1.axes_grid import im
-#from PyQt4 import QtCore
-
-TEST_WORKFLOW_DIR_NAME = '/new_workflow_jihuuui'
-
-#class FakeWidget(object):
-#
-#    def loadState(self, wf):
-#        pass
-#
-#    def saveState(self, wf):
-#        pass
-#
-#class FakeMainWindow(object):
-#
-#    def setWindowTitle(self, value):
-#        pass
-
-class WorkflowTestCase(unittest.TestCase):
-
-
+class WorkflowStepsTestCase(unittest.TestCase):
+    
     def assertIn(self, a, b, *args, **kwargs):
         ''''Python < v2.7 compatibility.  Assert "a" in "b"'''
         try:
-            f = super(WorkflowTestCase, self).assertIn
+            f = super(WorkflowStepsTestCase, self).assertIn
         except AttributeError:
             self.assertTrue(a in b, *args, **kwargs)
         else:
@@ -59,57 +39,11 @@ class WorkflowTestCase(unittest.TestCase):
     def assertNotIn(self, a, b, *args, **kwargs):
         ''''Python < v2.7 compatibility.  Assert "a" NOT in "b"'''
         try:
-            f = super(WorkflowTestCase, self).assertNotIn
+            f = super(WorkflowStepsTestCase, self).assertNotIn
         except AttributeError:
             self.assertFalse(a in b, *args, **kwargs)
         else:
             f(a, b, *args, **kwargs)
-
-    def testNew(self):
-        dirName = tempfile.mkdtemp(prefix='new_workflow_')
-        try:
-            wf = WorkflowManager()
-            wf.new(dirName)
-            assert(os.path.exists(dirName + '/workflow.conf'))
-        finally:
-            os.remove(dirName + '/workflow.conf')
-            os.rmdir(dirName)
-
-    def testNewWithNone(self):
-        wf = WorkflowManager()
-        self.assertRaises(WorkflowError, wf.new, None)
-
-    def testNewWithNonexistentDir(self):
-        tempDir = tempfile.gettempdir() + TEST_WORKFLOW_DIR_NAME
-        wf = WorkflowManager()
-        wf.new(tempDir)
-        assert(os.path.exists(tempDir + '/workflow.conf'))
-
-        # Get rid of test  output
-        os.remove(tempDir + '/workflow.conf')
-        os.rmdir(tempDir)
-
-    def testSave(self):
-        tempDir = tempfile.gettempdir() + TEST_WORKFLOW_DIR_NAME
-        print(tempDir)
-        wf = WorkflowManager()
-#        wf.widget = FakeWidget()
-        wf.new(tempDir)
-        wf.save()
-
-    def testOpen(self):
-        tempDir = tempfile.gettempdir() + TEST_WORKFLOW_DIR_NAME
-        wf = WorkflowManager()
-#        wf.widget = FakeWidget()
-        wf.new(tempDir)
-        wf.load(tempDir)
-
-        # Get rid of test  output
-        os.remove(tempDir + '/workflow.conf')
-        os.rmdir(tempDir)
-        
-    def testLocation(self):
-        wf = Workflow
 
     def testPort(self):
         port = WorkflowStepPort()
@@ -175,8 +109,3 @@ class WorkflowTestCase(unittest.TestCase):
         self.assertRaises(ValueError, workflowStepFactory, ('james'))
         app.argc()
         #Step()
-
-
-if __name__ == "__main__":
-    #import sys;sys.argv = ['', 'Test.testNew']
-    unittest.main()
