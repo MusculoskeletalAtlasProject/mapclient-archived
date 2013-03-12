@@ -31,18 +31,18 @@ class WorkflowStep(WorkflowStepMountPoint):
 
 TEST_WORKFLOW_DIR_NAME = '/new_workflow_jihuuui'
 
-class FakeWidget(object):
-
-    def loadState(self, ws):
-        pass
-
-    def saveState(self, ws):
-        pass
-
-class FakeMainWindow(object):
-
-    def setWindowTitle(self, value):
-        pass
+#class FakeWidget(object):
+#
+#    def loadState(self, wf):
+#        pass
+#
+#    def saveState(self, wf):
+#        pass
+#
+#class FakeMainWindow(object):
+#
+#    def setWindowTitle(self, value):
+#        pass
 
 class WorkflowTestCase(unittest.TestCase):
 
@@ -68,24 +68,21 @@ class WorkflowTestCase(unittest.TestCase):
     def testNew(self):
         dirName = tempfile.mkdtemp(prefix='new_workflow_')
         try:
-            ws = WorkflowManager(FakeMainWindow())
-            ws.new(dirName)
+            wf = WorkflowManager()
+            wf.new(dirName)
             assert(os.path.exists(dirName + '/workflow.conf'))
         finally:
             os.remove(dirName + '/workflow.conf')
             os.rmdir(dirName)
 
     def testNewWithNone(self):
-        ws = WorkflowManager(FakeMainWindow())
-        try:
-            ws.new(None)
-        except WorkflowError:
-            pass
+        wf = WorkflowManager()
+        self.assertRaises(WorkflowError, wf.new, None)
 
     def testNewWithNonexistentDir(self):
         tempDir = tempfile.gettempdir() + TEST_WORKFLOW_DIR_NAME
-        ws = WorkflowManager(FakeMainWindow())
-        ws.new(tempDir)
+        wf = WorkflowManager()
+        wf.new(tempDir)
         assert(os.path.exists(tempDir + '/workflow.conf'))
 
         # Get rid of test  output
@@ -94,21 +91,25 @@ class WorkflowTestCase(unittest.TestCase):
 
     def testSave(self):
         tempDir = tempfile.gettempdir() + TEST_WORKFLOW_DIR_NAME
-        ws = WorkflowManager(FakeMainWindow())
-        ws.widget = FakeWidget()
-        ws.new(tempDir)
-        ws.save()
+        print(tempDir)
+        wf = WorkflowManager()
+#        wf.widget = FakeWidget()
+        wf.new(tempDir)
+        wf.save()
 
     def testOpen(self):
         tempDir = tempfile.gettempdir() + TEST_WORKFLOW_DIR_NAME
-        ws = WorkflowManager(FakeMainWindow())
-        ws.widget = FakeWidget()
-        ws.new(tempDir)
-        ws.load(tempDir)
+        wf = WorkflowManager()
+#        wf.widget = FakeWidget()
+        wf.new(tempDir)
+        wf.load(tempDir)
 
         # Get rid of test  output
         os.remove(tempDir + '/workflow.conf')
         os.rmdir(tempDir)
+        
+    def testLocation(self):
+        wf = Workflow
 
     def testPort(self):
         port = WorkflowStepPort()

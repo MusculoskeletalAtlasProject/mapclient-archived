@@ -29,7 +29,7 @@ class WorkflowGraphicsView(QtGui.QGraphicsView):
 
     def __init__(self, parent=None):
         QtGui.QGraphicsView.__init__(self, parent)
-        self.mainWindow = None
+        self._mainWindow = None
         self.undoStack = QtGui.QUndoStack(self)
         self.selectedNodes = []
         self.errorIconTimer = QtCore.QTimer()
@@ -61,7 +61,7 @@ class WorkflowGraphicsView(QtGui.QGraphicsView):
             if item.type() == Node.Type:
                 nodeList.append(item)
 
-        location = self.mainWindow.workflowManager.location
+        location = self._mainWindow.workflowManager._location
         ws.remove('nodes')
         ws.beginGroup('nodes')
         ws.beginWriteArray('nodelist')
@@ -90,7 +90,7 @@ class WorkflowGraphicsView(QtGui.QGraphicsView):
     def loadState(self, ws):
         self.clear()
         self.undoStack.clear()
-        location = self.mainWindow.workflowManager.location
+        location = self._mainWindow.workflowManager._location
         ws.beginGroup('nodes')
         nodeCount = ws.beginReadArray('nodelist')
         nodeList = []
@@ -275,7 +275,7 @@ class WorkflowGraphicsView(QtGui.QGraphicsView):
             stream >> hotspot
 
             position = self.mapToScene(event.pos() - hotspot)
-            location = self.mainWindow.workflowManager.location
+            location = self._mainWindow.workflowManager._location
             node = Node(step, location, self)
             node.setPos(ensureItemInScene(self.scene(), node, position))
 

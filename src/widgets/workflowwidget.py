@@ -30,11 +30,15 @@ class WorkflowWidget(QtGui.QWidget):
         Constructor
         '''
         QtGui.QWidget.__init__(self)
-        self.mainWindow = mainWindow
+        self._mainWindow = mainWindow
         self._ui = Ui_WorkflowWidget()
         self._ui.setupUi(self)
-        self._ui.graphicsView.undoStack.indexChanged.connect(self.undoStackIndexChanged)
-        self._ui.graphicsView.mainWindow = mainWindow
+
+        self.undoStack = QtGui.QUndoStack(self)
+        self.undoStack.indexChanged.connect(self.undoStackIndexChanged)
+        
+        self._ui.graphicsView._mainWindow = mainWindow
+        
         self.action_Close = None # Keep a handle to this for modifying the Ui.
         self._createMenuItems()
         self._previousLocation = ''
@@ -44,20 +48,22 @@ class WorkflowWidget(QtGui.QWidget):
         for step in self.workflowStepPlugins:
             self.stepTree.addStep(step)
 
-        self.updateUi()
+        self._updateUi()
 
-    def updateUi(self):
-        workflowOpen = self.mainWindow.workflowManager.isWorkflowOpen()
+    def _updateUi(self):
+        wfm = self._mainWindow.model().workflowManager()
+        self._mainWindow.setWindowTitle(wfm.title())
+        workflowOpen = wfm.isWorkflowOpen()
         self.action_Close.setEnabled(workflowOpen)
         self.setEnabled(workflowOpen)
-        self.action_Save.setEnabled(not self.mainWindow.workflowManager.isModified())
+        self.action_Save.setEnabled(not wfm.isModified())
 
     def undoStackIndexChanged(self, index):
-        self.mainWindow.workflowManager.undoStackIndexChanged(index)
-        self.updateUi()
+        self._mainWindow.workflowManager.undoStackIndexChanged(index)
+        self._updateUi()
 
     def setActive(self):
-        self.mainWindow.setUndoStack(self._ui.graphicsView.undoStack)
+        self._mainWindow.setUndoStack(self._ui.graphicsView.undoStack)
 
     def _setActionProperties(self, action, name, slot, shortcut='', statustip=''):
         action.setObjectName(name)
@@ -68,42 +74,42 @@ class WorkflowWidget(QtGui.QWidget):
 
 
     def new(self):
-        workflowDir = QtGui.QFileDialog.getExistingDirectory(self.mainWindow, caption='Select Workflow Directory', directory=self._previousLocation)
+        workflowDir = QtGui.QFileDialog.getExistingDirectory(self._mainWindow, caption='Select Workflow Directory', directory=self._previousLocation)
         if len(workflowDir) > 0:
-            m = self.mainWindow.workflowManager
+            m = self._mainWindow.model().workflowManager()
             m.new(workflowDir)
-            self._previousLocation = workflowDir
-            self.updateUi()
+            m.setPreviousLocation(workflowDir)
+            self._updateUi()
 
     def load(self):
-        workflowDir = QtGui.QFileDialog.getExistingDirectory(self.mainWindow, caption='Open Workflow', directory=self._previousLocation, options=QtGui.QFileDialog.ShowDirsOnly | QtGui.QFileDialog.DontResolveSymlinks | QtGui.QFileDialog.ReadOnly)
+        workflowDir = QtGui.QFileDialog.getExistingDirectory(self._mainWindow, caption='Open Workflow', directory=self._previousLocation, options=QtGui.QFileDialog.ShowDirsOnly | QtGui.QFileDialog.DontResolveSymlinks | QtGui.QFileDialog.ReadOnly)
         if len(workflowDir) > 0:
-            m = self.mainWindow.workflowManager
+            m = self._mainWindow.model().workflowManager()
             m.load(workflowDir)
-            self._previousLocation = workflowDir
-            self.updateUi()
+            m.setPreviousLocation(workflowDir)
+            self._updateUi()
 
     def close(self):
-        m = self.mainWindow.workflowManager
+        m = self._mainWindow.model().workflowManager()
         m.close()
         self._ui.graphicsView.clear()
-        self.updateUi()
+        self._updateUi()
 
     def save(self):
-        m = self.mainWindow.workflowManager
+        m = self._mainWindow.model().workflowManager()
         m.save()
-        self.updateUi()
+        self._updateUi()
 
-    def saveState(self, ws):
-        self._ui.graphicsView.saveState(ws)
-        self.updateUi()
-
-    def loadState(self, ws):
-        self._ui.graphicsView.loadState(ws)
-        self.updateUi()
+#    def saveState(self, ws):
+#        self._ui.graphicsView.saveState(ws)
+#        self._updateUi()
+#
+#    def loadState(self, ws):
+#        self._ui.graphicsView.loadState(ws)
+#        self._updateUi()
 
     def _createMenuItems(self):
-        menu_File = self.mainWindow._ui.menubar.findChild(QtGui.QMenu, 'menu_File')
+        menu_File = self._mainWindow._ui.menubar.findChild(QtGui.QMenu, 'menu_File')
         lastFileMenuAction = menu_File.actions()[-1]
         menu_New = menu_File.findChild(QtGui.QMenu, name='&New')
         if not menu_New:

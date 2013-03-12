@@ -38,26 +38,6 @@ class UndoManager(object):
                                 cls, *args, **kwargs)
         return cls._instance
 
-    def createUndoAction(self, parent):
-        self.undoAction = QtGui.QAction('Undo', parent)
-        self.undoAction.triggered.connect(self.undo)
-        if self.stack:
-            self.undoAction.setEnabled(self.stack.canUndo())
-        else:
-            self.undoAction.setEnabled(False)
-
-        return self.undoAction
-
-    def createRedoAction(self, parent):
-        self.redoAction = QtGui.QAction('Redo', parent)
-        self.redoAction.triggered.connect(self.redo)
-        if self.stack:
-            self.redoAction.setEnabled(self.stack.canRedo())
-        else:
-            self.redoAction.setEnabled(False)
-
-        return self.redoAction
-
     def setCurrentStack(self, stack):
         if self.stack:
             self.stack.canRedoChanged.disconnect(self._canRedoChanged)

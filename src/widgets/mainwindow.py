@@ -18,33 +18,33 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
 
-from PyQt4 import QtCore, QtGui
+from PyQt4 import QtGui
 
 from widgets.ui_mainwindow import Ui_MainWindow
 from mountpoints.stackedwidget import StackedWidgetMountPoint
-from core.undomanager import UndoManager
-from core.workflow import WorkflowManager
+from widgets.workflowwidget import WorkflowWidget
 
 class MainWindow(QtGui.QMainWindow):
     '''
     This is the main window for the MAP Client.
     '''
 
-    def __init__(self):
+    def __init__(self, model):
         '''
         Constructor
         '''
         QtGui.QMainWindow.__init__(self)
 
+        self._model = model
+        
         self._ui = Ui_MainWindow()
         self._ui.setupUi(self)
         self._makeConnections()
-        self.undoManager = UndoManager()
 
 #        undoManager = self.mainWindow.workflowManager.undoManager
-        undoAction = self.undoManager.createUndoAction(self._ui.menu_Edit)
+        undoAction = self._createUndoAction(self._ui.menu_Edit)
         undoAction.setShortcut(QtGui.QKeySequence('Ctrl+Z'))
-        redoAction = self.undoManager.createRedoAction(self._ui.menu_Edit)
+        redoAction = self._createRedoAction(self._ui.menu_Edit)
         redoAction.setShortcut(QtGui.QKeySequence('Ctrl+Shift+Z'))
 
         self._ui.menu_Edit.addAction(undoAction)
@@ -52,40 +52,50 @@ class MainWindow(QtGui.QMainWindow):
 
         self._ui.stackedWidget.currentChanged.connect(self.centralWidgetChanged)
         self.stackedWidgetPages = StackedWidgetMountPoint.getPlugins(self)
-        self.stackedWidgetPages.insert(0, WorkflowManager(self))
+        self.stackedWidgetPages.insert(0, WorkflowWidget(self))
+        self._ui.stackedWidget.addWidget(self.stackedWidgetPages[0])
 
-        for stackedWidgetPage in self.stackedWidgetPages:
-            if not hasattr(self, stackedWidgetPage.name):
-                setattr(self, stackedWidgetPage.name, stackedWidgetPage)
-                stackedWidgetPage.setWidgetIndex(self._ui.stackedWidget.addWidget(stackedWidgetPage.getWidget()))
+#        for stackedWidgetPage in self.stackedWidgetPages:
+#            if not hasattr(self, stackedWidgetPage.name):
+#                setattr(self, stackedWidgetPage.name, stackedWidgetPage)
+#                stackedWidgetPage.setWidgetIndex(self._ui.stackedWidget.addWidget(stackedWidgetPage.getWidget()))
 
-        self._readSettings()
+        self._model.readSettings()
+        self.resize(self._model.size())
+        self.move(self._model.pos())
 
 
-    def _writeSettings(self):
-        settings = QtCore.QSettings()
-        settings.beginGroup('MainWindow')
-        settings.setValue('size', self.size())
-        settings.setValue('pos', self.pos())
-        settings.endGroup()
-        for stackedWidgetPage in self.stackedWidgetPages:
-            stackedWidgetPage.writeSettings(settings)
+    def _createUndoAction(self, parent):
+        self.undoAction = QtGui.QAction('Undo', parent)
+        self.undoAction.triggered.connect(self._model.undoManager().undo)
+        stack = self._model.undoManager().currentStack()
+        if stack:
+            self.undoAction.setEnabled(stack.canUndo())
+        else:
+            self.undoAction.setEnabled(False)
 
-    def _readSettings(self):
-        settings = QtCore.QSettings()
-        settings.beginGroup('MainWindow')
-        self.resize(settings.value('size', QtCore.QSize(600, 400)))
-        self.move(settings.value('pos', QtCore.QPoint(100, 100)))
-        settings.endGroup()
-        for stackedWidgetPage in self.stackedWidgetPages:
-            stackedWidgetPage.readSettings(settings)
+        return self.undoAction
 
+    def _createRedoAction(self, parent):
+        self.redoAction = QtGui.QAction('Redo', parent)
+        self.redoAction.triggered.connect(self._model.undoManager().redo)
+        stack = self._model.undoManager().currentStack()
+        if stack:
+            self.redoAction.setEnabled(stack.canRedo())
+        else:
+            self.redoAction.setEnabled(False)
+
+        return self.redoAction
+
+    def model(self):
+        return self._model
+    
     def _makeConnections(self):
         self._ui.action_Quit.triggered.connect(self.quitApplication)
         self._ui.action_About.triggered.connect(self.about)
 
     def setUndoStack(self, stack):
-        self.undoManager.setCurrentStack(stack)
+        self._model.undoManager().setCurrentStack(stack)
 
     def centralWidgetChanged(self, index):
         widget = self._ui.stackedWidget.currentWidget()
@@ -95,7 +105,9 @@ class MainWindow(QtGui.QMainWindow):
         self.quitApplication()
 
     def quitApplication(self):
-        self._writeSettings()
+        self._model.setSize(self.size())
+        self._model.setPos(self.pos())
+        self._model.writeSettings()
         QtGui.qApp.quit()
 
     def about(self):

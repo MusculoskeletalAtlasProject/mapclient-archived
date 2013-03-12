@@ -20,9 +20,14 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
 import unittest
 
 def suite():
-    from core_tests.pluginframework import PluginFrameworkTestCase
     tests = unittest.TestSuite()
+    
+    from core_tests.pluginframework import PluginFrameworkTestCase
     tests.addTests(unittest.TestLoader().loadTestsFromTestCase(PluginFrameworkTestCase))
+    
+    from core_tests.mainapplication import MainApplicationTestCase
+    tests.addTests(unittest.TestLoader().loadTestsFromTestCase(MainApplicationTestCase))
+
     return tests
 
 def load_tests(loader, tests, pattern):

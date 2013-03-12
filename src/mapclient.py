@@ -75,8 +75,11 @@ def winmain():
         for p in getPlugins(inbuiltPluginDir):
             loadPlugin(p)
 
+    from core.mainapplication import MainApplication
+    model = MainApplication()
+    
     from widgets.mainwindow import MainWindow
-    window = MainWindow()
+    window = MainWindow(model)
     window.show()
 
     sys.exit(app.exec_())
