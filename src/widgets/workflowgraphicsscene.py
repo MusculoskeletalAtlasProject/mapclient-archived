@@ -220,6 +220,10 @@ class Node(QtGui.QGraphicsItem):
         QtGui.QGraphicsItem.setPos(self, pos)
         self.scene().workflowScene().setItemPos(self._metastep, pos)
         
+    def setSelected(self, selected):
+        QtGui.QGraphicsItem.setSelected(self, selected)
+        self.scene().workflowScene().setItemSelected(self._metastep, selected)
+        
     def type(self):
         return Node.Type
 
@@ -390,6 +394,9 @@ class WorkflowGraphicsScene(QtGui.QGraphicsScene):
                 # be valid when we set the position.
                 QtGui.QGraphicsScene.addItem(self, node)
                 node.setPos(workflowitem.pos())
+                self.blockSignals(True)
+                node.setSelected(workflowitem.selected())
+                self.blockSignals(False)
                 meta_steps[workflowitem] = node
             elif workflowitem.Type == Connection.Type:
                 connections.append(workflowitem)
