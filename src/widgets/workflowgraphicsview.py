@@ -22,7 +22,7 @@ import sys
 from PyQt4 import QtCore, QtGui
 
 from mountpoints.workflowstep import workflowStepFactory
-from core.workflowcommands import CommandSelectionChange, CommandDeleteSelection, CommandAdd, CommandMove
+from core.workflowcommands import CommandSelection, CommandRemove, CommandAdd, CommandMove
 from core.workflowscene import MetaStep
 from widgets.workflowgraphicsscene import WorkflowGraphicsScene, Node, Edge, ErrorItem, ArrowLine, ensureItemInScene
 
@@ -82,7 +82,7 @@ class WorkflowGraphicsView(QtGui.QGraphicsView):
 
     def selectionChanged(self):
         currentSelection = self.scene().selectedItems()
-        command = CommandSelectionChange(self.scene(), currentSelection, self._previousSelection)
+        command = CommandSelection(self.scene(), currentSelection, self._previousSelection)
         self.undoStack.push(command)
         self._previousSelection = currentSelection
 
@@ -99,7 +99,7 @@ class WorkflowGraphicsView(QtGui.QGraphicsView):
     def keyPressEvent(self, event):
 #        super(WorkflowGraphicsView, self).keyPressEvent(event)
         if event.key() == QtCore.Qt.Key_Backspace or event.key() == QtCore.Qt.Key_Delete:
-            command = CommandDeleteSelection(self.scene(), self.scene().selectedItems())
+            command = CommandRemove(self.scene(), self.scene().selectedItems())
             self.undoStack.push(command)
             event.accept()
         else:

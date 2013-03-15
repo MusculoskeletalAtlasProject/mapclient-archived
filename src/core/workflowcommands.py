@@ -21,11 +21,11 @@ from PyQt4 import QtGui
 
 from widgets.workflowgraphicsscene import Node, Edge
 
-class CommandDeleteSelection(QtGui.QUndoCommand):
+class CommandRemove(QtGui.QUndoCommand):
     '''
     '''
     def __init__(self, scene, selection):
-        super(CommandDeleteSelection, self).__init__()
+        super(CommandRemove, self).__init__()
         self._scene = scene
         self._selection = selection
         self.edges = {} # Need to keep the edges alive in case of undo
@@ -59,14 +59,13 @@ class CommandDeleteSelection(QtGui.QUndoCommand):
         self._scene.blockSignals(False)
 
 
-class CommandSelectionChange(QtGui.QUndoCommand):
+class CommandSelection(QtGui.QUndoCommand):
     '''
-    We block signals  when setting the _selection so that we
+    We block signals  when setting the selection so that we
     don't end up in a recursive loop.
     '''
     def __init__(self, scene, selection, previous):
-        super(CommandSelectionChange, self).__init__()
-        print('========= creating selection change')
+        super(CommandSelection, self).__init__()
         self._scene = scene
         self._selection = selection
         self._previousSelection = previous

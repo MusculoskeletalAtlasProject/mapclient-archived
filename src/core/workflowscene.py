@@ -24,26 +24,36 @@ from PyQt4 import QtCore
 from mountpoints.workflowstep import workflowStepFactory
 
 
-class MetaStep(object):
+class Item(object):
+    
+    
+    def __init__(self):
+        self._selected = True
+        
+    def selected(self):
+        return self._selected
+    
+    
+class MetaStep(Item):
     
     
     Type = 'Step'
     
     def __init__(self, step):
+        Item.__init__(self)
         self._step = step
         self._pos = QtCore.QPoint(0, 0)
-        self._selected = True
         
     def pos(self):
         return self._pos
 
-
-class Connection(object):
+class Connection(Item):
     
     
     Type = 'Connection'
 
     def __init__(self, source, destination):
+        Item.__init__(self)
         self._source = source
         self._destination = destination
         
@@ -90,7 +100,8 @@ class WorkflowScene(object):
                 metastep._step.serialize(step_location)
             ws.setArrayIndex(nodeIndex)
             ws.setValue('name', metastep._step.getName())
-            ws.setValue('position', metastep.pos())
+            ws.setValue('position', metastep._pos)
+            ws.setValue('selected', metastep._selected)
             ws.setValue('identifier', metastep._step.getIdentifier())
             ws.beginWriteArray('connections')
             connectionIndex = 0
@@ -115,6 +126,7 @@ class WorkflowScene(object):
             ws.setArrayIndex(i)
             name = ws.value('name')
             position = ws.value('position')
+            selected = ws.value('selected', 'false') == 'true'
             identifier = ws.value('identifier')
             step = workflowStepFactory(name)
             step.setIdentifier(identifier)
@@ -122,6 +134,7 @@ class WorkflowScene(object):
             step.deserialize(step_location)
             metastep = MetaStep(step)
             metastep._pos = position
+            metastep._selected = selected
             metaStepList.append(metastep)
             self.addItem(metastep)
             edgeCount = ws.beginReadArray('connections')
@@ -157,7 +170,7 @@ class WorkflowScene(object):
         if item in self._items:
             self._items[item]._pos = pos
     
-    def setItemSelected(self, item, selected=True):
+    def setItemSelected(self, item, selected):
         if item in self._items:
             self._items[item]._selected = selected
     
