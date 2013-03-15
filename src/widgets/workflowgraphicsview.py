@@ -81,28 +81,10 @@ class WorkflowGraphicsView(QtGui.QGraphicsView):
                 self.errorIconTimer.start()
 
     def selectionChanged(self):
-        # Search the undo stack to get the previous selection
-#        previousSelection = []
-#        previousSelectionFound = False
-#        for index in range(self.undoStack.count(), 0, -1):
-#            com = self.undoStack.command(index - 1)
-#            if type(com) is CommandSelectionChange:
-#                previousSelection = com.selection
-#                previousSelectionFound = True
-#            elif type(com) is QtGui.QUndoCommand:
-#                for childIndex in range(com.childCount(), 0, -1):
-#                    childCom = com.child(childIndex)
-#                    if type(childCom) is CommandSelectionChange:
-#                        previousSelection = childCom.selection
-#                        previousSelectionFound = True
-#                        break
-#            if previousSelectionFound:
-#                break
-
         currentSelection = self.scene().selectedItems()
-        print(self.scene().selectedItems())
-        command = CommandSelectionChange(self.scene(), currentSelection, previousSelection)
+        command = CommandSelectionChange(self.scene(), currentSelection, self._previousSelection)
         self.undoStack.push(command)
+        self._previousSelection = currentSelection
 
     def nodeSelected(self, node, state):
         if state == True and node not in self.selectedNodes:
@@ -217,7 +199,7 @@ class WorkflowGraphicsView(QtGui.QGraphicsView):
             self.undoStack.beginMacro('Add node')
             self.undoStack.push(CommandAdd(self.scene(), node))
             # Set the position after it has been added to the scene
-            node.setPos(ensureItemInScene(self.scene(), node, position))
+            self.undoStack.push(CommandMove(node, position, ensureItemInScene(self.scene(), node, position)))
             self.scene().clearSelection()
             node.setSelected(True)
             self.undoStack.endMacro()

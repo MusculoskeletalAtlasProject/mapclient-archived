@@ -147,18 +147,11 @@ class WorkflowScene(object):
         return self._items.keys()
     
     def addItem(self, item):
-        print('addItem: ' + item.Type)
-        print(item)
         self._items[item] = item
     
     def removeItem(self, item):
-        print('removeItem: ' + item.Type)
-        print(item)
         if item in self._items:
-            #if item.Type == Connection.Type:
-                
             del self._items[item]
-            print(len(self._items))
     
     def setItemPos(self, item, pos):
         if item in self._items:

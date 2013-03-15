@@ -26,11 +26,11 @@ class CommandDeleteSelection(QtGui.QUndoCommand):
     '''
     def __init__(self, scene, selection):
         super(CommandDeleteSelection, self).__init__()
-        self.scene = scene
-        self.selection = selection
+        self._scene = scene
+        self._selection = selection
         self.edges = {} # Need to keep the edges alive in case of undo
         self.edgeUnique = {} # Keep a record of edges marked for deletion to avoid repetition
-        for item in self.selection:
+        for item in self._selection:
             if item.Type == Node.Type:
                 self.edges[item] = []
                 for edge in item._connections:
@@ -41,61 +41,47 @@ class CommandDeleteSelection(QtGui.QUndoCommand):
                 self.edgeUnique[item] = 1
 
     def redo(self):
-        self.scene.blockSignals(True)
-        for item in self.selection:
-            self.scene.removeItem(item)
+        self._scene.blockSignals(True)
+        for item in self._selection:
+            self._scene.removeItem(item)
             if item in self.edges:
                 for edge in self.edges[item]:
-                    self.scene.removeItem(edge)
-        self.scene.blockSignals(False)
+                    self._scene.removeItem(edge)
+        self._scene.blockSignals(False)
 
     def undo(self):
-        self.scene.blockSignals(True)
-        for item in self.selection:
-            self.scene.addItem(item)
+        self._scene.blockSignals(True)
+        for item in self._selection:
+            self._scene.addItem(item)
             if item in self.edges:
                 for edge in self.edges[item]:
-                    self.scene.addItem(edge)
-        self.scene.blockSignals(False)
+                    self._scene.addItem(edge)
+        self._scene.blockSignals(False)
 
 
 class CommandSelectionChange(QtGui.QUndoCommand):
     '''
-    We block signals  when setting the selection so that we
+    We block signals  when setting the _selection so that we
     don't end up in a recursive loop.
     '''
-    def __init__(self, selection, previous):
+    def __init__(self, scene, selection, previous):
         super(CommandSelectionChange, self).__init__()
-        self.selection = selection
-        self.previousSelection = previous
-
-    def blockSignalsAndClear(self):
-        if len(self.selection) > 0:
-            self.selection[0].scene().blockSignals(True)
-            self.selection[0].scene().clearSelection()
-        if len(self.selection) == 0 and len(self.previousSelection) > 0:
-            print('error time ==============')
-            print(self.previousSelection[0].Type)
-            self.previousSelection[0].scene().blockSignals(True)
-            self.previousSelection[0].scene().clearSelection()
-
-    def unblockSignals(self):
-        if len(self.selection) > 0:
-            self.selection[0].scene().blockSignals(False)
-        if len(self.selection) == 0 and len(self.previousSelection) > 0:
-            self.previousSelection[0].scene().blockSignals(False)
+        print('========= creating selection change')
+        self._scene = scene
+        self._selection = selection
+        self._previousSelection = previous
 
     def redo(self):
-        self.blockSignalsAndClear()
-        for item in self.selection:
-            item.setSelected(True)
-        self.unblockSignals()
+        self._scene.blockSignals(True)
+        for item in self._scene.items():
+            item.setSelected(item in self._selection)
+        self._scene.blockSignals(False)
 
     def undo(self):
-        self.blockSignalsAndClear()
-        for item in self.previousSelection:
-            item.setSelected(True)
-        self.unblockSignals()
+        self._scene.blockSignals(True)
+        for item in self._scene.items():
+            item.setSelected(item in self._previousSelection)
+        self._scene.blockSignals(False)
 
 
 class CommandAdd(QtGui.QUndoCommand):
@@ -103,14 +89,18 @@ class CommandAdd(QtGui.QUndoCommand):
     '''
     def __init__(self, scene, item):
         super(CommandAdd, self).__init__()
-        self.scene = scene
+        self._scene = scene
         self.item = item
 
     def undo(self):
-        self.scene.removeItem(self.item)
+        self._scene.blockSignals(True)
+        self._scene.removeItem(self.item)
+        self._scene.blockSignals(False)
 
     def redo(self):
-        self.scene.addItem(self.item)
+        self._scene.blockSignals(True)
+        self._scene.addItem(self.item)
+        self._scene.blockSignals(False)
 
 
 class CommandMove(QtGui.QUndoCommand):

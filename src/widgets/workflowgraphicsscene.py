@@ -368,7 +368,6 @@ class WorkflowGraphicsScene(QtGui.QGraphicsScene):
                 self._workflow_scene.addItem(item._connection)
         
     def removeItem(self, item):
-        print('removeItem')
         QtGui.QGraphicsScene.removeItem(self, item)
         if hasattr(item, 'Type'):
             if item.Type == Node.Type:
