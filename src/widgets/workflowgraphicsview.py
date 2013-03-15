@@ -17,13 +17,14 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     You should have received a copy of the GNU General Public License
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
-import sys, os
+import sys
 
 from PyQt4 import QtCore, QtGui
 
 from mountpoints.workflowstep import workflowStepFactory
 from core.workflowcommands import CommandSelectionChange, CommandDeleteSelection, CommandAdd, CommandMove
-from core.workflowscene import WorkflowScene, Node, Edge, ErrorItem, ArrowLine, ensureItemInScene
+from core.workflowscene import MetaStep
+from widgets.workflowgraphicsscene import WorkflowGraphicsScene, Node, Edge, ErrorItem, ArrowLine, ensureItemInScene
 
 class WorkflowGraphicsView(QtGui.QGraphicsView):
 
@@ -32,20 +33,24 @@ class WorkflowGraphicsView(QtGui.QGraphicsView):
         self._mainWindow = None
         self.selectedNodes = []
         self.errorIconTimer = QtCore.QTimer()
-        self.errorIconTimer.setInterval(3000)
+        self.errorIconTimer.setInterval(2000)
         self.errorIconTimer.setSingleShot(True)
         self.errorIconTimer.timeout.connect(self.errorIconTimeout)
         self.errorIcon = None
+        
+        self.undoStack = None
         
         self.connectLine = None
         self.connectSourceNode = None
         
         self.selectionStartPos = None
 
-        scene = WorkflowScene(self)
+        self._previousSelection = []
+        
+        scene = WorkflowGraphicsScene(self)
         scene.selectionChanged.connect(self.selectionChanged)
-
         self.setScene(scene)
+
         self.setCacheMode(QtGui.QGraphicsView.CacheBackground)
         self.setRenderHint(QtGui.QPainter.Antialiasing)
 #        self.setTransformationAnchor(QtGui.QGraphicsView.AnchorUnderMouse)
@@ -56,10 +61,13 @@ class WorkflowGraphicsView(QtGui.QGraphicsView):
     def clear(self):
         self.scene().clear()
 
+    def setUndoStack(self, stack):
+        self.undoStack = stack
+        
     def connectNodes(self, node1, node2):
         # Check if nodes are already connected
         if not node1.hasEdgeToDestination(node2):
-            if node1.step.canConnect(node2.step):
+            if node1._metastep._step.canConnect(node2._metastep._step):
                 command = CommandAdd(self.scene(), Edge(node1, node2))
                 self.undoStack.push(command)
             else:
@@ -74,24 +82,26 @@ class WorkflowGraphicsView(QtGui.QGraphicsView):
 
     def selectionChanged(self):
         # Search the undo stack to get the previous selection
-        previousSelection = []
-        previousSelectionFound = False
-        for index in range(self.undoStack.count(), 0, -1):
-            com = self.undoStack.command(index - 1)
-            if type(com) is CommandSelectionChange:
-                previousSelection = com.selection
-                previousSelectionFound = True
-            elif type(com) is QtGui.QUndoCommand:
-                for childIndex in range(com.childCount(), 0, -1):
-                    childCom = com.child(childIndex)
-                    if type(childCom) is CommandSelectionChange:
-                        previousSelection = childCom.selection
-                        previousSelectionFound = True
-                        break
-            if previousSelectionFound:
-                break
+#        previousSelection = []
+#        previousSelectionFound = False
+#        for index in range(self.undoStack.count(), 0, -1):
+#            com = self.undoStack.command(index - 1)
+#            if type(com) is CommandSelectionChange:
+#                previousSelection = com.selection
+#                previousSelectionFound = True
+#            elif type(com) is QtGui.QUndoCommand:
+#                for childIndex in range(com.childCount(), 0, -1):
+#                    childCom = com.child(childIndex)
+#                    if type(childCom) is CommandSelectionChange:
+#                        previousSelection = childCom.selection
+#                        previousSelectionFound = True
+#                        break
+#            if previousSelectionFound:
+#                break
 
-        command = CommandSelectionChange(self.scene().selectedItems(), previousSelection)
+        currentSelection = self.scene().selectedItems()
+        print(self.scene().selectedItems())
+        command = CommandSelectionChange(self.scene(), currentSelection, previousSelection)
         self.undoStack.push(command)
 
     def nodeSelected(self, node, state):
@@ -197,17 +207,17 @@ class WorkflowGraphicsView(QtGui.QGraphicsView):
 
             nameLen = stream.readUInt32()
             name = stream.readRawData(nameLen).decode(sys.stdout.encoding)
-            step = workflowStepFactory(name)
             stream >> hotspot
 
             position = self.mapToScene(event.pos() - hotspot)
-            location = self._mainWindow.workflowManager._location
-            node = Node(step, location, self)
-            node.setPos(ensureItemInScene(self.scene(), node, position))
+            location = self._mainWindow.model().workflowManager().location()
+            step = MetaStep(workflowStepFactory(name))
+            node = Node(step, location)
 
             self.undoStack.beginMacro('Add node')
-            command = CommandAdd(self.scene(), node)
-            self.undoStack.push(command)
+            self.undoStack.push(CommandAdd(self.scene(), node))
+            # Set the position after it has been added to the scene
+            node.setPos(ensureItemInScene(self.scene(), node, position))
             self.scene().clearSelection()
             node.setSelected(True)
             self.undoStack.endMacro()
@@ -226,11 +236,12 @@ class WorkflowGraphicsView(QtGui.QGraphicsView):
 
         self.update()
 
-    def dragLeaveEvent(self, event):
-        event.accept()
+#    def dragLeaveEvent(self, event):
+#        event.accept()
 
     def dragEnterEvent(self, event):
         if event.mimeData().hasFormat("image/x-workflow-step"):
             event.accept()
         else:
             event.ignore()
+     

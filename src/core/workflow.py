@@ -22,6 +22,7 @@ import os
 from PyQt4 import QtCore
 
 from settings import info
+from core.workflowscene import WorkflowScene
 
 def getWorkflowConfigurationAbsoluteFilename(location):
     return os.path.join(location, info.WORKFLOW_NAME)
@@ -65,6 +66,8 @@ class WorkflowManager():
         self._currentStateIndex = 0
         
         self._title = info.APPLICATION_NAME
+        
+        self._scene = WorkflowScene(self)
 #        self.mainWindow = mainWindow
 
 #    def setWidgetIndex(self, index):
@@ -91,6 +94,9 @@ class WorkflowManager():
     def previousLocation(self):
         return self._previousLocation
     
+    def scene(self):
+        return self._scene
+    
     def undoStackIndexChanged(self, index):
         if self._saveStateIndex == index:
             self._title = info.APPLICATION_NAME + ' - ' + self._location
@@ -116,9 +122,10 @@ class WorkflowManager():
             os.mkdir(location)
 
         self._location = location
-        self._title = info.APPLICATION_NAME + ' - ' + location
         wf = getWorkflowConfiguration(location)
         wf.setValue('version', info.VERSION_STRING)
+        self._title = info.APPLICATION_NAME + ' - ' + location
+        self._scene.clear()
 
 
 
@@ -142,13 +149,14 @@ class WorkflowManager():
 
         self._location = location
         wf = getWorkflowConfiguration(location)
-#        self.widget.loadState(wf)
+        self._scene.loadState(wf)
         self._saveStateIndex = self._currentStateIndex = 0
         self._title = info.APPLICATION_NAME + ' - ' + location
 
     def save(self):
         wf = getWorkflowConfiguration(self._location)
-#        self.widget.saveState(wf)
+        print('save workflow')
+        self._scene.saveState(wf)
         self._saveStateIndex = self._currentStateIndex
         self._title = info.APPLICATION_NAME + ' - ' + self._location
 
@@ -164,12 +172,12 @@ class WorkflowManager():
 
     def writeSettings(self, settings):
         settings.beginGroup(self.name)
-        settings.setValue('_previousLocation', self._previousLocation)
+        settings.setValue('previousLocation', self._previousLocation)
         settings.endGroup()
 
     def readSettings(self, settings):
         settings.beginGroup(self.name)
-        self._previousLocation = settings.value('_previousLocation', '')
+        self._previousLocation = settings.value('previousLocation', '')
         settings.endGroup()
 
 

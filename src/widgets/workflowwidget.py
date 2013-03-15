@@ -33,15 +33,18 @@ class WorkflowWidget(QtGui.QWidget):
         self._mainWindow = mainWindow
         self._ui = Ui_WorkflowWidget()
         self._ui.setupUi(self)
+        
 
         self.undoStack = QtGui.QUndoStack(self)
         self.undoStack.indexChanged.connect(self.undoStackIndexChanged)
-        
+
+        scene = self._mainWindow.model().workflowManager().scene()
         self._ui.graphicsView._mainWindow = mainWindow
+        self._ui.graphicsView.setUndoStack(self.undoStack)
+        self._ui.graphicsView.scene().setWorkflowScene(scene)
         
         self.action_Close = None # Keep a handle to this for modifying the Ui.
         self._createMenuItems()
-        self._previousLocation = ''
 
         self.workflowStepPlugins = WorkflowStepMountPoint.getPlugins()
         self.stepTree = self.findChild(QtGui.QWidget, "stepTree")
@@ -59,34 +62,28 @@ class WorkflowWidget(QtGui.QWidget):
         self.action_Save.setEnabled(not wfm.isModified())
 
     def undoStackIndexChanged(self, index):
-        self._mainWindow.workflowManager.undoStackIndexChanged(index)
+        self._mainWindow.model().workflowManager().undoStackIndexChanged(index)
         self._updateUi()
 
     def setActive(self):
         self._mainWindow.setUndoStack(self.undoStack)
 
-    def _setActionProperties(self, action, name, slot, shortcut='', statustip=''):
-        action.setObjectName(name)
-        action.triggered.connect(slot)
-        if len(shortcut) > 0:
-            action.setShortcut(QtGui.QKeySequence(shortcut))
-        action.setStatusTip(statustip)
-
-
     def new(self):
-        workflowDir = QtGui.QFileDialog.getExistingDirectory(self._mainWindow, caption='Select Workflow Directory', directory=self._previousLocation)
+        m = self._mainWindow.model().workflowManager()
+        workflowDir = QtGui.QFileDialog.getExistingDirectory(self._mainWindow, caption='Select Workflow Directory', directory=m.previousLocation())
         if len(workflowDir) > 0:
-            m = self._mainWindow.model().workflowManager()
             m.new(workflowDir)
             m.setPreviousLocation(workflowDir)
+            self._ui.graphicsView.scene().update()
             self._updateUi()
 
     def load(self):
-        workflowDir = QtGui.QFileDialog.getExistingDirectory(self._mainWindow, caption='Open Workflow', directory=self._previousLocation, options=QtGui.QFileDialog.ShowDirsOnly | QtGui.QFileDialog.DontResolveSymlinks | QtGui.QFileDialog.ReadOnly)
+        m = self._mainWindow.model().workflowManager()
+        workflowDir = QtGui.QFileDialog.getExistingDirectory(self._mainWindow, caption='Open Workflow', directory=m.previousLocation(), options=QtGui.QFileDialog.ShowDirsOnly | QtGui.QFileDialog.DontResolveSymlinks | QtGui.QFileDialog.ReadOnly)
         if len(workflowDir) > 0:
-            m = self._mainWindow.model().workflowManager()
             m.load(workflowDir)
             m.setPreviousLocation(workflowDir)
+            self._ui.graphicsView.scene().update()
             self._updateUi()
 
     def close(self):
@@ -107,6 +104,13 @@ class WorkflowWidget(QtGui.QWidget):
 #    def loadState(self, ws):
 #        self._ui.graphicsView.loadState(ws)
 #        self._updateUi()
+
+    def _setActionProperties(self, action, name, slot, shortcut='', statustip=''):
+        action.setObjectName(name)
+        action.triggered.connect(slot)
+        if len(shortcut) > 0:
+            action.setShortcut(QtGui.QKeySequence(shortcut))
+        action.setStatusTip(statustip)
 
     def _createMenuItems(self):
         menu_File = self._mainWindow._ui.menubar.findChild(QtGui.QMenu, 'menu_File')

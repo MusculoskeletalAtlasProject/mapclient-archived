@@ -18,8 +18,6 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
 
-from PyQt4 import QtGui
-
 class UndoManager(object):
     '''
     This class is the undo redo manager for multiple undo stacks. It is a
@@ -28,8 +26,6 @@ class UndoManager(object):
     Don't inherit from this class.
     '''
     _instance = None
-    undoAction = None
-    redoAction = None
     stack = None
 
     def __new__(cls, *args, **kwargs):
@@ -39,15 +35,7 @@ class UndoManager(object):
         return cls._instance
 
     def setCurrentStack(self, stack):
-        if self.stack:
-            self.stack.canRedoChanged.disconnect(self._canRedoChanged)
-            self.stack.canUndoChanged.disconnect(self._canUndoChanged)
-
         self.stack = stack
-        self.redoAction.setEnabled(stack.canRedo())
-        self.undoAction.setEnabled(stack.canUndo())
-        stack.canUndoChanged.connect(self._canUndoChanged)
-        stack.canRedoChanged.connect(self._canRedoChanged)
 
     def currentStack(self):
         return self.stack
@@ -57,11 +45,4 @@ class UndoManager(object):
 
     def redo(self):
         self.stack.redo()
-
-    def _canRedoChanged(self, canRedo):
-        self.redoAction.setEnabled(canRedo)
-
-    def _canUndoChanged(self, canUndo):
-        self.undoAction.setEnabled(canUndo)
-
 

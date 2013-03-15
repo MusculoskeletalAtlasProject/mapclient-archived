@@ -19,7 +19,7 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
 '''
 from PyQt4 import QtGui
 
-from core.workflowscene import Node, Edge
+from widgets.workflowgraphicsscene import Node, Edge
 
 class CommandDeleteSelection(QtGui.QUndoCommand):
     '''
@@ -33,7 +33,7 @@ class CommandDeleteSelection(QtGui.QUndoCommand):
         for item in self.selection:
             if item.Type == Node.Type:
                 self.edges[item] = []
-                for edge in item.edgeList:
+                for edge in item._connections:
                     if edge() not in self.edgeUnique:
                         self.edges[item].append(edge())
                         self.edgeUnique[edge()] = 1
@@ -74,6 +74,8 @@ class CommandSelectionChange(QtGui.QUndoCommand):
             self.selection[0].scene().blockSignals(True)
             self.selection[0].scene().clearSelection()
         if len(self.selection) == 0 and len(self.previousSelection) > 0:
+            print('error time ==============')
+            print(self.previousSelection[0].Type)
             self.previousSelection[0].scene().blockSignals(True)
             self.previousSelection[0].scene().clearSelection()
 

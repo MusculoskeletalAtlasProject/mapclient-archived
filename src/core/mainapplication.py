@@ -62,6 +62,7 @@ class MainApplication(object):
         settings.setValue('size', self._size)
         settings.setValue('pos', self._pos)
         settings.endGroup()
+        self._workflowManager.writeSettings(settings)
 #        for stackedWidgetPage in self.stackedWidgetPages:
 #            stackedWidgetPage.writeSettings(settings)
 
@@ -71,6 +72,7 @@ class MainApplication(object):
         self._size = settings.value('size', self._size)
         self._pos = settings.value('pos', self._pos)
         settings.endGroup()
+        self._workflowManager.readSettings(settings)
 #        for stackedWidgetPage in self.stackedWidgetPages:
 #            stackedWidgetPage.readSettings(settings)
 

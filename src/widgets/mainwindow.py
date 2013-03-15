@@ -42,13 +42,8 @@ class MainWindow(QtGui.QMainWindow):
         self._makeConnections()
 
 #        undoManager = self.mainWindow.workflowManager.undoManager
-        undoAction = self._createUndoAction(self._ui.menu_Edit)
-        undoAction.setShortcut(QtGui.QKeySequence('Ctrl+Z'))
-        redoAction = self._createRedoAction(self._ui.menu_Edit)
-        redoAction.setShortcut(QtGui.QKeySequence('Ctrl+Shift+Z'))
-
-        self._ui.menu_Edit.addAction(undoAction)
-        self._ui.menu_Edit.addAction(redoAction)
+        self._createUndoAction(self._ui.menu_Edit)
+        self._createRedoAction(self._ui.menu_Edit)
 
         self._ui.stackedWidget.currentChanged.connect(self.centralWidgetChanged)
         self.stackedWidgetPages = StackedWidgetMountPoint.getPlugins(self)
@@ -67,6 +62,7 @@ class MainWindow(QtGui.QMainWindow):
 
     def _createUndoAction(self, parent):
         self.undoAction = QtGui.QAction('Undo', parent)
+        self.undoAction.setShortcut(QtGui.QKeySequence('Ctrl+Z'))
         self.undoAction.triggered.connect(self._model.undoManager().undo)
         stack = self._model.undoManager().currentStack()
         if stack:
@@ -74,10 +70,11 @@ class MainWindow(QtGui.QMainWindow):
         else:
             self.undoAction.setEnabled(False)
 
-        return self.undoAction
+        parent.addAction(self.undoAction)
 
     def _createRedoAction(self, parent):
         self.redoAction = QtGui.QAction('Redo', parent)
+        self.redoAction.setShortcut(QtGui.QKeySequence('Ctrl+Shift+Z'))
         self.redoAction.triggered.connect(self._model.undoManager().redo)
         stack = self._model.undoManager().currentStack()
         if stack:
@@ -85,7 +82,7 @@ class MainWindow(QtGui.QMainWindow):
         else:
             self.redoAction.setEnabled(False)
 
-        return self.redoAction
+        parent.addAction(self.redoAction)
 
     def model(self):
         return self._model
@@ -95,7 +92,23 @@ class MainWindow(QtGui.QMainWindow):
         self._ui.action_About.triggered.connect(self.about)
 
     def setUndoStack(self, stack):
+        current_stack = self._model.undoManager().currentStack()
+        if current_stack:
+            current_stack.canRedoChanged.disconnect(self._canRedoChanged)
+            current_stack.canUndoChanged.disconnect(self._canUndoChanged)
+
         self._model.undoManager().setCurrentStack(stack)
+
+        self.redoAction.setEnabled(stack.canRedo())
+        self.undoAction.setEnabled(stack.canUndo())
+        stack.canUndoChanged.connect(self._canUndoChanged)
+        stack.canRedoChanged.connect(self._canRedoChanged)
+
+    def _canRedoChanged(self, canRedo):
+        self.redoAction.setEnabled(canRedo)
+
+    def _canUndoChanged(self, canUndo):
+        self.undoAction.setEnabled(canUndo)
 
     def centralWidgetChanged(self, index):
         widget = self._ui.stackedWidget.currentWidget()

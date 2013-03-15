@@ -40,7 +40,7 @@ class PointCloudStoreStep(WorkflowStepMountPoint):
         '''
         super(PointCloudStoreStep, self).__init__()
         self._name = 'Point Cloud Store'
-        self._pixmap = QtGui.QPixmap(':/pointcloudstore/icons/pointcloudstore.png')
+        self._icon = QtGui.QImage(':/pointcloudstore/icons/pointcloudstore.png')
         self.addPort(('pho#workflow#port', 'uses', 'pointcloud'))
         self._state = ConfigureDialogState()
 

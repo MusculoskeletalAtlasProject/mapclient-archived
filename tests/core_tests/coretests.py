@@ -28,6 +28,9 @@ def suite():
     from core_tests.mainapplication import MainApplicationTestCase
     tests.addTests(unittest.TestLoader().loadTestsFromTestCase(MainApplicationTestCase))
 
+    from core_tests.workflowscene import WorkflowSceneTestCase
+    tests.addTests(unittest.TestLoader().loadTestsFromTestCase(WorkflowSceneTestCase))
+
     return tests
 
 def load_tests(loader, tests, pattern):

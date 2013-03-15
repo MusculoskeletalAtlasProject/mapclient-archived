@@ -191,9 +191,9 @@ class Node(QtGui.QGraphicsItem):
     def __init__(self, pixmap, workflowWidget):
         QtGui.QGraphicsItem.__init__(self)
 
-        self.pixmap = pixmap
+        self._pixmap = pixmap
         self.graph = weakref.ref(workflowWidget)
-        self.edgeList = []
+        self._connections = []
         self.newPos = QtCore.QPointF()
         self.setFlag(QtGui.QGraphicsItem.ItemIsMovable)
         self.setFlag(QtGui.QGraphicsItem.ItemSendsGeometryChanges)
@@ -209,25 +209,25 @@ class Node(QtGui.QGraphicsItem):
         self.update()
 
     def addEdge(self, edge):
-        self.edgeList.append(weakref.ref(edge))
+        self._connections.append(weakref.ref(edge))
 
     def boundingRect(self):
         adjust = 2.0
         return QtCore.QRectF(-adjust, -adjust,
-                             self.pixmap.width() + adjust,
-                             self.pixmap.height() + adjust)
+                             self._pixmap.width() + adjust,
+                             self._pixmap.height() + adjust)
 
     def paint(self, painter, option, widget):
             if option.state & QtGui.QStyle.State_Sunken or self.selected:
                 painter.setBrush(QtCore.Qt.darkGray)
                 painter.drawRoundedRect(self.boundingRect(), 5, 5)
 
-            painter.drawPixmap(0, 0, self.pixmap)
+            painter.drawPixmap(0, 0, self._pixmap)
 
     def itemChange(self, change, value):
 
         if change == QtGui.QGraphicsItem.ItemPositionChange:
-            for edge in self.edgeList:
+            for edge in self._connections:
                 edge().adjust()
 
         return QtGui.QGraphicsItem.itemChange(self, change, value)
@@ -314,7 +314,7 @@ class WorkflowWidget(QtGui.QGraphicsView):
             node = Node(pixmap, self)
             node.setPos(self.mapToScene(event.pos() - hotspot))
             self.scene().addItem(node)
-#            ic = self.scene().addPixmap(pixmap)
+#            ic = self.scene().addPixmap(_pixmap)
 #            ic.setFlag(QtGui.QGraphicsItem.ItemIsMovable)
 #            ic.setFlag(QtGui.QGraphicsItem.ItemSendsGeometryChanges)
 #            ic.setPos(self.mapToScene(event.pos() - hotspot))

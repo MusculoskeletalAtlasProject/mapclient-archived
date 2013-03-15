@@ -76,7 +76,7 @@ class WorkflowStepPort(object):
 Plugins can inherit this mount point to add a workflow step.
 
 A plugin that registers this mount point must have:
-  - An attribute _pixmap that is a QPixmap icon for a visual representation of the step
+  - An attribute _icon that is a QImage icon for a visual representation of the step
   - Implement a function 'configure'
   - Implement a function 'setIdentifier'
   - Implement a function 'getIdentifier'
@@ -100,7 +100,7 @@ def _workflow_step_init(self):
     '''
     self._location = None
     self._ports = []
-    self._pixmap = None
+    self._icon = None
     self._configured = False
 
 def _workflow_step_configure(self, location):

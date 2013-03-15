@@ -39,7 +39,7 @@ class ImageSourceStep(WorkflowStepMountPoint):
         '''
         super(ImageSourceStep, self).__init__()
         self._name = 'Image source'
-        self._pixmap = QtGui.QPixmap(':/imagesource/icons/landscapeimages.png')
+        self._icon = QtGui.QImage(':/imagesource/icons/landscapeimages.png')
         self.addPort(('pho#workflow#port', 'provides', 'images'))
         self._configured = False
         self._state = ConfigureDialogState()

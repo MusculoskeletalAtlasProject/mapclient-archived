@@ -31,8 +31,8 @@ class SegmentationStep(WorkflowStepMountPoint):
         '''
         super(SegmentationStep, self).__init__()
         self._name = 'Segmentation'
-        self._identifier = 'squiggly'
-        self._pixmap = QtGui.QPixmap(':/segmentation/icons/seg.gif')
+        self._identifier = ''
+        self._icon = QtGui.QImage(':/segmentation/icons/seg.gif')
         self.addPort(('pho#workflow#port', 'uses', 'images'))
         self.addPort(('pho#workflow#port', 'provides', 'pointcloud'))
 

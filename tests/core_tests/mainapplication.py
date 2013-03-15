@@ -26,7 +26,7 @@ class MainApplicationTestCase(unittest.TestCase):
 
     def testCreateMainApplication(self):
         ma = MainApplication()
-        
+
         self.assertEqual(ma.size().width(), 600)
         self.assertEqual(ma.size().height(), 400)
         
