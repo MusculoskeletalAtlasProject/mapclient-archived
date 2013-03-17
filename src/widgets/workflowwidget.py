@@ -35,12 +35,12 @@ class WorkflowWidget(QtGui.QWidget):
         self._ui.setupUi(self)
         
 
-        self.undoStack = QtGui.QUndoStack(self)
-        self.undoStack.indexChanged.connect(self.undoStackIndexChanged)
+        self._undoStack = QtGui.QUndoStack(self)
+        self._undoStack.indexChanged.connect(self.undoStackIndexChanged)
 
         scene = self._mainWindow.model().workflowManager().scene()
         self._ui.graphicsView._mainWindow = mainWindow
-        self._ui.graphicsView.setUndoStack(self.undoStack)
+        self._ui.graphicsView.setUndoStack(self._undoStack)
         self._ui.graphicsView.scene().setWorkflowScene(scene)
         
         self.action_Close = None # Keep a handle to this for modifying the Ui.
@@ -67,7 +67,7 @@ class WorkflowWidget(QtGui.QWidget):
         self._updateUi()
 
     def setActive(self):
-        self._mainWindow.setUndoStack(self.undoStack)
+        self._mainWindow.setUndoStack(self._undoStack)
 
     def new(self):
         m = self._mainWindow.model().workflowManager()

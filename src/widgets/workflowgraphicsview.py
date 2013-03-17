@@ -31,19 +31,19 @@ class WorkflowGraphicsView(QtGui.QGraphicsView):
     def __init__(self, parent=None):
         QtGui.QGraphicsView.__init__(self, parent)
         self._mainWindow = None
-        self.selectedNodes = []
-        self.errorIconTimer = QtCore.QTimer()
-        self.errorIconTimer.setInterval(2000)
-        self.errorIconTimer.setSingleShot(True)
-        self.errorIconTimer.timeout.connect(self.errorIconTimeout)
-        self.errorIcon = None
+        self._selectedNodes = []
+        self._errorIconTimer = QtCore.QTimer()
+        self._errorIconTimer.setInterval(2000)
+        self._errorIconTimer.setSingleShot(True)
+        self._errorIconTimer.timeout.connect(self.errorIconTimeout)
+        self._errorIcon = None
         
-        self.undoStack = None
+        self._undoStack = None
         
-        self.connectLine = None
-        self.connectSourceNode = None
+        self._connectLine = None
+        self._connectSourceNode = None
         
-        self.selectionStartPos = None
+        self._selectionStartPos = None
 
         self._previousSelection = []
         
@@ -62,45 +62,45 @@ class WorkflowGraphicsView(QtGui.QGraphicsView):
         self.scene().clear()
 
     def setUndoStack(self, stack):
-        self.undoStack = stack
+        self._undoStack = stack
         
     def connectNodes(self, node1, node2):
         # Check if nodes are already connected
         if not node1.hasEdgeToDestination(node2):
             if node1._metastep._step.canConnect(node2._metastep._step):
                 command = CommandAdd(self.scene(), Edge(node1, node2))
-                self.undoStack.push(command)
+                self._undoStack.push(command)
             else:
                 # add temporary line ???
-                if self.errorIconTimer.isActive():
-                    self.errorIconTimer.stop()
+                if self._errorIconTimer.isActive():
+                    self._errorIconTimer.stop()
                     self.errorIconTimeout()
 
-                self.errorIcon = ErrorItem(node1, node2)
-                self.scene().addItem(self.errorIcon)
-                self.errorIconTimer.start()
+                self._errorIcon = ErrorItem(node1, node2)
+                self.scene().addItem(self._errorIcon)
+                self._errorIconTimer.start()
 
     def selectionChanged(self):
         currentSelection = self.scene().selectedItems()
         command = CommandSelection(self.scene(), currentSelection, self._previousSelection)
-        self.undoStack.push(command)
+        self._undoStack.push(command)
         self._previousSelection = currentSelection
 
     def nodeSelected(self, node, state):
-        if state == True and node not in self.selectedNodes:
-            self.selectedNodes.append(node)
-        elif state == False and node in self.selectedNodes:
-            found = self.selectedNodes.index(node)
-            del self.selectedNodes[found]
+        if state == True and node not in self._selectedNodes:
+            self._selectedNodes.append(node)
+        elif state == False and node in self._selectedNodes:
+            found = self._selectedNodes.index(node)
+            del self._selectedNodes[found]
 
-        if len(self.selectedNodes) == 2:
-            self.connectNodes(self.selectedNodes[0], self.selectedNodes[1])
+        if len(self._selectedNodes) == 2:
+            self.connectNodes(self._selectedNodes[0], self._selectedNodes[1])
 
     def keyPressEvent(self, event):
 #        super(WorkflowGraphicsView, self).keyPressEvent(event)
         if event.key() == QtCore.Qt.Key_Backspace or event.key() == QtCore.Qt.Key_Delete:
             command = CommandRemove(self.scene(), self.scene().selectedItems())
-            self.undoStack.push(command)
+            self._undoStack.push(command)
             event.accept()
         else:
             event.ignore()
@@ -118,42 +118,42 @@ class WorkflowGraphicsView(QtGui.QGraphicsView):
             item = self.scene().itemAt(self.mapToScene(event.pos()))
             if item and item.type() == Node.Type:
                 centre = item.boundingRect().center()
-                self.connectSourceNode = item
-                self.connectLine = ArrowLine(QtCore.QLineF(item.mapToScene(centre),
+                self._connectSourceNode = item
+                self._connectLine = ArrowLine(QtCore.QLineF(item.mapToScene(centre),
                                              self.mapToScene(event.pos())))
-                self.scene().addItem(self.connectLine)
+                self.scene().addItem(self._connectLine)
         else:
             QtGui.QGraphicsView.mousePressEvent(self, event)
-            self.selectionStartPos = event.pos()
+            self._selectionStartPos = event.pos()
             
     def mouseMoveEvent(self, event):
-        if self.connectLine:
-            newLine = QtCore.QLineF(self.connectLine.line().p1(), self.mapToScene(event.pos()))
-            self.connectLine.setLine(newLine)
+        if self._connectLine:
+            newLine = QtCore.QLineF(self._connectLine.line().p1(), self.mapToScene(event.pos()))
+            self._connectLine.setLine(newLine)
         else:
             QtGui.QGraphicsView.mouseMoveEvent(self, event)
 
     def mouseReleaseEvent(self, event):
-        if self.connectLine:
+        if self._connectLine:
             item = self.scene().itemAt(self.mapToScene(event.pos()))
             if item and item.type() == Node.Type:
-                self.connectNodes(self.connectSourceNode, item)
-            self.scene().removeItem(self.connectLine)
-            self.connectLine = None
-            self.connectSourceNode = None
+                self.connectNodes(self._connectSourceNode, item)
+            self.scene().removeItem(self._connectLine)
+            self._connectLine = None
+            self._connectSourceNode = None
         else:
             QtGui.QGraphicsView.mouseReleaseEvent(self, event)
-            diff = event.pos() - self.selectionStartPos
+            diff = event.pos() - self._selectionStartPos
             if diff.x() != 0 and diff.y() != 0:
-                self.undoStack.beginMacro('Move Step(s)')
+                self._undoStack.beginMacro('Move Step(s)')
                 for item in self.scene().selectedItems():
                     if item.type() == Node.Type:
-                        self.undoStack.push(CommandMove(item, item.pos() - diff, item.pos()))
-                self.undoStack.endMacro()
+                        self._undoStack.push(CommandMove(item, item.pos() - diff, item.pos()))
+                self._undoStack.endMacro()
 
     def errorIconTimeout(self):
-        self.scene().removeItem(self.errorIcon)
-        del self.errorIcon
+        self.scene().removeItem(self._errorIcon)
+        del self._errorIcon
 
     def changeEvent(self, event):
         if event.type() == QtCore.QEvent.EnabledChange:
@@ -196,13 +196,13 @@ class WorkflowGraphicsView(QtGui.QGraphicsView):
             step = MetaStep(workflowStepFactory(name))
             node = Node(step, location)
 
-            self.undoStack.beginMacro('Add node')
-            self.undoStack.push(CommandAdd(self.scene(), node))
+            self._undoStack.beginMacro('Add node')
+            self._undoStack.push(CommandAdd(self.scene(), node))
             # Set the position after it has been added to the scene
-            self.undoStack.push(CommandMove(node, position, ensureItemInScene(self.scene(), node, position)))
+            self._undoStack.push(CommandMove(node, position, ensureItemInScene(self.scene(), node, position)))
             self.scene().clearSelection()
             node.setSelected(True)
-            self.undoStack.endMacro()
+            self._undoStack.endMacro()
 
             event.setDropAction(QtCore.Qt.MoveAction);
             event.accept();
