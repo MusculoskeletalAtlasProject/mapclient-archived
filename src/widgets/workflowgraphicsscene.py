@@ -371,6 +371,8 @@ class WorkflowGraphicsScene(QtGui.QGraphicsScene):
             elif item.Type == Edge.Type:
                 self._workflow_scene.addItem(item._connection)
         
+            print('check valid workflow')
+
     def removeItem(self, item):
         QtGui.QGraphicsScene.removeItem(self, item)
         if hasattr(item, 'Type'):
@@ -378,6 +380,8 @@ class WorkflowGraphicsScene(QtGui.QGraphicsScene):
                 self._workflow_scene.removeItem(item._metastep)
             elif item.Type == Edge.Type:
                 self._workflow_scene.removeItem(item._connection)
+                
+            print('check valid workflow')
         
     def update(self):
         '''
@@ -407,6 +411,8 @@ class WorkflowGraphicsScene(QtGui.QGraphicsScene):
             # WorkflowScene
             edge._connection = connection
             QtGui.QGraphicsScene.addItem(self, edge)
+            
+        print('check valid workflow')
             
     def clear(self):
         QtGui.QGraphicsScene.clear(self)

@@ -27,35 +27,25 @@ class CommandRemove(QtGui.QUndoCommand):
     def __init__(self, scene, selection):
         super(CommandRemove, self).__init__()
         self._scene = scene
-        self._selection = selection
-        self.edges = {} # Need to keep the edges alive in case of undo
-        self.edgeUnique = {} # Keep a record of edges marked for deletion to avoid repetition
-        for item in self._selection:
+        self._items = []
+        for item in selection:
+            if item not in self._items:
+                self._items.append(item)
             if item.Type == Node.Type:
-                self.edges[item] = []
                 for edge in item._connections:
-                    if edge() not in self.edgeUnique:
-                        self.edges[item].append(edge())
-                        self.edgeUnique[edge()] = 1
-            elif item.Type == Edge.Type:
-                self.edgeUnique[item] = 1
+                    if edge() not in self._items:
+                        self._items.append(edge())
 
     def redo(self):
         self._scene.blockSignals(True)
-        for item in self._selection:
+        for item in self._items:
             self._scene.removeItem(item)
-            if item in self.edges:
-                for edge in self.edges[item]:
-                    self._scene.removeItem(edge)
         self._scene.blockSignals(False)
 
     def undo(self):
         self._scene.blockSignals(True)
-        for item in self._selection:
+        for item in self._items:
             self._scene.addItem(item)
-            if item in self.edges:
-                for edge in self.edges[item]:
-                    self._scene.addItem(edge)
         self._scene.blockSignals(False)
 
 
