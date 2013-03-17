@@ -19,7 +19,7 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
 '''
 from PyQt4 import QtGui
 
-from widgets.workflowgraphicsscene import Node, Edge
+from widgets.workflowgraphicsscene import Node
 
 class CommandRemove(QtGui.QUndoCommand):
     '''

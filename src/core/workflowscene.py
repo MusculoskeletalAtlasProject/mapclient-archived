@@ -76,19 +76,18 @@ class WorkflowScene(object):
 
     def saveState(self, ws):
         connectionMap = {}
+        connectionSelectionMap = {}
         stepList = []
         for item in self._items:
             if item.Type == MetaStep.Type:
                 stepList.append(item)
             elif item.Type == Connection.Type:
+                connectionSelectionMap[item.source()] = item.selected()
                 if item.source() in connectionMap:
                     connectionMap[item.source()].append(item.destination())
                 else:
                     connectionMap[item.source()] = [item.destination()]
 
-        print('save state: ' + str(len(stepList)))
-        print(len(self._items))
-        print(connectionMap)
         location = self._manager.location()
         ws.remove('nodes')
         ws.beginGroup('nodes')
@@ -109,6 +108,7 @@ class WorkflowScene(object):
                 for destination in connectionMap[metastep]:
                     ws.setArrayIndex(connectionIndex)
                     ws.setValue('connectedTo', stepList.index(destination))
+                    ws.setValue('selected', connectionSelectionMap[metastep])
                     connectionIndex += 1
             ws.endArray()
             nodeIndex += 1
@@ -141,14 +141,17 @@ class WorkflowScene(object):
             for j in range(edgeCount):
                 ws.setArrayIndex(j)
                 connectedTo = int(ws.value('connectedTo'))
-                edgeConnections.append((i, connectedTo))
+                selected = ws.value('selected', 'false') == 'true'
+                edgeConnections.append((i, connectedTo, selected))
             ws.endArray()
         ws.endArray()
         ws.endGroup()
         for edge in edgeConnections:
             node1 = metaStepList[edge[0]]
             node2 = metaStepList[edge[1]]
-            self.addItem(Connection(node1, node2))
+            c = Connection(node1, node2)
+            c._selected = edge[2]
+            self.addItem(c)
 
     def manager(self):
         return self._manager

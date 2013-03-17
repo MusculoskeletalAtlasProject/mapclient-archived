@@ -75,17 +75,31 @@ class ErrorItem(QtGui.QGraphicsItem):
 
         painter.drawPixmap(midPoint.x() - 8, midPoint.y() - 8, self._pixmap)
 
+class Item(QtGui.QGraphicsItem):
+    '''
+    Class to contain the selection information that selectable scene items can be derived from.
+    '''
+    
+    
+    def __init__(self):
+        QtGui.QGraphicsItem.__init__(self)
 
-class Edge(QtGui.QGraphicsItem):
+        self.setFlag(QtGui.QGraphicsItem.ItemIsSelectable)
+        
+    def setSelected(self, selected):
+        QtGui.QGraphicsItem.setSelected(self, selected)
+        self.scene().workflowScene().setItemSelected(self.metaItem(), selected)
+        
+       
+class Edge(Item):
     Pi = math.pi
     TwoPi = 2.0 * Pi
 
     Type = QtGui.QGraphicsItem.UserType + 2
 
     def __init__(self, sourceNode, destNode):
-        QtGui.QGraphicsItem.__init__(self)
+        Item.__init__(self)
 
-        self.setFlag(QtGui.QGraphicsItem.ItemIsSelectable)
         self.arrowSize = 10.0
         
         self._connection = Connection(sourceNode._metastep, destNode._metastep)
@@ -105,6 +119,9 @@ class Edge(QtGui.QGraphicsItem):
     
     def type(self):
         return Edge.Type
+    
+    def metaItem(self):
+        return self._connection
 
     def adjust(self):
         if not self.source() or not self.dest():
@@ -173,11 +190,11 @@ class Edge(QtGui.QGraphicsItem):
         # painter.setPen(QtGui.QPen(QtCore.Qt.SolidLine))
         painter.drawLine(line)
 
-class Node(QtGui.QGraphicsItem):
+class Node(Item):
     Type = QtGui.QGraphicsItem.UserType + 1
 
     def __init__(self, metastep, location):
-        QtGui.QGraphicsItem.__init__(self)
+        Item.__init__(self)
 
         self._metastep = metastep
         self._pixmap = QtGui.QPixmap.fromImage(self._metastep._step._icon).scaled(64, 64, aspectRatioMode=QtCore.Qt.KeepAspectRatio, transformMode=QtCore.Qt.FastTransformation)
@@ -220,12 +237,11 @@ class Node(QtGui.QGraphicsItem):
         QtGui.QGraphicsItem.setPos(self, pos)
         self.scene().workflowScene().setItemPos(self._metastep, pos)
         
-    def setSelected(self, selected):
-        QtGui.QGraphicsItem.setSelected(self, selected)
-        self.scene().workflowScene().setItemSelected(self._metastep, selected)
-        
     def type(self):
         return Node.Type
+    
+    def metaItem(self):
+        return self._metastep
 
     def _removeDeadwood(self):
         '''
@@ -411,6 +427,9 @@ class WorkflowGraphicsScene(QtGui.QGraphicsScene):
             # WorkflowScene
             edge._connection = connection
             QtGui.QGraphicsScene.addItem(self, edge)
+            self.blockSignals(True)
+            edge.setSelected(connection.selected())
+            self.blockSignals(False)
             
         print('check valid workflow')
             
