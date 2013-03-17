@@ -64,6 +64,17 @@ class Connection(Item):
         return self._destination
 
 
+class WorkflowDependencyGraph(object):
+    
+    
+    def __init__(self):
+        pass
+    
+    def canExecute(self):
+        print('canExecute ?')
+        return False
+    
+    
 class WorkflowScene(object):
     '''
     This is the authoratative model for the workflow scene.
@@ -73,6 +84,7 @@ class WorkflowScene(object):
     def __init__(self, manager):
         self._manager = manager
         self._items = {}
+        self._dependencyGraph = WorkflowDependencyGraph()
 
     def saveState(self, ws):
         connectionMap = {}
@@ -155,6 +167,9 @@ class WorkflowScene(object):
 
     def manager(self):
         return self._manager
+    
+    def canExecute(self):
+        return self._dependencyGraph.canExecute()
     
     def clear(self):
         self._items.clear()

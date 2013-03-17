@@ -204,16 +204,13 @@ class Node(Item):
 
         self.setFlag(QtGui.QGraphicsItem.ItemIsMovable)
         self.setFlag(QtGui.QGraphicsItem.ItemSendsGeometryChanges)
-        self.setFlag(QtGui.QGraphicsItem.ItemIsSelectable)
         self.setCacheMode(self.DeviceCoordinateCache)
         self.setZValue(-1)
 
-        self.connectLine = None
-
-        self.contextMenu = QtGui.QMenu()
-        configureAction = QtGui.QAction('Configure', self.contextMenu)
+        self._contextMenu = QtGui.QMenu()
+        configureAction = QtGui.QAction('Configure', self._contextMenu)
         configureAction.triggered.connect(lambda: self._metastep._step.configure(location))
-        self.contextMenu.addAction(configureAction)
+        self._contextMenu.addAction(configureAction)
         portsProvidesTip = ''
         portsUsesTip = ''
         for port in self._metastep._step._ports:
@@ -290,7 +287,7 @@ class Node(Item):
         return QtGui.QGraphicsItem.itemChange(self, change, value)
 
     def showContextMenu(self, pos):
-        self.contextMenu.popup(pos)
+        self._contextMenu.popup(pos)
      
         
 class ArrowLine(QtGui.QGraphicsLineItem):
@@ -387,8 +384,6 @@ class WorkflowGraphicsScene(QtGui.QGraphicsScene):
             elif item.Type == Edge.Type:
                 self._workflow_scene.addItem(item._connection)
         
-            print('check valid workflow')
-
     def removeItem(self, item):
         QtGui.QGraphicsScene.removeItem(self, item)
         if hasattr(item, 'Type'):
@@ -397,8 +392,6 @@ class WorkflowGraphicsScene(QtGui.QGraphicsScene):
             elif item.Type == Edge.Type:
                 self._workflow_scene.removeItem(item._connection)
                 
-            print('check valid workflow')
-        
     def update(self):
         '''
         Clears the QGraphicScene and re-populates it with what is currently 
@@ -430,8 +423,6 @@ class WorkflowGraphicsScene(QtGui.QGraphicsScene):
             self.blockSignals(True)
             edge.setSelected(connection.selected())
             self.blockSignals(False)
-            
-        print('check valid workflow')
             
     def clear(self):
         QtGui.QGraphicsScene.clear(self)
