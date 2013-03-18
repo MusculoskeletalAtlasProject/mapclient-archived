@@ -123,6 +123,12 @@ class Edge(Item):
     def metaItem(self):
         return self._connection
 
+    def sourceNode(self):
+        return self._source()
+    
+    def destinationNode(self):
+        return self._dest()
+    
     def adjust(self):
         if not self._source() or not self._dest():
             return
@@ -261,9 +267,7 @@ class Node(Item):
         self._connections.append(weakref.ref(edge))
         
     def removeEdge(self, edge):
-        if edge in self._connections:
-            index = self._connections.index(edge)
-            self._connections[index] = []
+        self._connections = [weakedge for weakedge in self._connections if weakedge() != edge]
 
     def boundingRect(self):
         adjust = 2.0

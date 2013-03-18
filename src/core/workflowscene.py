@@ -184,11 +184,8 @@ class WorkflowScene(object):
         self._items[item] = item
     
     def removeItem(self, item):
-        print(item in self._items)
         if item in self._items:
             del self._items[item]
-            
-        print(self._items)
     
     def setItemPos(self, item, pos):
         if item in self._items:

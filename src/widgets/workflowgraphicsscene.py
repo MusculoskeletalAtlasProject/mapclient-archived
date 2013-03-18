@@ -63,9 +63,8 @@ class WorkflowGraphicsScene(QtGui.QGraphicsScene):
             if item.Type == Node.Type:
                 self._workflow_scene.removeItem(item._metastep)
             elif item.Type == Edge.Type:
-                print('remove item')
-                # who has this connection?
-                item.
+                item.sourceNode().removeEdge(item)
+                item.destinationNode().removeEdge(item)
                 self._workflow_scene.removeItem(item._connection)
                 
     def updateModel(self):

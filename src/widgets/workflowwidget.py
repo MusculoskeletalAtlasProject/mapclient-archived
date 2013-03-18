@@ -48,6 +48,7 @@ class WorkflowWidget(QtGui.QWidget):
         self._graphicsScene.setWorkflowScene(self._workflowManager.scene())
         self._graphicsScene.selectionChanged.connect(self._ui.graphicsView.selectionChanged)
 
+        self._ui.executeButton.connect(self.executeWorkflow)
         self.action_Close = None # Keep a handle to this for modifying the Ui.
         self._createMenuItems()
 
