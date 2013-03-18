@@ -22,7 +22,7 @@ import sys
 from PyQt4 import QtCore, QtGui
 
 from mountpoints.workflowstep import workflowStepFactory
-from core.workflowcommands import CommandSelection, CommandRemove, CommandAdd, CommandMove
+from widgets.workflowcommands import CommandSelection, CommandRemove, CommandAdd, CommandMove
 from core.workflowscene import MetaStep
 from widgets.workflowgraphicsscene import WorkflowGraphicsScene, Node, Edge, ErrorItem, ArrowLine, ensureItemInScene
 
