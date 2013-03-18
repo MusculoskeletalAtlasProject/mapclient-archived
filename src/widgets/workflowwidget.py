@@ -39,7 +39,6 @@ class WorkflowWidget(QtGui.QWidget):
         self._undoStack.indexChanged.connect(self.undoStackIndexChanged)
 
         scene = self._mainWindow.model().workflowManager().scene()
-        self._ui.graphicsView._mainWindow = mainWindow
         self._ui.graphicsView.setUndoStack(self._undoStack)
         self._ui.graphicsView.scene().setWorkflowScene(scene)
         
@@ -75,7 +74,7 @@ class WorkflowWidget(QtGui.QWidget):
         if len(workflowDir) > 0:
             m.new(workflowDir)
             m.setPreviousLocation(workflowDir)
-            self._ui.graphicsView.scene().update()
+            self._ui.graphicsView.scene().updateModel()
             self._updateUi()
 
     def load(self):
@@ -84,7 +83,7 @@ class WorkflowWidget(QtGui.QWidget):
         if len(workflowDir) > 0:
             m.load(workflowDir)
             m.setPreviousLocation(workflowDir)
-            self._ui.graphicsView.scene().update()
+            self._ui.graphicsView.scene().updateModel()
             self._updateUi()
 
     def close(self):

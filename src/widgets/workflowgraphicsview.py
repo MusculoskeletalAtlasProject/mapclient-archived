@@ -30,7 +30,6 @@ class WorkflowGraphicsView(QtGui.QGraphicsView):
 
     def __init__(self, parent=None):
         QtGui.QGraphicsView.__init__(self, parent)
-        self._mainWindow = None
         self._selectedNodes = []
         self._errorIconTimer = QtCore.QTimer()
         self._errorIconTimer.setInterval(2000)
@@ -44,8 +43,6 @@ class WorkflowGraphicsView(QtGui.QGraphicsView):
         self._connectSourceNode = None
         
         self._selectionStartPos = None
-
-        self._previousSelection = []
         
         scene = WorkflowGraphicsScene(self)
         scene.selectionChanged.connect(self.selectionChanged)
@@ -82,9 +79,10 @@ class WorkflowGraphicsView(QtGui.QGraphicsView):
 
     def selectionChanged(self):
         currentSelection = self.scene().selectedItems()
-        command = CommandSelection(self.scene(), currentSelection, self._previousSelection)
+        previousSelection = self.scene().previouslySelectedItems()
+        command = CommandSelection(self.scene(), currentSelection, previousSelection)
         self._undoStack.push(command)
-        self._previousSelection = currentSelection
+        self.scene().setPreviouslySelectedItems(currentSelection)
 
     def nodeSelected(self, node, state):
         if state == True and node not in self._selectedNodes:
@@ -192,9 +190,9 @@ class WorkflowGraphicsView(QtGui.QGraphicsView):
             stream >> hotspot
 
             position = self.mapToScene(event.pos() - hotspot)
-            location = self._mainWindow.model().workflowManager().location()
-            step = MetaStep(workflowStepFactory(name))
-            node = Node(step, location)
+            metastep = MetaStep(workflowStepFactory(name))
+            node = Node(metastep)
+            metastep._step.registerConfiguredObserver(self.scene().stepConfigured)
 
             self._undoStack.beginMacro('Add node')
             self._undoStack.push(CommandAdd(self.scene(), node))

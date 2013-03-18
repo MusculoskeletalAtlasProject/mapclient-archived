@@ -44,18 +44,15 @@ class PointCloudStoreStep(WorkflowStepMountPoint):
         self.addPort(('pho#workflow#port', 'uses', 'pointcloud'))
         self._state = ConfigureDialogState()
 
-    def configure(self, location):
+    def configure(self):
         d = ConfigureDialog(self._state)
         d.setModal(True)
         if d.exec_():
             self._state = d.getState()
-            step_location = os.path.join(location, self._state.identifier())
-            if not os.path.exists(step_location):
-                os.mkdir(step_location)
-                
-            self.serialize(step_location)
         
         self._configured = d.validate()
+        if self._configured and self._configuredObserver != None:
+            self._configuredObserver()
 
     def getIdentifier(self):
         return self._state.identifier()
@@ -64,11 +61,16 @@ class PointCloudStoreStep(WorkflowStepMountPoint):
         self._state.setIdentifier(identifier)
         
     def serialize(self, location):
-        s = QtCore.QSettings(os.path.join(location, STEP_SERIALISATION_FILENAME), QtCore.QSettings.IniFormat)
+        step_location = os.path.join(location, self._state.identifier())
+        if not os.path.exists(step_location):
+            os.mkdir(step_location)
+            
+        s = QtCore.QSettings(os.path.join(step_location, STEP_SERIALISATION_FILENAME), QtCore.QSettings.IniFormat)
         self._state.save(s)
         
     def deserialize(self, location):
-        s = QtCore.QSettings(os.path.join(location, STEP_SERIALISATION_FILENAME), QtCore.QSettings.IniFormat)
+        step_location = os.path.join(location, self._state.identifier())
+        s = QtCore.QSettings(os.path.join(step_location, STEP_SERIALISATION_FILENAME), QtCore.QSettings.IniFormat)
         self._state.load(s)
         d = ConfigureDialog(self._state)
         self._configured = d.validate()

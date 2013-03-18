@@ -311,7 +311,7 @@ class WorkflowWidget(QtGui.QGraphicsView):
 
             stream >> pixmap >> hotspot
 
-            node = Node(pixmap, self)
+            node = Node(pixmap)
             node.setPos(self.mapToScene(event.pos() - hotspot))
             self.scene().addItem(node)
 #            ic = self.scene().addPixmap(_pixmap)

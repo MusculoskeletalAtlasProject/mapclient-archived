@@ -193,7 +193,7 @@ class Edge(Item):
 class Node(Item):
     Type = QtGui.QGraphicsItem.UserType + 1
 
-    def __init__(self, metastep, location):
+    def __init__(self, metastep):
         Item.__init__(self)
 
         self._metastep = metastep
@@ -209,7 +209,7 @@ class Node(Item):
 
         self._contextMenu = QtGui.QMenu()
         configureAction = QtGui.QAction('Configure', self._contextMenu)
-        configureAction.triggered.connect(lambda: self._metastep._step.configure(location))
+        configureAction.triggered.connect(self._metastep._step.configure)
         self._contextMenu.addAction(configureAction)
         portsProvidesTip = ''
         portsUsesTip = ''
@@ -369,6 +369,7 @@ class WorkflowGraphicsScene(QtGui.QGraphicsScene):
     def __init__(self, parent=None):
         QtGui.QGraphicsScene.__init__(self, -self.sceneHeight // 2, -self.sceneWidth // 2, self.sceneHeight, self.sceneWidth, parent)
         self._workflow_scene = None
+        self._previousSelection = []
 
     def setWorkflowScene(self, scene):
         self._workflow_scene = scene
@@ -392,7 +393,7 @@ class WorkflowGraphicsScene(QtGui.QGraphicsScene):
             elif item.Type == Edge.Type:
                 self._workflow_scene.removeItem(item._connection)
                 
-    def update(self):
+    def updateModel(self):
         '''
         Clears the QGraphicScene and re-populates it with what is currently 
         in the WorkflowScene.
@@ -402,7 +403,8 @@ class WorkflowGraphicsScene(QtGui.QGraphicsScene):
         connections = []
         for workflowitem in self._workflow_scene.items():
             if workflowitem.Type == MetaStep.Type:
-                node = Node(workflowitem, self._workflow_scene.manager().location())
+                node = Node(workflowitem)
+                workflowitem._step.registerConfiguredObserver(self.stepConfigured)
                 # Put the node into the scene straight away so that the items scene will
                 # be valid when we set the position.
                 QtGui.QGraphicsScene.addItem(self, node)
@@ -419,14 +421,29 @@ class WorkflowGraphicsScene(QtGui.QGraphicsScene):
             # Overwrite the connection created in the Edge with the original one that is in the 
             # WorkflowScene
             edge._connection = connection
+            # Again put the edge into the scene straight away so the scene will be valid
             QtGui.QGraphicsScene.addItem(self, edge)
             self.blockSignals(True)
             edge.setSelected(connection.selected())
             self.blockSignals(False)
             
+        self._previousSelection = self.selectedItems()
+            
     def clear(self):
         QtGui.QGraphicsScene.clear(self)
         self._workflow_scene.clear()
+        
+        
+    def previouslySelectedItems(self):
+        return self._previousSelection
+    
+    def setPreviouslySelectedItems(self, selection):
+        self._previousSelection = selection
+        
+    def stepConfigured(self):
+        print('step configured!')
+        for item in self.items():
+            item.update()
         
         
         

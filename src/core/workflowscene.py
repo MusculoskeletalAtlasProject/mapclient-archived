@@ -142,8 +142,7 @@ class WorkflowScene(object):
             identifier = ws.value('identifier')
             step = workflowStepFactory(name)
             step.setIdentifier(identifier)
-            step_location = os.path.join(location, identifier)
-            step.deserialize(step_location)
+            step.deserialize(location)
             metastep = MetaStep(step)
             metastep._pos = position
             metastep._selected = selected
