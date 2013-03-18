@@ -28,29 +28,29 @@ class ErrorItem(QtGui.QGraphicsItem):
     def __init__(self, sourceNode, destNode):
         QtGui.QGraphicsItem.__init__(self)
         self._source = weakref.ref(sourceNode)
-        self.dest = weakref.ref(destNode)
-        self.sourcePoint = QtCore.QPointF()
-        self.destPoint = QtCore.QPointF()
+        self._dest = weakref.ref(destNode)
+        self._sourcePoint = QtCore.QPointF()
+        self._destPoint = QtCore.QPointF()
         self._pixmap = QtGui.QPixmap(':/workflow/images/cancel_256.png').scaled(16, 16, aspectRatioMode=QtCore.Qt.KeepAspectRatio, transformMode=QtCore.Qt.FastTransformation)
         self._source().addEdge(self)
-        self.dest().addEdge(self)
+        self._dest().addEdge(self)
         self.setZValue(-1.5)
         self.adjust()
 
     def boundingRect(self):
         extra = (16) / 2.0 # Icon size divided by two
 
-        return QtCore.QRectF(self.sourcePoint,
-                             QtCore.QSizeF(self.destPoint.x() - self.sourcePoint.x(),
-                                           self.destPoint.y() - self.sourcePoint.y())).normalized().adjusted(-extra, -extra, extra, extra)
+        return QtCore.QRectF(self._sourcePoint,
+                             QtCore.QSizeF(self._destPoint.x() - self._sourcePoint.x(),
+                                           self._destPoint.y() - self._sourcePoint.y())).normalized().adjusted(-extra, -extra, extra, extra)
 
     def adjust(self):
-        if not self._source() or not self.dest():
+        if not self._source() or not self._dest():
             return
 
         sourceCentre = self._source().boundingRect().center()
-        destCentre = self.dest().boundingRect().center()
-        line = QtCore.QLineF(self.mapFromItem(self._source(), sourceCentre.x(), sourceCentre.y()), self.mapFromItem(self.dest(), destCentre.x(), destCentre.y()))
+        destCentre = self._dest().boundingRect().center()
+        line = QtCore.QLineF(self.mapFromItem(self._source(), sourceCentre.x(), sourceCentre.y()), self.mapFromItem(self._dest(), destCentre.x(), destCentre.y()))
         length = line.length()
 
         if length == 0.0:
@@ -59,13 +59,13 @@ class ErrorItem(QtGui.QGraphicsItem):
         edgeOffset = QtCore.QPointF((line.dx() * 10) / length, (line.dy() * 10) / length)
 
         self.prepareGeometryChange()
-        self.sourcePoint = line.p1() + edgeOffset
-        self.destPoint = line.p2() - edgeOffset
+        self._sourcePoint = line.p1() + edgeOffset
+        self._destPoint = line.p2() - edgeOffset
 
     def paint(self, painter, option, widget):
-        midPoint = (self.destPoint + self.sourcePoint) / 2
+        midPoint = (self._destPoint + self._sourcePoint) / 2
         # Draw the line itself.
-        line = QtCore.QLineF(self.sourcePoint, self.destPoint)
+        line = QtCore.QLineF(self._sourcePoint, self._destPoint)
 
         if line.length() == 0.0:
             return
@@ -100,17 +100,17 @@ class Edge(Item):
     def __init__(self, sourceNode, destNode):
         Item.__init__(self)
 
-        self.arrowSize = 10.0
+        self._arrowSize = 10.0
         
         self._connection = Connection(sourceNode._metastep, destNode._metastep)
         
-        self.sourcePoint = QtCore.QPointF()
-        self.destPoint = QtCore.QPointF()
+        self._sourcePoint = QtCore.QPointF()
+        self._destPoint = QtCore.QPointF()
 #        self.setAcceptedMouseButtons(QtCore.Qt.NoButton)
         self._source = weakref.ref(sourceNode)
-        self.dest = weakref.ref(destNode)
+        self._dest = weakref.ref(destNode)
         self._source().addEdge(self)
-        self.dest().addEdge(self)
+        self._dest().addEdge(self)
         self.setZValue(-2.0)
         self.adjust()
 
@@ -124,12 +124,12 @@ class Edge(Item):
         return self._connection
 
     def adjust(self):
-        if not self._source() or not self.dest():
+        if not self._source() or not self._dest():
             return
 
         sourceCentre = self._source().boundingRect().center()
-        destCentre = self.dest().boundingRect().center()
-        line = QtCore.QLineF(self.mapFromItem(self._source(), sourceCentre.x(), sourceCentre.y()), self.mapFromItem(self.dest(), destCentre.x(), destCentre.y()))
+        destCentre = self._dest().boundingRect().center()
+        line = QtCore.QLineF(self.mapFromItem(self._source(), sourceCentre.x(), sourceCentre.y()), self.mapFromItem(self._dest(), destCentre.x(), destCentre.y()))
         length = line.length()
 
         if length == 0.0:
@@ -137,29 +137,29 @@ class Edge(Item):
 
         edgeOffset = QtCore.QPointF((line.dx() * 10) / length, (line.dy() * 10) / length)
         self.prepareGeometryChange()
-        self.sourcePoint = line.p1() + edgeOffset
-        self.destPoint = line.p2() - edgeOffset
+        self._sourcePoint = line.p1() + edgeOffset
+        self._destPoint = line.p2() - edgeOffset
 
     def boundingRect(self):
-        if not self._source() or not self.dest():
+        if not self._source() or not self._dest():
             return QtCore.QRectF()
 
         penWidth = 1
-        extra = (penWidth + self.arrowSize) / 2.0
+        extra = (penWidth + self._arrowSize) / 2.0
 
-        sceneRect = QtCore.QRectF(self.sourcePoint,
-                         QtCore.QSizeF(self.destPoint.x() - self.sourcePoint.x(),
-                                       self.destPoint.y() - self.sourcePoint.y())).normalized().adjusted(-extra, -extra, extra, extra)
+        sceneRect = QtCore.QRectF(self._sourcePoint,
+                         QtCore.QSizeF(self._destPoint.x() - self._sourcePoint.x(),
+                                       self._destPoint.y() - self._sourcePoint.y())).normalized().adjusted(-extra, -extra, extra, extra)
  
         return sceneRect
     
 
     def paint(self, painter, option, widget):
-        if not self._source() or not self.dest():
+        if not self._source() or not self._dest():
             return
 
         # Draw the line itself.
-        line = QtCore.QLineF(self.sourcePoint, self.destPoint)
+        line = QtCore.QLineF(self._sourcePoint, self._destPoint)
 
         if line.length() == 0.0:
             return
@@ -176,13 +176,13 @@ class Edge(Item):
 
 
         # Draw the arrows if there's enough room.
-        if line.dy() * line.dy() + line.dx() * line.dx() > 200 * self.arrowSize:
-            midPoint = (self.destPoint + self.sourcePoint) / 2
+        if line.dy() * line.dy() + line.dx() * line.dx() > 200 * self._arrowSize:
+            midPoint = (self._destPoint + self._sourcePoint) / 2
 
-            destArrowP1 = midPoint + QtCore.QPointF(math.sin(angle - Edge.Pi / 3) * self.arrowSize,
-                                                          math.cos(angle - Edge.Pi / 3) * self.arrowSize)
-            destArrowP2 = midPoint + QtCore.QPointF(math.sin(angle - Edge.Pi + Edge.Pi / 3) * self.arrowSize,
-                                                          math.cos(angle - Edge.Pi + Edge.Pi / 3) * self.arrowSize)
+            destArrowP1 = midPoint + QtCore.QPointF(math.sin(angle - Edge.Pi / 3) * self._arrowSize,
+                                                          math.cos(angle - Edge.Pi / 3) * self._arrowSize)
+            destArrowP2 = midPoint + QtCore.QPointF(math.sin(angle - Edge.Pi + Edge.Pi / 3) * self._arrowSize,
+                                                          math.cos(angle - Edge.Pi + Edge.Pi / 3) * self._arrowSize)
 
             painter.drawPolygon(QtGui.QPolygonF([midPoint, destArrowP1, destArrowP2]))
 
@@ -252,7 +252,7 @@ class Node(Item):
     def hasEdgeToDestination(self, node):
         self._removeDeadwood()
         for edge in self._connections:
-            if edge().dest() == node:
+            if edge()._dest() == node:
                 return True
 
         return False
@@ -299,13 +299,13 @@ class ArrowLine(QtGui.QGraphicsLineItem):
 
     def __init__(self, *args, **kwargs):
         super(ArrowLine, self).__init__(*args, **kwargs)
-        self.arrowSize = 10.0
+        self._arrowSize = 10.0
         self.setZValue(-2.0)
 
     def boundingRect(self):
 
         penWidth = 1
-        extra = (penWidth + self.arrowSize) / 2.0
+        extra = (penWidth + self._arrowSize) / 2.0
         line = self.line()
         return QtCore.QRectF(line.p1(),
                              QtCore.QSizeF(line.p2().x() - line.p1().x(),
@@ -323,13 +323,13 @@ class ArrowLine(QtGui.QGraphicsLineItem):
         if line.dy() >= 0:
             angle = Edge.TwoPi - angle
         # Draw the arrows if there's enough room.
-        if line.dy() * line.dy() + line.dx() * line.dx() > 200 * self.arrowSize:
+        if line.dy() * line.dy() + line.dx() * line.dx() > 200 * self._arrowSize:
             midPoint = (line.p1() + line.p2()) / 2
 
-            destArrowP1 = midPoint + QtCore.QPointF(math.sin(angle - Edge.Pi / 3) * self.arrowSize,
-                                                          math.cos(angle - Edge.Pi / 3) * self.arrowSize)
-            destArrowP2 = midPoint + QtCore.QPointF(math.sin(angle - Edge.Pi + Edge.Pi / 3) * self.arrowSize,
-                                                          math.cos(angle - Edge.Pi + Edge.Pi / 3) * self.arrowSize)
+            destArrowP1 = midPoint + QtCore.QPointF(math.sin(angle - Edge.Pi / 3) * self._arrowSize,
+                                                          math.cos(angle - Edge.Pi / 3) * self._arrowSize)
+            destArrowP2 = midPoint + QtCore.QPointF(math.sin(angle - Edge.Pi + Edge.Pi / 3) * self._arrowSize,
+                                                          math.cos(angle - Edge.Pi + Edge.Pi / 3) * self._arrowSize)
 
             painter.setBrush(QtCore.Qt.black)
 #        painter.drawPolygon(QtGui.QPolygonF([line.p1(), sourceArrowP1, sourceArrowP2]))
