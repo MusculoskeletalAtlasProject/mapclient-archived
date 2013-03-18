@@ -54,7 +54,7 @@ class PointCloudStoreTestCase(unittest.TestCase):
                 return
             
             from pointcloudstorestep.step import PointCloudStoreStep
-            mystep = ImageSourceStep()
+            mystep = PointCloudStoreStep()
             mystep.configure()
         
     if HAVE_QTTEST:

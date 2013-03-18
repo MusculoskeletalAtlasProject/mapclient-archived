@@ -24,7 +24,9 @@ from PyQt4 import QtCore, QtGui
 from mountpoints.workflowstep import workflowStepFactory
 from widgets.workflowcommands import CommandSelection, CommandRemove, CommandAdd, CommandMove
 from core.workflowscene import MetaStep
-from widgets.workflowgraphicsscene import WorkflowGraphicsScene, Node, Edge, ErrorItem, ArrowLine, ensureItemInScene
+from widgets.workflowgraphicsscene import WorkflowGraphicsScene
+from widgets.workflowgraphicsitems import Node, Edge, ErrorItem, ArrowLine
+
 
 class WorkflowGraphicsView(QtGui.QGraphicsView):
 
@@ -197,7 +199,7 @@ class WorkflowGraphicsView(QtGui.QGraphicsView):
             self._undoStack.beginMacro('Add node')
             self._undoStack.push(CommandAdd(self.scene(), node))
             # Set the position after it has been added to the scene
-            self._undoStack.push(CommandMove(node, position, ensureItemInScene(self.scene(), node, position)))
+            self._undoStack.push(CommandMove(node, position, self.scene().ensureItemInScene(node, position)))
             self.scene().clearSelection()
             node.setSelected(True)
             self._undoStack.endMacro()
