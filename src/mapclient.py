@@ -82,7 +82,7 @@ def winmain():
     window = MainWindow(model)
     window.show()
 
-    sys.exit(app.exec_())
+    return app.exec_()
 
 class ConsumeOutput(object):
     def __init__(self):
@@ -123,6 +123,6 @@ def main():
 
 if __name__ == '__main__':
     if len(sys.argv) == 1: # No command line arguments
-        winmain()
+        sys.exit(winmain())
     else:
         main()

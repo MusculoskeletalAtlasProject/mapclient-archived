@@ -19,7 +19,7 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
 '''
 from PyQt4 import QtGui
 
-from widgets.workflowgraphicsscene import Node
+from widgets.workflowgraphicsitems import Node
 
 class CommandRemove(QtGui.QUndoCommand):
     '''
@@ -106,4 +106,20 @@ class CommandMove(QtGui.QUndoCommand):
 
     def undo(self):
         self._node.setPos(self._from)
+
+
+class CommandConfigure(QtGui.QUndoCommand):
+    
+
+    def __init__(self, scene):
+        super(CommandConfigure, self).__init__()
+        self._scene = scene
+        
+    def redo(self):
+        for item in self._scene.items():
+            item.update()
+
+    def undo(self):
+        for item in self._scene.items():
+            item.update()
 

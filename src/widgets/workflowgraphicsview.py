@@ -24,7 +24,6 @@ from PyQt4 import QtCore, QtGui
 from mountpoints.workflowstep import workflowStepFactory
 from widgets.workflowcommands import CommandSelection, CommandRemove, CommandAdd, CommandMove
 from core.workflowscene import MetaStep
-from widgets.workflowgraphicsscene import WorkflowGraphicsScene
 from widgets.workflowgraphicsitems import Node, Edge, ErrorItem, ArrowLine
 
 
@@ -46,10 +45,6 @@ class WorkflowGraphicsView(QtGui.QGraphicsView):
         
         self._selectionStartPos = None
         
-        scene = WorkflowGraphicsScene(self)
-        scene.selectionChanged.connect(self.selectionChanged)
-        self.setScene(scene)
-
         self.setCacheMode(QtGui.QGraphicsView.CacheBackground)
         self.setRenderHint(QtGui.QPainter.Antialiasing)
 #        self.setTransformationAnchor(QtGui.QGraphicsView.AnchorUnderMouse)
@@ -65,6 +60,7 @@ class WorkflowGraphicsView(QtGui.QGraphicsView):
         
     def connectNodes(self, node1, node2):
         # Check if nodes are already connected
+        print(node1.hasEdgeToDestination(node2))
         if not node1.hasEdgeToDestination(node2):
             if node1._metastep._step.canConnect(node2._metastep._step):
                 command = CommandAdd(self.scene(), Edge(node1, node2))

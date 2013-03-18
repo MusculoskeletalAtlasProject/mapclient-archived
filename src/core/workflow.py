@@ -65,7 +65,7 @@ class WorkflowManager():
         self._saveStateIndex = 0
         self._currentStateIndex = 0
         
-        self._title = info.APPLICATION_NAME
+        self._title = None
         
         self._scene = WorkflowScene(self)
 #        self.mainWindow = mainWindow
@@ -80,6 +80,12 @@ class WorkflowManager():
 #        return self.widget
 
     def title(self):
+        self._title = info.APPLICATION_NAME
+        if self._location:
+            self._title = self._title + ' - ' + self._location
+        if self._saveStateIndex != self._currentStateIndex:
+            self._title = self._title + ' *'
+
         return self._title
     
     def setLocation(self, location):
@@ -99,10 +105,6 @@ class WorkflowManager():
     
     def undoStackIndexChanged(self, index):
         self._currentStateIndex = index
-        self._title = info.APPLICATION_NAME + ' - ' + self._location
-        if self._saveStateIndex != self._currentStateIndex:
-            self._title = self._title + ' *'
-
 
     def isModified(self):
         return self._saveStateIndex == self._currentStateIndex
@@ -123,7 +125,7 @@ class WorkflowManager():
         self._location = location
         wf = getWorkflowConfiguration(location)
         wf.setValue('version', info.VERSION_STRING)
-        self._title = info.APPLICATION_NAME + ' - ' + location
+#        self._title = info.APPLICATION_NAME + ' - ' + location
         self._scene.clear()
 
 
@@ -150,21 +152,21 @@ class WorkflowManager():
         wf = getWorkflowConfiguration(location)
         self._scene.loadState(wf)
         self._saveStateIndex = self._currentStateIndex = 0
-        self._title = info.APPLICATION_NAME + ' - ' + location
+#        self._title = info.APPLICATION_NAME + ' - ' + location
 
     def save(self):
         wf = getWorkflowConfiguration(self._location)
-        print('save workflow')
         self._scene.saveState(wf)
         self._saveStateIndex = self._currentStateIndex
-        self._title = info.APPLICATION_NAME + ' - ' + self._location
+#        self._title = info.APPLICATION_NAME + ' - ' + self._location
 
     def close(self):
         '''
         Close the current workflow
         '''
         self._location = None
-        self._title = info.APPLICATION_NAME
+        self._saveStateIndex = self._currentStateIndex = 0
+#        self._title = info.APPLICATION_NAME
 
     def isWorkflowOpen(self):
         return not self._location == None

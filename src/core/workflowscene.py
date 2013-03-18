@@ -67,12 +67,16 @@ class Connection(Item):
 class WorkflowDependencyGraph(object):
     
     
-    def __init__(self):
-        pass
+    def __init__(self, scene):
+        self._scene = scene
     
     def canExecute(self):
-        print('canExecute ?')
-        return False
+        can = False
+        for item in self._scene.items():
+            if item.Type == Connection.Type:
+                can = True
+
+        return can
     
     
 class WorkflowScene(object):
@@ -84,7 +88,7 @@ class WorkflowScene(object):
     def __init__(self, manager):
         self._manager = manager
         self._items = {}
-        self._dependencyGraph = WorkflowDependencyGraph()
+        self._dependencyGraph = WorkflowDependencyGraph(self)
 
     def saveState(self, ws):
         connectionMap = {}
@@ -180,8 +184,11 @@ class WorkflowScene(object):
         self._items[item] = item
     
     def removeItem(self, item):
+        print(item in self._items)
         if item in self._items:
             del self._items[item]
+            
+        print(self._items)
     
     def setItemPos(self, item, pos):
         if item in self._items:

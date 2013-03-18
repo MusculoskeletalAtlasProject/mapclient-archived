@@ -21,6 +21,7 @@ from PyQt4 import QtGui
 
 from core.workflowscene import MetaStep, Connection
 from widgets.workflowgraphicsitems import Node, Edge
+from widgets.workflowcommands import CommandConfigure
 
        
 class WorkflowGraphicsScene(QtGui.QGraphicsScene):
@@ -37,12 +38,16 @@ class WorkflowGraphicsScene(QtGui.QGraphicsScene):
         QtGui.QGraphicsScene.__init__(self, -self.sceneHeight // 2, -self.sceneWidth // 2, self.sceneHeight, self.sceneWidth, parent)
         self._workflow_scene = None
         self._previousSelection = []
+        self._undoStack = None
 
     def setWorkflowScene(self, scene):
         self._workflow_scene = scene
         
     def workflowScene(self):
         return self._workflow_scene
+        
+    def setUndoStack(self, stack):
+        self._undoStack = stack
         
     def addItem(self, item):
         QtGui.QGraphicsScene.addItem(self, item)
@@ -58,6 +63,9 @@ class WorkflowGraphicsScene(QtGui.QGraphicsScene):
             if item.Type == Node.Type:
                 self._workflow_scene.removeItem(item._metastep)
             elif item.Type == Edge.Type:
+                print('remove item')
+                # who has this connection?
+                item.
                 self._workflow_scene.removeItem(item._connection)
                 
     def updateModel(self):
@@ -124,7 +132,6 @@ class WorkflowGraphicsScene(QtGui.QGraphicsScene):
         QtGui.QGraphicsScene.clear(self)
         self._workflow_scene.clear()
         
-        
     def previouslySelectedItems(self):
         return self._previousSelection
     
@@ -133,6 +140,5 @@ class WorkflowGraphicsScene(QtGui.QGraphicsScene):
         
     def stepConfigured(self):
         print('step configured!')
-        for item in self.items():
-            item.update()
+        self._undoStack.push(CommandConfigure(self))
 

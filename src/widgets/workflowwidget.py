@@ -20,6 +20,7 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
 from PyQt4 import QtGui
 from widgets.ui_workflowwidget import Ui_WorkflowWidget
 from mountpoints.workflowstep import WorkflowStepMountPoint
+from widgets.workflowgraphicsscene import WorkflowGraphicsScene
 
 class WorkflowWidget(QtGui.QWidget):
     '''
@@ -33,15 +34,20 @@ class WorkflowWidget(QtGui.QWidget):
         self._mainWindow = mainWindow
         self._ui = Ui_WorkflowWidget()
         self._ui.setupUi(self)
-        
 
         self._undoStack = QtGui.QUndoStack(self)
         self._undoStack.indexChanged.connect(self.undoStackIndexChanged)
 
-        scene = self._mainWindow.model().workflowManager().scene()
-        self._ui.graphicsView.setUndoStack(self._undoStack)
-        self._ui.graphicsView.scene().setWorkflowScene(scene)
+        self._workflowManager = self._mainWindow.model().workflowManager()
+        self._graphicsScene = WorkflowGraphicsScene(self)
+        self._ui.graphicsView.setScene(self._graphicsScene)
         
+        self._ui.graphicsView.setUndoStack(self._undoStack)
+        self._graphicsScene.setUndoStack(self._undoStack)
+        
+        self._graphicsScene.setWorkflowScene(self._workflowManager.scene())
+        self._graphicsScene.selectionChanged.connect(self._ui.graphicsView.selectionChanged)
+
         self.action_Close = None # Keep a handle to this for modifying the Ui.
         self._createMenuItems()
 
@@ -74,7 +80,8 @@ class WorkflowWidget(QtGui.QWidget):
         if len(workflowDir) > 0:
             m.new(workflowDir)
             m.setPreviousLocation(workflowDir)
-            self._ui.graphicsView.scene().updateModel()
+            self._undoStack.clear()
+            self._graphicsScene.updateModel()
             self._updateUi()
 
     def load(self):
@@ -83,13 +90,14 @@ class WorkflowWidget(QtGui.QWidget):
         if len(workflowDir) > 0:
             m.load(workflowDir)
             m.setPreviousLocation(workflowDir)
-            self._ui.graphicsView.scene().updateModel()
+            self._graphicsScene.updateModel()
             self._updateUi()
 
     def close(self):
         m = self._mainWindow.model().workflowManager()
+        self._undoStack.clear()
         m.close()
-        self._ui.graphicsView.clear()
+        self._graphicsScene.clear()
         self._updateUi()
 
     def save(self):
