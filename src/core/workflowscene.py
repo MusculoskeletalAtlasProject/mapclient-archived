@@ -159,7 +159,7 @@ class WorkflowDependencyGraph(object):
             
         configured = [metastep for metastep in self._graph if metastep._step.isConfigured()]
         can = len(configured) == len(self._graph) and len(self._graph) >= 0
-        return can
+        return can and self._current == -1
     
     def execute(self):
         if not self._graph:

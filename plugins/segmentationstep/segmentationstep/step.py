@@ -37,8 +37,9 @@ class SegmentationStep(WorkflowStepMountPoint):
         self.addPort(('pho#workflow#port', 'provides', 'pointcloud'))
 
     def configure(self):
-        print('configure the segmentation step')
         self._configured = True
+        if self._configured and self._configuredObserver != None:
+            self._configuredObserver()
 
     def getIdentifier(self):
         return self._identifier
