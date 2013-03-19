@@ -230,7 +230,7 @@ class WorkflowScene(object):
         ws.beginGroup('nodes')
         nodeCount = ws.beginReadArray('nodelist')
         metaStepList = []
-        edgeConnections = []
+        connections = []
         for i in range(nodeCount):
             ws.setArrayIndex(i)
             name = ws.value('name')
@@ -245,20 +245,20 @@ class WorkflowScene(object):
             metastep._selected = selected
             metaStepList.append(metastep)
             self.addItem(metastep)
-            edgeCount = ws.beginReadArray('connections')
-            for j in range(edgeCount):
+            arcCount = ws.beginReadArray('connections')
+            for j in range(arcCount):
                 ws.setArrayIndex(j)
                 connectedTo = int(ws.value('connectedTo'))
                 selected = ws.value('selected', 'false') == 'true'
-                edgeConnections.append((i, connectedTo, selected))
+                connections.append((i, connectedTo, selected))
             ws.endArray()
         ws.endArray()
         ws.endGroup()
-        for edge in edgeConnections:
-            node1 = metaStepList[edge[0]]
-            node2 = metaStepList[edge[1]]
+        for arc in connections:
+            node1 = metaStepList[arc[0]]
+            node2 = metaStepList[arc[1]]
             c = Connection(node1, node2)
-            c._selected = edge[2]
+            c._selected = arc[2]
             self.addItem(c)
 
     def manager(self):

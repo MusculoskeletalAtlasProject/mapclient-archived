@@ -20,7 +20,7 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
 from PyQt4 import QtGui
 
 from core.workflowscene import MetaStep, Connection
-from widgets.workflowgraphicsitems import Node, Edge
+from widgets.workflowgraphicsitems import Node, Arc
 from widgets.workflowcommands import CommandConfigure
 
        
@@ -54,7 +54,7 @@ class WorkflowGraphicsScene(QtGui.QGraphicsScene):
         if hasattr(item, 'Type'):
             if item.Type == Node.Type:
                 self._workflow_scene.addItem(item._metastep)
-            elif item.Type == Edge.Type:
+            elif item.Type == Arc.Type:
                 self._workflow_scene.addItem(item._connection)
         
     def removeItem(self, item):
@@ -62,9 +62,9 @@ class WorkflowGraphicsScene(QtGui.QGraphicsScene):
         if hasattr(item, 'Type'):
             if item.Type == Node.Type:
                 self._workflow_scene.removeItem(item._metastep)
-            elif item.Type == Edge.Type:
-                item.sourceNode().removeEdge(item)
-                item.destinationNode().removeEdge(item)
+            elif item.Type == Arc.Type:
+                item.sourceNode().removeArc(item)
+                item.destinationNode().removeArc(item)
                 self._workflow_scene.removeItem(item._connection)
                 
     def updateModel(self):
@@ -92,14 +92,14 @@ class WorkflowGraphicsScene(QtGui.QGraphicsScene):
                 connections.append(workflowitem)
                 
         for connection in connections:
-            edge = Edge(meta_steps[connection.source()], meta_steps[connection.destination()])
-            # Overwrite the connection created in the Edge with the original one that is in the 
+            arc = Arc(meta_steps[connection.source()], meta_steps[connection.destination()])
+            # Overwrite the connection created in the Arc with the original one that is in the 
             # WorkflowScene
-            edge._connection = connection
-            # Again put the edge into the scene straight away so the scene will be valid
-            QtGui.QGraphicsScene.addItem(self, edge)
+            arc._connection = connection
+            # Again put the arc into the scene straight away so the scene will be valid
+            QtGui.QGraphicsScene.addItem(self, arc)
             self.blockSignals(True)
-            edge.setSelected(connection.selected())
+            arc.setSelected(connection.selected())
             self.blockSignals(False)
             
         self._previousSelection = self.selectedItems()
