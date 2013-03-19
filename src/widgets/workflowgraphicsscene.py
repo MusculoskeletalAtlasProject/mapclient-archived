@@ -79,6 +79,7 @@ class WorkflowGraphicsScene(QtGui.QGraphicsScene):
             if workflowitem.Type == MetaStep.Type:
                 node = Node(workflowitem)
                 workflowitem._step.registerConfiguredObserver(self.stepConfigured)
+                workflowitem._step.registerDoneExecution(self.doneExecution)
                 # Put the node into the scene straight away so that the items scene will
                 # be valid when we set the position.
                 QtGui.QGraphicsScene.addItem(self, node)
@@ -138,6 +139,8 @@ class WorkflowGraphicsScene(QtGui.QGraphicsScene):
         self._previousSelection = selection
         
     def stepConfigured(self):
-        print('step configured!')
         self._undoStack.push(CommandConfigure(self))
+        
+    def doneExecution(self):
+        self.parent().executeWorkflow()
 

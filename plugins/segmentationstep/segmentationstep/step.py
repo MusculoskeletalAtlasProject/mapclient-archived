@@ -38,6 +38,7 @@ class SegmentationStep(WorkflowStepMountPoint):
 
     def configure(self):
         print('configure the segmentation step')
+        self._configured = True
 
     def getIdentifier(self):
         return self._identifier

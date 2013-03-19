@@ -105,6 +105,9 @@ class WorkflowManager():
     
     def undoStackIndexChanged(self, index):
         self._currentStateIndex = index
+        
+    def execute(self):
+        self._scene.execute()
 
     def isModified(self):
         return self._saveStateIndex == self._currentStateIndex

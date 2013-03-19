@@ -60,7 +60,6 @@ class WorkflowGraphicsView(QtGui.QGraphicsView):
         
     def connectNodes(self, node1, node2):
         # Check if nodes are already connected
-        print(node1.hasEdgeToDestination(node2))
         if not node1.hasEdgeToDestination(node2):
             if node1._metastep._step.canConnect(node2._metastep._step):
                 command = CommandAdd(self.scene(), Edge(node1, node2))
@@ -191,6 +190,7 @@ class WorkflowGraphicsView(QtGui.QGraphicsView):
             metastep = MetaStep(workflowStepFactory(name))
             node = Node(metastep)
             metastep._step.registerConfiguredObserver(self.scene().stepConfigured)
+            metastep._step.registerDoneExecution(self.scene().doneExecution)
 
             self._undoStack.beginMacro('Add node')
             self._undoStack.push(CommandAdd(self.scene(), node))

@@ -104,6 +104,14 @@ def _workflow_step_init(self):
     self._icon = None
     self._configured = False
     self._configuredObserver = None
+    self._doneExecution = None
+
+def _workflow_step_execute(self):
+    print('executing: ' + self.getName())
+    self._doneExecution()
+
+def _workflow_step_registerDoneExecution(self, observer):
+    self._doneExecution = observer
 
 def _workflow_step_configure(self, location):
     raise NotImplementedError
@@ -148,6 +156,8 @@ def _workflow_step_getName(self):
 
 attr_dict = {'_category': 'General'}
 attr_dict['__init__'] = _workflow_step_init
+attr_dict['execute'] = _workflow_step_execute
+attr_dict['registerDoneExecution'] = _workflow_step_registerDoneExecution
 attr_dict['configure'] = _workflow_step_configure
 attr_dict['isConfigured'] = _workflow_step_isConfigured
 attr_dict['registerConfiguredObserver'] = _workflow_step_registerConfiguredObserver

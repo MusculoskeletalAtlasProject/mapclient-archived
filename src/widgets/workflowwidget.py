@@ -48,7 +48,7 @@ class WorkflowWidget(QtGui.QWidget):
         self._graphicsScene.setWorkflowScene(self._workflowManager.scene())
         self._graphicsScene.selectionChanged.connect(self._ui.graphicsView.selectionChanged)
 
-        self._ui.executeButton.connect(self.executeWorkflow)
+        self._ui.executeButton.clicked.connect(self.executeWorkflow)
         self.action_Close = None # Keep a handle to this for modifying the Ui.
         self._createMenuItems()
 
@@ -66,7 +66,7 @@ class WorkflowWidget(QtGui.QWidget):
         self.action_Close.setEnabled(workflowOpen)
         self.setEnabled(workflowOpen)
         self.action_Save.setEnabled(not wfm.isModified())
-        self._ui.executeButton.setEnabled(wfm.scene().canExecute())
+        self._ui.executeButton.setEnabled(wfm.scene().canExecute() and not wfm.isModified())
 
     def undoStackIndexChanged(self, index):
         self._mainWindow.model().workflowManager().undoStackIndexChanged(index)
@@ -75,6 +75,9 @@ class WorkflowWidget(QtGui.QWidget):
     def setActive(self):
         self._mainWindow.setUndoStack(self._undoStack)
 
+    def executeWorkflow(self):
+        self._mainWindow.model().workflowManager().execute()
+        
     def new(self):
         m = self._mainWindow.model().workflowManager()
         workflowDir = QtGui.QFileDialog.getExistingDirectory(self._mainWindow, caption='Select Workflow Directory', directory=m.previousLocation())
@@ -105,14 +108,6 @@ class WorkflowWidget(QtGui.QWidget):
         m = self._mainWindow.model().workflowManager()
         m.save()
         self._updateUi()
-
-#    def saveState(self, ws):
-#        self._ui.graphicsView.saveState(ws)
-#        self._updateUi()
-#
-#    def loadState(self, ws):
-#        self._ui.graphicsView.loadState(ws)
-#        self._updateUi()
 
     def _setActionProperties(self, action, name, slot, shortcut='', statustip=''):
         action.setObjectName(name)

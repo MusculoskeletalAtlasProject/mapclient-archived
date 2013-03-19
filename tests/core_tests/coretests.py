@@ -28,8 +28,10 @@ def suite():
     from core_tests.mainapplication import MainApplicationTestCase
     tests.addTests(unittest.TestLoader().loadTestsFromTestCase(MainApplicationTestCase))
 
-    from core_tests.workflowscene import WorkflowSceneTestCase
+    from core_tests.workflowscene import WorkflowSceneTestCase, WorkflowDependencyGraphTestCase, GraphUtilitiesTestCase
     tests.addTests(unittest.TestLoader().loadTestsFromTestCase(WorkflowSceneTestCase))
+    tests.addTests(unittest.TestLoader().loadTestsFromTestCase(WorkflowDependencyGraphTestCase))
+    tests.addTests(unittest.TestLoader().loadTestsFromTestCase(GraphUtilitiesTestCase))
 
     return tests
 
