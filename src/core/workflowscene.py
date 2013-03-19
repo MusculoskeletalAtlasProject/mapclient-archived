@@ -17,8 +17,6 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     You should have received a copy of the GNU General Public License
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
-import os
-
 from PyQt4 import QtCore
 
 from mountpoints.workflowstep import workflowStepFactory
@@ -131,6 +129,8 @@ class WorkflowDependencyGraph(object):
     def __init__(self, scene):
         self._scene = scene
         self._graph = []
+        self._head = None
+        self._tail = None
         self._current = -1
     
     def _calculateGraph(self):
@@ -149,10 +149,10 @@ class WorkflowDependencyGraph(object):
                 seed = item
                 
         if seed:
-            head = _findHead(dependencyGraph, seed)
-            tail = _findTail(dependencyGraph, seed)
+            self._head = _findHead(dependencyGraph, seed)
+            self._tail = _findTail(dependencyGraph, seed)
         
-            self._graph = _findPath(dependencyGraph, head, tail)
+            self._graph = _findPath(dependencyGraph, self._head, self._tail)
     
     def canExecute(self):
         self._calculateGraph()
@@ -162,14 +162,14 @@ class WorkflowDependencyGraph(object):
         return can and self._current == -1
     
     def execute(self):
-        if not self._graph:
-            self._calculateGraph()
-            
         self._current += 1
         if self._current >= len(self._graph):
             self._current = -1
         else:
-            self._graph[self._current]._step.execute()
+            dataIn = None
+            if self._current > 0:
+                dataIn = self._graph[self._current - 1]._step.portOutput()
+            self._graph[self._current]._step.execute(dataIn)
     
     
 class WorkflowScene(object):
@@ -204,8 +204,7 @@ class WorkflowScene(object):
         nodeIndex = 0
         for metastep in stepList:
             if metastep._step.isConfigured():
-                step_location = os.path.join(location, metastep._step.getIdentifier())
-                metastep._step.serialize(step_location)
+                metastep._step.serialize(location)
             ws.setArrayIndex(nodeIndex)
             ws.setValue('name', metastep._step.getName())
             ws.setValue('position', metastep._pos)

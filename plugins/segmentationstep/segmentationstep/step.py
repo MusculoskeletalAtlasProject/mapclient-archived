@@ -53,3 +53,7 @@ class SegmentationStep(WorkflowStepMountPoint):
     def deserialize(self, location):
         pass
     
+    def execute(self, dataIn):
+        print('segmentation step : ' + dataIn.identifier())
+        self._doneExecution()
+    

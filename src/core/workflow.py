@@ -110,7 +110,7 @@ class WorkflowManager():
         self._scene.execute()
 
     def isModified(self):
-        return self._saveStateIndex == self._currentStateIndex
+        return self._saveStateIndex != self._currentStateIndex
 
     def new(self, location):
         '''

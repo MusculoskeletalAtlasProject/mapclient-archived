@@ -26,6 +26,22 @@ from imagesourcestep.widgets.configuredialog import ConfigureDialog, ConfigureDi
 
 STEP_SERIALISATION_FILENAME = 'step.conf'
 
+class ImageSourceData(object):
+    def __init__(self, identifier, location, imageType):
+        self._identifier = identifier
+        self._location = location
+        self._imageType = imageType
+        
+    def identifier(self):
+        return self._identifier
+    
+    def location(self):
+        return self._location
+    
+    def imageType(self):
+        return self._imageType
+    
+
 class ImageSourceStep(WorkflowStepMountPoint):
     '''
     A step satisfies the step plugin duck.
@@ -74,4 +90,6 @@ class ImageSourceStep(WorkflowStepMountPoint):
         self._state.load(s)
         d = ConfigureDialog(self._state)
         self._configured = d.validate()
-    
+        
+    def portOutput(self):
+        return ImageSourceData(self._state.identifier(), self._state.location(), self._state.imageType())

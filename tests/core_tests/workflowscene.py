@@ -136,7 +136,7 @@ class GraphUtilitiesTestCase(unittest.TestCase):
         
     def testFindHead1(self):
         head = _findHead(self._graph, 'C')
-        self.assertEqual(head, 'A')
+        self.assertIn(head, ['A', 'E'])
         
     def testFindTail1(self):
         tail = _findTail(self._graph, 'C')

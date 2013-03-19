@@ -106,9 +106,12 @@ def _workflow_step_init(self):
     self._configuredObserver = None
     self._doneExecution = None
 
-def _workflow_step_execute(self):
+def _workflow_step_execute(self, dataIn=None):
     print('executing: ' + self.getName())
     self._doneExecution()
+    
+def _workflow_step_portOutput(self):
+    return None
 
 def _workflow_step_registerDoneExecution(self, observer):
     self._doneExecution = observer
@@ -157,6 +160,7 @@ def _workflow_step_getName(self):
 attr_dict = {'_category': 'General'}
 attr_dict['__init__'] = _workflow_step_init
 attr_dict['execute'] = _workflow_step_execute
+attr_dict['portOutput'] = _workflow_step_portOutput
 attr_dict['registerDoneExecution'] = _workflow_step_registerDoneExecution
 attr_dict['configure'] = _workflow_step_configure
 attr_dict['isConfigured'] = _workflow_step_isConfigured

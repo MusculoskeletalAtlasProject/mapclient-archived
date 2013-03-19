@@ -65,7 +65,7 @@ class WorkflowWidget(QtGui.QWidget):
         workflowOpen = wfm.isWorkflowOpen()
         self.action_Close.setEnabled(workflowOpen)
         self.setEnabled(workflowOpen)
-        self.action_Save.setEnabled(not wfm.isModified())
+        self.action_Save.setEnabled(wfm.isModified())
         self._ui.executeButton.setEnabled(wfm.scene().canExecute() and not wfm.isModified())
 
     def undoStackIndexChanged(self, index):
