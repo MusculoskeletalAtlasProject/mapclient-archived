@@ -46,14 +46,15 @@ class MainWindow(QtGui.QMainWindow):
         self._createRedoAction(self._ui.menu_Edit)
 
         self._ui.stackedWidget.currentChanged.connect(self.centralWidgetChanged)
-        self.stackedWidgetPages = StackedWidgetMountPoint.getPlugins(self)
-        self.stackedWidgetPages.insert(0, WorkflowWidget(self))
-        self._ui.stackedWidget.addWidget(self.stackedWidgetPages[0])
+        self._stackedWidgetPages = StackedWidgetMountPoint.getPlugins(self)
+        self._workflowWidget = WorkflowWidget(self)
+        print('======')
+        print(self._stackedWidgetPages)
+        print('======')
+        self._ui.stackedWidget.addWidget(self._workflowWidget)
 
-#        for stackedWidgetPage in self.stackedWidgetPages:
-#            if not hasattr(self, stackedWidgetPage.name):
-#                setattr(self, stackedWidgetPage.name, stackedWidgetPage)
-#                stackedWidgetPage.setWidgetIndex(self._ui.stackedWidget.addWidget(stackedWidgetPage.getWidget()))
+        for stackedWidgetPage in self._stackedWidgetPages:
+            stackedWidgetPage.setWidgetIndex(self._ui.stackedWidget.addWidget(stackedWidgetPage.getWidget()))
 
         self._model.readSettings()
         self.resize(self._model.size())

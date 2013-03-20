@@ -33,4 +33,3 @@ Plugins can inherit this mount point to extend
  
 '''
 StackedWidgetMountPoint = MetaPluginMountPoint('StackedWidgetMountPoint', (object,), {})
-

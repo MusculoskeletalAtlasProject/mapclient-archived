@@ -19,6 +19,7 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
 '''
 from PyQt4 import QtGui
 from mountpoints.workflowstep import WorkflowStepMountPoint
+from mountpoints.stackedwidget import StackedWidgetMountPoint
 
 class SegmentationStep(WorkflowStepMountPoint):
     '''
@@ -57,3 +58,19 @@ class SegmentationStep(WorkflowStepMountPoint):
         print('segmentation step : ' + dataIn.identifier())
         self._doneExecution()
     
+class Boo(QtGui.QWidget):
+    pass
+
+class SegmentationWidget(StackedWidgetMountPoint):
+    
+    def __init__(self, mainWindow):
+        self._mainWindow = mainWindow
+        self._widgetIndex = -1
+        
+    def setWidgetIndex(self, index):
+        self._widgetIndex = index
+        print(self._widgetIndex)
+        
+    def getWidget(self):
+        return Boo(self._mainWindow)
+
