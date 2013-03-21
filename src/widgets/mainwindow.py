@@ -45,7 +45,7 @@ class MainWindow(QtGui.QMainWindow):
         self._createUndoAction(self._ui.menu_Edit)
         self._createRedoAction(self._ui.menu_Edit)
 
-        self._ui.stackedWidget.currentChanged.connect(self.centralWidgetChanged)
+#        self._ui.stackedWidget.currentChanged.connect(self.centralWidgetChanged)
         self._stackedWidgetPages = StackedWidgetMountPoint.getPlugins(self)
         self._workflowWidget = WorkflowWidget(self)
         print('======')
@@ -54,7 +54,9 @@ class MainWindow(QtGui.QMainWindow):
         self._ui.stackedWidget.addWidget(self._workflowWidget)
 
         for stackedWidgetPage in self._stackedWidgetPages:
-            stackedWidgetPage.setWidgetIndex(self._ui.stackedWidget.addWidget(stackedWidgetPage.getWidget()))
+            widget = stackedWidgetPage.getWidget()
+            print(widget)
+            stackedWidgetPage.setWidgetIndex(self._ui.stackedWidget.addWidget(widget))
 
         self._model.readSettings()
         self.resize(self._model.size())
@@ -111,7 +113,17 @@ class MainWindow(QtGui.QMainWindow):
     def _canUndoChanged(self, canUndo):
         self.undoAction.setEnabled(canUndo)
 
+    def execute(self):
+        self._ui.stackedWidget.setCurrentWidget(self._workflowWidget)
+        self.model().workflowManager().execute()
+        
+    def setCurrentWidget(self, widget):
+        if self._ui.stackedWidget.indexOf(widget) <= 0:
+            self._ui.stackedWidget.addWidget(widget)
+        self._ui.stackedWidget.setCurrentWidget(widget)
+        
     def centralWidgetChanged(self, index):
+        print('centralWidgetChanged')
         widget = self._ui.stackedWidget.currentWidget()
         widget.setActive()
 

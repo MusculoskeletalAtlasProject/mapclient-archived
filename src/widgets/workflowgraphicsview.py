@@ -191,6 +191,7 @@ class WorkflowGraphicsView(QtGui.QGraphicsView):
             node = Node(metastep)
             metastep._step.registerConfiguredObserver(self.scene().stepConfigured)
             metastep._step.registerDoneExecution(self.scene().doneExecution)
+            metastep._step.registerSetCurrentWidget(self.scene().setCurrentWidget)
 
             self._undoStack.beginMacro('Add node')
             self._undoStack.push(CommandAdd(self.scene(), node))

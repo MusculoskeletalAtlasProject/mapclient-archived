@@ -18,8 +18,10 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
 from PyQt4 import QtGui
+
 from mountpoints.workflowstep import WorkflowStepMountPoint
-from mountpoints.stackedwidget import StackedWidgetMountPoint
+
+from segmentationstep.widgets.segmentationwidget import SegmentationWidget
 
 class SegmentationStep(WorkflowStepMountPoint):
     '''
@@ -36,6 +38,8 @@ class SegmentationStep(WorkflowStepMountPoint):
         self._icon = QtGui.QImage(':/segmentation/icons/seg.gif')
         self.addPort(('pho#workflow#port', 'uses', 'images'))
         self.addPort(('pho#workflow#port', 'provides', 'pointcloud'))
+        self._widget = None
+        self._configured = True
 
     def configure(self):
         self._configured = True
@@ -55,22 +59,8 @@ class SegmentationStep(WorkflowStepMountPoint):
         pass
     
     def execute(self, dataIn):
-        print('segmentation step : ' + dataIn.identifier())
-        self._doneExecution()
-    
-class Boo(QtGui.QWidget):
-    pass
-
-class SegmentationWidget(StackedWidgetMountPoint):
-    
-    def __init__(self, mainWindow):
-        self._mainWindow = mainWindow
-        self._widgetIndex = -1
-        
-    def setWidgetIndex(self, index):
-        self._widgetIndex = index
-        print(self._widgetIndex)
-        
-    def getWidget(self):
-        return Boo(self._mainWindow)
+        if not self._widget:
+            self._widget = SegmentationWidget()
+            self._widget._ui.doneButton.clicked.connect(self._doneExecution)
+        self._setCurrentWidget(self._widget)
 

@@ -76,7 +76,10 @@ class WorkflowWidget(QtGui.QWidget):
         self._mainWindow.setUndoStack(self._undoStack)
 
     def executeWorkflow(self):
-        self._mainWindow.model().workflowManager().execute()
+        self._mainWindow.execute()#.model().workflowManager().execute()
+        
+    def setCurrentWidget(self, widget):
+        self._mainWindow.setCurrentWidget(widget)
         
     def new(self):
         m = self._mainWindow.model().workflowManager()

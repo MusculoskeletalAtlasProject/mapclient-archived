@@ -80,6 +80,7 @@ class WorkflowGraphicsScene(QtGui.QGraphicsScene):
                 node = Node(workflowitem)
                 workflowitem._step.registerConfiguredObserver(self.stepConfigured)
                 workflowitem._step.registerDoneExecution(self.doneExecution)
+                workflowitem._step.registerSetCurrentWidget(self.setCurrentWidget)
                 # Put the node into the scene straight away so that the items scene will
                 # be valid when we set the position.
                 QtGui.QGraphicsScene.addItem(self, node)
@@ -140,6 +141,9 @@ class WorkflowGraphicsScene(QtGui.QGraphicsScene):
         
     def stepConfigured(self):
         self._undoStack.push(CommandConfigure(self))
+        
+    def setCurrentWidget(self, widget):
+        self.parent().setCurrentWidget(widget)
         
     def doneExecution(self):
         self.parent().executeWorkflow()

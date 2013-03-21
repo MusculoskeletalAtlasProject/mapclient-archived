@@ -105,6 +105,7 @@ def _workflow_step_init(self):
     self._configured = False
     self._configuredObserver = None
     self._doneExecution = None
+    self._setCurrentWidget = None
 
 def _workflow_step_execute(self, dataIn=None):
     print('executing: ' + self.getName())
@@ -115,6 +116,9 @@ def _workflow_step_portOutput(self):
 
 def _workflow_step_registerDoneExecution(self, observer):
     self._doneExecution = observer
+
+def _workflow_step_registerSetCurrentWidget(self, observer):
+    self._setCurrentWidget = observer
 
 def _workflow_step_configure(self, location):
     raise NotImplementedError
@@ -162,6 +166,7 @@ attr_dict['__init__'] = _workflow_step_init
 attr_dict['execute'] = _workflow_step_execute
 attr_dict['portOutput'] = _workflow_step_portOutput
 attr_dict['registerDoneExecution'] = _workflow_step_registerDoneExecution
+attr_dict['registerSetCurrentWidget'] = _workflow_step_registerSetCurrentWidget
 attr_dict['configure'] = _workflow_step_configure
 attr_dict['isConfigured'] = _workflow_step_isConfigured
 attr_dict['registerConfiguredObserver'] = _workflow_step_registerConfiguredObserver

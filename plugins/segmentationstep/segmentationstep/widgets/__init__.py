@@ -17,20 +17,3 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     You should have received a copy of the GNU General Public License
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
-
-from core.pluginframework import MetaPluginMountPoint
-'''
-Plugins can inherit this mount point to extend
-
- A plugin that registers this mount point must have attributes
- * name
- 
- A plugin that registers this mount point could have attributes
- * None
- 
- It must implement
- * setWidgetIndex 
- 
-'''
-StackedWidgetMountPoint = MetaPluginMountPoint('StackedWidgetMountPoint', (object,), {})
-
