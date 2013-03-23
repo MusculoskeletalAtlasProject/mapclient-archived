@@ -48,19 +48,22 @@ class SegmentationStep(WorkflowStepMountPoint):
 
     def getIdentifier(self):
         return self._identifier
-    
+
     def setIdentifier(self, identifier):
         self._identifier = identifier
-        
+
     def serialize(self, location):
-        pass #QtCore.QSettings(location + '/' + info.WORKFLOW_NAME, QtCore.QSettings.IniFormat)
-        
+        pass  # QtCore.QSettings(location + '/' + info.WORKFLOW_NAME, QtCore.QSettings.IniFormat)
+
     def deserialize(self, location):
         pass
-    
+
     def execute(self, dataIn):
         if not self._widget:
-            self._widget = SegmentationWidget()
+            self._widget = SegmentationWidget(dataIn)
             self._widget._ui.doneButton.clicked.connect(self._doneExecution)
         self._setCurrentWidget(self._widget)
 
+    def portOutput(self):
+        point_cloud = self._widget.getPointCloud()
+        return point_cloud

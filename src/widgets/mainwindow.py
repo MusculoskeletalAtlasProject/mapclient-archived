@@ -21,7 +21,7 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
 from PyQt4 import QtGui
 
 from widgets.ui_mainwindow import Ui_MainWindow
-from mountpoints.stackedwidget import StackedWidgetMountPoint
+# from mountpoints.stackedwidget import StackedWidgetMountPoint
 from widgets.workflowwidget import WorkflowWidget
 
 class MainWindow(QtGui.QMainWindow):
@@ -36,7 +36,7 @@ class MainWindow(QtGui.QMainWindow):
         QtGui.QMainWindow.__init__(self)
 
         self._model = model
-        
+
         self._ui = Ui_MainWindow()
         self._ui.setupUi(self)
         self._makeConnections()
@@ -46,17 +46,14 @@ class MainWindow(QtGui.QMainWindow):
         self._createRedoAction(self._ui.menu_Edit)
 
 #        self._ui.stackedWidget.currentChanged.connect(self.centralWidgetChanged)
-        self._stackedWidgetPages = StackedWidgetMountPoint.getPlugins(self)
+#        self._stackedWidgetPages = StackedWidgetMountPoint.getPlugins(self)
         self._workflowWidget = WorkflowWidget(self)
-        print('======')
-        print(self._stackedWidgetPages)
-        print('======')
         self._ui.stackedWidget.addWidget(self._workflowWidget)
 
-        for stackedWidgetPage in self._stackedWidgetPages:
-            widget = stackedWidgetPage.getWidget()
-            print(widget)
-            stackedWidgetPage.setWidgetIndex(self._ui.stackedWidget.addWidget(widget))
+#        for stackedWidgetPage in self._stackedWidgetPages:
+#            widget = stackedWidgetPage.getWidget()
+#            print(widget)
+#            stackedWidgetPage.setWidgetIndex(self._ui.stackedWidget.addWidget(widget))
 
         self._model.readSettings()
         self.resize(self._model.size())
@@ -89,7 +86,7 @@ class MainWindow(QtGui.QMainWindow):
 
     def model(self):
         return self._model
-    
+
     def _makeConnections(self):
         self._ui.action_Quit.triggered.connect(self.quitApplication)
         self._ui.action_About.triggered.connect(self.about)
@@ -116,12 +113,12 @@ class MainWindow(QtGui.QMainWindow):
     def execute(self):
         self._ui.stackedWidget.setCurrentWidget(self._workflowWidget)
         self.model().workflowManager().execute()
-        
+
     def setCurrentWidget(self, widget):
         if self._ui.stackedWidget.indexOf(widget) <= 0:
             self._ui.stackedWidget.addWidget(widget)
         self._ui.stackedWidget.setCurrentWidget(widget)
-        
+
     def centralWidgetChanged(self, index):
         print('centralWidgetChanged')
         widget = self._ui.stackedWidget.currentWidget()

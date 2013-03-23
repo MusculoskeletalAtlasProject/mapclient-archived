@@ -36,6 +36,6 @@ if current_dir not in sys.path:
 
 import segmentationstep
 
-( _, tail ) = os.path.split(current_dir)
+(_, tail) = os.path.split(current_dir)
 print("Plugin '{0}' version {1} by {2} loaded".format(tail, __version__, __author__))
 
