@@ -89,7 +89,7 @@ A plugin that registers this mount point could have:
   - An attribute _category that is a string representation of the step's category
   
 '''
-#class WorkflowStep(WorkflowStepMountPoint):
+# class WorkflowStep(WorkflowStepMountPoint):
 #    '''
 #    A step that acts like the step plugin duck
 #    '''
@@ -110,15 +110,16 @@ def _workflow_step_init(self):
 def _workflow_step_execute(self, dataIn=None):
     print('executing: ' + self.getName())
     self._doneExecution()
-    
+
 def _workflow_step_portOutput(self):
     return None
 
 def _workflow_step_registerDoneExecution(self, observer):
     self._doneExecution = observer
 
-def _workflow_step_registerSetCurrentWidget(self, observer):
+def _workflow_step_registerOnExecuteEntry(self, observer, setCurrentUndoRedoStackObserver=None):
     self._setCurrentWidget = observer
+    self._setCurrentUndoRedoStack = setCurrentUndoRedoStackObserver
 
 def _workflow_step_configure(self, location):
     raise NotImplementedError
@@ -158,7 +159,7 @@ def _workflow_step_canConnect(self, other):
 def _workflow_step_getName(self):
     if hasattr(self, '_name'):
         return self._name
-    
+
     return self.__class__.__name__
 
 attr_dict = {'_category': 'General'}
@@ -166,7 +167,7 @@ attr_dict['__init__'] = _workflow_step_init
 attr_dict['execute'] = _workflow_step_execute
 attr_dict['portOutput'] = _workflow_step_portOutput
 attr_dict['registerDoneExecution'] = _workflow_step_registerDoneExecution
-attr_dict['registerSetCurrentWidget'] = _workflow_step_registerSetCurrentWidget
+attr_dict['registerOnExecuteEntry'] = _workflow_step_registerOnExecuteEntry
 attr_dict['configure'] = _workflow_step_configure
 attr_dict['isConfigured'] = _workflow_step_isConfigured
 attr_dict['registerConfiguredObserver'] = _workflow_step_registerConfiguredObserver
@@ -182,7 +183,7 @@ def workflowStepFactory(step_name):
     for step in WorkflowStepMountPoint.getPlugins():
         if step_name == step.getName():
             return step
-        
+
     raise ValueError('Failed to find step named: ' + step_name)
 
 

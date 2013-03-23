@@ -62,6 +62,8 @@ class SegmentationStep(WorkflowStepMountPoint):
         if not self._widget:
             self._widget = SegmentationWidget(dataIn)
             self._widget._ui.doneButton.clicked.connect(self._doneExecution)
+
+        self._setCurrentUndoRedoStack(self._widget.undoRedoStack())
         self._setCurrentWidget(self._widget)
 
     def portOutput(self):

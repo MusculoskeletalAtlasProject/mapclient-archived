@@ -91,7 +91,8 @@ class MainWindow(QtGui.QMainWindow):
         self._ui.action_Quit.triggered.connect(self.quitApplication)
         self._ui.action_About.triggered.connect(self.about)
 
-    def setUndoStack(self, stack):
+    def setCurrentUndoRedoStack(self, stack):
+        print('setCurrentUndoRedoStack')
         current_stack = self._model.undoManager().currentStack()
         if current_stack:
             current_stack.canRedoChanged.disconnect(self._canRedoChanged)
@@ -112,6 +113,7 @@ class MainWindow(QtGui.QMainWindow):
 
     def execute(self):
         self._ui.stackedWidget.setCurrentWidget(self._workflowWidget)
+        self.setCurrentUndoRedoStack(self._workflowWidget.undoRedoStack())
         self.model().workflowManager().execute()
 
     def setCurrentWidget(self, widget):

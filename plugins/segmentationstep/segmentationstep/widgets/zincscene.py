@@ -21,7 +21,7 @@ import os, re
 
 import numpy
 
-from PyQt4 import QtCore, QtOpenGL
+from PyQt4 import QtCore, QtOpenGL, QtGui
 
 from zinc.context import Context
 from zinc.graphic import Graphic
@@ -29,6 +29,8 @@ from zinc.sceneviewer import SceneViewerInput, SceneViewer
 from zinc.field import Field
 from zinc.element import Element, ElementBasis
 from zinc.graphicsmaterial import GraphicsMaterial
+
+from segmentationstep.undoredo import CommandAdd
 
 def tryint(s):
     try:
@@ -56,6 +58,7 @@ class ZincScene(QtOpenGL.QGLWidget):
         self._slider_value = 0
         self._component = 0
         self._action_transfrom = True
+        self._undoRedoStack = QtGui.QUndoStack(self)
 
     def setImageDataLocation(self, imageDataLocation):
         self._imageDataLocation = imageDataLocation
@@ -449,13 +452,11 @@ class ZincScene(QtOpenGL.QGLWidget):
 
 
     def unproject(self, x, y, z):
-        return self._scene_viewer.unproject(x, y, z)
+        return self._scene_viewer.unproject(x, y, z)[1:]
 
     def getPlaneCoordinate(self, x, y):
         unproject_near = self.unproject(x, y, 0.0)
-        unproject_near = unproject_near[1:]
         unproject_far = self.unproject(x, y, 1.0)
-        unproject_far = unproject_far[1:]
 
         p0 = numpy.array([0.0, 0.0, 0.0])
         p0[self._component] = self._slider_value / 100.0
@@ -481,20 +482,7 @@ class ZincScene(QtOpenGL.QGLWidget):
         position = self.getPlaneCoordinate(x, y)
         if position:
             field_module = self._points_region.getFieldModule()
-            field_module.beginChange()
-            field_cache = field_module.createCache()
-            coordinate_field = field_module.findFieldByName('coordinates')
-            nodeset = field_module.findNodesetByName('cmiss_nodes')
-            template = nodeset.createNodeTemplate()
-            template.defineField(coordinate_field)
-
-            node = nodeset.createNode(-1, template)
-            field_cache.setNode(node)
-            coordinate_field.assignReal(field_cache, position)
-
-            field_module.endChange()
-
-            self.updateGL()
+            self._undoRedoStack.push(CommandAdd(field_module, position, self.updateGL))
 
     def mousePressEvent(self, mouseevent):
         '''

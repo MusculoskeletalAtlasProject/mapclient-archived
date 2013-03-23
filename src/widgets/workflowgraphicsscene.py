@@ -23,14 +23,14 @@ from core.workflowscene import MetaStep, Connection
 from widgets.workflowgraphicsitems import Node, Arc
 from widgets.workflowcommands import CommandConfigure
 
-       
+
 class WorkflowGraphicsScene(QtGui.QGraphicsScene):
     '''
     This view side class is a non-authoratative representation
     of the current workflow scene model.  It must be kept in 
     sync with the authoratative workflow scene model.
     '''
-    
+
     sceneWidth = 500
     sceneHeight = 1.618 * sceneWidth
 
@@ -42,13 +42,13 @@ class WorkflowGraphicsScene(QtGui.QGraphicsScene):
 
     def setWorkflowScene(self, scene):
         self._workflow_scene = scene
-        
+
     def workflowScene(self):
         return self._workflow_scene
-        
+
     def setUndoStack(self, stack):
         self._undoStack = stack
-        
+
     def addItem(self, item):
         QtGui.QGraphicsScene.addItem(self, item)
         if hasattr(item, 'Type'):
@@ -56,7 +56,7 @@ class WorkflowGraphicsScene(QtGui.QGraphicsScene):
                 self._workflow_scene.addItem(item._metastep)
             elif item.Type == Arc.Type:
                 self._workflow_scene.addItem(item._connection)
-        
+
     def removeItem(self, item):
         QtGui.QGraphicsScene.removeItem(self, item)
         if hasattr(item, 'Type'):
@@ -66,7 +66,7 @@ class WorkflowGraphicsScene(QtGui.QGraphicsScene):
                 item.sourceNode().removeArc(item)
                 item.destinationNode().removeArc(item)
                 self._workflow_scene.removeItem(item._connection)
-                
+
     def updateModel(self):
         '''
         Clears the QGraphicScene and re-populates it with what is currently 
@@ -80,7 +80,7 @@ class WorkflowGraphicsScene(QtGui.QGraphicsScene):
                 node = Node(workflowitem)
                 workflowitem._step.registerConfiguredObserver(self.stepConfigured)
                 workflowitem._step.registerDoneExecution(self.doneExecution)
-                workflowitem._step.registerSetCurrentWidget(self.setCurrentWidget)
+                workflowitem._step.registerOnExecuteEntry(self.setCurrentWidget, self.setWidgetUndoRedoStack)
                 # Put the node into the scene straight away so that the items scene will
                 # be valid when we set the position.
                 QtGui.QGraphicsScene.addItem(self, node)
@@ -91,10 +91,10 @@ class WorkflowGraphicsScene(QtGui.QGraphicsScene):
                 meta_steps[workflowitem] = node
             elif workflowitem.Type == Connection.Type:
                 connections.append(workflowitem)
-                
+
         for connection in connections:
             arc = Arc(meta_steps[connection.source()], meta_steps[connection.destination()])
-            # Overwrite the connection created in the Arc with the original one that is in the 
+            # Overwrite the connection created in the Arc with the original one that is in the
             # WorkflowScene
             arc._connection = connection
             # Again put the arc into the scene straight away so the scene will be valid
@@ -102,9 +102,9 @@ class WorkflowGraphicsScene(QtGui.QGraphicsScene):
             self.blockSignals(True)
             arc.setSelected(connection.selected())
             self.blockSignals(False)
-            
+
         self._previousSelection = self.selectedItems()
-            
+
     def ensureItemInScene(self, item, newPos):
         bRect = item.boundingRect()
         xp1 = bRect.x() + newPos.x()
@@ -114,9 +114,9 @@ class WorkflowGraphicsScene(QtGui.QGraphicsScene):
         bRect.setCoords(xp1, yp1, xp2, yp2)
         rect = self.sceneRect()
         if not rect.contains(bRect):
-            x1 = max(bRect.left(), rect.left()) + 2.0 # plus bounding rectangle adjust
+            x1 = max(bRect.left(), rect.left()) + 2.0  # plus bounding rectangle adjust
             x2 = min(bRect.x() + bRect.width(), rect.x() + rect.width()) - bRect.width() + 2.0
-            y1 = max(bRect.top(), rect.top()) + 2.0 # plus bounding rectangle adjust
+            y1 = max(bRect.top(), rect.top()) + 2.0  # plus bounding rectangle adjust
             y2 = min(bRect.bottom(), rect.bottom()) - bRect.height() + 2.0
             if newPos.x() != x1:
                 newPos.setX(x1)
@@ -126,25 +126,28 @@ class WorkflowGraphicsScene(QtGui.QGraphicsScene):
                 newPos.setY(y1)
             elif newPos.y() != y2:
                 newPos.setY(y2)
-    
+
         return newPos
 
     def clear(self):
         QtGui.QGraphicsScene.clear(self)
         self._workflow_scene.clear()
-        
+
     def previouslySelectedItems(self):
         return self._previousSelection
-    
+
     def setPreviouslySelectedItems(self, selection):
         self._previousSelection = selection
-        
+
     def stepConfigured(self):
         self._undoStack.push(CommandConfigure(self))
-        
+
     def setCurrentWidget(self, widget):
         self.parent().setCurrentWidget(widget)
-        
+
+    def setWidgetUndoRedoStack(self, stack):
+        self.parent().setWidgetUndoRedoStack(stack)
+
     def doneExecution(self):
         self.parent().executeWorkflow()
 

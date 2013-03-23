@@ -37,14 +37,14 @@ class WorkflowGraphicsView(QtGui.QGraphicsView):
         self._errorIconTimer.setSingleShot(True)
         self._errorIconTimer.timeout.connect(self.errorIconTimeout)
         self._errorIcon = None
-        
+
         self._undoStack = None
-        
+
         self._connectLine = None
         self._connectSourceNode = None
-        
+
         self._selectionStartPos = None
-        
+
         self.setCacheMode(QtGui.QGraphicsView.CacheBackground)
         self.setRenderHint(QtGui.QPainter.Antialiasing)
 #        self.setTransformationAnchor(QtGui.QGraphicsView.AnchorUnderMouse)
@@ -57,7 +57,7 @@ class WorkflowGraphicsView(QtGui.QGraphicsView):
 
     def setUndoStack(self, stack):
         self._undoStack = stack
-        
+
     def connectNodes(self, node1, node2):
         # Check if nodes are already connected
         if not node1.hasArcToDestination(node2):
@@ -99,7 +99,7 @@ class WorkflowGraphicsView(QtGui.QGraphicsView):
             event.accept()
         else:
             event.ignore()
-            
+
     def contextMenuEvent(self, event):
         item = self.itemAt(event.pos())
         if item and item.type() == Node.Type:
@@ -120,7 +120,7 @@ class WorkflowGraphicsView(QtGui.QGraphicsView):
         else:
             QtGui.QGraphicsView.mousePressEvent(self, event)
             self._selectionStartPos = event.pos()
-            
+
     def mouseMoveEvent(self, event):
         if self._connectLine:
             newLine = QtCore.QLineF(self._connectLine.line().p1(), self.mapToScene(event.pos()))
@@ -153,7 +153,7 @@ class WorkflowGraphicsView(QtGui.QGraphicsView):
     def changeEvent(self, event):
         if event.type() == QtCore.QEvent.EnabledChange:
             self.invalidateScene(self.sceneRect())
-       
+
     def drawBackground(self, painter, rect):
         # Shadow.
         sceneRect = self.sceneRect()
@@ -191,7 +191,7 @@ class WorkflowGraphicsView(QtGui.QGraphicsView):
             node = Node(metastep)
             metastep._step.registerConfiguredObserver(self.scene().stepConfigured)
             metastep._step.registerDoneExecution(self.scene().doneExecution)
-            metastep._step.registerSetCurrentWidget(self.scene().setCurrentWidget)
+            metastep._step.registerOnExecuteEntry(self.scene().setCurrentWidget)
 
             self._undoStack.beginMacro('Add node')
             self._undoStack.push(CommandAdd(self.scene(), node))
@@ -223,4 +223,4 @@ class WorkflowGraphicsView(QtGui.QGraphicsView):
             event.accept()
         else:
             event.ignore()
-     
+

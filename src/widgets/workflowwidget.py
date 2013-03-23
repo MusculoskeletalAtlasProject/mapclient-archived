@@ -41,15 +41,15 @@ class WorkflowWidget(QtGui.QWidget):
         self._workflowManager = self._mainWindow.model().workflowManager()
         self._graphicsScene = WorkflowGraphicsScene(self)
         self._ui.graphicsView.setScene(self._graphicsScene)
-        
+
         self._ui.graphicsView.setUndoStack(self._undoStack)
         self._graphicsScene.setUndoStack(self._undoStack)
-        
+
         self._graphicsScene.setWorkflowScene(self._workflowManager.scene())
         self._graphicsScene.selectionChanged.connect(self._ui.graphicsView.selectionChanged)
 
         self._ui.executeButton.clicked.connect(self.executeWorkflow)
-        self.action_Close = None # Keep a handle to this for modifying the Ui.
+        self.action_Close = None  # Keep a handle to this for modifying the Ui.
         self._createMenuItems()
 
         self.workflowStepPlugins = WorkflowStepMountPoint.getPlugins()
@@ -72,15 +72,22 @@ class WorkflowWidget(QtGui.QWidget):
         self._mainWindow.model().workflowManager().undoStackIndexChanged(index)
         self._updateUi()
 
+    def undoRedoStack(self):
+        return self._undoStack
+
     def setActive(self):
-        self._mainWindow.setUndoStack(self._undoStack)
+        print('setting active - workflow widget')
+        self._mainWindow.setCurrentUndoRedoStack(self._undoStack)
 
     def executeWorkflow(self):
-        self._mainWindow.execute()#.model().workflowManager().execute()
-        
+        self._mainWindow.execute()  # .model().workflowManager().execute()
+
     def setCurrentWidget(self, widget):
         self._mainWindow.setCurrentWidget(widget)
-        
+
+    def setWidgetUndoRedoStack(self, stack):
+        self._mainWindow.setCurrentUndoRedoStack(stack)
+
     def new(self):
         m = self._mainWindow.model().workflowManager()
         workflowDir = QtGui.QFileDialog.getExistingDirectory(self._mainWindow, caption='Select Workflow Directory', directory=m.previousLocation())

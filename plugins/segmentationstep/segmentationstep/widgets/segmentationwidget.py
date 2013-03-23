@@ -52,6 +52,8 @@ class SegmentationWidget(QtGui.QWidget):
 
         self._ui.context.actionButtonClicked()
 
+    def undoRedoStack(self):
+        return self._ui.context._undoRedoStack
 
     def getPointCloud(self):
         return self._ui.context.getPointCloud()
