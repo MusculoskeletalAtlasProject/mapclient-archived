@@ -17,6 +17,8 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     You should have received a copy of the GNU General Public License
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
+import os
+
 from PyQt4 import QtCore
 
 from core.workflow import WorkflowManager
@@ -32,36 +34,41 @@ class MainApplication(object):
         '''
         Constructor
         '''
-        
+
         self._size = QtCore.QSize(600, 400)
         self._pos = QtCore.QPoint(100, 150)
+        self._pluginManager = PluginManager()
         self._workflowManager = WorkflowManager()
         self._undoManager = UndoManager()
 
     def setSize(self, size):
         self._size = size
-        
+
     def size(self):
         return self._size
-        
+
     def setPos(self, pos):
         self._pos = pos
-    
+
     def pos(self):
         return self._pos
-        
+
     def undoManager(self):
         return self._undoManager
-    
+
     def workflowManager(self):
         return self._workflowManager
-    
+
+    def pluginManager(self):
+        return self._pluginManager
+
     def writeSettings(self):
         settings = QtCore.QSettings()
         settings.beginGroup('MainWindow')
         settings.setValue('size', self._size)
         settings.setValue('pos', self._pos)
         settings.endGroup()
+        self._pluginManager.writeSettings(settings)
         self._workflowManager.writeSettings(settings)
 #        for stackedWidgetPage in self.stackedWidgetPages:
 #            stackedWidgetPage.writeSettings(settings)
@@ -72,7 +79,65 @@ class MainApplication(object):
         self._size = settings.value('size', self._size)
         self._pos = settings.value('pos', self._pos)
         settings.endGroup()
+        self._pluginManager.readSettings(settings)
         self._workflowManager.readSettings(settings)
 #        for stackedWidgetPage in self.stackedWidgetPages:
 #            stackedWidgetPage.readSettings(settings)
 
+from core.pluginframework import getPlugins, loadPlugin
+
+class PluginManager(object):
+
+
+    def __init__(self):
+        self._directories = []
+        self._loadDefaultPlugins = True
+
+    def directories(self):
+        return self._directories
+
+    def setDirectories(self, directories):
+        self._directories = directories
+
+    def loadDefaultPlugins(self):
+        return self._loadDefaultPlugins
+
+    def setLoadDefaultPlugins(self, loadDefaultPlugins):
+        self._loadDefaultPlugins = loadDefaultPlugins
+
+    def allDirectories(self):
+        plugin_dirs = self._directories[:]
+        if self._loadDefaultPlugins:
+            file_dir = os.path.dirname(os.path.abspath(__file__))
+            inbuilt_plugin_dir = os.path.realpath(os.path.join(file_dir, '..', '..', 'plugins'))  # fileDir + '/../plugins')
+            plugin_dirs.insert(0, inbuilt_plugin_dir)
+
+        return plugin_dirs
+
+    def load(self):
+        for directory in self.allDirectories():
+            for p in getPlugins(directory):
+                loadPlugin(p)
+
+    def readSettings(self, settings):
+        self._directories = []
+        settings.beginGroup('Plugins')
+        self._loadDefaultPlugins = settings.value('load_defaults', 'true') == 'true'
+        directory_count = settings.beginReadArray('directories')
+        for i in range(directory_count):
+            settings.setArrayIndex(i)
+            self._directories.append(settings.value('directory'))
+        settings.endArray()
+        settings.endGroup()
+
+    def writeSettings(self, settings):
+        settings.beginGroup('Plugins')
+        settings.setValue('load_defaults', self._loadDefaultPlugins)
+        settings.beginWriteArray('directories')
+        directory_index = 0
+        for directory in self._directories:
+            settings.setArrayIndex(directory_index)
+            settings.setValue('directory', directory)
+            directory_index += 1
+        settings.endArray()
+        settings.endGroup()

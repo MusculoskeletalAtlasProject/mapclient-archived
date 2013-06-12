@@ -81,4 +81,5 @@ class PointCloudStoreStep(WorkflowStepMountPoint):
         for i, pt in enumerate(dataIn):
             f.write(str(i + 1) + '\t' + str(pt[0]) + '\t' + str(pt[1]) + '\t' + str(pt[2]) + '\n')
         f.close()
+        self._doneExecution()
 

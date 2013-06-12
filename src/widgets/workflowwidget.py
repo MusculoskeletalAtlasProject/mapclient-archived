@@ -52,10 +52,7 @@ class WorkflowWidget(QtGui.QWidget):
         self.action_Close = None  # Keep a handle to this for modifying the Ui.
         self._createMenuItems()
 
-        self.workflowStepPlugins = WorkflowStepMountPoint.getPlugins()
-        self.stepTree = self.findChild(QtGui.QWidget, "stepTree")
-        for step in self.workflowStepPlugins:
-            self.stepTree.addStep(step)
+        self.updateStepTree()
 
         self._updateUi()
 
@@ -67,6 +64,12 @@ class WorkflowWidget(QtGui.QWidget):
         self.setEnabled(workflowOpen)
         self.action_Save.setEnabled(wfm.isModified())
         self._ui.executeButton.setEnabled(wfm.scene().canExecute() and not wfm.isModified())
+
+    def updateStepTree(self):
+        self._ui.stepTree.clear()
+        for step in WorkflowStepMountPoint.getPlugins():
+            self._ui.stepTree.addStep(step)
+
 
     def undoStackIndexChanged(self, index):
         self._mainWindow.model().workflowManager().undoStackIndexChanged(index)

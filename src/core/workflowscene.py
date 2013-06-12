@@ -23,41 +23,41 @@ from mountpoints.workflowstep import workflowStepFactory
 
 
 class Item(object):
-    
-    
+
+
     def __init__(self):
         self._selected = True
-        
+
     def selected(self):
         return self._selected
-    
-    
+
+
 class MetaStep(Item):
-    
-    
+
+
     Type = 'Step'
-    
+
     def __init__(self, step):
         Item.__init__(self)
         self._step = step
         self._pos = QtCore.QPoint(0, 0)
-        
+
     def pos(self):
         return self._pos
 
 class Connection(Item):
-    
-    
+
+
     Type = 'Connection'
 
     def __init__(self, source, destination):
         Item.__init__(self)
         self._source = source
         self._destination = destination
-        
+
     def source(self):
         return self._source
-    
+
     def destination(self):
         return self._destination
 
@@ -73,9 +73,9 @@ def _findPath(graph, start, end, path=[]):
             newpath = _findPath(graph, node, end, path)
             if newpath:
                 return newpath
-    
+
     return []
-    
+
 def _findAllPaths(graph, start, end, path=[]):
     path = path + [start]
     if start == end:
@@ -88,7 +88,7 @@ def _findAllPaths(graph, start, end, path=[]):
             newpaths = _findAllPaths(graph, node, end, path)
             for newpath in newpaths:
                 paths.append(newpath)
-                
+
     return paths
 
 def _findEndPoint(graph, seed, path=[]):
@@ -100,7 +100,7 @@ def _findEndPoint(graph, seed, path=[]):
             newpath = _findEndPoint(graph, node, path)
             if newpath:
                 return newpath
-            
+
     return path
 
 def _findHead(graph, seed):
@@ -109,30 +109,30 @@ def _findHead(graph, seed):
         for entry in v:
             inv_graph[entry] = inv_graph.get(entry, [])
             inv_graph[entry].append(k)
-        
+
     path = _findEndPoint(inv_graph, seed)
     if path:
         return path[-1]
-        
+
     return None
 
 def _findTail(graph, seed):
     path = _findEndPoint(graph, seed)
     if path:
         return path[-1]
-    
+
     return None
-    
+
 class WorkflowDependencyGraph(object):
-    
-    
+
+
     def __init__(self, scene):
         self._scene = scene
         self._graph = []
         self._head = None
         self._tail = None
         self._current = -1
-    
+
     def _calculateGraph(self):
         '''
         Create a dependency graph based on the items in the scene.
@@ -147,20 +147,20 @@ class WorkflowDependencyGraph(object):
                 dependencyGraph[item.source()].append(item.destination())
             elif item.Type == MetaStep.Type and seed == None:
                 seed = item
-                
+
         if seed:
             self._head = _findHead(dependencyGraph, seed)
             self._tail = _findTail(dependencyGraph, seed)
-        
+
             self._graph = _findPath(dependencyGraph, self._head, self._tail)
-    
+
     def canExecute(self):
         self._calculateGraph()
-            
+
         configured = [metastep for metastep in self._graph if metastep._step.isConfigured()]
         can = len(configured) == len(self._graph) and len(self._graph) >= 0
         return can and self._current == -1
-    
+
     def execute(self):
         self._current += 1
         if self._current >= len(self._graph):
@@ -170,14 +170,14 @@ class WorkflowDependencyGraph(object):
             if self._current > 0:
                 dataIn = self._graph[self._current - 1]._step.portOutput()
             self._graph[self._current]._step.execute(dataIn)
-    
-    
+
+
 class WorkflowScene(object):
     '''
     This is the authoratative model for the workflow scene.
     '''
-    
-    
+
+
     def __init__(self, manager):
         self._manager = manager
         self._items = {}
@@ -262,32 +262,32 @@ class WorkflowScene(object):
 
     def manager(self):
         return self._manager
-    
+
     def canExecute(self):
         return self._dependencyGraph.canExecute()
-    
+
     def execute(self):
         self._dependencyGraph.execute()
-    
+
     def clear(self):
         self._items.clear()
-    
+
     def items(self):
         return self._items.keys()
-    
+
     def addItem(self, item):
         self._items[item] = item
-    
+
     def removeItem(self, item):
         if item in self._items:
             del self._items[item]
-    
+
     def setItemPos(self, item, pos):
         if item in self._items:
             self._items[item]._pos = pos
-    
+
     def setItemSelected(self, item, selected):
         if item in self._items:
             self._items[item]._selected = selected
-    
-    
+
+

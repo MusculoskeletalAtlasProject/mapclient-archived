@@ -41,24 +41,18 @@ class MainWindow(QtGui.QMainWindow):
         self._ui.setupUi(self)
         self._makeConnections()
 
-#        undoManager = self.mainWindow.workflowManager.undoManager
         self._createUndoAction(self._ui.menu_Edit)
         self._createRedoAction(self._ui.menu_Edit)
-
-#        self._ui.stackedWidget.currentChanged.connect(self.centralWidgetChanged)
-#        self._stackedWidgetPages = StackedWidgetMountPoint.getPlugins(self)
-        self._workflowWidget = WorkflowWidget(self)
-        self._ui.stackedWidget.addWidget(self._workflowWidget)
-
-#        for stackedWidgetPage in self._stackedWidgetPages:
-#            widget = stackedWidgetPage.getWidget()
-#            print(widget)
-#            stackedWidgetPage.setWidgetIndex(self._ui.stackedWidget.addWidget(widget))
 
         self._model.readSettings()
         self.resize(self._model.size())
         self.move(self._model.pos())
 
+        self._model.pluginManager().load()
+
+        self._workflowWidget = WorkflowWidget(self)
+        self._ui.stackedWidget.addWidget(self._workflowWidget)
+        self.setCurrentUndoRedoStack(self._workflowWidget.undoRedoStack())
 
     def _createUndoAction(self, parent):
         self.undoAction = QtGui.QAction('Undo', parent)
@@ -90,9 +84,11 @@ class MainWindow(QtGui.QMainWindow):
     def _makeConnections(self):
         self._ui.action_Quit.triggered.connect(self.quitApplication)
         self._ui.action_About.triggered.connect(self.about)
+        self._ui.actionPluginManager.triggered.connect(self.pluginManager)
+        self._ui.actionPMR.triggered.connect(self.pmr)
+        self._ui.actionAnnotation.triggered.connect(self.annotationTool)
 
     def setCurrentUndoRedoStack(self, stack):
-        print('setCurrentUndoRedoStack')
         current_stack = self._model.undoManager().currentStack()
         if current_stack:
             current_stack.canRedoChanged.disconnect(self._canRedoChanged)
@@ -121,11 +117,6 @@ class MainWindow(QtGui.QMainWindow):
             self._ui.stackedWidget.addWidget(widget)
         self._ui.stackedWidget.setCurrentWidget(widget)
 
-    def centralWidgetChanged(self, index):
-        print('centralWidgetChanged')
-        widget = self._ui.stackedWidget.currentWidget()
-        widget.setActive()
-
     def closeEvent(self, event):
         self.quitApplication()
 
@@ -140,3 +131,29 @@ class MainWindow(QtGui.QMainWindow):
         dlg = AboutDialog(self)
         dlg.setModal(True)
         dlg.exec_()
+
+    def pluginManager(self):
+        from tools.pluginmanagerdialog import PluginManagerDialog
+        dlg = PluginManagerDialog(self)
+        dlg.setDirectories(self._model.pluginManager().directories())
+        dlg.setLoadDefaultPlugins(self._model.pluginManager().loadDefaultPlugins())
+
+        dlg.setModal(True)
+        if dlg.exec_():
+            self._model.pluginManager().setDirectories(dlg.directories())
+            self._model.pluginManager().setLoadDefaultPlugins(dlg.loadDefaultPlugins())
+            self._model.pluginManager().load()
+            self._workflowWidget.updateStepTree()
+
+    def pmr(self):
+        from tools.pmrdialog import PMRDialog
+        dlg = PMRDialog(self)
+        dlg.setModal(True)
+        dlg.exec_()
+
+    def annotationTool(self):
+        from tools.annotationtool import AnnotationDialog
+        dlg = AnnotationDialog(self)
+        dlg.setModal(True)
+        dlg.exec_()
+

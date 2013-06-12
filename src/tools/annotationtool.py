@@ -17,9 +17,19 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     You should have received a copy of the GNU General Public License
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
-__version__ = '0.1.0'
-__author__ = 'Hugh Sorby'
+from PyQt4 import QtGui
+from tools.ui_annotationdialog import Ui_AnnotationDialog
 
-# from segmentationstep import resources_rc, step
-import segmentationstep.resources_rc
-import segmentationstep.step
+class AnnotationDialog(QtGui.QDialog):
+    '''
+    Dialog for managing the list of plugin directories.
+    '''
+
+
+    def __init__(self, parent=None):
+        '''
+        Constructor
+        '''
+        QtGui.QDialog.__init__(self, parent)
+        self._ui = Ui_AnnotationDialog()
+        self._ui.setupUi(self)

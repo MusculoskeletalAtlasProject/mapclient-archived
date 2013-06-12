@@ -139,8 +139,11 @@ class WorkflowGraphicsScene(QtGui.QGraphicsScene):
     def setPreviouslySelectedItems(self, selection):
         self._previousSelection = selection
 
+    def setConfigureNode(self, node):
+        self._currentConfigureNode = node
+
     def stepConfigured(self):
-        self._undoStack.push(CommandConfigure(self))
+        self._undoStack.push(CommandConfigure(self, self._currentConfigureNode))
 
     def setCurrentWidget(self, widget):
         self.parent().setCurrentWidget(widget)

@@ -109,17 +109,22 @@ class CommandMove(QtGui.QUndoCommand):
 
 
 class CommandConfigure(QtGui.QUndoCommand):
-    
 
-    def __init__(self, scene):
+
+    def __init__(self, scene, node):
         super(CommandConfigure, self).__init__()
         self._scene = scene
-        
+        self._node = node
+
     def redo(self):
-        for item in self._scene.items():
-            item.update()
+        self._node.updateConfigureIcon()
+        self._node.update()
+#        for item in self._scene.items():
+#            item.update()
 
     def undo(self):
-        for item in self._scene.items():
-            item.update()
+        self._node.updateConfigureIcon()
+        self._node.update()
+#        for item in self._scene.items():
+#            item.update()
 

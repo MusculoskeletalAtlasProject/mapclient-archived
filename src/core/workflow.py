@@ -64,9 +64,9 @@ class WorkflowManager():
         self._previousLocation = None
         self._saveStateIndex = 0
         self._currentStateIndex = 0
-        
+
         self._title = None
-        
+
         self._scene = WorkflowScene(self)
 #        self.mainWindow = mainWindow
 
@@ -87,25 +87,25 @@ class WorkflowManager():
             self._title = self._title + ' *'
 
         return self._title
-    
+
     def setLocation(self, location):
         self._location = location
-        
+
     def location(self):
         return self._location
-    
+
     def setPreviousLocation(self, location):
         self._previousLocation = location
-        
+
     def previousLocation(self):
         return self._previousLocation
-    
+
     def scene(self):
         return self._scene
-    
+
     def undoStackIndexChanged(self, index):
         self._currentStateIndex = index
-        
+
     def execute(self):
         self._scene.execute()
 

@@ -38,7 +38,7 @@ class ErrorItem(QtGui.QGraphicsItem):
         self.adjust()
 
     def boundingRect(self):
-        extra = (16) / 2.0 # Icon size divided by two
+        extra = (16) / 2.0  # Icon size divided by two
 
         return QtCore.QRectF(self._sourcePoint,
                              QtCore.QSizeF(self._destPoint.x() - self._sourcePoint.x(),
@@ -79,18 +79,18 @@ class Item(QtGui.QGraphicsItem):
     '''
     Class to contain the selection information that selectable scene items can be derived from.
     '''
-    
-    
+
+
     def __init__(self):
         QtGui.QGraphicsItem.__init__(self)
 
         self.setFlag(QtGui.QGraphicsItem.ItemIsSelectable)
-        
+
     def setSelected(self, selected):
         QtGui.QGraphicsItem.setSelected(self, selected)
         self.scene().workflowScene().setItemSelected(self.metaItem(), selected)
-        
-       
+
+
 class Arc(Item):
     Pi = math.pi
     TwoPi = 2.0 * Pi
@@ -101,9 +101,9 @@ class Arc(Item):
         Item.__init__(self)
 
         self._arrowSize = 10.0
-        
+
         self._connection = Connection(sourceNode._metastep, destNode._metastep)
-        
+
         self._sourcePoint = QtCore.QPointF()
         self._destPoint = QtCore.QPointF()
 #        self.setAcceptedMouseButtons(QtCore.Qt.NoButton)
@@ -116,19 +116,19 @@ class Arc(Item):
 
     def connection(self):
         return self._connection
-    
+
     def type(self):
         return Arc.Type
-    
+
     def metaItem(self):
         return self._connection
 
     def sourceNode(self):
         return self._source()
-    
+
     def destinationNode(self):
         return self._dest()
-    
+
     def adjust(self):
         if not self._source() or not self._dest():
             return
@@ -156,9 +156,9 @@ class Arc(Item):
         sceneRect = QtCore.QRectF(self._sourcePoint,
                          QtCore.QSizeF(self._destPoint.x() - self._sourcePoint.x(),
                                        self._destPoint.y() - self._sourcePoint.y())).normalized().adjusted(-extra, -extra, extra, extra)
- 
+
         return sceneRect
-    
+
 
     def paint(self, painter, option, widget):
         if not self._source() or not self._dest():
@@ -171,9 +171,9 @@ class Arc(Item):
             return
 
         brush = QtGui.QBrush(QtCore.Qt.black)
-        if option.state & (QtGui.QStyle.State_Selected | QtGui.QStyle.State_HasFocus): #or self.selected:
+        if option.state & (QtGui.QStyle.State_Selected | QtGui.QStyle.State_HasFocus):  # or self.selected:
             brush = QtGui.QBrush(QtCore.Qt.red)
-        
+
         painter.setBrush(brush)
 
         angle = math.acos(line.dx() / line.length())
@@ -215,8 +215,12 @@ class Node(Item):
 
         self._contextMenu = QtGui.QMenu()
         configureAction = QtGui.QAction('Configure', self._contextMenu)
-        configureAction.triggered.connect(self._metastep._step.configure)
+        configureAction.triggered.connect(self.configureMe)
+        annotateAction = QtGui.QAction('Annotate', self._contextMenu)
+        annotateAction.setEnabled(False)
         self._contextMenu.addAction(configureAction)
+        self._contextMenu.addAction(annotateAction)
+
         portsProvidesTip = ''
         portsUsesTip = ''
         for port in self._metastep._step._ports:
@@ -235,14 +239,30 @@ class Node(Item):
         tip = portsProvidesTip + portsUsesTip
         self.setToolTip(tip)
 
+        self._configure_item = ConfigureIcon(self)
+        self._configure_item.moveBy(40, 40)
+
+        self.updateConfigureIcon()
+
+    def updateConfigureIcon(self):
+
+        if self._metastep._step.isConfigured():
+            self._configure_item.hide()
+        else:
+            self._configure_item.show()
+
 
     def setPos(self, pos):
         QtGui.QGraphicsItem.setPos(self, pos)
         self.scene().workflowScene().setItemPos(self._metastep, pos)
-        
+
     def type(self):
         return Node.Type
-    
+
+    def configureMe(self):
+        self.scene().setConfigureNode(self)
+        self._metastep._step.configure()
+
     def metaItem(self):
         return self._metastep
 
@@ -265,7 +285,7 @@ class Node(Item):
 
     def addArc(self, arc):
         self._connections.append(weakref.ref(arc))
-        
+
     def removeArc(self, arc):
         self._connections = [weakarc for weakarc in self._connections if weakarc() != arc]
 
@@ -276,14 +296,14 @@ class Node(Item):
                              self._pixmap.height() + 2 * adjust)
 
     def paint(self, painter, option, widget):
-            if option.state & QtGui.QStyle.State_Selected: #or self.selected:
+            if option.state & QtGui.QStyle.State_Selected:  # or self.selected:
                 painter.setBrush(QtCore.Qt.darkGray)
                 painter.drawRoundedRect(self.boundingRect(), 5, 5)
 
 #            super(Node, self).paint(painter, option, widget)
             painter.drawPixmap(0, 0, self._pixmap)
-            if not self._metastep._step.isConfigured():
-                painter.drawPixmap(40, 40, self._configure_red)
+#            if not self._metastep._step.isConfigured():
+#                painter.drawPixmap(40, 40, self._configure_red)
 
     def itemChange(self, change, value):
         if change == QtGui.QGraphicsItem.ItemPositionChange and self.scene():
@@ -297,9 +317,30 @@ class Node(Item):
 
     def showContextMenu(self, pos):
         self._contextMenu.popup(pos)
-     
-        
+
+class ConfigureIcon(QtGui.QGraphicsItem):
+
+
+    def __init__(self, *args, **kwargs):
+        super(ConfigureIcon, self).__init__(*args, **kwargs)
+        self._configure_red = QtGui.QPixmap(':/workflow/images/configure_red.png').scaled(24, 24, aspectRatioMode=QtCore.Qt.KeepAspectRatio, transformMode=QtCore.Qt.FastTransformation)
+
+    def paint(self, painter, option, widget):
+        painter.drawPixmap(0, 0, self._configure_red)
+
+    def boundingRect(self):
+        return QtCore.QRectF(0, 0, 24, 24)
+
+    def mousePressEvent(self, event):
+        event.accept()
+
+    def mouseReleaseEvent(self, event):
+        if self.scene().itemAt(event.scenePos()) == self:
+            self.parentItem().configureMe()
+
+
 class ArrowLine(QtGui.QGraphicsLineItem):
+
 
     def __init__(self, *args, **kwargs):
         super(ArrowLine, self).__init__(*args, **kwargs)
