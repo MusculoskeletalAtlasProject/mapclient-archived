@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'qt/mainwindow.ui'
 #
-# Created: Wed Feb 20 12:10:43 2013
-#      by: PyQt4 UI code generator 4.9.6
+# Created: Wed Mar 20 09:34:07 2013
+#      by: PyQt4 UI code generator 4.10
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -40,7 +40,7 @@ class Ui_MainWindow(object):
         self.horizontalLayout.addWidget(self.stackedWidget)
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 800, 25))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 800, 24))
         self.menubar.setObjectName(_fromUtf8("menubar"))
         self.menu_Help = QtGui.QMenu(self.menubar)
         self.menu_Help.setObjectName(_fromUtf8("menu_Help"))
@@ -48,6 +48,8 @@ class Ui_MainWindow(object):
         self.menu_File.setObjectName(_fromUtf8("menu_File"))
         self.menu_Edit = QtGui.QMenu(self.menubar)
         self.menu_Edit.setObjectName(_fromUtf8("menu_Edit"))
+        self.menu_Tools = QtGui.QMenu(self.menubar)
+        self.menu_Tools.setObjectName(_fromUtf8("menu_Tools"))
         MainWindow.setMenuBar(self.menubar)
         self.statusbar = QtGui.QStatusBar(MainWindow)
         self.statusbar.setObjectName(_fromUtf8("statusbar"))
@@ -56,11 +58,21 @@ class Ui_MainWindow(object):
         self.action_About.setObjectName(_fromUtf8("action_About"))
         self.action_Quit = QtGui.QAction(MainWindow)
         self.action_Quit.setObjectName(_fromUtf8("action_Quit"))
+        self.actionPluginManager = QtGui.QAction(MainWindow)
+        self.actionPluginManager.setObjectName(_fromUtf8("actionPluginManager"))
+        self.actionPMR = QtGui.QAction(MainWindow)
+        self.actionPMR.setObjectName(_fromUtf8("actionPMR"))
+        self.actionAnnotation = QtGui.QAction(MainWindow)
+        self.actionAnnotation.setObjectName(_fromUtf8("actionAnnotation"))
         self.menu_Help.addAction(self.action_About)
         self.menu_File.addSeparator()
         self.menu_File.addAction(self.action_Quit)
+        self.menu_Tools.addAction(self.actionPluginManager)
+        self.menu_Tools.addAction(self.actionPMR)
+        self.menu_Tools.addAction(self.actionAnnotation)
         self.menubar.addAction(self.menu_File.menuAction())
         self.menubar.addAction(self.menu_Edit.menuAction())
+        self.menubar.addAction(self.menu_Tools.menuAction())
         self.menubar.addAction(self.menu_Help.menuAction())
 
         self.retranslateUi(MainWindow)
@@ -71,9 +83,13 @@ class Ui_MainWindow(object):
         self.menu_Help.setTitle(_translate("MainWindow", "&Help", None))
         self.menu_File.setTitle(_translate("MainWindow", "&File", None))
         self.menu_Edit.setTitle(_translate("MainWindow", "&Edit", None))
+        self.menu_Tools.setTitle(_translate("MainWindow", "&Tools", None))
         self.action_About.setText(_translate("MainWindow", "&About", None))
         self.action_Quit.setText(_translate("MainWindow", "&Quit", None))
         self.action_Quit.setStatusTip(_translate("MainWindow", "Quit the application", None))
         self.action_Quit.setShortcut(_translate("MainWindow", "Ctrl+Q", None))
+        self.actionPluginManager.setText(_translate("MainWindow", "Plugin &Manager", None))
+        self.actionPMR.setText(_translate("MainWindow", "&PMR", None))
+        self.actionAnnotation.setText(_translate("MainWindow", "&Annotation", None))
 
 import widgets.resources_rc

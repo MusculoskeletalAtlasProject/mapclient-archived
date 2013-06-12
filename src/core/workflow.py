@@ -22,13 +22,16 @@ import os
 from PyQt4 import QtCore
 
 from settings import info
-from widgets.workflowwidget import WorkflowWidget
+from core.workflowscene import WorkflowScene
+
+def getWorkflowConfigurationAbsoluteFilename(location):
+    return os.path.join(location, info.WORKFLOW_NAME)
 
 def workflowConfigurationExists(location):
-    return os.path.exists(location + '/' + info.WORKFLOW_NAME)
+    return os.path.exists(getWorkflowConfigurationAbsoluteFilename(location))
 
 def getWorkflowConfiguration(location):
-    return QtCore.QSettings(location + '/' + info.WORKFLOW_NAME, QtCore.QSettings.IniFormat)
+    return QtCore.QSettings(getWorkflowConfigurationAbsoluteFilename(location), QtCore.QSettings.IniFormat)
 
 class WorkflowError(Exception):
     pass
@@ -38,11 +41,11 @@ class Workflow(object):
     Holds information relating to a workflow.
     '''
 
-    location = None
+    _location = None
     version = None
 
     def __init__(self, location, version):
-        self.location = location
+        self._location = location
         self.version = version
 
 class WorkflowManager():
@@ -50,66 +53,93 @@ class WorkflowManager():
     This class managers the workflow.
     '''
 
-    def __init__(self, mainWindow):
+    def __init__(self):
         '''
         Constructor
         '''
         self.name = 'workflowManager'
-        self.widget = None
-        self.widgetIndex = -1
-        self.location = None
+#        self.widget = None
+#        self.widgetIndex = -1
+        self._location = None
         self._previousLocation = None
-        self.saveStateIndex = 0
-        self.currentStateIndex = 0
-        self.mainWindow = mainWindow
+        self._saveStateIndex = 0
+        self._currentStateIndex = 0
 
-    def setWidgetIndex(self, index):
-        self.widgetIndex = index
+        self._title = None
 
-    def getWidget(self):
-        if not self.widget:
-            self.widget = WorkflowWidget(self.mainWindow)
+        self._scene = WorkflowScene(self)
+#        self.mainWindow = mainWindow
 
-        return self.widget
+#    def setWidgetIndex(self, index):
+#        self.widgetIndex = index
+#
+#    def getWidget(self):
+#        if not self.widget:
+#            self.widget = WorkflowWidget(self.mainWindow)
+#
+#        return self.widget
+
+    def title(self):
+        self._title = info.APPLICATION_NAME
+        if self._location:
+            self._title = self._title + ' - ' + self._location
+        if self._saveStateIndex != self._currentStateIndex:
+            self._title = self._title + ' *'
+
+        return self._title
+
+    def setLocation(self, location):
+        self._location = location
+
+    def location(self):
+        return self._location
+
+    def setPreviousLocation(self, location):
+        self._previousLocation = location
+
+    def previousLocation(self):
+        return self._previousLocation
+
+    def scene(self):
+        return self._scene
 
     def undoStackIndexChanged(self, index):
-        if self.saveStateIndex == index:
-            self.mainWindow.setWindowTitle(info.APPLICATION_NAME + ' - ' + self.location)
-        elif self.saveStateIndex == self.currentStateIndex:
-            self.mainWindow.setWindowTitle(info.APPLICATION_NAME + ' - ' + self.location + ' *')
+        self._currentStateIndex = index
 
-        self.currentStateIndex = index
+    def execute(self):
+        self._scene.execute()
 
     def isModified(self):
-        return self.saveStateIndex == self.currentStateIndex
+        return self._saveStateIndex != self._currentStateIndex
 
     def new(self, location):
         '''
-        Create a new workflow at the given location.  The location is a directory, if it doesn't exist
-        it will be created.  A file 'workflow.conf' is created in the directory at 'location' which holds
+        Create a new workflow at the given _location.  The _location is a directory, if it doesn't exist
+        it will be created.  A file 'workflow.conf' is created in the directory at '_location' which holds
         information relating to the workflow.  
         '''
 
         if location is None:
-            raise WorkflowError('No location given to create new workflow.')
+            raise WorkflowError('No _location given to create new workflow.')
 
         if not os.path.exists(location):
             os.mkdir(location)
 
-        self.location = location
-        self.mainWindow.setWindowTitle(info.APPLICATION_NAME + ' - ' + location)
-        ws = getWorkflowConfiguration(location)
-        ws.setValue('version', info.VERSION_STRING)
+        self._location = location
+        wf = getWorkflowConfiguration(location)
+        wf.setValue('version', info.VERSION_STRING)
+#        self._title = info.APPLICATION_NAME + ' - ' + location
+        self._scene.clear()
 
 
 
     def load(self, location):
         '''
-        Open a workflow from the given location.
-        :param location:
+        Open a workflow from the given _location.
+        :param _location:
         '''
         if location is None:
-            raise WorkflowError('No location given to open workflow.')
+            raise WorkflowError('No _location given to open workflow.')
 
         if not os.path.exists(location):
             raise WorkflowError('Location %s does not exist' % location)
@@ -117,40 +147,41 @@ class WorkflowManager():
         if not workflowConfigurationExists(location):
             raise WorkflowError('No workflow located at %s' % location)
 
-        ws = getWorkflowConfiguration(location)
-        if ws.value('version') != info.VERSION_STRING:
-            raise WorkflowError('Version mismatch in workflow expected: %s got: %s' % (info.VERSION_STRING, ws.value('version')))
+        wf = getWorkflowConfiguration(location)
+        if wf.value('version') != info.VERSION_STRING:
+            raise WorkflowError('Version mismatch in workflow expected: %s got: %s' % (info.VERSION_STRING, wf.value('version')))
 
-        self.location = location
-        ws = getWorkflowConfiguration(location)
-        self.widget.loadState(ws)
-        self.saveStateIndex = self.currentStateIndex = 0
-        self.mainWindow.setWindowTitle(info.APPLICATION_NAME + ' - ' + location)
+        self._location = location
+        wf = getWorkflowConfiguration(location)
+        self._scene.loadState(wf)
+        self._saveStateIndex = self._currentStateIndex = 0
+#        self._title = info.APPLICATION_NAME + ' - ' + location
 
     def save(self):
-        ws = getWorkflowConfiguration(self.location)
-        self.widget.saveState(ws)
-        self.saveStateIndex = self.currentStateIndex
-        self.mainWindow.setWindowTitle(info.APPLICATION_NAME + ' - ' + self.location)
+        wf = getWorkflowConfiguration(self._location)
+        self._scene.saveState(wf)
+        self._saveStateIndex = self._currentStateIndex
+#        self._title = info.APPLICATION_NAME + ' - ' + self._location
 
     def close(self):
         '''
         Close the current workflow
         '''
-        self.location = None
-        self.mainWindow.setWindowTitle(info.APPLICATION_NAME)
+        self._location = None
+        self._saveStateIndex = self._currentStateIndex = 0
+#        self._title = info.APPLICATION_NAME
 
     def isWorkflowOpen(self):
-        return not self.location == None
+        return not self._location == None
 
     def writeSettings(self, settings):
         settings.beginGroup(self.name)
-        settings.setValue('_previousLocation', self.widget._previousLocation)
+        settings.setValue('previousLocation', self._previousLocation)
         settings.endGroup()
 
     def readSettings(self, settings):
         settings.beginGroup(self.name)
-        self.widget._previousLocation = settings.value('_previousLocation', '')
+        self._previousLocation = settings.value('previousLocation', '')
         settings.endGroup()
 
 

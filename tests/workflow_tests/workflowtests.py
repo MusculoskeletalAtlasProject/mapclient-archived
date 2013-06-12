@@ -20,9 +20,14 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
 import unittest
 
 def suite():
-    from workflow_tests.workflow import WorkflowTestCase
     tests = unittest.TestSuite()
-    tests.addTests(unittest.TestLoader().loadTestsFromTestCase(WorkflowTestCase))
+
+    from workflow_tests.workflowmanager import WorkflowManagerTestCase
+    tests.addTests(unittest.TestLoader().loadTestsFromTestCase(WorkflowManagerTestCase))
+
+    from workflow_tests.workflowsteps import WorkflowStepsTestCase
+    tests.addTests(unittest.TestLoader().loadTestsFromTestCase(WorkflowStepsTestCase))
+
     return tests
 
 def load_tests(loader, tests, pattern):

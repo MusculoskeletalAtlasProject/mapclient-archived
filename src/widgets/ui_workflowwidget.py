@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'qt/workflowwidget.ui'
 #
-# Created: Wed Mar  6 13:36:49 2013
+# Created: Thu Mar  7 15:04:17 2013
 #      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -26,24 +26,38 @@ except AttributeError:
 class Ui_WorkflowWidget(object):
     def setupUi(self, WorkflowWidget):
         WorkflowWidget.setObjectName(_fromUtf8("WorkflowWidget"))
-        WorkflowWidget.resize(400, 300)
+        WorkflowWidget.resize(574, 399)
         WorkflowWidget.setWindowTitle(_fromUtf8(""))
-        self.horizontalLayout = QtGui.QHBoxLayout(WorkflowWidget)
-        self.horizontalLayout.setObjectName(_fromUtf8("horizontalLayout"))
+        self.gridLayout = QtGui.QGridLayout(WorkflowWidget)
+        self.gridLayout.setObjectName(_fromUtf8("gridLayout"))
         self.splitter = QtGui.QSplitter(WorkflowWidget)
         self.splitter.setOrientation(QtCore.Qt.Horizontal)
         self.splitter.setObjectName(_fromUtf8("splitter"))
         self.stepTree = StepTree(self.splitter)
         self.stepTree.setObjectName(_fromUtf8("stepTree"))
-        self.graphicsView = WorkflowGraphicsView(self.splitter)
+        self.widget = QtGui.QWidget(self.splitter)
+        self.widget.setObjectName(_fromUtf8("widget"))
+        self.verticalLayout = QtGui.QVBoxLayout(self.widget)
+        self.verticalLayout.setMargin(0)
+        self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
+        self.graphicsView = WorkflowGraphicsView(self.widget)
         self.graphicsView.setObjectName(_fromUtf8("graphicsView"))
-        self.horizontalLayout.addWidget(self.splitter)
+        self.verticalLayout.addWidget(self.graphicsView)
+        self.horizontalLayout = QtGui.QHBoxLayout()
+        self.horizontalLayout.setObjectName(_fromUtf8("horizontalLayout"))
+        spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
+        self.horizontalLayout.addItem(spacerItem)
+        self.executeButton = QtGui.QPushButton(self.widget)
+        self.executeButton.setObjectName(_fromUtf8("executeButton"))
+        self.horizontalLayout.addWidget(self.executeButton)
+        self.verticalLayout.addLayout(self.horizontalLayout)
+        self.gridLayout.addWidget(self.splitter, 0, 0, 1, 1)
 
         self.retranslateUi(WorkflowWidget)
         QtCore.QMetaObject.connectSlotsByName(WorkflowWidget)
 
     def retranslateUi(self, WorkflowWidget):
-        pass
+        self.executeButton.setText(_translate("WorkflowWidget", "E&xecute", None))
 
 from widgets.steptree import StepTree
 from widgets.workflowgraphicsview import WorkflowGraphicsView

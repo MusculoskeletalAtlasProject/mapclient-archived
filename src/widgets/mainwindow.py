@@ -18,84 +18,112 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
 
-from PyQt4 import QtCore, QtGui
+from PyQt4 import QtGui
 
 from widgets.ui_mainwindow import Ui_MainWindow
-from mountpoints.stackedwidget import StackedWidgetMountPoint
-from core.undomanager import UndoManager
-from core.workflow import WorkflowManager
+# from mountpoints.stackedwidget import StackedWidgetMountPoint
+from widgets.workflowwidget import WorkflowWidget
 
 class MainWindow(QtGui.QMainWindow):
     '''
     This is the main window for the MAP Client.
     '''
 
-    def __init__(self):
+    def __init__(self, model):
         '''
         Constructor
         '''
         QtGui.QMainWindow.__init__(self)
 
+        self._model = model
+
         self._ui = Ui_MainWindow()
         self._ui.setupUi(self)
         self._makeConnections()
-        self.undoManager = UndoManager()
 
-#        undoManager = self.mainWindow.workflowManager.undoManager
-        undoAction = self.undoManager.createUndoAction(self._ui.menu_Edit)
-        undoAction.setShortcut(QtGui.QKeySequence('Ctrl+Z'))
-        redoAction = self.undoManager.createRedoAction(self._ui.menu_Edit)
-        redoAction.setShortcut(QtGui.QKeySequence('Ctrl+Shift+Z'))
+        self._createUndoAction(self._ui.menu_Edit)
+        self._createRedoAction(self._ui.menu_Edit)
 
-        self._ui.menu_Edit.addAction(undoAction)
-        self._ui.menu_Edit.addAction(redoAction)
+        self._model.readSettings()
+        self.resize(self._model.size())
+        self.move(self._model.pos())
 
-        self._ui.stackedWidget.currentChanged.connect(self.centralWidgetChanged)
-        self.stackedWidgetPages = StackedWidgetMountPoint.getPlugins(self)
-        self.stackedWidgetPages.insert(0, WorkflowManager(self))
+        self._model.pluginManager().load()
 
-        for stackedWidgetPage in self.stackedWidgetPages:
-            if not hasattr(self, stackedWidgetPage.name):
-                setattr(self, stackedWidgetPage.name, stackedWidgetPage)
-                stackedWidgetPage.setWidgetIndex(self._ui.stackedWidget.addWidget(stackedWidgetPage.getWidget()))
+        self._workflowWidget = WorkflowWidget(self)
+        self._ui.stackedWidget.addWidget(self._workflowWidget)
+        self.setCurrentUndoRedoStack(self._workflowWidget.undoRedoStack())
 
-        self._readSettings()
+    def _createUndoAction(self, parent):
+        self.undoAction = QtGui.QAction('Undo', parent)
+        self.undoAction.setShortcut(QtGui.QKeySequence('Ctrl+Z'))
+        self.undoAction.triggered.connect(self._model.undoManager().undo)
+        stack = self._model.undoManager().currentStack()
+        if stack:
+            self.undoAction.setEnabled(stack.canUndo())
+        else:
+            self.undoAction.setEnabled(False)
 
+        parent.addAction(self.undoAction)
 
-    def _writeSettings(self):
-        settings = QtCore.QSettings()
-        settings.beginGroup('MainWindow')
-        settings.setValue('size', self.size())
-        settings.setValue('pos', self.pos())
-        settings.endGroup()
-        for stackedWidgetPage in self.stackedWidgetPages:
-            stackedWidgetPage.writeSettings(settings)
+    def _createRedoAction(self, parent):
+        self.redoAction = QtGui.QAction('Redo', parent)
+        self.redoAction.setShortcut(QtGui.QKeySequence('Ctrl+Shift+Z'))
+        self.redoAction.triggered.connect(self._model.undoManager().redo)
+        stack = self._model.undoManager().currentStack()
+        if stack:
+            self.redoAction.setEnabled(stack.canRedo())
+        else:
+            self.redoAction.setEnabled(False)
 
-    def _readSettings(self):
-        settings = QtCore.QSettings()
-        settings.beginGroup('MainWindow')
-        self.resize(settings.value('size', QtCore.QSize(600, 400)))
-        self.move(settings.value('pos', QtCore.QPoint(100, 100)))
-        settings.endGroup()
-        for stackedWidgetPage in self.stackedWidgetPages:
-            stackedWidgetPage.readSettings(settings)
+        parent.addAction(self.redoAction)
+
+    def model(self):
+        return self._model
 
     def _makeConnections(self):
         self._ui.action_Quit.triggered.connect(self.quitApplication)
         self._ui.action_About.triggered.connect(self.about)
+        self._ui.actionPluginManager.triggered.connect(self.pluginManager)
+        self._ui.actionPMR.triggered.connect(self.pmr)
+        self._ui.actionAnnotation.triggered.connect(self.annotationTool)
 
-    def setUndoStack(self, stack):
-        self.undoManager.setCurrentStack(stack)
+    def setCurrentUndoRedoStack(self, stack):
+        current_stack = self._model.undoManager().currentStack()
+        if current_stack:
+            current_stack.canRedoChanged.disconnect(self._canRedoChanged)
+            current_stack.canUndoChanged.disconnect(self._canUndoChanged)
 
-    def centralWidgetChanged(self, index):
-        widget = self._ui.stackedWidget.currentWidget()
-        widget.setActive()
+        self._model.undoManager().setCurrentStack(stack)
+
+        self.redoAction.setEnabled(stack.canRedo())
+        self.undoAction.setEnabled(stack.canUndo())
+        stack.canUndoChanged.connect(self._canUndoChanged)
+        stack.canRedoChanged.connect(self._canRedoChanged)
+
+    def _canRedoChanged(self, canRedo):
+        self.redoAction.setEnabled(canRedo)
+
+    def _canUndoChanged(self, canUndo):
+        self.undoAction.setEnabled(canUndo)
+
+    def execute(self):
+        self._ui.stackedWidget.setCurrentWidget(self._workflowWidget)
+        self.setCurrentUndoRedoStack(self._workflowWidget.undoRedoStack())
+        self.model().workflowManager().execute()
+
+    def setCurrentWidget(self, widget):
+        if self._ui.stackedWidget.indexOf(widget) <= 0:
+            self._ui.stackedWidget.addWidget(widget)
+        self._ui.stackedWidget.setCurrentWidget(widget)
 
     def closeEvent(self, event):
         self.quitApplication()
 
     def quitApplication(self):
-        self._writeSettings()
+        self._model.setSize(self.size())
+        self._model.setPos(self.pos())
+        self._model.writeSettings()
         QtGui.qApp.quit()
 
     def about(self):
@@ -103,3 +131,29 @@ class MainWindow(QtGui.QMainWindow):
         dlg = AboutDialog(self)
         dlg.setModal(True)
         dlg.exec_()
+
+    def pluginManager(self):
+        from tools.pluginmanagerdialog import PluginManagerDialog
+        dlg = PluginManagerDialog(self)
+        dlg.setDirectories(self._model.pluginManager().directories())
+        dlg.setLoadDefaultPlugins(self._model.pluginManager().loadDefaultPlugins())
+
+        dlg.setModal(True)
+        if dlg.exec_():
+            self._model.pluginManager().setDirectories(dlg.directories())
+            self._model.pluginManager().setLoadDefaultPlugins(dlg.loadDefaultPlugins())
+            self._model.pluginManager().load()
+            self._workflowWidget.updateStepTree()
+
+    def pmr(self):
+        from tools.pmrdialog import PMRDialog
+        dlg = PMRDialog(self)
+        dlg.setModal(True)
+        dlg.exec_()
+
+    def annotationTool(self):
+        from tools.annotationtool import AnnotationDialog
+        dlg = AnnotationDialog(self)
+        dlg.setModal(True)
+        dlg.exec_()
+
