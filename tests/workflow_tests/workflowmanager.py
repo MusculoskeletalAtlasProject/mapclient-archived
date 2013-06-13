@@ -65,7 +65,7 @@ class WorkflowManagerTestCase(unittest.TestCase):
         
     def testLocation(self):
         wf = WorkflowManager()
-        self.assertIsNone(wf.setLocation('here'))
+        self.assertTrue(wf.setLocation('here') == None)
         self.assertEqual(wf.location(), 'here')
 
 
