@@ -36,7 +36,7 @@ class MainApplicationTestCase(unittest.TestCase):
     def testWorkflowManagerAPI(self):
         ma = MainApplication()
         wm = ma.workflowManager()
-        self.assertIsNone(wm.setPreviousLocation('here'))
+        self.assertTrue(wm.setPreviousLocation('here') == None)
         self.assertEqual(wm.previousLocation(), 'here')
 
 if __name__ == "__main__":

@@ -20,6 +20,6 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
 __version__ = '0.1.0'
 __author__ = 'Hugh Sorby'
 
-import pointcloudstorestep.widgets.resources_rc
-import pointcloudstorestep.step
+from widgets import resources_rc
+from . import step
 
