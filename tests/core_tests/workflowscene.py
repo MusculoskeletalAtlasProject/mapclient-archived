@@ -25,7 +25,7 @@ class WorkflowSceneTestCase(unittest.TestCase):
     def testCreate(self):
         
         s = WorkflowScene(DumbManager())
-        self.assertIsNotNone(s)
+        self.assertTrue(s != None)
 
     def testItemAPI(self):
         
@@ -59,7 +59,7 @@ class WorkflowDependencyGraphTestCase(unittest.TestCase):
            
     def testCreate(self):
         g = WorkflowDependencyGraph(self._s)
-        self.assertIsNotNone(g)
+        self.assertTrue(g != None)
         
     def testGraph1(self):
         g = WorkflowDependencyGraph(self._s)
