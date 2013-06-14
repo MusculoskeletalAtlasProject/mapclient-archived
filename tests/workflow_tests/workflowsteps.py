@@ -101,11 +101,14 @@ class WorkflowStepsTestCase(unittest.TestCase):
         # and cannot do QPixmap
         if os.name == 'posix' and 'DISPLAY' not in os.environ:
             return
-        from PyQt4 import QtGui
-        app = QtGui.QApplication(sys.argv)
+        
+        from PySide import QtGui
+
+        if QtGui.QApplication.instance() is None:
+            QtGui.QApplication(sys.argv)
         #from segmentation_plugin.segmentationstep import Step
         from mountpoints.workflowstep import workflowStepFactory
         self.assertEqual(workflowStepFactory('Segmentation').getName(), 'Segmentation')
         self.assertRaises(ValueError, workflowStepFactory, ('james'))
-        app.argc()
+        
         #Step()

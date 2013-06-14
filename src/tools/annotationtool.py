@@ -17,7 +17,7 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     You should have received a copy of the GNU General Public License
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
-from PyQt4 import QtGui
+from PySide import QtGui
 from tools.ui_annotationdialog import Ui_AnnotationDialog
 
 class AnnotationDialog(QtGui.QDialog):

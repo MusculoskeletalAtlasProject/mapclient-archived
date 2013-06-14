@@ -21,7 +21,7 @@ import os, re
 
 import numpy
 
-from PyQt4 import QtCore, QtOpenGL, QtGui
+from PySide import QtCore, QtOpenGL, QtGui
 
 from zinc.context import Context
 from zinc.graphic import Graphic

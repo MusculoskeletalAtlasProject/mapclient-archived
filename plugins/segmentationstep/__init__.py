@@ -21,12 +21,6 @@ __version__ = '0.1.0'
 __author__ = 'Hugh Sorby'
 
 import os, sys
-import sip
-
-API_NAMES = ["QDate", "QDateTime", "QString", "QTextStream", "QTime", "QUrl", "QVariant"]
-API_VERSION = 2
-for name in API_NAMES:
-    sip.setapi(name, API_VERSION)
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 if current_dir not in sys.path:
@@ -34,7 +28,8 @@ if current_dir not in sys.path:
     # Possible problem of OSX10.6 also.
     sys.path.insert(0, current_dir)
 
-import segmentationstep
+from segmentationstep import resources_rc
+from segmentationstep import step
 
 (_, tail) = os.path.split(current_dir)
 print("Plugin '{0}' version {1} by {2} loaded".format(tail, __version__, __author__))

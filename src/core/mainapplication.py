@@ -19,7 +19,7 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
 '''
 import os
 
-from PyQt4 import QtCore
+from PySide import QtCore
 
 from core.workflow import WorkflowManager
 from core.undomanager import UndoManager

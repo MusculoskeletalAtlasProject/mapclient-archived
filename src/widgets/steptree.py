@@ -18,7 +18,7 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
 import sys
-from PyQt4 import QtCore, QtGui
+from PySide import QtCore, QtGui
 
 class StepTree(QtGui.QTreeWidget):
 
@@ -47,7 +47,7 @@ class StepTree(QtGui.QTreeWidget):
     def addStep(self, step):
 
         parentItem = self.findParentItem(step._category)
-        if parentItem == None:
+        if not parentItem:
             parentItem = QtGui.QTreeWidgetItem(self)
             parentItem.setText(0, step._category)
 

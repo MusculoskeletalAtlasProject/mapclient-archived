@@ -5,7 +5,7 @@ Created on Mar 14, 2013
 '''
 import unittest
 
-from PyQt4 import QtCore
+from PySide import QtCore
 
 from core.workflowscene import WorkflowScene, WorkflowDependencyGraph, MetaStep, Connection, _findAllPaths, _findPath, _findHead, _findTail
 

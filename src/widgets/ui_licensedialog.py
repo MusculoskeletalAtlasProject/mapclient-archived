@@ -1,56 +1,51 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'ui/LicenseDialog.ui'
+# Form implementation generated from reading ui file 'qt/licensedialog.ui'
 #
-# Created: Thu Apr  5 11:35:24 2012
-#      by: PyQt4 UI code generator 4.9.1
+# Created: Fri Jun 14 11:25:15 2013
+#      by: pyside-uic 0.2.14 running on PySide 1.1.2
 #
 # WARNING! All changes made in this file will be lost!
 
-from PyQt4 import QtCore, QtGui
-
-try:
-    _fromUtf8 = QtCore.QString.fromUtf8
-except AttributeError:
-    _fromUtf8 = lambda s: s
+from PySide import QtCore, QtGui
 
 class Ui_LicenseDialog(object):
     def setupUi(self, LicenseDialog):
-        LicenseDialog.setObjectName(_fromUtf8("LicenseDialog"))
+        LicenseDialog.setObjectName("LicenseDialog")
         LicenseDialog.resize(434, 302)
         self.verticalLayout = QtGui.QVBoxLayout(LicenseDialog)
-        self.verticalLayout.setMargin(0)
-        self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
+        self.verticalLayout.setContentsMargins(0, 0, 0, 0)
+        self.verticalLayout.setObjectName("verticalLayout")
         self.scrollArea = QtGui.QScrollArea(LicenseDialog)
         self.scrollArea.setWidgetResizable(True)
-        self.scrollArea.setObjectName(_fromUtf8("scrollArea"))
+        self.scrollArea.setObjectName("scrollArea")
         self.scrollAreaWidgetContents = QtGui.QWidget()
         self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 413, 8081))
-        self.scrollAreaWidgetContents.setObjectName(_fromUtf8("scrollAreaWidgetContents"))
+        self.scrollAreaWidgetContents.setObjectName("scrollAreaWidgetContents")
         self.gridLayout = QtGui.QGridLayout(self.scrollAreaWidgetContents)
-        self.gridLayout.setObjectName(_fromUtf8("gridLayout"))
+        self.gridLayout.setObjectName("gridLayout")
         self.label = QtGui.QLabel(self.scrollAreaWidgetContents)
-        self.label.setStyleSheet(_fromUtf8("QLabel { background-color : white }"))
+        self.label.setStyleSheet("QLabel { background-color : white }")
         self.label.setWordWrap(True)
-        self.label.setObjectName(_fromUtf8("label"))
+        self.label.setObjectName("label")
         self.gridLayout.addWidget(self.label, 0, 0, 1, 1)
         self.scrollArea.setWidget(self.scrollAreaWidgetContents)
         self.verticalLayout.addWidget(self.scrollArea)
         self.frame = QtGui.QFrame(LicenseDialog)
         self.frame.setFrameShape(QtGui.QFrame.StyledPanel)
         self.frame.setFrameShadow(QtGui.QFrame.Raised)
-        self.frame.setObjectName(_fromUtf8("frame"))
+        self.frame.setObjectName("frame")
         self.horizontalLayout = QtGui.QHBoxLayout(self.frame)
-        self.horizontalLayout.setObjectName(_fromUtf8("horizontalLayout"))
+        self.horizontalLayout.setObjectName("horizontalLayout")
         spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout.addItem(spacerItem)
         self.btn_Close = QtGui.QPushButton(self.frame)
-        self.btn_Close.setObjectName(_fromUtf8("btn_Close"))
+        self.btn_Close.setObjectName("btn_Close")
         self.horizontalLayout.addWidget(self.btn_Close)
         self.verticalLayout.addWidget(self.frame)
 
         self.retranslateUi(LicenseDialog)
-        QtCore.QObject.connect(self.btn_Close, QtCore.SIGNAL(_fromUtf8("clicked()")), LicenseDialog.close)
+        QtCore.QObject.connect(self.btn_Close, QtCore.SIGNAL("clicked()"), LicenseDialog.close)
         QtCore.QMetaObject.connectSlotsByName(LicenseDialog)
 
     def retranslateUi(self, LicenseDialog):

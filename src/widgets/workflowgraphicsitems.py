@@ -19,7 +19,7 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
 '''
 import math, weakref
 
-from PyQt4 import QtCore, QtGui
+from PySide import QtCore, QtGui
 
 from core.workflowscene import Connection
 
