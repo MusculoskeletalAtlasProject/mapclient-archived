@@ -204,7 +204,7 @@ class MetaPluginMountPoint(type):
 # Plugin mount points are defined below.
 # For running in both python 2.x and python 3.x we must follow the example found
 # at http://mikewatkins.ca/2008/11/29/python-2-and-3-metaclasses/
-from PyQt4.QtCore import QObject
+from PySide.QtCore import QObject
 
 MetaQObject = type(QObject)
 

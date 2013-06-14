@@ -18,7 +18,7 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
 
-from PyQt4 import QtGui
+from PySide import QtGui
 from tools.ui_pluginmanagerdialog import Ui_PluginManagerDialog
 
 class PluginManagerDialog(QtGui.QDialog):

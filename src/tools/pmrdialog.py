@@ -17,12 +17,12 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     You should have received a copy of the GNU General Public License
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
-from PyQt4 import QtGui
+from PySide import QtGui
 from tools.ui_pmrdialog import Ui_PMRDialog
 
 class PMRDialog(QtGui.QDialog):
     '''
-    Dialog for managing the list of plugin directories.
+    Dialog for managing interaction with PMR.
     '''
 
 

@@ -18,7 +18,7 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
 import os, unittest
-from PyQt4 import QtGui
+from PySide import QtGui
 
 class SegmentationTestCase(unittest.TestCase):
 
@@ -29,7 +29,10 @@ class SegmentationTestCase(unittest.TestCase):
         # and cannot do QPixmap
         if os.name == 'posix' and 'DISPLAY' not in os.environ:
             return
-        app = QtGui.QApplication(sys.argv)
+        
+        app = QtGui.QApplication.instance()
+        if app is None:
+            app = QtGui.QApplication(sys.argv)
         #fileDir = os.path.dirname(__file__)
         #inbuiltPluginDir = os.path.realpath(fileDir + '/../../plugins')
 #        loadPlugins(inbuiltPluginDir)
@@ -39,7 +42,6 @@ class SegmentationTestCase(unittest.TestCase):
         from segmentationstep.step import SegmentationStep
         myStep = SegmentationStep()
         self.assertEqual(myStep.getName(), 'Segmentation')
-        app.argc() # eclipse warning killer
         del sys.path[0]
 
 #    def testSerialisation(self):
