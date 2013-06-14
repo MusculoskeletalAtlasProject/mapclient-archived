@@ -108,7 +108,7 @@ class WorkflowStepsTestCase(unittest.TestCase):
             QtGui.QApplication(sys.argv)
         #from segmentation_plugin.segmentationstep import Step
         from mountpoints.workflowstep import workflowStepFactory
-        self.assertEqual(workflowStepFactory('Segmentation').getName(), 'Segmentation')
+        self.assertEqual(workflowStepFactory('Image source').getName(), 'Image source')
         self.assertRaises(ValueError, workflowStepFactory, ('james'))
         
         #Step()
