@@ -18,7 +18,7 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
 
-from PyQt4.QtGui import QDialog
+from PySide.QtGui import QDialog
 from widgets.ui_licensedialog import Ui_LicenseDialog
 
 class LicenseDialog(QDialog):

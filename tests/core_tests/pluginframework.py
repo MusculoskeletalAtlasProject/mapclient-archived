@@ -17,25 +17,23 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     You should have received a copy of the GNU General Public License
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
-import os, sys, unittest
-from core.pluginframework import getPlugins, loadPlugin
+import sys, unittest
+from core.mainapplication import PluginManager
 from utils import ConsumeOutput
 
 class PluginFrameworkTestCase(unittest.TestCase):
 
 
     def testLoadPlugins(self):
-        fileDir = os.path.dirname(__file__)
-        inbuiltPluginDir = os.path.realpath(fileDir + '/../../plugins')
+        pm = PluginManager()
 
         old_stdout = sys.stdout
         sys.stdout = redirectstdout = ConsumeOutput()
-        sys.path.insert(0, inbuiltPluginDir)
-        for p in getPlugins(inbuiltPluginDir):
-            loadPlugin(p)
+
+        pm.load()
 
         sys.stdout = old_stdout
-        self.assertTrue("Plugin 'segmentationstep' version 0.1.0 by Hugh Sorby loaded" in redirectstdout.messages)
+        self.assertTrue("Plugin 'pointcloudstorestep' version 0.2.0 by Hugh Sorby loaded" in redirectstdout.messages)
 
 
 if __name__ == "__main__":

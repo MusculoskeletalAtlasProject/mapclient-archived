@@ -20,7 +20,7 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
 '''
 import os
 
-from PyQt4.QtGui import QDialog, QFileDialog, QDialogButtonBox
+from PySide.QtGui import QDialog, QFileDialog, QDialogButtonBox
 
 from imagesourcestep.widgets.ui_configuredialog import Ui_ConfigureDialog
 
@@ -121,7 +121,7 @@ class ConfigureDialog(QDialog):
     def setState(self, state):
         self._ui.identifierLineEdit.setText(state._identifier)
         self._ui.localLineEdit.setText(state._localLocation)
-        self._ui.copyToWorkspaceCheckBox.setChecked(state._copyTo)
+        self._ui.copyToWorkflowCheckBox.setChecked(state._copyTo)
         self._ui.pmrLineEdit.setText(state._pmrLocation)
         self._ui.imageSourceTypeComboBox.setCurrentIndex(state._imageType)
         self._ui.tabWidget.setCurrentIndex(state._currentTab)
@@ -132,7 +132,7 @@ class ConfigureDialog(QDialog):
         state = ConfigureDialogState(
             self._ui.identifierLineEdit.text(),
             self._ui.localLineEdit.text(),
-            self._ui.copyToWorkspaceCheckBox.isChecked(),
+            self._ui.copyToWorkflowCheckBox.isChecked(),
             self._ui.pmrLineEdit.text(),
             self._ui.imageSourceTypeComboBox.currentIndex(),
             self._ui.tabWidget.currentIndex(),

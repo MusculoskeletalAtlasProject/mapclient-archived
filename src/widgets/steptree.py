@@ -18,7 +18,7 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
 import sys
-from PyQt4 import QtCore, QtGui
+from PySide import QtCore, QtGui
 
 class StepTree(QtGui.QTreeWidget):
 
@@ -47,7 +47,7 @@ class StepTree(QtGui.QTreeWidget):
     def addStep(self, step):
 
         parentItem = self.findParentItem(step._category)
-        if parentItem == None:
+        if not parentItem:
             parentItem = QtGui.QTreeWidgetItem(self)
             parentItem.setText(0, step._category)
 
@@ -56,7 +56,7 @@ class StepTree(QtGui.QTreeWidget):
 
         stepItem = QtGui.QTreeWidgetItem(parentItem)
         stepItem.setText(0, step.getName())
-        stepItem.setIcon(0, QtGui.QIcon(step._pixmap))
+        stepItem.setIcon(0, QtGui.QIcon(QtGui.QPixmap.fromImage(step._icon)))
         stepItem.setData(0, QtCore.Qt.UserRole, step)
         stepItem.setFlags(QtCore.Qt.ItemIsEnabled)
 
@@ -72,7 +72,7 @@ class StepTree(QtGui.QTreeWidget):
         itemData = QtCore.QByteArray()
         dataStream = QtCore.QDataStream(itemData, QtCore.QIODevice.WriteOnly)
         step = item.data(0, QtCore.Qt.UserRole)
-        pixmap = QtGui.QPixmap(step._pixmap)
+        pixmap = QtGui.QPixmap(step._icon)
         pixmap = pixmap.scaled(64, 64, aspectRatioMode=QtCore.Qt.KeepAspectRatio, transformMode=QtCore.Qt.FastTransformation)
         hotspot = QtCore.QPoint(pixmap.width() / 2, pixmap.height() / 2)
 
@@ -85,7 +85,7 @@ class StepTree(QtGui.QTreeWidget):
         dataStream << hotspot
 
         mimeData = QtCore.QMimeData()
-        mimeData.setData('image/x-workspace-step', itemData)
+        mimeData.setData('image/x-workflow-step', itemData)
 
         drag = QtGui.QDrag(self)
         drag.setMimeData(mimeData)

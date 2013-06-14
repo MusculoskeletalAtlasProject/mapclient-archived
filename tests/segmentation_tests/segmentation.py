@@ -18,7 +18,7 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
 import os, unittest
-from PyQt4 import QtGui
+from PySide import QtGui
 
 class SegmentationTestCase(unittest.TestCase):
 
@@ -29,24 +29,26 @@ class SegmentationTestCase(unittest.TestCase):
         # and cannot do QPixmap
         if os.name == 'posix' and 'DISPLAY' not in os.environ:
             return
-        app = QtGui.QApplication(sys.argv)
+        
+        app = QtGui.QApplication.instance()
+        if app is None:
+            app = QtGui.QApplication(sys.argv)
         #fileDir = os.path.dirname(__file__)
         #inbuiltPluginDir = os.path.realpath(fileDir + '/../../plugins')
 #        loadPlugins(inbuiltPluginDir)
 
         #sys.path.insert(0, inbuiltPluginDir)
-#        from workspace.Workspace import Manager
+#        from workflow.Workflow import Manager
         from segmentationstep.step import SegmentationStep
         myStep = SegmentationStep()
         self.assertEqual(myStep.getName(), 'Segmentation')
-        app.argc() # eclipse warning killer
         del sys.path[0]
 
 #    def testSerialisation(self):
 #        import sys
 #        app = QtGui.QApplication(sys.argv)
 #        from segmentation.SegmentationStep import SegmentationStep
-#        from workspace.WorkspaceStep import WorkspaceStep
+#        from workflow.WorkflowStep import WorkflowStep
 #        myStep = SegmentationStep()
 #
 #        itemData = QtCore.QByteArray()
@@ -55,7 +57,7 @@ class SegmentationTestCase(unittest.TestCase):
 #        writeDataStream = myStep.serialize(writeDataStream)
 #
 #        readDataStream = QtCore.QDataStream(itemData, QtCore.QIODevice.ReadOnly)
-#        passedStep = WorkspaceStep()
+#        passedStep = WorkflowStep()
 #        retStep = SegmentationStep.deserialize(passedStep, readDataStream)
 #        self.assertEqual(retStep.name, 'segmentation')
 #        self.assertNotEqual(retStep.pixmap, None)

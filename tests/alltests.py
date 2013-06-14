@@ -32,11 +32,11 @@ def suite():
     from core_tests import coretests
     tests.addTests(coretests.suite())
 
-    from workspace_tests import workspacetests #as workspacetests
-    tests.addTests(workspacetests.suite())
+    from workflow_tests import workflowtests
+    tests.addTests(workflowtests.suite())
 
-    from segmentation_tests import segmentationtests
-    tests.addTests(segmentationtests.suite())
+#    from segmentation_tests import segmentationtests
+#    tests.addTests(segmentationtests.suite())
     
     from imagesourcestep_tests import imagesourcesteptests
     tests.addTests(imagesourcesteptests.suite())
