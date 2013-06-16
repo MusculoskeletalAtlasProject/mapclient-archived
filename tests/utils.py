@@ -27,6 +27,9 @@ class ConsumeOutput(object):
     def write(self, message):
         self.messages.append(message)
 
+    def flush(self):
+        pass
+
 def parseUnitTestOutput(filename):
     '''
     Function for parsing unittest output for gathering pass and fail counts. 
@@ -38,12 +41,13 @@ def parseUnitTestOutput(filename):
     passed = 0
     failed = 0
     lines.reverse()
-    if len(lines) >= 3:
+    while len(lines) >= 3:
         statusLine = lines[0].rstrip('\r\n')
         totalLine = lines[2].rstrip('\r\n')
 
         m = re.match('Ran (\d+)', totalLine)
         if m:
+            lines = []
             total = int(m.group(1))
             if statusLine.startswith('OK'):
                 passed = total
@@ -55,8 +59,10 @@ def parseUnitTestOutput(filename):
                     m = re.match('.*{0}=(\d+)'.format(errorType), statusLine)
                     if m:
                         failed += int(m.group(1))
-    
+
                 passed = total - failed
+        else:
+            del lines[0]
 
     return rc, passed, failed
 

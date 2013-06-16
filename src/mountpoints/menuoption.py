@@ -18,7 +18,7 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     You should have received a copy of the GNU General Public License
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
-from PyQt4.QtCore import QObject
+from PySide.QtCore import QObject
 
 from core.pluginframework import MetaQObjectPluginMountPoint
 

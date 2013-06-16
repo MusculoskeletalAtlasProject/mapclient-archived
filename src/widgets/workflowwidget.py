@@ -17,9 +17,10 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     You should have received a copy of the GNU General Public License
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
-from PyQt4 import QtGui
+from PySide import QtGui
 from widgets.ui_workflowwidget import Ui_WorkflowWidget
 from mountpoints.workflowstep import WorkflowStepMountPoint
+from widgets.workflowgraphicsscene import WorkflowGraphicsScene
 
 class WorkflowWidget(QtGui.QWidget):
     '''
@@ -30,34 +31,96 @@ class WorkflowWidget(QtGui.QWidget):
         Constructor
         '''
         QtGui.QWidget.__init__(self)
-        self.mainWindow = mainWindow
+        self._mainWindow = mainWindow
         self._ui = Ui_WorkflowWidget()
         self._ui.setupUi(self)
-        self._ui.graphicsView.undoStack.indexChanged.connect(self.undoStackIndexChanged)
-        self._ui.graphicsView.mainWindow = mainWindow
-        self.action_Close = None # Keep a handle to this for modifying the Ui.
+
+        self._undoStack = QtGui.QUndoStack(self)
+        self._undoStack.indexChanged.connect(self.undoStackIndexChanged)
+
+        self._workflowManager = self._mainWindow.model().workflowManager()
+        self._graphicsScene = WorkflowGraphicsScene(self)
+        self._ui.graphicsView.setScene(self._graphicsScene)
+
+        self._ui.graphicsView.setUndoStack(self._undoStack)
+        self._graphicsScene.setUndoStack(self._undoStack)
+
+        self._graphicsScene.setWorkflowScene(self._workflowManager.scene())
+        self._graphicsScene.selectionChanged.connect(self._ui.graphicsView.selectionChanged)
+
+        self._ui.executeButton.clicked.connect(self.executeWorkflow)
+        self.action_Close = None  # Keep a handle to this for modifying the Ui.
         self._createMenuItems()
-        self._previousLocation = ''
 
-        self.workflowStepPlugins = WorkflowStepMountPoint.getPlugins()
-        self.stepTree = self.findChild(QtGui.QWidget, "stepTree")
-        for step in self.workflowStepPlugins:
-            self.stepTree.addStep(step)
+        self.updateStepTree()
 
-        self.updateUi()
+        self._updateUi()
 
-    def updateUi(self):
-        workflowOpen = self.mainWindow.workflowManager.isWorkflowOpen()
+    def _updateUi(self):
+        wfm = self._mainWindow.model().workflowManager()
+        self._mainWindow.setWindowTitle(wfm.title())
+        workflowOpen = wfm.isWorkflowOpen()
         self.action_Close.setEnabled(workflowOpen)
         self.setEnabled(workflowOpen)
-        self.action_Save.setEnabled(not self.mainWindow.workflowManager.isModified())
+        self.action_Save.setEnabled(wfm.isModified())
+        self._ui.executeButton.setEnabled(wfm.scene().canExecute() and not wfm.isModified())
+
+    def updateStepTree(self):
+        self._ui.stepTree.clear()
+        for step in WorkflowStepMountPoint.getPlugins():
+            self._ui.stepTree.addStep(step)
+
 
     def undoStackIndexChanged(self, index):
-        self.mainWindow.workflowManager.undoStackIndexChanged(index)
-        self.updateUi()
+        self._mainWindow.model().workflowManager().undoStackIndexChanged(index)
+        self._updateUi()
+
+    def undoRedoStack(self):
+        return self._undoStack
 
     def setActive(self):
-        self.mainWindow.setUndoStack(self._ui.graphicsView.undoStack)
+        print('setting active - workflow widget')
+        self._mainWindow.setCurrentUndoRedoStack(self._undoStack)
+
+    def executeWorkflow(self):
+        self._mainWindow.execute()  # .model().workflowManager().execute()
+
+    def setCurrentWidget(self, widget):
+        self._mainWindow.setCurrentWidget(widget)
+
+    def setWidgetUndoRedoStack(self, stack):
+        self._mainWindow.setCurrentUndoRedoStack(stack)
+
+    def new(self):
+        m = self._mainWindow.model().workflowManager()
+        workflowDir = QtGui.QFileDialog.getExistingDirectory(self._mainWindow, caption='Select Workflow Directory', directory=m.previousLocation())
+        if len(workflowDir) > 0:
+            m.new(workflowDir)
+            m.setPreviousLocation(workflowDir)
+            self._undoStack.clear()
+            self._graphicsScene.updateModel()
+            self._updateUi()
+
+    def load(self):
+        m = self._mainWindow.model().workflowManager()
+        workflowDir = QtGui.QFileDialog.getExistingDirectory(self._mainWindow, caption='Open Workflow', directory=m.previousLocation(), options=QtGui.QFileDialog.ShowDirsOnly | QtGui.QFileDialog.DontResolveSymlinks | QtGui.QFileDialog.ReadOnly)
+        if len(workflowDir) > 0:
+            m.load(workflowDir)
+            m.setPreviousLocation(workflowDir)
+            self._graphicsScene.updateModel()
+            self._updateUi()
+
+    def close(self):
+        m = self._mainWindow.model().workflowManager()
+        self._undoStack.clear()
+        m.close()
+        self._graphicsScene.clear()
+        self._updateUi()
+
+    def save(self):
+        m = self._mainWindow.model().workflowManager()
+        m.save()
+        self._updateUi()
 
     def _setActionProperties(self, action, name, slot, shortcut='', statustip=''):
         action.setObjectName(name)
@@ -66,44 +129,8 @@ class WorkflowWidget(QtGui.QWidget):
             action.setShortcut(QtGui.QKeySequence(shortcut))
         action.setStatusTip(statustip)
 
-
-    def new(self):
-        workflowDir = QtGui.QFileDialog.getExistingDirectory(self.mainWindow, caption='Select Workflow Directory', directory=self._previousLocation)
-        if len(workflowDir) > 0:
-            m = self.mainWindow.workflowManager
-            m.new(workflowDir)
-            self._previousLocation = workflowDir
-            self.updateUi()
-
-    def load(self):
-        workflowDir = QtGui.QFileDialog.getExistingDirectory(self.mainWindow, caption='Open Workflow', directory=self._previousLocation, options=QtGui.QFileDialog.ShowDirsOnly | QtGui.QFileDialog.DontResolveSymlinks | QtGui.QFileDialog.ReadOnly)
-        if len(workflowDir) > 0:
-            m = self.mainWindow.workflowManager
-            m.load(workflowDir)
-            self._previousLocation = workflowDir
-            self.updateUi()
-
-    def close(self):
-        m = self.mainWindow.workflowManager
-        m.close()
-        self._ui.graphicsView.clear()
-        self.updateUi()
-
-    def save(self):
-        m = self.mainWindow.workflowManager
-        m.save()
-        self.updateUi()
-
-    def saveState(self, ws):
-        self._ui.graphicsView.saveState(ws)
-        self.updateUi()
-
-    def loadState(self, ws):
-        self._ui.graphicsView.loadState(ws)
-        self.updateUi()
-
     def _createMenuItems(self):
-        menu_File = self.mainWindow._ui.menubar.findChild(QtGui.QMenu, 'menu_File')
+        menu_File = self._mainWindow._ui.menubar.findChild(QtGui.QMenu, 'menu_File')
         lastFileMenuAction = menu_File.actions()[-1]
         menu_New = menu_File.findChild(QtGui.QMenu, name='&New')
         if not menu_New:

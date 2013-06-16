@@ -18,14 +18,8 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     You should have received a copy of the GNU General Public License
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
-import sip
-API_NAMES = ["QDate", "QDateTime", "QString", "QTextStream", "QTime", "QUrl", "QVariant"]
-API_VERSION = 2
-for name in API_NAMES:
-    sip.setapi(name, API_VERSION)
-
 import os, sys, locale
-from core.pluginframework import getPlugins, loadPlugin
+
 from settings import info
 
 # Ensure the MAP Client module directory is in the system path so relative 'import' statements work
@@ -50,11 +44,11 @@ def winmain():
     '''
 
     progheader()
-    # import the locale, and set the locale. This is used for 
+    # import the locale, and set the locale. This is used for
     # locale-aware number to string formatting
     locale.setlocale(locale.LC_ALL, '')
 
-    from PyQt4 import QtGui, QtCore
+    from PySide import QtGui, QtCore
     app = QtGui.QApplication(sys.argv)
 
     # Set the default organisation name and application name used to store application settings
@@ -62,24 +56,14 @@ def winmain():
     QtCore.QCoreApplication.setOrganizationDomain(info.ORGANISATION_DOMAIN)
     QtCore.QCoreApplication.setApplicationName(info.APPLICATION_NAME)
 
-    from PyQt4.QtCore import QSettings
-    settings = QSettings()
-    settings.beginGroup('Plugins')
-    loadDefaultPlugins = settings.value('load_defaults', True)
-    settings.endGroup()
-
-    if loadDefaultPlugins:
-        fileDir = os.path.dirname(os.path.abspath(__file__))
-        inbuiltPluginDir = os.path.realpath(fileDir + '/../plugins')
-        
-        for p in getPlugins(inbuiltPluginDir):
-            loadPlugin(p)
+    from core.mainapplication import MainApplication
+    model = MainApplication()
 
     from widgets.mainwindow import MainWindow
-    window = MainWindow()
+    window = MainWindow(model)
     window.show()
 
-    sys.exit(app.exec_())
+    return app.exec_()
 
 class ConsumeOutput(object):
     def __init__(self):
@@ -92,7 +76,7 @@ def main():
     locale.setlocale(locale.LC_ALL, '')
 
     from optparse import OptionParser
-    from PyQt4 import QtCore
+    from PySide import QtCore
     app = QtCore.QCoreApplication(sys.argv)
 
     # Set the default organisation name and application name used to store application settings
@@ -119,7 +103,7 @@ def main():
 
 
 if __name__ == '__main__':
-    if len(sys.argv) == 1: # No command line arguments
-        winmain()
+    if len(sys.argv) == 1:  # No command line arguments
+        sys.exit(winmain())
     else:
         main()

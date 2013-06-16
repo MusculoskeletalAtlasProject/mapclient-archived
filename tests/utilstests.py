@@ -61,6 +61,12 @@ class UnitTestOutputTestCase(unittest.TestCase):
         self.assertEqual(p, 0)
         self.assertEqual(f, 0)
       
+    def test7(self):
+        [rc, p, f] = parseUnitTestOutput('test_resources/utils/utoutput7.log')
+        self.assertEqual(rc, 0)
+        self.assertEqual(p, 31)
+        self.assertEqual(f, 0)
+      
 def suite():
     tests = unittest.TestSuite()
     tests.addTests(unittest.TestLoader().loadTestsFromTestCase(UnitTestOutputTestCase))

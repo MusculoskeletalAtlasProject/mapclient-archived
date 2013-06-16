@@ -20,7 +20,7 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
 '''
 import os
 
-from PyQt4.QtGui import QDialog, QFileDialog, QDialogButtonBox
+from PySide.QtGui import QDialog, QFileDialog, QDialogButtonBox
 
 from imagesourcestep.widgets.ui_configuredialog import Ui_ConfigureDialog
 

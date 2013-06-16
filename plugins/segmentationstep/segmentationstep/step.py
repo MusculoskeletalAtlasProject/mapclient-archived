@@ -17,8 +17,16 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     You should have received a copy of the GNU General Public License
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
-from PyQt4 import QtGui
+import os
+
+from PySide import QtGui, QtCore
+
 from mountpoints.workflowstep import WorkflowStepMountPoint
+
+from segmentationstep.widgets.segmentationwidget import SegmentationWidget
+from segmentationstep.widgets.configuredialog import ConfigureDialog, ConfigureDialogState
+
+STEP_SERIALISATION_FILENAME = 'step.conf'
 
 class SegmentationStep(WorkflowStepMountPoint):
     '''
@@ -31,23 +39,53 @@ class SegmentationStep(WorkflowStepMountPoint):
         '''
         super(SegmentationStep, self).__init__()
         self._name = 'Segmentation'
-        self._identifier = 'squiggly'
-        self._pixmap = QtGui.QPixmap(':/segmentation/icons/seg.gif')
+        self._identifier = ''
+        self._icon = QtGui.QImage(':/segmentation/icons/seg.gif')
         self.addPort(('pho#workflow#port', 'uses', 'images'))
         self.addPort(('pho#workflow#port', 'provides', 'pointcloud'))
+        self._widget = None
+#        self._configured = True
+        self._state = ConfigureDialogState()
 
-    def configure(self, location):
-        print('configure the segmentation step')
+    def configure(self):
+        d = ConfigureDialog(self._state)
+        d.setModal(True)
+        if d.exec_():
+            self._state = d.getState()
+
+        self._configured = d.validate()
+        if self._configured and self._configuredObserver != None:
+            self._configuredObserver()
 
     def getIdentifier(self):
-        return self._identifier
-    
+        return self._state.identifier()
+
     def setIdentifier(self, identifier):
-        self._identifier = identifier
-        
+        self._state.setIdentifier(identifier)
+
     def serialize(self, location):
-        pass #QtCore.QSettings(location + '/' + info.WORKFLOW_NAME, QtCore.QSettings.IniFormat)
-        
+        self._step_location = os.path.join(location, self._state.identifier())
+        if not os.path.exists(self._step_location):
+            os.mkdir(self._step_location)
+
+        s = QtCore.QSettings(os.path.join(self._step_location, STEP_SERIALISATION_FILENAME), QtCore.QSettings.IniFormat)
+        self._state.save(s)
+
     def deserialize(self, location):
-        pass
-    
+        self._step_location = os.path.join(location, self._state.identifier())
+        s = QtCore.QSettings(os.path.join(self._step_location, STEP_SERIALISATION_FILENAME), QtCore.QSettings.IniFormat)
+        self._state.load(s)
+        d = ConfigureDialog(self._state)
+        self._configured = d.validate()
+
+    def execute(self, dataIn):
+        if not self._widget:
+            self._widget = SegmentationWidget(dataIn)
+            self._widget._ui.doneButton.clicked.connect(self._doneExecution)
+
+        self._setCurrentUndoRedoStack(self._widget.undoRedoStack())
+        self._setCurrentWidget(self._widget)
+
+    def portOutput(self):
+        point_cloud = self._widget.getPointCloud()
+        return point_cloud

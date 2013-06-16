@@ -6,9 +6,9 @@ Created on Feb 27, 2013
 import os, sys
 import unittest
 
-from PyQt4 import QtGui
+from PySide import QtGui
 try:
-    from PyQt4.QtTest import QTest
+    from PySide.QtTest import QTest
     HAVE_QTTEST = True
 except ImportError:
     HAVE_QTTEST = False
@@ -23,7 +23,9 @@ class ImageSourceTestCase(unittest.TestCase):
             self.pixmap_unavailable = True
         else:
             self.pixmap_unavailable = False
-            self.my_test_app = QtGui.QApplication(sys.argv)
+            self.my_test_app = QtGui.QApplication.instance()
+            if self.my_test_app is None:
+                self.my_test_app = QtGui.QApplication(sys.argv)
 
     def tearDown(self):
         if not self.pixmap_unavailable:

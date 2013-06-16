@@ -19,7 +19,7 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
 '''
 import os
 
-from PyQt4 import QtGui, QtCore
+from PySide import QtGui, QtCore
 
 from mountpoints.workflowstep import WorkflowStepMountPoint
 
@@ -40,36 +40,46 @@ class PointCloudStoreStep(WorkflowStepMountPoint):
         '''
         super(PointCloudStoreStep, self).__init__()
         self._name = 'Point Cloud Store'
-        self._pixmap = QtGui.QPixmap(':/pointcloudstore/icons/pointcloudstore.png')
+        self._icon = QtGui.QImage(':/pointcloudstore/icons/pointcloudstore.png')
         self.addPort(('pho#workflow#port', 'uses', 'pointcloud'))
         self._state = ConfigureDialogState()
+        self._step_location = None
 
-    def configure(self, location):
+    def configure(self):
         d = ConfigureDialog(self._state)
         d.setModal(True)
         if d.exec_():
             self._state = d.getState()
-            step_location = os.path.join(location, self._state.identifier())
-            if not os.path.exists(step_location):
-                os.mkdir(step_location)
-                
-            self.serialize(step_location)
-        
+
         self._configured = d.validate()
+        if self._configured and self._configuredObserver != None:
+            self._configuredObserver()
 
     def getIdentifier(self):
         return self._state.identifier()
-    
+
     def setIdentifier(self, identifier):
-        self._state.setIdentifer(identifier)
-        
+        self._state.setIdentifier(identifier)
+
     def serialize(self, location):
-        s = QtCore.QSettings(os.path.join(location, STEP_SERIALISATION_FILENAME), QtCore.QSettings.IniFormat)
+        self._step_location = os.path.join(location, self._state.identifier())
+        if not os.path.exists(self._step_location):
+            os.mkdir(self._step_location)
+
+        s = QtCore.QSettings(os.path.join(self._step_location, STEP_SERIALISATION_FILENAME), QtCore.QSettings.IniFormat)
         self._state.save(s)
-        
+
     def deserialize(self, location):
-        s = QtCore.QSettings(os.path.join(location, STEP_SERIALISATION_FILENAME), QtCore.QSettings.IniFormat)
+        self._step_location = os.path.join(location, self._state.identifier())
+        s = QtCore.QSettings(os.path.join(self._step_location, STEP_SERIALISATION_FILENAME), QtCore.QSettings.IniFormat)
         self._state.load(s)
         d = ConfigureDialog(self._state)
         self._configured = d.validate()
-    
+
+    def execute(self, dataIn):
+        f = open(os.path.join(self._step_location, 'pointcloud.txt'), 'w')
+        for i, pt in enumerate(dataIn):
+            f.write(str(i + 1) + '\t' + str(pt[0]) + '\t' + str(pt[1]) + '\t' + str(pt[2]) + '\n')
+        f.close()
+        self._doneExecution()
+

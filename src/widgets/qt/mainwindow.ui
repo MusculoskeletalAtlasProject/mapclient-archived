@@ -33,7 +33,7 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>25</height>
+     <height>24</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_Help">
@@ -54,8 +54,17 @@
      <string>&amp;Edit</string>
     </property>
    </widget>
+   <widget class="QMenu" name="menu_Tools">
+    <property name="title">
+     <string>&amp;Tools</string>
+    </property>
+    <addaction name="actionPluginManager"/>
+    <addaction name="actionPMR"/>
+    <addaction name="actionAnnotation"/>
+   </widget>
    <addaction name="menu_File"/>
    <addaction name="menu_Edit"/>
+   <addaction name="menu_Tools"/>
    <addaction name="menu_Help"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
@@ -73,6 +82,21 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+Q</string>
+   </property>
+  </action>
+  <action name="actionPluginManager">
+   <property name="text">
+    <string>Plugin &amp;Manager</string>
+   </property>
+  </action>
+  <action name="actionPMR">
+   <property name="text">
+    <string>&amp;PMR</string>
+   </property>
+  </action>
+  <action name="actionAnnotation">
+   <property name="text">
+    <string>&amp;Annotation</string>
    </property>
   </action>
  </widget>
