@@ -39,7 +39,7 @@ class ImageSourceTestCase(unittest.TestCase):
             return
         
         from imagesourcestep.step import ImageSourceStep
-        mystep = ImageSourceStep()
+        mystep = ImageSourceStep('empty')
         
         self.assertFalse(mystep.isConfigured())
 
