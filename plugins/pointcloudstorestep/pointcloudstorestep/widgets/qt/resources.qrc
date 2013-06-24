@@ -1,0 +1,5 @@
+<RCC>
+  <qresource prefix="/pointcloudstore/">
+    <file>icons/pointcloudstore.png</file>
+  </qresource>
+</RCC>

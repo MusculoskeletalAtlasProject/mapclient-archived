@@ -17,3 +17,18 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     You should have received a copy of the GNU General Public License
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
+from PySide import QtCore
+
+from tools.registerdialog import RegisterDialog
+
+def registerUser(parent=None):
+    d = RegisterDialog(parent)
+    d.setModal(True)
+    if d.exec_():
+        settings = QtCore.QSettings()
+        settings.beginGroup('RegisteredUsers')
+        settings.beginGroup(d.username())
+        settings.setValue('email', d.email())
+        settings.setValue('password', d.password())
+        settings.endGroup()
+        settings.endGroup()

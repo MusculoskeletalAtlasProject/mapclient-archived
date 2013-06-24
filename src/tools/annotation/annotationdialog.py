@@ -17,3 +17,31 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     You should have received a copy of the GNU General Public License
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
+from PySide import QtGui
+
+from tools.annotation.ui_annotationdialog import Ui_AnnotationDialog
+from tools.annotation.annotationtool import AnnotationTool
+
+_DEFAULT_ANNOTATION_FILENAME = 'annotation.rdf'
+
+class AnnotationDialog(QtGui.QDialog):
+    '''
+    Dialog for annotating a directory.
+    '''
+
+
+    def __init__(self, location, parent=None):
+        '''
+        Constructor
+        '''
+        QtGui.QDialog.__init__(self, parent)
+        self._ui = Ui_AnnotationDialog()
+        self._ui.setupUi(self)
+        
+        self._ui.locationLineEdit.setText(location)
+        self._tool = AnnotationTool()
+        self._ui.subjectComboBox.addItems(self._tool.getTerms())
+        self._ui.predicateComboBox.addItems(self._tool.getTerms())
+        self._ui.objectComboBox.addItems(self._tool.getTerms())
+        
+#        self._ui
