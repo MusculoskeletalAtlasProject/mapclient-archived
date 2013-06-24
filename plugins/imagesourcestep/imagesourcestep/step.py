@@ -24,6 +24,10 @@ from PySide import QtGui, QtCore
 from mountpoints.workflowstep import WorkflowStepMountPoint
 from imagesourcestep.widgets.configuredialog import ConfigureDialog, ConfigureDialogState
 
+from core.threadcommandmanager import ThreadCommandManager, CommandCopyDirectory, CommandCloneWorkspace
+from tools.pmr.pmrtool import PMRTool
+from tools.pmr.pmrhglogindialog import PMRHgLoginDialog
+
 STEP_SERIALISATION_FILENAME = 'step.conf'
 
 class ImageSourceData(object):
@@ -44,32 +48,62 @@ class ImageSourceData(object):
 
 class ImageSourceStep(WorkflowStepMountPoint):
     '''
-    A step satisfies the step plugin duck.
+    A step that satisfies the step plugin duck.
     
     It describes the location of an image/a set of images.
     It can be used as an image source.
     '''
-    def __init__(self):
+    def __init__(self, location):
         '''
         Constructor
         '''
-        super(ImageSourceStep, self).__init__()
-        self._name = 'Image source'
+        super(ImageSourceStep, self).__init__('Image source', location)
+#        self._location = location
+#        self._name = 'Image source'
         self._icon = QtGui.QImage(':/imagesource/icons/landscapeimages.png')
         self.addPort(('pho#workflow#port', 'provides', 'images'))
         self._configured = False
         self._state = ConfigureDialogState()
+        self._threadCommandManager = ThreadCommandManager()
+        self._threadCommandManager.registerFinishedCallback(self._threadCommandsFinished)
 
     def configure(self):
+        delay = False
         d = ConfigureDialog(self._state)
         d.setModal(True)
         if d.exec_():
+            self.serialize(self._location)
+            step_location = os.path.join(self._location, self._state.identifier())
+            if d.copyToWorkflow():
+                src_location = d.localLocation()
+                if src_location != step_location:
+                    delay = True
+                    c = CommandCopyDirectory(src_location, step_location)
+                    self._threadCommandManager.addCommand(c)
+            if d.addToPMR():
+                pmr_tool = PMRTool()
+                # Get login details:
+                dlg = PMRHgLoginDialog()
+                if dlg.exec_():
+                    repourl = pmr_tool.addWorkspace('Image Source Step: ' + self._state.identifier(), None)
+                    c = CommandCloneWorkspace(repourl, step_location, dlg.username(), dlg.password())
+                    self._threadCommandManager.addCommand(c)
+                    delay= True
+            
             self._state = d.getState()
         
         self._configured = d.validate()
+
+        if self._configured and delay:
+            self._threadCommandManager.execute()
+        elif self._configured and self._configuredObserver != None:
+            self._configuredObserver()
+            
+    def _threadCommandsFinished(self):
+        self._state._localLocation = os.path.join(self._location, self._state.identifier())
         if self._configured and self._configuredObserver != None:
             self._configuredObserver()
-        
+            
     def getIdentifier(self):
         return self._state.identifier()
     

@@ -39,6 +39,7 @@ class WorkflowGraphicsView(QtGui.QGraphicsView):
         self._errorIcon = None
 
         self._undoStack = None
+        self._location = None
 
         self._connectLine = None
         self._connectSourceNode = None
@@ -57,6 +58,9 @@ class WorkflowGraphicsView(QtGui.QGraphicsView):
 
     def setUndoStack(self, stack):
         self._undoStack = stack
+        
+    def setLocation(self, location):
+        self._location = location
 
     def connectNodes(self, node1, node2):
         # Check if nodes are already connected
@@ -187,7 +191,7 @@ class WorkflowGraphicsView(QtGui.QGraphicsView):
             stream >> hotspot
 
             position = self.mapToScene(event.pos() - hotspot)
-            metastep = MetaStep(workflowStepFactory(name))
+            metastep = MetaStep(workflowStepFactory(name, self._location))
             node = Node(metastep)
             metastep._step.registerConfiguredObserver(self.scene().stepConfigured)
             metastep._step.registerDoneExecution(self.scene().doneExecution)

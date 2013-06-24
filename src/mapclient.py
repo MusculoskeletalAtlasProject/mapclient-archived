@@ -48,13 +48,14 @@ def winmain():
     # locale-aware number to string formatting
     locale.setlocale(locale.LC_ALL, '')
 
-    from PySide import QtGui, QtCore
+    from PySide import QtGui
     app = QtGui.QApplication(sys.argv)
 
     # Set the default organisation name and application name used to store application settings
-    QtCore.QCoreApplication.setOrganizationName(info.ORGANISATION_NAME)
-    QtCore.QCoreApplication.setOrganizationDomain(info.ORGANISATION_DOMAIN)
-    QtCore.QCoreApplication.setApplicationName(info.APPLICATION_NAME)
+    app.setOrganizationDomain(info.ORGANISATION_DOMAIN)
+    app.setOrganizationName(info.ORGANISATION_NAME)
+    app.setApplicationName(info.APPLICATION_NAME)
+    app.setApplicationVersion(info.ABOUT['version'])
 
     from core.mainapplication import MainApplication
     model = MainApplication()

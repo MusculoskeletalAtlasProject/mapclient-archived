@@ -17,19 +17,3 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     You should have received a copy of the GNU General Public License
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
-from PySide import QtGui
-from tools.ui_pmrdialog import Ui_PMRDialog
-
-class PMRDialog(QtGui.QDialog):
-    '''
-    Dialog for managing interaction with PMR.
-    '''
-
-
-    def __init__(self, parent=None):
-        '''
-        Constructor
-        '''
-        QtGui.QDialog.__init__(self, parent)
-        self._ui = Ui_PMRDialog()
-        self._ui.setupUi(self)

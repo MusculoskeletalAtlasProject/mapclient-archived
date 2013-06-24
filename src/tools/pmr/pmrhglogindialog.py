@@ -18,18 +18,29 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
 from PySide import QtGui
-from tools.ui_annotationdialog import Ui_AnnotationDialog
 
-class AnnotationDialog(QtGui.QDialog):
-    '''
-    Dialog for managing the list of plugin directories.
-    '''
+from tools.pmr.ui_pmrhglogindialog import Ui_PMRHgLoginDialog
 
-
+class PMRHgLoginDialog(QtGui.QDialog):
     def __init__(self, parent=None):
-        '''
-        Constructor
-        '''
         QtGui.QDialog.__init__(self, parent)
-        self._ui = Ui_AnnotationDialog()
+        self._ui = Ui_PMRHgLoginDialog()
         self._ui.setupUi(self)
+
+        self._ui.buttonBox.button(QtGui.QDialogButtonBox.Ok).setText('Login')
+        self._ui.buttonBox.button(QtGui.QDialogButtonBox.Ok).clicked.connect(self._handleLogin)
+
+    def _handleLogin(self):
+        if (len(self._ui.usernameLineEdit.text()) > 0 and
+            len(self._ui.passwordLineEdit.text()) > 0):
+            self.accept()
+        else:
+            QtGui.QMessageBox.warning(
+                self, 'Error', 'Bad user or password')
+
+    def username(self):
+        return self._ui.usernameLineEdit.text()
+    
+    def password(self):
+        return self._ui.passwordLineEdit.text()
+    

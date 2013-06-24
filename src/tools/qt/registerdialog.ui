@@ -1,43 +1,47 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>AnnotationDialog</class>
- <widget class="QDialog" name="AnnotationDialog">
+ <class>AuthoriseApplicationDialog</class>
+ <widget class="QDialog" name="AuthoriseApplicationDialog">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>454</width>
-    <height>513</height>
+    <width>400</width>
+    <height>300</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Annotation Tool</string>
+   <string>Authorise Application</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <widget class="QGroupBox" name="groupBox">
      <property name="title">
-      <string>Annotation</string>
+      <string>Authorise Application</string>
      </property>
-     <layout class="QGridLayout" name="gridLayout">
-      <item row="0" column="0">
+     <layout class="QVBoxLayout" name="verticalLayout_2">
+      <item>
        <widget class="QLabel" name="label">
-        <property name="maximumSize">
-         <size>
-          <width>400</width>
-          <height>400</height>
-         </size>
-        </property>
         <property name="text">
-         <string/>
-        </property>
-        <property name="pixmap">
-         <pixmap resource="resources.qrc">:/images/sad_face.png</pixmap>
-        </property>
-        <property name="scaledContents">
-         <bool>true</bool>
+         <string>Paste authorisation token here:</string>
         </property>
        </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="tokenLineEdit"/>
+      </item>
+      <item>
+       <spacer name="verticalSpacer">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>20</width>
+          <height>40</height>
+         </size>
+        </property>
+       </spacer>
       </item>
      </layout>
     </widget>
@@ -54,14 +58,12 @@
    </item>
   </layout>
  </widget>
- <resources>
-  <include location="resources.qrc"/>
- </resources>
+ <resources/>
  <connections>
   <connection>
    <sender>buttonBox</sender>
    <signal>accepted()</signal>
-   <receiver>AnnotationDialog</receiver>
+   <receiver>AuthoriseApplicationDialog</receiver>
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -77,7 +79,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>rejected()</signal>
-   <receiver>AnnotationDialog</receiver>
+   <receiver>AuthoriseApplicationDialog</receiver>
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">
