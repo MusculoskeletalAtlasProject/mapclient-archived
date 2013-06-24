@@ -17,17 +17,11 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     You should have received a copy of the GNU General Public License
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
-import unittest
+import unittest, sys
 
 from PySide import QtGui
 
 from settings import info
-
-try:
-    from PySide.QtTest import QTest
-    HAVE_QTTEST = True
-except ImportError:
-    HAVE_QTTEST = False
 
 DISABLE_GUI_TESTS = True
 
@@ -47,20 +41,17 @@ class PMRSearchDialogTestCase(unittest.TestCase):
     def tearDown(self):
         pass
 
-    @unittest.skipIf(DISABLE_GUI_TESTS, 'GUI tests are disabled')
-    def testPMRSearchDialog(self):        
-        from tools.pmr.pmrsearchdialog import PMRSearchDialog
-        dlg = PMRSearchDialog()
-        dlg.setModal(True)
-        if dlg.exec_():
-            ws = dlg.getSelectedWorkspace()
-            print('the winner has selected:')
-            print(ws)
+    if sys.version < '2.7.0':
+        @unittest.skipIf(DISABLE_GUI_TESTS, 'GUI tests are disabled')
+        def testPMRSearchDialog(self):        
+            from tools.pmr.pmrsearchdialog import PMRSearchDialog
+            dlg = PMRSearchDialog()
+            dlg.setModal(True)
+            if dlg.exec_():
+                ws = dlg.getSelectedWorkspace()
+                print('the winner has selected:')
+                print(ws)
             
-    @unittest.skipIf(not HAVE_QTTEST, 'No QtTest available')
-    def testMe(self):
-        pass
-
 class PMRToolTestCase(unittest.TestCase):
     
     def setUp(self):
@@ -71,10 +62,11 @@ class PMRToolTestCase(unittest.TestCase):
         pass
 #        del self._app
 
-    @unittest.skip('No need to create workspaces all the time.')
-    def testAddWorkspace(self):
-        location = self._tool.addWorkspace('my title', 'my description')
-        self.assertTrue(location.startswith('http://'))
+    if sys.version < '2.7.0':
+        @unittest.skip('No need to create workspaces all the time.')
+        def testAddWorkspace(self):
+            location = self._tool.addWorkspace('my title', 'my description')
+            self.assertTrue(location.startswith('http://'))
     
     def testGetDashboard(self):
         from tools.pmr.pmrtool import PMRTool
