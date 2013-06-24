@@ -95,11 +95,12 @@ A plugin that registers this mount point could have:
 #    '''
 #
 
-def _workflow_step_init(self):
+def _workflow_step_init(self, name, location):
     '''
     Constructor
     '''
-    self._location = None
+    self._name = name
+    self._location = location
     self._ports = []
     self._icon = None
     self._configured = False
@@ -179,8 +180,8 @@ attr_dict['serialize'] = _workflow_step_serialize
 
 WorkflowStepMountPoint = pluginframework.MetaPluginMountPoint('WorkflowStepMountPoint', (object,), attr_dict)
 
-def workflowStepFactory(step_name):
-    for step in WorkflowStepMountPoint.getPlugins():
+def workflowStepFactory(step_name, location):
+    for step in WorkflowStepMountPoint.getPlugins(location):
         if step_name == step.getName():
             return step
 

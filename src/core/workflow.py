@@ -48,6 +48,8 @@ class Workflow(object):
         self._location = location
         self.version = version
 
+_PREVIOUS_LOCATION_STRING = 'previousLocation'
+
 class WorkflowManager():
     '''
     This class managers the workflow.
@@ -57,7 +59,7 @@ class WorkflowManager():
         '''
         Constructor
         '''
-        self.name = 'workflowManager'
+        self.name = 'WorkflowManager'
 #        self.widget = None
 #        self.widgetIndex = -1
         self._location = None
@@ -176,12 +178,12 @@ class WorkflowManager():
 
     def writeSettings(self, settings):
         settings.beginGroup(self.name)
-        settings.setValue('previousLocation', self._previousLocation)
+        settings.setValue(_PREVIOUS_LOCATION_STRING, self._previousLocation)
         settings.endGroup()
 
     def readSettings(self, settings):
         settings.beginGroup(self.name)
-        self._previousLocation = settings.value('previousLocation', '')
+        self._previousLocation = settings.value(_PREVIOUS_LOCATION_STRING, '')
         settings.endGroup()
 
 

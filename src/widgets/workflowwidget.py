@@ -51,6 +51,8 @@ class WorkflowWidget(QtGui.QWidget):
         self._ui.executeButton.clicked.connect(self.executeWorkflow)
         self.action_Close = None  # Keep a handle to this for modifying the Ui.
         self._createMenuItems()
+        # load tools
+#        self.toolPlugins = ToolMountPoint.getPlugins(self.menu_Tools, self)
 
         self.updateStepTree()
 
@@ -67,9 +69,8 @@ class WorkflowWidget(QtGui.QWidget):
 
     def updateStepTree(self):
         self._ui.stepTree.clear()
-        for step in WorkflowStepMountPoint.getPlugins():
+        for step in WorkflowStepMountPoint.getPlugins(''):
             self._ui.stepTree.addStep(step)
-
 
     def undoStackIndexChanged(self, index):
         self._mainWindow.model().workflowManager().undoStackIndexChanged(index)
@@ -98,15 +99,20 @@ class WorkflowWidget(QtGui.QWidget):
             m.new(workflowDir)
             m.setPreviousLocation(workflowDir)
             self._undoStack.clear()
+            self._ui.graphicsView.setLocation(workflowDir)
             self._graphicsScene.updateModel()
             self._updateUi()
 
     def load(self):
         m = self._mainWindow.model().workflowManager()
-        workflowDir = QtGui.QFileDialog.getExistingDirectory(self._mainWindow, caption='Open Workflow', directory=m.previousLocation(), options=QtGui.QFileDialog.ShowDirsOnly | QtGui.QFileDialog.DontResolveSymlinks | QtGui.QFileDialog.ReadOnly)
+        # Warning: when switching between PySide and PyQt4 the keyword argument for the directory to initialise the dialog to is different.
+        # In PySide the keyword argument is 'dir'
+        # In PyQt4 the keyword argument is 'directory'
+        workflowDir = QtGui.QFileDialog.getExistingDirectory(self._mainWindow, caption='Open Workflow', dir=m.previousLocation(), options=QtGui.QFileDialog.ShowDirsOnly | QtGui.QFileDialog.DontResolveSymlinks | QtGui.QFileDialog.ReadOnly)
         if len(workflowDir) > 0:
             m.load(workflowDir)
             m.setPreviousLocation(workflowDir)
+            self._ui.graphicsView.setLocation(workflowDir)
             self._graphicsScene.updateModel()
             self._updateUi()
 
@@ -153,4 +159,20 @@ class WorkflowWidget(QtGui.QWidget):
         menu_File.insertSeparator(lastFileMenuAction)
         menu_File.insertAction(lastFileMenuAction, self.action_Save)
         menu_File.insertSeparator(lastFileMenuAction)
+
+        # Todo add tool menus
+#        lastMenubarAction = menubar.actions()[-1]
+#        self.menu_Tools = menubar.findChild(QtGui.QMenu, 'menu_Tools')
+#        if not self.menu_Tools:
+#            self.menu_Tools = QtGui.QMenu('&Tools', menubar)
+#
+#        self.menu_Window = menubar.findChild(QtGui.QMenu, 'menu_Window')
+#        if not self.menu_Window:
+#            self.menu_Window = QtGui.QMenu('&Window', menubar)
+
+
+#        menubar.insertMenu(lastMenubarAction, self.menu_Tools)
+#        menubar.insertMenu(lastMenubarAction, self.menu_Window)
+
+
 

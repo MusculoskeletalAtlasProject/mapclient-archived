@@ -34,12 +34,13 @@ class PointCloudStoreStep(WorkflowStepMountPoint):
     It stores point cloud data.
     It can be used as a point cloud data store.
     '''
-    def __init__(self):
+    def __init__(self, location):
         '''
         Constructor
         '''
-        super(PointCloudStoreStep, self).__init__()
-        self._name = 'Point Cloud Store'
+        super(PointCloudStoreStep, self).__init__('Point Cloud Store', location)
+#        self._name = 'Point Cloud Store'
+#        self._location = location
         self._icon = QtGui.QImage(':/pointcloudstore/icons/pointcloudstore.png')
         self.addPort(('pho#workflow#port', 'uses', 'pointcloud'))
         self._state = ConfigureDialogState()

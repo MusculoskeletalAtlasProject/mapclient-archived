@@ -17,21 +17,25 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     You should have received a copy of the GNU General Public License
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
-import unittest
+from PySide import QtGui
 
-def suite():
-    tests = unittest.TestSuite()
+from tools.pmr.ui_authoriseapplicationdialog import Ui_AuthoriseApplicationDialog
 
-    from workflow_tests.workflowmanager import WorkflowManagerTestCase
-    tests.addTests(unittest.TestLoader().loadTestsFromTestCase(WorkflowManagerTestCase))
 
-    from workflow_tests.workflowsteps import WorkflowStepsTestCase
-    tests.addTests(unittest.TestLoader().loadTestsFromTestCase(WorkflowStepsTestCase))
+class AuthoriseApplicationDialog(QtGui.QDialog):
+    '''
+    Dialog for authorising the application.
+    '''
 
-    return tests
 
-def load_tests(loader, tests, pattern):
-    return suite()
+    def __init__(self, parent=None):
+        '''
+        Constructor
+        '''
+        QtGui.QDialog.__init__(self, parent)
+        self._ui = Ui_AuthoriseApplicationDialog()
+        self._ui.setupUi(self)
+        
 
-if __name__ == '__main__':
-    unittest.TextTestRunner().run(suite())
+    def token(self):
+        return self._ui.tokenLineEdit.text()

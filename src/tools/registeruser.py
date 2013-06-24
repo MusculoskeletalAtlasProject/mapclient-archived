@@ -1,4 +1,3 @@
-#!/usr/bin/python
 '''
 MAP Client, a program to generate detailed musculoskeletal models for OpenSim.
     Copyright (C) 2012  University of Auckland
@@ -18,32 +17,18 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     You should have received a copy of the GNU General Public License
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
-import unittest
+from PySide import QtCore
 
-def suite():
-    tests = unittest.TestSuite()
+from tools.registerdialog import RegisterDialog
 
-    from settings_tests import settingstests
-    tests.addTests(settingstests.suite())
-
-    from widgets_tests import widgetstests
-    tests.addTests(widgetstests.suite())
-
-    from core_tests import coretests
-    tests.addTests(coretests.suite())
-
-    from imagesourcestep_tests import imagesourcesteptests
-    tests.addTests(imagesourcesteptests.suite())
-    
-    from pointcloudstorestep_tests import pointcloudstoretests
-    tests.addTests(pointcloudstoretests.suite())
-    
-    return tests
-
-def load_tests(loader, tests, pattern):
-    return suite()
-
-
-if __name__ == '__main__':
-    #unittest.main()
-    unittest.TextTestRunner().run(suite())
+def registerUser(parent=None):
+    d = RegisterDialog(parent)
+    d.setModal(True)
+    if d.exec_():
+        settings = QtCore.QSettings()
+        settings.beginGroup('RegisteredUsers')
+        settings.beginGroup(d.username())
+        settings.setValue('email', d.email())
+        settings.setValue('password', d.password())
+        settings.endGroup()
+        settings.endGroup()

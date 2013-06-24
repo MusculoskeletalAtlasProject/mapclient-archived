@@ -18,25 +18,24 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     You should have received a copy of the GNU General Public License
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
-import os
-
 from PySide.QtGui import QDialog, QFileDialog, QDialogButtonBox
 
 from imagesourcestep.widgets.ui_configuredialog import Ui_ConfigureDialog
+from tools.pmr.pmrtool import PMRTool
 
 REQUIRED_STYLE_SHEET = 'border: 1px solid red; border-radius: 3px'
 DEFAULT_STYLE_SHEET = 'border: 1px solid gray; border-radius: 3px'
 
 class ConfigureDialogState(object):
     
-    def __init__(self, identifier='', localLocation='', copyTo=False, pmrLocation='', imageType=0, currentTab=0, localDirectory=False, previousLocalLocation=''):
+    def __init__(self, identifier='', localLocation='', copyTo=False, pmrLocation='', imageType=0, currentTab=0, addToPMR=False, previousLocalLocation=''):
         self._identifier = identifier
         self._localLocation = localLocation
         self._copyTo = copyTo
         self._pmrLocation = pmrLocation
         self._imageType = imageType
         self._currentTab = currentTab
-        self._localDirectory = localDirectory
+        self._addToPMR = addToPMR
         self._previousLocalLocation = previousLocalLocation
         
         
@@ -61,8 +60,8 @@ class ConfigureDialogState(object):
     def currentTab(self):
         return self._currentTab
     
-    def localDirectory(self):
-        return self._localDirectory
+    def addToPMR(self):
+        return self._addToPMR
     
     def previousLocalLocation(self):
         return self._previousLocalLocation
@@ -75,7 +74,7 @@ class ConfigureDialogState(object):
         conf.setValue('pmrLocation', self._pmrLocation)
         conf.setValue('imageType', self._imageType)
         conf.setValue('currentTab', self._currentTab)
-        conf.setValue('localDirectory', self._localDirectory)
+        conf.setValue('addToPMR', self._addToPMR)
         conf.setValue('previousLocalLocation', self._previousLocalLocation)
         conf.endGroup()
     
@@ -87,7 +86,7 @@ class ConfigureDialogState(object):
         self._pmrLocation = conf.value('pmrLocation', '')
         self._imageType = int(conf.value('imageType', 0))
         self._currentTab = int(conf.value('currentTab', 0))
-        self._localDirectory = conf.value('localDirectory', 'false') == 'true'
+        self._addToPMR = conf.value('addToPMR', 'false') == 'true'
         self._previousLocalLocation = conf.value('previousLocalLocation', '')
         conf.endGroup()
         
@@ -105,9 +104,9 @@ class ConfigureDialog(QDialog):
         QDialog.__init__(self, parent)
         self._ui = Ui_ConfigureDialog()
         self._ui.setupUi(self)
-        self._ui.identifierLineEdit.setStyleSheet(REQUIRED_STYLE_SHEET)
         
         self.setState(state)
+        self._updateUi()
         self.validate()
         self._makeConnections()
         
@@ -117,6 +116,8 @@ class ConfigureDialog(QDialog):
         self._ui.pmrLineEdit.textChanged.connect(self._pmrLocationEdited)
         self._ui.pmrButton.clicked.connect(self._pmrLocationClicked)
         self._ui.localButton.clicked.connect(self._localLocationClicked)
+        self._ui.pmrRegisterLabel.linkActivated.connect(self._register)
+        self._ui.copyToWorkflowCheckBox.stateChanged.connect(self._updateUi)
         
     def setState(self, state):
         self._ui.identifierLineEdit.setText(state._identifier)
@@ -125,7 +126,7 @@ class ConfigureDialog(QDialog):
         self._ui.pmrLineEdit.setText(state._pmrLocation)
         self._ui.imageSourceTypeComboBox.setCurrentIndex(state._imageType)
         self._ui.tabWidget.setCurrentIndex(state._currentTab)
-        self._ui.localDirectoryCheckBox.setChecked(state._localDirectory)
+        self._ui.addToPMRCheckBox.setChecked(state._addToPMR)
         self._ui.previousLocationLabel.setText(state._previousLocalLocation)
     
     def getState(self):
@@ -136,27 +137,37 @@ class ConfigureDialog(QDialog):
             self._ui.pmrLineEdit.text(),
             self._ui.imageSourceTypeComboBox.currentIndex(),
             self._ui.tabWidget.currentIndex(),
-            self._ui.localDirectoryCheckBox.isChecked(),
+            self._ui.addToPMRCheckBox.isChecked(),
             self._ui.previousLocationLabel.text())
         
         return state
     
+    def _updateUi(self):
+        pmr_tool = PMRTool()
+        if pmr_tool.hasAccess():
+            self._ui.pmrRegisterLabel.hide()
+            
+        self._ui.addToPMRCheckBox.setEnabled(pmr_tool.hasAccess() and self._ui.copyToWorkflowCheckBox.isChecked())
+            
+    def _register(self):
+        pmr_tool = PMRTool()
+        pmr_tool.registerWithPMR(self)
+        self._updateUi()
+        
     def _pmrLocationClicked(self):
-        print('Implement PMR Dialog')
-    
+        from tools.pmr.pmrsearchdialog import PMRSearchDialog
+        dlg = PMRSearchDialog(self)
+        dlg.setModal(True)
+        if dlg.exec_():
+            ws = dlg.getSelectedWorkspace()
+            self._ui.pmrLineEdit.setText(ws['target'])
+        
     def _localLocationClicked(self):
-        if self._ui.localDirectoryCheckBox.isChecked():
-            location = QFileDialog.getExistingDirectory(self, 'Select Image Directory', self._ui.previousLocationLabel.text(), QFileDialog.ShowDirsOnly)
-        else:
-            location = QFileDialog.getOpenFileNames(self, 'Select Image File(s)', self._ui.previousLocationLabel.text()) 
+        location = QFileDialog.getExistingDirectory(self, 'Select Image File(s)', self._ui.previousLocationLabel.text()) 
         
         if location:
-            if self._ui.localDirectoryCheckBox.isChecked():
-                self._ui.previousLocationLabel.setText(location)
-                self._ui.localLineEdit.setText(location)
-            else:
-                self._ui.previousLocationLabel.setText(os.path.dirname(location[0]))
-                self._ui.localLineEdit.setText(';;'.join(location))
+            self._ui.previousLocationLabel.setText(location)
+            self._ui.localLineEdit.setText(location)
 
     
     def _pmrLocationEdited(self):
@@ -167,6 +178,15 @@ class ConfigureDialog(QDialog):
         self._ui.pmrLineEdit.setText('')
         self.validate()
         
+    def localLocation(self):
+        return self._ui.localLineEdit.text()
+        
+    def copyToWorkflow(self):
+        return self._ui.copyToWorkflowCheckBox.isChecked()
+    
+    def addToPMR(self):
+        return self._ui.addToPMRCheckBox.isChecked()
+    
     def validate(self):
         identifierValid = len(self._ui.identifierLineEdit.text()) > 0
         localValid = len(self._ui.localLineEdit.text()) > 0

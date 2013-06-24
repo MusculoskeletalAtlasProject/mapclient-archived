@@ -17,11 +17,12 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     You should have received a copy of the GNU General Public License
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
-import math, weakref
+import os, math, weakref
 
 from PySide import QtCore, QtGui
 
 from core.workflowscene import Connection
+from tools.annotation.annotationdialog import AnnotationDialog
 
 class ErrorItem(QtGui.QGraphicsItem):
 
@@ -218,6 +219,7 @@ class Node(Item):
         configureAction.triggered.connect(self.configureMe)
         annotateAction = QtGui.QAction('Annotate', self._contextMenu)
         annotateAction.setEnabled(False)
+        annotateAction.triggered.connect(self.annotateMe)
         self._contextMenu.addAction(configureAction)
         self._contextMenu.addAction(annotateAction)
 
@@ -262,6 +264,11 @@ class Node(Item):
     def configureMe(self):
         self.scene().setConfigureNode(self)
         self._metastep._step.configure()
+        
+    def annotateMe(self):
+        dlg = AnnotationDialog(self._getStepLocation())
+        dlg.setModal(True)
+        dlg.exec_()
 
     def metaItem(self):
         return self._metastep
@@ -316,7 +323,19 @@ class Node(Item):
         return QtGui.QGraphicsItem.itemChange(self, change, value)
 
     def showContextMenu(self, pos):
+        has_dir = os.path.exists(self._getStepLocation())
+        self._contextMenu.actions()[1].setEnabled(has_dir)
         self._contextMenu.popup(pos)
+        
+    def _getStepLocation(self):
+        return os.path.join(self._metastep._step._location, self._metastep._step.getIdentifier())
+
+class StepPort(QtGui.QGraphicsItem):
+
+    
+    def __init__(self, *args, **kwargs):
+        super(ConfigureIcon, self).__init__(*args, **kwargs)
+
 
 class ConfigureIcon(QtGui.QGraphicsItem):
 
