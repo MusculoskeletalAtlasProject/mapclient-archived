@@ -17,10 +17,17 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     You should have received a copy of the GNU General Public License
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
+import os
+
 from PySide import QtGui
+
 from widgets.ui_workflowwidget import Ui_WorkflowWidget
 from mountpoints.workflowstep import WorkflowStepMountPoint
 from widgets.workflowgraphicsscene import WorkflowGraphicsScene
+from core.workflow import WorkflowError
+from tools.pmr.pmrtool import PMRTool
+from tools.pmr.pmrhglogindialog import PMRHgLoginDialog
+from core.threadcommandmanager import CommandCloneWorkspace, CommandIgnoreDirectoriesHg
 
 class WorkflowWidget(QtGui.QWidget):
     '''
@@ -92,16 +99,31 @@ class WorkflowWidget(QtGui.QWidget):
     def setWidgetUndoRedoStack(self, stack):
         self._mainWindow.setCurrentUndoRedoStack(stack)
 
-    def new(self):
+    def new(self, pmr=False):
         m = self._mainWindow.model().workflowManager()
         workflowDir = QtGui.QFileDialog.getExistingDirectory(self._mainWindow, caption='Select Workflow Directory', directory=m.previousLocation())
         if len(workflowDir) > 0:
             m.new(workflowDir)
             m.setPreviousLocation(workflowDir)
+            if pmr:
+                dir_name = os.path.basename(workflowDir)
+                pmr_tool = PMRTool()
+                # Get login details:
+                dlg = PMRHgLoginDialog(self._mainWindow)
+                if dlg.exec_():
+                    repourl = pmr_tool.addWorkspace('Workflow: ' + dir_name, None)
+                    c = CommandCloneWorkspace(repourl, workflowDir, dlg.username(), dlg.password())
+                    c.run()
+                    c = CommandIgnoreDirectoriesHg(workflowDir)
+                    c.run()
+
             self._undoStack.clear()
             self._ui.graphicsView.setLocation(workflowDir)
             self._graphicsScene.updateModel()
             self._updateUi()
+            
+    def newpmr(self):
+        self.new(pmr=True)
 
     def load(self):
         m = self._mainWindow.model().workflowManager()
@@ -110,11 +132,15 @@ class WorkflowWidget(QtGui.QWidget):
         # In PyQt4 the keyword argument is 'directory'
         workflowDir = QtGui.QFileDialog.getExistingDirectory(self._mainWindow, caption='Open Workflow', dir=m.previousLocation(), options=QtGui.QFileDialog.ShowDirsOnly | QtGui.QFileDialog.DontResolveSymlinks | QtGui.QFileDialog.ReadOnly)
         if len(workflowDir) > 0:
-            m.load(workflowDir)
-            m.setPreviousLocation(workflowDir)
-            self._ui.graphicsView.setLocation(workflowDir)
-            self._graphicsScene.updateModel()
-            self._updateUi()
+            try:
+                m.load(workflowDir)
+                m.setPreviousLocation(workflowDir)
+                self._ui.graphicsView.setLocation(workflowDir)
+                self._graphicsScene.updateModel()
+                self._updateUi()
+            except (ValueError, WorkflowError) as e:
+                self.close()
+                QtGui.QMessageBox.critical( self, 'Error Caught', 'Invalid Workflow.  ' + str(e))
 
     def close(self):
         m = self._mainWindow.model().workflowManager()
@@ -138,41 +164,32 @@ class WorkflowWidget(QtGui.QWidget):
     def _createMenuItems(self):
         menu_File = self._mainWindow._ui.menubar.findChild(QtGui.QMenu, 'menu_File')
         lastFileMenuAction = menu_File.actions()[-1]
-        menu_New = menu_File.findChild(QtGui.QMenu, name='&New')
-        if not menu_New:
-            menu_New = QtGui.QMenu('&New', menu_File)
+        menu_New = QtGui.QMenu('&New', menu_File)            
+        menu_Open = QtGui.QMenu('&Open', menu_File)
 
+        action_NewPMR = QtGui.QAction('PMR Workflow', menu_New)
+        self._setActionProperties(action_NewPMR, 'action_NewPMR', self.newpmr, 'Ctrl+N', 'Create a new PMR based Workflow')
         action_New = QtGui.QAction('Workflow', menu_New)
-        self._setActionProperties(action_New, 'action_New', self.new, 'Ctrl+N', 'Create a new workflow')
-        action_Open = QtGui.QAction('&Open', menu_File)
-        self._setActionProperties(action_Open, 'action_Open', self.load, 'Ctrl+O', 'Open an existing workflow')
+        self._setActionProperties(action_New, 'action_New', self.new, 'Ctrl+Shift+N', 'Create a new Workflow')
+        action_OpenPMR = QtGui.QAction('PMR Workflow', menu_Open)
+        self._setActionProperties(action_OpenPMR, 'action_OpenPMR', self.load, 'Ctrl+O', 'Open an existing PMR based Workflow')
+        action_Open = QtGui.QAction('Workflow', menu_Open)
+        self._setActionProperties(action_Open, 'action_Open', self.load, 'Ctrl+Shift+O', 'Open an existing Workflow')
         self.action_Close = QtGui.QAction('&Close', menu_File)
-        self._setActionProperties(self.action_Close, 'action_Close', self.close, 'Ctrl+W', 'Close open workflow')
+        self._setActionProperties(self.action_Close, 'action_Close', self.close, 'Ctrl+W', 'Close open Workflow')
         self.action_Save = QtGui.QAction('&Save', menu_File)
-        self._setActionProperties(self.action_Save, 'action_Save', self.save, 'Ctrl+S', 'Save workflow')
+        self._setActionProperties(self.action_Save, 'action_Save', self.save, 'Ctrl+S', 'Save Workflow')
 
+        menu_New.insertAction(QtGui.QAction(self), action_NewPMR)
         menu_New.insertAction(QtGui.QAction(self), action_New)
         menu_File.insertMenu(lastFileMenuAction, menu_New)
-        menu_File.insertAction(lastFileMenuAction, action_Open)
+        menu_Open.insertAction(QtGui.QAction(self), action_OpenPMR)
+        menu_Open.insertAction(QtGui.QAction(self), action_Open)
+        menu_File.insertMenu(lastFileMenuAction, menu_Open)
         menu_File.insertSeparator(lastFileMenuAction)
         menu_File.insertAction(lastFileMenuAction, self.action_Close)
         menu_File.insertSeparator(lastFileMenuAction)
         menu_File.insertAction(lastFileMenuAction, self.action_Save)
         menu_File.insertSeparator(lastFileMenuAction)
-
-        # Todo add tool menus
-#        lastMenubarAction = menubar.actions()[-1]
-#        self.menu_Tools = menubar.findChild(QtGui.QMenu, 'menu_Tools')
-#        if not self.menu_Tools:
-#            self.menu_Tools = QtGui.QMenu('&Tools', menubar)
-#
-#        self.menu_Window = menubar.findChild(QtGui.QMenu, 'menu_Window')
-#        if not self.menu_Window:
-#            self.menu_Window = QtGui.QMenu('&Window', menubar)
-
-
-#        menubar.insertMenu(lastMenubarAction, self.menu_Tools)
-#        menubar.insertMenu(lastMenubarAction, self.menu_Window)
-
 
 

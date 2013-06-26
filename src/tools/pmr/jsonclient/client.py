@@ -53,8 +53,12 @@ class Client(object):
         '''
         url = '%s/search' % self._site
         headers = std_headers()
+        if self.hasAccess():
+            headers.update(self._credential.getAuthorization('POST', url))
+            
         data = {'SearchableText': text, 'portal_type': 'Workspace'}
         response = requests.post(url, headers=headers, data=json.dumps(data))
+        
         return response.json()
     
     def addWorkspace(self, title=None, description=None):
@@ -68,6 +72,7 @@ class Client(object):
         data['actions'] = {'add': '1'}
         data['fields'] = {'storage': 'mercurial', 'description': description, 'title': title}
         response = requests.post(url, headers=headers, data=json.dumps(data), allow_redirects=False)
+        
         return response.headers['Location']
     
     def requestTemporaryCredential(self):

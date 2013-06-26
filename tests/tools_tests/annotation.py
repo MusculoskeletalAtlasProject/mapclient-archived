@@ -18,9 +18,15 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
 import unittest
-import re
+import re, os, sys, shutil
 
-from tools.annotation.annotationtool import AnnotationTool, SECTION_HEADER_RE
+from PySide import QtGui
+
+import alltests
+from tools.annotation.annotationtool import AnnotationTool, _SECTION_HEADER_RE, _PHYSIOME_NAMESPACE_RE
+from tools.annotation.annotationdialog import AnnotationDialog
+
+DISABLE_GUI_TESTS = False
 
 class AnnotationToolTestCase(unittest.TestCase):
 
@@ -35,18 +41,47 @@ class AnnotationToolTestCase(unittest.TestCase):
 
     def testReadVocab(self):
         a =  AnnotationTool()
-        a._readVocabulary()
         
-        self.assertEqual(8, len(a._vocab._terms))
+        self.assertEqual(8, len(a.getTerms()))
         self.assertEqual('1.0', a._vocab._version)
         self.assertEqual('http://physiomeproject.org/mapclient', a._vocab._namespace)
         
     def testSectionHeaderRe(self):
-        s = re.compile(SECTION_HEADER_RE)
+        s = re.compile(_SECTION_HEADER_RE)
         
         test_1 = '[hello]'
         r = s.match(test_1)
         self.assertEqual('hello', r.group(1))
+        
+    def testPhysiomeNamespaceRe(self):
+        s = re.compile(_PHYSIOME_NAMESPACE_RE)
+        test_1 = '<http://physiomeproject.org/workflow/1.0/rdf-schema#port> <http://physiomeproject.org/workflow/1.0/rdf-schema#port> <http://physiomeproject.org/workflow/1.0/rdf-schema#port>.'
+        test_2 = '<http://physiomeproject.org/workflow/1.0/rdf-schema#uses> <http://physiomeproject.org/workflow/1.0/rdf-schema#pointcloud> <http://physiomeproject.org/workflow/1.0/rdf-schema#port>.'
+        
+        r_1 = s.match(test_1)
+        self.assertEqual('port', r_1.group(1))
+        self.assertEqual('port', r_1.group(2))
+        self.assertEqual('port', r_1.group(3))
+
+        r_2 = s.match(test_2)
+        self.assertEqual('uses', r_2.group(1))
+        self.assertEqual('pointcloud', r_2.group(2))
+        self.assertEqual('port', r_2.group(3))
+
+        
+    if not DISABLE_GUI_TESTS:
+        def testAnnotationDialog(self):
+            QtGui.QApplication(sys.argv)
+            to_path = os.path.join(os.path.dirname(alltests.__file__), 'test_resources/annotation_test/')
+            if not os.path.exists(to_path):
+                os.mkdir(to_path)
+            
+            dlg = AnnotationDialog(to_path)
+            dlg.setModal(True)
+            if dlg.exec_():
+                pass
+#            shutil.rmtree(to_path)
+        
 
 
 if __name__ == "__main__":

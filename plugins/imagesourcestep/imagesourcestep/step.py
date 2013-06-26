@@ -28,9 +28,13 @@ from core.threadcommandmanager import ThreadCommandManager, CommandCopyDirectory
 from tools.pmr.pmrtool import PMRTool
 from tools.pmr.pmrhglogindialog import PMRHgLoginDialog
 
-STEP_SERIALISATION_FILENAME = 'step.conf'
+def getConfigFilename(identifier):
+    return identifier + '.conf'
 
 class ImageSourceData(object):
+    
+    name = 'ImageSourceData'
+    
     def __init__(self, identifier, location, imageType):
         self._identifier = identifier
         self._location = location
@@ -57,7 +61,7 @@ class ImageSourceStep(WorkflowStepMountPoint):
         '''
         Constructor
         '''
-        super(ImageSourceStep, self).__init__('Image source', location)
+        super(ImageSourceStep, self).__init__('Image Source', location)
 #        self._location = location
 #        self._name = 'Image source'
         self._icon = QtGui.QImage(':/imagesource/icons/landscapeimages.png')
@@ -85,7 +89,7 @@ class ImageSourceStep(WorkflowStepMountPoint):
                 # Get login details:
                 dlg = PMRHgLoginDialog()
                 if dlg.exec_():
-                    repourl = pmr_tool.addWorkspace('Image Source Step: ' + self._state.identifier(), None)
+                    repourl = pmr_tool.addWorkspace(ImageSourceData.name + ': ' + self._state.identifier(), None)
                     c = CommandCloneWorkspace(repourl, step_location, dlg.username(), dlg.password())
                     self._threadCommandManager.addCommand(c)
                     delay= True
@@ -111,16 +115,13 @@ class ImageSourceStep(WorkflowStepMountPoint):
         self._state.setIdentifier(identifier)
         
     def serialize(self, location):
-        step_location = os.path.join(location, self._state.identifier())
-        if not os.path.exists(step_location):
-            os.mkdir(step_location)
-            
-        s = QtCore.QSettings(os.path.join(step_location, STEP_SERIALISATION_FILENAME), QtCore.QSettings.IniFormat)
+        configuration_file = os.path.join(location,getConfigFilename(self._state.identifier()))
+        s = QtCore.QSettings(configuration_file, QtCore.QSettings.IniFormat)
         self._state.save(s)
         
     def deserialize(self, location):
-        step_location = os.path.join(location, self._state.identifier())
-        s = QtCore.QSettings(os.path.join(step_location, STEP_SERIALISATION_FILENAME), QtCore.QSettings.IniFormat)
+        configuration_file = os.path.join(location,getConfigFilename(self._state.identifier()))
+        s = QtCore.QSettings(configuration_file, QtCore.QSettings.IniFormat)
         self._state.load(s)
         d = ConfigureDialog(self._state)
         self._configured = d.validate()

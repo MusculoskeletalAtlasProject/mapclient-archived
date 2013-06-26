@@ -1,14 +1,28 @@
 '''
-Created on Jun 22, 2013
+MAP Client, a program to generate detailed musculoskeletal models for OpenSim.
+    Copyright (C) 2012  University of Auckland
+    
+This file is part of MAP Client. (http://launchpad.net/mapclient)
 
-@author: hsorby
+    MAP Client is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    MAP Client is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
 import os, tempfile
 from threading import Thread
 from os import listdir
-from os.path import isfile, join
+from os.path import isfile, join, isdir
 from shutil import copy, move, rmtree
-from subprocess import call, Popen
+from subprocess import call#, Popen
 
 class ThreadCommand(Thread):
     '''Base class for threaded commands to be used by the CommandThreadManager.
@@ -63,7 +77,28 @@ class CommandCreateWorkspace(ThreadCommand):
         print('Warning: Not fully implemented')
         self.runFinished()
         
+    
+class CommandIgnoreDirectoriesHg(ThreadCommand):
+    ''' Threadable command to add ignore directives to
+    all directories in given location.  Requires a Mercurial
+    repository to be already present in the given location.
+    '''
+    def __init__(self, location):
+        ThreadCommand.__init__(self, 'CommandIgnoreDirectoriesHg')
+        self._location = location
+        self._hg = None
+        hg = which('hg')
+        if len(hg) > 0:
+            self._hg = hg[0] 
         
+    def run(self):
+        if self._hg and os.path.exists(join(self._location, '.hg')):
+            onlydirs = [x for x in listdir(self._location) if isdir(join(self._location, x)) ]
+            ignoredirs = ['^' + d + '/.*\n' for d in onlydirs if d != '.hg']
+            f = open(join(self._location, '.hgignore'), 'w')
+            f.writelines(ignoredirs)
+            f.close()
+    
 class CommandCloneWorkspace(ThreadCommand):
     ''' Threadable command to clone a PMR workspace.
     '''

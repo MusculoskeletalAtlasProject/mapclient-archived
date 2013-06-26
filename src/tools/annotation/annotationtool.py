@@ -18,9 +18,14 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
 from os.path import join, dirname
-import re
+import re, os
 
-SECTION_HEADER_RE = '\[(.*)\]'
+_SECTION_HEADER_RE = '\[(.*)\]'
+_DEFAULT_ANNOTATION_FILENAME = 'annotation.rdf'
+_PHYSIOME_NAMESPACE = 'http://physiomeproject.org/workflow/1.0/rdf-schema'
+_PHYSIOME_NAMESPACE_RE = '<' + _PHYSIOME_NAMESPACE + '#([^>]+)> <' + _PHYSIOME_NAMESPACE + '#([^>]+)> <' + _PHYSIOME_NAMESPACE + '#([^>]+)>.'
+_PHYSIOME_NAMESPACE_FORMAT = '<' + _PHYSIOME_NAMESPACE + '#{0}>'  
+
 
 class AnnotationTool(object):
     '''
@@ -32,12 +37,14 @@ class AnnotationTool(object):
         Constructor
         '''
         self._vocab = Vocabulary()
+        self._readVocabulary()
+        self._triple_store = []
     
     def _readVocabulary(self):
         with open(join(dirname(__file__), 'annotation.voc')) as f:
             content = f.readlines()
     
-        section_header_re = re.compile(SECTION_HEADER_RE)
+        section_header_re = re.compile(_SECTION_HEADER_RE)
         
         section = ''
         for line in content:
@@ -61,6 +68,46 @@ class AnnotationTool(object):
     
     def getTerms(self):
         return self._vocab._terms
+    
+    def serialize(self, location):
+        annotation = ''#@prefix pp: <http://physiomeproject.org/workflow/1.0/>.\n'
+        for triple in self._triple_store:
+            annotation = annotation + _PHYSIOME_NAMESPACE_FORMAT.format(triple[0]) + ' ' \
+                                    + _PHYSIOME_NAMESPACE_FORMAT.format(triple[1]) + ' ' \
+                                    + _PHYSIOME_NAMESPACE_FORMAT.format(triple[2]) + '.\n'
+            
+        annotationfile = os.path.join(location, _DEFAULT_ANNOTATION_FILENAME)
+        f = open(annotationfile, 'w')
+        f.write(annotation)
+        f.close()
+    
+    def deserialize(self, location):
+        s = re.compile(_PHYSIOME_NAMESPACE_RE)
+        
+        annotationfile = os.path.join(location, _DEFAULT_ANNOTATION_FILENAME)
+        if os.path.exists(annotationfile):
+            f = open(annotationfile, 'r')
+            lines = f.readlines()
+            f.close()
+            for line in lines:
+                r = s.match(line)
+                if r:
+                    self.addTriple(r.group(1), r.group(2), r.group(3))
+    
+    def addTriple(self, subj, pred, obj):
+        self._triple_store.append((subj, pred, obj))
+        
+    def tripleCount(self):
+        return len(self._triple_store)
+    
+    def getTriple(self, index):
+        return self._triple_store[index]
+    
+    def getTriples(self):
+        return self._triple_store
+    
+    def clear(self):
+        self._triple_store = []
     
     
 class Vocabulary(object):
