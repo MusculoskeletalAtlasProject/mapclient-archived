@@ -77,7 +77,9 @@ class ImageSourceStep(WorkflowStepMountPoint):
         d.setModal(True)
         if d.exec_():
             self.serialize(self._location)
+            self._state = d.getState()
             step_location = os.path.join(self._location, self._state.identifier())
+            print(step_location)
             if d.copyToWorkflow():
                 src_location = d.localLocation()
                 if src_location != step_location:
@@ -92,9 +94,9 @@ class ImageSourceStep(WorkflowStepMountPoint):
                     repourl = pmr_tool.addWorkspace(ImageSourceData.name + ': ' + self._state.identifier(), None)
                     c = CommandCloneWorkspace(repourl, step_location, dlg.username(), dlg.password())
                     self._threadCommandManager.addCommand(c)
+                    self._state._pmrLocation = repourl
                     delay= True
             
-            self._state = d.getState()
         
         self._configured = d.validate()
 
@@ -104,7 +106,15 @@ class ImageSourceStep(WorkflowStepMountPoint):
             self._configuredObserver()
             
     def _threadCommandsFinished(self):
-        self._state._localLocation = os.path.join(self._location, self._state.identifier())
+        if self._state._addToPMR:
+            self._state._addToPMR = False
+            self._state._copyTo = False
+            self._state._localLocation = ''
+            self._state._currentTab = 1
+        elif self._state._copyTo:
+            self._state._copyTo = False
+            self._state._localLocation = os.path.join(self._location, self._state.identifier())
+
         if self._configured and self._configuredObserver != None:
             self._configuredObserver()
             

@@ -142,6 +142,9 @@ class WorkflowWidget(QtGui.QWidget):
                 self.close()
                 QtGui.QMessageBox.critical( self, 'Error Caught', 'Invalid Workflow.  ' + str(e))
 
+    def importFromPMR(self):
+        print('Implement me:')
+        
     def close(self):
         m = self._mainWindow.model().workflowManager()
         self._undoStack.clear()
@@ -165,16 +168,18 @@ class WorkflowWidget(QtGui.QWidget):
         menu_File = self._mainWindow._ui.menubar.findChild(QtGui.QMenu, 'menu_File')
         lastFileMenuAction = menu_File.actions()[-1]
         menu_New = QtGui.QMenu('&New', menu_File)            
-        menu_Open = QtGui.QMenu('&Open', menu_File)
+#        menu_Open = QtGui.QMenu('&Open', menu_File)
 
         action_NewPMR = QtGui.QAction('PMR Workflow', menu_New)
         self._setActionProperties(action_NewPMR, 'action_NewPMR', self.newpmr, 'Ctrl+N', 'Create a new PMR based Workflow')
         action_New = QtGui.QAction('Workflow', menu_New)
         self._setActionProperties(action_New, 'action_New', self.new, 'Ctrl+Shift+N', 'Create a new Workflow')
-        action_OpenPMR = QtGui.QAction('PMR Workflow', menu_Open)
-        self._setActionProperties(action_OpenPMR, 'action_OpenPMR', self.load, 'Ctrl+O', 'Open an existing PMR based Workflow')
-        action_Open = QtGui.QAction('Workflow', menu_Open)
-        self._setActionProperties(action_Open, 'action_Open', self.load, 'Ctrl+Shift+O', 'Open an existing Workflow')
+#        action_OpenPMR = QtGui.QAction('PMR Workflow', menu_Open)
+#        self._setActionProperties(action_OpenPMR, 'action_OpenPMR', self.load, 'Ctrl+O', 'Open an existing PMR based Workflow')
+        action_Open = QtGui.QAction('&Open', menu_File)
+        self._setActionProperties(action_Open, 'action_Open', self.load, 'Ctrl+O', 'Open an existing Workflow')
+        self.action_Import = QtGui.QAction('I&mport', menu_File)
+        self._setActionProperties(self.action_Import, 'action_Import', self.importFromPMR, 'Ctrl+M', 'Import existing Workflow from PMR')
         self.action_Close = QtGui.QAction('&Close', menu_File)
         self._setActionProperties(self.action_Close, 'action_Close', self.close, 'Ctrl+W', 'Close open Workflow')
         self.action_Save = QtGui.QAction('&Save', menu_File)
@@ -183,9 +188,11 @@ class WorkflowWidget(QtGui.QWidget):
         menu_New.insertAction(QtGui.QAction(self), action_NewPMR)
         menu_New.insertAction(QtGui.QAction(self), action_New)
         menu_File.insertMenu(lastFileMenuAction, menu_New)
-        menu_Open.insertAction(QtGui.QAction(self), action_OpenPMR)
-        menu_Open.insertAction(QtGui.QAction(self), action_Open)
-        menu_File.insertMenu(lastFileMenuAction, menu_Open)
+#        menu_Open.insertAction(QtGui.QAction(self), action_OpenPMR)
+#        menu_Open.insertAction(QtGui.QAction(self), action_Open)
+        menu_File.insertAction(lastFileMenuAction, action_Open)
+        menu_File.insertSeparator(lastFileMenuAction)
+        menu_File.insertAction(lastFileMenuAction, self.action_Import)
         menu_File.insertSeparator(lastFileMenuAction)
         menu_File.insertAction(lastFileMenuAction, self.action_Close)
         menu_File.insertSeparator(lastFileMenuAction)

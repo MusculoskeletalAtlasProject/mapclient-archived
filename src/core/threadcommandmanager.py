@@ -58,6 +58,9 @@ class CommandCopyDirectory(ThreadCommand):
         self._to_dir = to_dir
         
     def run(self):
+        if not os.path.exists(self._to_dir):
+            os.mkdir(self._to_dir)
+            
         onlyfiles = [ join(self._from_dir, f) for f in listdir(self._from_dir) if isfile(join(self._from_dir, f)) ]
         for f in onlyfiles:
             copy(f, self._to_dir)
@@ -98,6 +101,7 @@ class CommandIgnoreDirectoriesHg(ThreadCommand):
             f = open(join(self._location, '.hgignore'), 'w')
             f.writelines(ignoredirs)
             f.close()
+    
     
 class CommandCloneWorkspace(ThreadCommand):
     ''' Threadable command to clone a PMR workspace.
