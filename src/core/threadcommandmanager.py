@@ -22,7 +22,7 @@ from threading import Thread
 from os import listdir
 from os.path import isfile, join, isdir
 from shutil import copy, move, rmtree
-from subprocess import call#, Popen
+from subprocess import call, Popen, PIPE, STDOUT
 
 class ThreadCommand(Thread):
     '''Base class for threaded commands to be used by the CommandThreadManager.
@@ -102,7 +102,6 @@ class CommandIgnoreDirectoriesHg(ThreadCommand):
             f.writelines(ignoredirs)
             f.close()
     
-    
 class CommandCloneWorkspace(ThreadCommand):
     ''' Threadable command to clone a PMR workspace.
     '''
@@ -128,20 +127,46 @@ class CommandCloneWorkspace(ThreadCommand):
             
             repourl = self._repourl[:7] + self._username + ':' + self._password + '@' + self._repourl[7:]
             call([self._hg, 'clone', repourl, d])
-            move(join(d, '.hg'), self._location)
+            mvdir(d, self._location)
+#            move(join(d, '.hg'), self._location)
             rmtree(d)
-# This is for the commit command
-#                call([self._hg, 'add', self._location])
-#                message = 'Initial commit of directory contents.'
-#                process = Popen([self._hg, 'commit', '-u', u, '-m', message], cwd=self._location)
-#                process.communicate()
-#                process = Popen([self._hg, 'push', repourl], cwd=self._location)
-#                process.communicate()
-                
         
-        print('call complete')
         self.runFinished()
     
+
+class CommandCommit(ThreadCommand):
+    '''Threadable command to commit all changes at location to PMR
+    '''
+    
+    def __init__(self, location, username, password, comment):
+        ThreadCommand.__init__(self, 'CommandCommit')
+        self._location = location
+        self._username = username
+        self._password = password
+        self._comment = comment
+        self._hg = None
+        hg = which('hg')
+        if len(hg) > 0:
+            self._hg = hg[0] 
+        
+    def run(self):
+        if self._hg and os.path.exists(join(self._location, '.hg')):
+            # This is for the commit command
+            call([self._hg, 'add', self._location])
+            process = Popen([self._hg, 'commit', '-u', self._username, '-m', self._comment], cwd=self._location)
+            process.communicate()
+            process = Popen([self._hg, 'paths'], cwd=self._location, stdout=PIPE, stdin=PIPE, stderr=STDOUT)
+            paths = process.communicate()[0].split()
+            if len(paths) > 2:
+                repourl = paths[2]
+                insert = repourl.find('@')
+                repourl = repourl[:insert] + ':' + self._password + repourl[insert:]
+                process = Popen([self._hg, 'push', repourl], cwd=self._location)
+                process.communicate()
+        
+        self.runFinished()
+        
+
 class ThreadCommandManager(object):
     '''This class managers thread commands in a queue.  The queue will
     be executed in order serially.
@@ -184,4 +209,19 @@ def which(name, flags=os.X_OK):
                 if os.access(pext, flags):
                     result.append(pext)
         return result
+
+
+def mvdir(root_src_dir, root_dst_dir):
+    for src_dir, _, files in os.walk(root_src_dir):
+        dst_dir = src_dir.replace(root_src_dir, root_dst_dir)
+        if not os.path.exists(dst_dir):
+            os.mkdir(dst_dir)
+        for file_ in files:
+            src_file = os.path.join(src_dir, file_)
+            dst_file = os.path.join(dst_dir, file_)
+            if os.path.exists(dst_file):
+                os.remove(dst_file)
+            move(src_file, dst_dir)
+        
+        
     

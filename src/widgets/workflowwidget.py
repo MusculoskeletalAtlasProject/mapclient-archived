@@ -19,15 +19,17 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
 '''
 import os
 
-from PySide import QtGui
+from PySide import QtGui, QtCore
 
 from widgets.ui_workflowwidget import Ui_WorkflowWidget
 from mountpoints.workflowstep import WorkflowStepMountPoint
 from widgets.workflowgraphicsscene import WorkflowGraphicsScene
 from core.workflow import WorkflowError
 from tools.pmr.pmrtool import PMRTool
+from tools.pmr.pmrsearchdialog import PMRSearchDialog
 from tools.pmr.pmrhglogindialog import PMRHgLoginDialog
-from core.threadcommandmanager import CommandCloneWorkspace, CommandIgnoreDirectoriesHg
+from tools.pmr.pmrhgcommitdialog import PMRHgCommitDialog
+from core.threadcommandmanager import CommandCloneWorkspace, CommandIgnoreDirectoriesHg, CommandCommit
 
 class WorkflowWidget(QtGui.QWidget):
     '''
@@ -111,11 +113,16 @@ class WorkflowWidget(QtGui.QWidget):
                 # Get login details:
                 dlg = PMRHgLoginDialog(self._mainWindow)
                 if dlg.exec_():
+                    # set wait icon
+                    QtGui.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
                     repourl = pmr_tool.addWorkspace('Workflow: ' + dir_name, None)
                     c = CommandCloneWorkspace(repourl, workflowDir, dlg.username(), dlg.password())
                     c.run()
                     c = CommandIgnoreDirectoriesHg(workflowDir)
                     c.run()
+                    # unset wait icon
+                    QtGui.QApplication.restoreOverrideCursor()
+
 
             self._undoStack.clear()
             self._ui.graphicsView.setLocation(workflowDir)
@@ -143,7 +150,32 @@ class WorkflowWidget(QtGui.QWidget):
                 QtGui.QMessageBox.critical( self, 'Error Caught', 'Invalid Workflow.  ' + str(e))
 
     def importFromPMR(self):
-        print('Implement me:')
+        m = self._mainWindow.model().workflowManager()
+        workflowDir = QtGui.QFileDialog.getExistingDirectory(self._mainWindow, caption='Select Workflow Directory', directory=m.previousLocation())
+        if len(workflowDir) > 0:
+            dlg = PMRSearchDialog(self._mainWindow)
+            dlg.setModal(True)
+            if dlg.exec_():
+                ws = dlg.getSelectedWorkspace()
+                login = PMRHgLoginDialog(self._mainWindow)
+                login.setModal(True)
+                if login.exec_():
+                    # set wait icon
+                    QtGui.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
+                    c = CommandCloneWorkspace(ws['target'], workflowDir, login.username(), login.password())
+                    c.run()
+                    # unset wait icon
+                    QtGui.QApplication.restoreOverrideCursor()
+                    print('Analyze first before attempting load ...')
+                    try:
+                        m.load(workflowDir)
+                        m.setPreviousLocation(workflowDir)
+                        self._graphicsScene.updateModel()
+                        self._updateUi()
+                    except (ValueError, WorkflowError) as e:
+                        self.close()
+                        QtGui.QMessageBox.critical( self, 'Error Caught', 'Invalid Workflow.  ' + str(e))
+                    
         
     def close(self):
         m = self._mainWindow.model().workflowManager()
@@ -155,6 +187,21 @@ class WorkflowWidget(QtGui.QWidget):
     def save(self):
         m = self._mainWindow.model().workflowManager()
         m.save()
+        if os.path.exists(os.path.join(m.location(), '.hg')):
+            dlg = PMRHgCommitDialog()
+            dlg.setModal(True)
+            if dlg.exec_():
+                try:
+                    # set wait icon
+                    QtGui.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
+                    c = CommandCommit(m.location(), dlg.username(), dlg.password(), dlg.comment())
+                    c.run()
+                    # unset wait icon
+                    QtGui.QApplication.restoreOverrideCursor()
+                except Exception:
+                    QtGui.QMessageBox.warning(self._mainWindow, 'Error Saving', 'The commit to PMR did not succeed')
+                
+            
         self._updateUi()
 
     def _setActionProperties(self, action, name, slot, shortcut='', statustip=''):

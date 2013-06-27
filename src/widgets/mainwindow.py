@@ -152,8 +152,8 @@ class MainWindow(QtGui.QMainWindow):
         dlg.exec_()
 
     def annotationTool(self):
-        from tools.annotationdialog import AnnotationDialog
-        dlg = AnnotationDialog(self)
+        from tools.annotation.annotationdialog import AnnotationDialog
+        dlg = AnnotationDialog('', self)
         dlg.setModal(True)
         dlg.exec_()
 
