@@ -104,7 +104,6 @@ class WorkflowGraphicsScene(QtGui.QGraphicsScene):
                         dest_port_item = destination_port_item
                         break
             arc = Arc(src_port_item, dest_port_item)
-#            arc = Arc(meta_steps[connection.source()], meta_steps[connection.destination()])
             # Overwrite the connection created in the Arc with the original one that is in the
             # WorkflowScene
             arc._connection = connection
