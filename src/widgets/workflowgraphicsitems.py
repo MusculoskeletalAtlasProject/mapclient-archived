@@ -208,9 +208,6 @@ class Node(Item):
 
         self._metastep = metastep
         self._pixmap = QtGui.QPixmap.fromImage(self._metastep._step._icon).scaled(self.Size, self.Size, aspectRatioMode=QtCore.Qt.KeepAspectRatio, transformMode=QtCore.Qt.FastTransformation)
-#        self._configure_red = QtGui.QPixmap(':/workflow/images/configure_red.png').scaled(24, 24, aspectRatioMode=QtCore.Qt.KeepAspectRatio, transformMode=QtCore.Qt.FastTransformation)
-#        self._connections = []
-#        self.graph = weakref.ref(workflowGraphicsView)
 
         self.setFlag(QtGui.QGraphicsItem.ItemIsMovable)
         self.setFlag(QtGui.QGraphicsItem.ItemSendsGeometryChanges)
@@ -296,29 +293,6 @@ class Node(Item):
     def metaItem(self):
         return self._metastep
 
-#    def _removeDeadwood(self):
-#        '''
-#        Unfortunately the weakref doesn't work correctly for c based classes.  This function 
-#        removes any None type references in _connections.
-#        '''
-#        prunedArcList = [ arc for arc in self._connections if arc() ]
-#        self._connections = prunedArcList
-#
-#
-#    def hasArcToDestination(self, node):
-#        self._removeDeadwood()
-#        for arc in self._connections:
-#            if arc()._dest() == node:
-#                return True
-#
-#        return False
-#
-#    def addArc(self, arc):
-#        self._connections.append(weakref.ref(arc))
-#
-#    def removeArc(self, arc):
-#        self._connections = [weakarc for weakarc in self._connections if weakarc() != arc]
-
     def boundingRect(self):
         adjust = 2.0
         return QtCore.QRectF(-adjust, -adjust,
@@ -342,10 +316,6 @@ class Node(Item):
             for port_item in self._step_port_items:
                 port_item.itemChange(change, value)
                 
-#            self._removeDeadwood()
-#            for arc in self._connections:
-#                arc().adjust()
-
         return QtGui.QGraphicsItem.itemChange(self, change, value)
 
     def showContextMenu(self, pos):
