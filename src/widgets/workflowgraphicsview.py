@@ -110,17 +110,9 @@ class WorkflowGraphicsView(QtGui.QGraphicsView):
             item.showContextMenu(event.globalPos())
 
     def mousePressEvent(self, event):
-        modifiers = QtGui.QApplication.keyboardModifiers()
         item = self.scene().itemAt(self.mapToScene(event.pos()))
         if event.button() == QtCore.Qt.RightButton:
             event.ignore()
-        elif modifiers & QtCore.Qt.ShiftModifier:
-            if item and item.type() == Node.Type:
-                centre = item.boundingRect().center()
-                self._connectSourceNode = item
-                self._connectLine = ArrowLine(QtCore.QLineF(item.mapToScene(centre),
-                                             self.mapToScene(event.pos())))
-                self.scene().addItem(self._connectLine)
         elif item and item.type() == StepPort.Type:
             centre = item.boundingRect().center()
             self._connectSourceNode = item
@@ -141,9 +133,7 @@ class WorkflowGraphicsView(QtGui.QGraphicsView):
     def mouseReleaseEvent(self, event):
         if self._connectLine:
             item = self.scene().itemAt(self.mapToScene(event.pos()))
-            if item and item.type() == Node.Type:
-                self.connectNodes(self._connectSourceNode, item)
-            elif item and item.type() == StepPort.Type:
+            if item and item.type() == StepPort.Type:
                 self.connectNodes(self._connectSourceNode, item)
             self.scene().removeItem(self._connectLine)
             self._connectLine = None
