@@ -38,6 +38,9 @@ class AnnotationDialog(QtGui.QDialog):
         self._ui = Ui_AnnotationDialog()
         self._ui.setupUi(self)
         
+        if len(location) > 0:
+            self._ui.fileButton.hide()
+            
         self._ui.locationLineEdit.setText(location)
         self._tool = AnnotationTool()
         self._tool.deserialize(location)

@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'qt/annotationdialog.ui'
 #
-# Created: Tue Jun 25 12:57:46 2013
+# Created: Thu Jun 27 16:19:15 2013
 #      by: pyside-uic 0.2.14 running on PySide 1.1.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -90,6 +90,9 @@ class Ui_AnnotationDialog(object):
         spacerItem = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
         self.verticalLayout.addItem(spacerItem)
         self.gridLayout.addLayout(self.verticalLayout, 3, 1, 1, 1)
+        self.fileButton = QtGui.QPushButton(self.groupBox)
+        self.fileButton.setObjectName("fileButton")
+        self.gridLayout.addWidget(self.fileButton, 0, 1, 1, 1)
         self.verticalLayout_2.addWidget(self.groupBox)
         self.buttonBox = QtGui.QDialogButtonBox(AnnotationDialog)
         self.buttonBox.setOrientation(QtCore.Qt.Horizontal)
@@ -98,7 +101,6 @@ class Ui_AnnotationDialog(object):
         self.verticalLayout_2.addWidget(self.buttonBox)
 
         self.retranslateUi(AnnotationDialog)
-        QtCore.QObject.connect(self.buttonBox, QtCore.SIGNAL("accepted()"), AnnotationDialog.accept)
         QtCore.QObject.connect(self.buttonBox, QtCore.SIGNAL("rejected()"), AnnotationDialog.reject)
         QtCore.QMetaObject.connectSlotsByName(AnnotationDialog)
 
@@ -110,4 +112,5 @@ class Ui_AnnotationDialog(object):
         self.label.setText(QtGui.QApplication.translate("AnnotationDialog", "Annotations:", None, QtGui.QApplication.UnicodeUTF8))
         self.label_3.setText(QtGui.QApplication.translate("AnnotationDialog", "TextLabel", None, QtGui.QApplication.UnicodeUTF8))
         self.removeButton.setText(QtGui.QApplication.translate("AnnotationDialog", "Remove", None, QtGui.QApplication.UnicodeUTF8))
+        self.fileButton.setText(QtGui.QApplication.translate("AnnotationDialog", "...", None, QtGui.QApplication.UnicodeUTF8))
 

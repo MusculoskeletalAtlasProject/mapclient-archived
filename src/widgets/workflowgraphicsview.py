@@ -24,7 +24,7 @@ from PySide import QtCore, QtGui
 from mountpoints.workflowstep import workflowStepFactory
 from widgets.workflowcommands import CommandSelection, CommandRemove, CommandAdd, CommandMove
 from core.workflowscene import MetaStep
-from widgets.workflowgraphicsitems import Node, Arc, ErrorItem, ArrowLine
+from widgets.workflowgraphicsitems import Node, Arc, ErrorItem, ArrowLine, StepPort
 
 
 class WorkflowGraphicsView(QtGui.QGraphicsView):
@@ -65,7 +65,7 @@ class WorkflowGraphicsView(QtGui.QGraphicsView):
     def connectNodes(self, node1, node2):
         # Check if nodes are already connected
         if not node1.hasArcToDestination(node2):
-            if node1._metastep._step.canConnect(node2._metastep._step):
+            if node1.canConnect(node2):
                 command = CommandAdd(self.scene(), Arc(node1, node2))
                 self._undoStack.push(command)
             else:
@@ -111,16 +111,22 @@ class WorkflowGraphicsView(QtGui.QGraphicsView):
 
     def mousePressEvent(self, event):
         modifiers = QtGui.QApplication.keyboardModifiers()
+        item = self.scene().itemAt(self.mapToScene(event.pos()))
         if event.button() == QtCore.Qt.RightButton:
             event.ignore()
         elif modifiers & QtCore.Qt.ShiftModifier:
-            item = self.scene().itemAt(self.mapToScene(event.pos()))
             if item and item.type() == Node.Type:
                 centre = item.boundingRect().center()
                 self._connectSourceNode = item
                 self._connectLine = ArrowLine(QtCore.QLineF(item.mapToScene(centre),
                                              self.mapToScene(event.pos())))
                 self.scene().addItem(self._connectLine)
+        elif item and item.type() == StepPort.Type:
+            centre = item.boundingRect().center()
+            self._connectSourceNode = item
+            self._connectLine = ArrowLine(QtCore.QLineF(item.mapToScene(centre),
+                                         self.mapToScene(event.pos())))
+            self.scene().addItem(self._connectLine)
         else:
             QtGui.QGraphicsView.mousePressEvent(self, event)
             self._selectionStartPos = event.pos()
@@ -136,6 +142,8 @@ class WorkflowGraphicsView(QtGui.QGraphicsView):
         if self._connectLine:
             item = self.scene().itemAt(self.mapToScene(event.pos()))
             if item and item.type() == Node.Type:
+                self.connectNodes(self._connectSourceNode, item)
+            elif item and item.type() == StepPort.Type:
                 self.connectNodes(self._connectSourceNode, item)
             self.scene().removeItem(self._connectLine)
             self._connectLine = None

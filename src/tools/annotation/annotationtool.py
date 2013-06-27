@@ -69,22 +69,29 @@ class AnnotationTool(object):
     def getTerms(self):
         return self._vocab._terms
     
-    def serialize(self, location):
+    def serialize(self, location, rdf_file=None):
         annotation = ''#@prefix pp: <http://physiomeproject.org/workflow/1.0/>.\n'
         for triple in self._triple_store:
             annotation = annotation + _PHYSIOME_NAMESPACE_FORMAT.format(triple[0]) + ' ' \
                                     + _PHYSIOME_NAMESPACE_FORMAT.format(triple[1]) + ' ' \
                                     + _PHYSIOME_NAMESPACE_FORMAT.format(triple[2]) + '.\n'
             
-        annotationfile = os.path.join(location, _DEFAULT_ANNOTATION_FILENAME)
+        if rdf_file:
+            annotationfile = os.path.join(location, rdf_file)
+        else:
+            annotationfile = os.path.join(location, _DEFAULT_ANNOTATION_FILENAME)
         f = open(annotationfile, 'w')
         f.write(annotation)
         f.close()
     
-    def deserialize(self, location):
+    def deserialize(self, location, rdf_file=None):
         s = re.compile(_PHYSIOME_NAMESPACE_RE)
         
-        annotationfile = os.path.join(location, _DEFAULT_ANNOTATION_FILENAME)
+        if rdf_file:
+            annotationfile = os.path.join(location, rdf_file)
+        else:
+            annotationfile = os.path.join(location, _DEFAULT_ANNOTATION_FILENAME)
+
         if os.path.exists(annotationfile):
             f = open(annotationfile, 'r')
             lines = f.readlines()

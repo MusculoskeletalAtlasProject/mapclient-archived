@@ -52,6 +52,12 @@ class WorkflowStepPort(object):
         return []
 #        return [triple[2] for triple in self.obj[obj]]
 
+    def hasUses(self):
+        return 'uses' in self.pred
+    
+    def hasProvides(self):
+        return 'provides' in self.pred
+
     def getTriplesForPred(self, pred):
         if pred in self.pred:
             return self.pred[pred]
