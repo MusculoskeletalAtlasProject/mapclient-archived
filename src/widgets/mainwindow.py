@@ -23,6 +23,7 @@ from PySide import QtGui
 from widgets.ui_mainwindow import Ui_MainWindow
 # from mountpoints.stackedwidget import StackedWidgetMountPoint
 from widgets.workflowwidget import WorkflowWidget
+from settings.info import DEFAULT_WORKFLOW_ANNOTATION_FILENAME
 
 class MainWindow(QtGui.QMainWindow):
     '''
@@ -153,7 +154,8 @@ class MainWindow(QtGui.QMainWindow):
 
     def annotationTool(self):
         from tools.annotation.annotationdialog import AnnotationDialog
-        dlg = AnnotationDialog('', self)
+        location = self._model.workflowManager().location()
+        dlg = AnnotationDialog(location, DEFAULT_WORKFLOW_ANNOTATION_FILENAME, self)
         dlg.setModal(True)
         dlg.exec_()
 

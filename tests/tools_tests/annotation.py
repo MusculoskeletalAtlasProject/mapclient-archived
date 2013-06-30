@@ -18,12 +18,12 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
 import unittest
-import re, os, sys, shutil
+import re, os, sys
 
 from PySide import QtGui
 
 import alltests
-from tools.annotation.annotationtool import AnnotationTool, _SECTION_HEADER_RE, _PHYSIOME_NAMESPACE_RE
+from tools.annotation.annotationtool import AnnotationTool, _SECTION_HEADER_RE, _NAMESPACE_RE
 from tools.annotation.annotationdialog import AnnotationDialog
 
 DISABLE_GUI_TESTS = False
@@ -42,9 +42,9 @@ class AnnotationToolTestCase(unittest.TestCase):
     def testReadVocab(self):
         a =  AnnotationTool()
         
-        self.assertEqual(8, len(a.getTerms()))
+        self.assertEqual(10, len(a.getTerms()))
         self.assertEqual('1.0', a._vocab._version)
-        self.assertEqual('http://physiomeproject.org/mapclient', a._vocab._namespace)
+        self.assertEqual('http://physiomeproject.org/workflow', a._vocab._namespace)
         
     def testSectionHeaderRe(self):
         s = re.compile(_SECTION_HEADER_RE)
@@ -54,7 +54,7 @@ class AnnotationToolTestCase(unittest.TestCase):
         self.assertEqual('hello', r.group(1))
         
     def testPhysiomeNamespaceRe(self):
-        s = re.compile(_PHYSIOME_NAMESPACE_RE)
+        s = re.compile(_NAMESPACE_RE.format('http://physiomeproject.org/workflow', '1.0'))
         test_1 = '<http://physiomeproject.org/workflow/1.0/rdf-schema#port> <http://physiomeproject.org/workflow/1.0/rdf-schema#port> <http://physiomeproject.org/workflow/1.0/rdf-schema#port>.'
         test_2 = '<http://physiomeproject.org/workflow/1.0/rdf-schema#uses> <http://physiomeproject.org/workflow/1.0/rdf-schema#pointcloud> <http://physiomeproject.org/workflow/1.0/rdf-schema#port>.'
         

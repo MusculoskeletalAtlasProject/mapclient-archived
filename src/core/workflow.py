@@ -33,7 +33,7 @@ def _getWorkflowConfiguration(location):
     return QtCore.QSettings(_getWorkflowConfigurationAbsoluteFilename(location), QtCore.QSettings.IniFormat)
 
 def _getWorkflowConfigurationAbsoluteFilename(location):
-    return os.path.join(location, info.DEFAULT_WORKFLOW_NAME)
+    return os.path.join(location, info.DEFAULT_WORKFLOW_PROJECT_FILENAME)
 
 class WorkflowManager():
     '''

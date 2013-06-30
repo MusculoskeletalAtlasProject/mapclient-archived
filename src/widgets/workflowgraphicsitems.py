@@ -235,7 +235,7 @@ class Node(Item):
             
         port_count = len(uses_ports)
         for index, port in enumerate(uses_ports):
-            triples = port.getTriplesForPred('uses')
+            triples = port.getTriplesForPred('http://physiomeproject.org/workflow/1.0/rdf-schema#uses')
             if len(triples) == 1:
                 triple = triples[0]
                 port_item = StepPort(port, self)
@@ -249,7 +249,7 @@ class Node(Item):
             
         port_count = len(provides_ports)
         for index, port in enumerate(provides_ports):
-            triples = port.getTriplesForPred('provides')
+            triples = port.getTriplesForPred('http://physiomeproject.org/workflow/1.0/rdf-schema#provides')
             if len(triples) == 1:
                 triple = triples[0]
                 port_item = StepPort(port, self)

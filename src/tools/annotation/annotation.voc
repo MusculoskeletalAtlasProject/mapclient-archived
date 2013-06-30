@@ -1,5 +1,5 @@
 # Annotation vocabulary file for the MAP Client
-namespace: http://physiomeproject.org/mapclient
+namespace: http://physiomeproject.org/workflow
 version: 1.0
 
 [terms]
@@ -11,3 +11,5 @@ pointcloud
 knee
 description
 step
+version
+name

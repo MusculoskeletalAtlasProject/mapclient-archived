@@ -59,6 +59,7 @@ class WorkflowWidget(QtGui.QWidget):
 
         self._ui.executeButton.clicked.connect(self.executeWorkflow)
         self.action_Close = None  # Keep a handle to this for modifying the Ui.
+        self._action_annotation = self._mainWindow.findChild(QtGui.QAction, "actionAnnotation")
         self._createMenuItems()
         # load tools
 #        self.toolPlugins = ToolMountPoint.getPlugins(self.menu_Tools, self)
@@ -75,6 +76,7 @@ class WorkflowWidget(QtGui.QWidget):
         self.setEnabled(workflowOpen)
         self.action_Save.setEnabled(wfm.isModified())
         self._ui.executeButton.setEnabled(wfm.scene().canExecute() and not wfm.isModified())
+        self._action_annotation.setEnabled(workflowOpen)
 
     def updateStepTree(self):
         self._ui.stepTree.clear()

@@ -53,10 +53,10 @@ class WorkflowStepPort(object):
 #        return [triple[2] for triple in self.obj[obj]]
 
     def hasUses(self):
-        return 'uses' in self.pred
+        return 'http://physiomeproject.org/workflow/1.0/rdf-schema#uses' in self.pred
     
     def hasProvides(self):
-        return 'provides' in self.pred
+        return 'http://physiomeproject.org/workflow/1.0/rdf-schema#provides' in self.pred
 
     def getTriplesForPred(self, pred):
         if pred in self.pred:
@@ -66,11 +66,11 @@ class WorkflowStepPort(object):
 #        return [triple for triple in self.pred[pred]]
 
     def canConnect(self, other):
-        if 'pho#workflow#port' in self.subj and 'pho#workflow#port' in other.subj:
-            myPorts = self.subj['pho#workflow#port']
-            thierPorts = other.subj['pho#workflow#port']
-            mineProvides = [triple for triple in myPorts if 'provides' == triple[1]]
-            thiersUses = [triple for triple in thierPorts if 'uses' == triple[1]]
+        if 'http://physiomeproject.org/workflow/1.0/rdf-schema#port' in self.subj and 'http://physiomeproject.org/workflow/1.0/rdf-schema#port' in other.subj:
+            myPorts = self.subj['http://physiomeproject.org/workflow/1.0/rdf-schema#port']
+            thierPorts = other.subj['http://physiomeproject.org/workflow/1.0/rdf-schema#port']
+            mineProvides = [triple for triple in myPorts if 'http://physiomeproject.org/workflow/1.0/rdf-schema#provides' == triple[1]]
+            thiersUses = [triple for triple in thierPorts if 'http://physiomeproject.org/workflow/1.0/rdf-schema#uses' == triple[1]]
             for mine in mineProvides:
                 for thiers in thiersUses:
                     if mine[2] == thiers[2]:

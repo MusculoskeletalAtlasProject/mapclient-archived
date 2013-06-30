@@ -30,7 +30,7 @@ class AnnotationDialog(QtGui.QDialog):
     '''
 
 
-    def __init__(self, location, parent=None):
+    def __init__(self, location, annotation_filename=None, parent=None):
         '''
         Constructor
         '''
@@ -43,7 +43,8 @@ class AnnotationDialog(QtGui.QDialog):
             
         self._ui.locationLineEdit.setText(location)
         self._tool = AnnotationTool()
-        self._tool.deserialize(location)
+        self._annotation_filename = annotation_filename
+        self._tool.deserialize(location, annotation_filename)
         
         self._ui.subjectComboBox.addItems(self._tool.getTerms())
         self._ui.predicateComboBox.addItems(self._tool.getTerms())
@@ -88,7 +89,7 @@ class AnnotationDialog(QtGui.QDialog):
                 self._tool.addTriple(sbj, pred, obj)
 
         location = self._ui.locationLineEdit.text()
-        self._tool.serialize(location)        
+        self._tool.serialize(location, self._annotation_filename)        
         self.accept()
     
         

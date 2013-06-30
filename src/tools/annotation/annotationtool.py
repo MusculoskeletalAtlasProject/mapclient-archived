@@ -22,9 +22,9 @@ import re, os
 
 _SECTION_HEADER_RE = '\[(.*)\]'
 _DEFAULT_ANNOTATION_FILENAME = 'annotation.rdf'
-_PHYSIOME_NAMESPACE = 'http://physiomeproject.org/workflow/1.0/rdf-schema'
-_PHYSIOME_NAMESPACE_RE = '<' + _PHYSIOME_NAMESPACE + '#([^>]+)> <' + _PHYSIOME_NAMESPACE + '#([^>]+)> <' + _PHYSIOME_NAMESPACE + '#([^>]+)>.'
-_PHYSIOME_NAMESPACE_FORMAT = '<' + _PHYSIOME_NAMESPACE + '#{0}>'  
+#_PHYSIOME_NAMESPACE = 'http://physiomeproject.org/workflow/1.0/rdf-schema'
+_NAMESPACE_RE = '<{0}/{1}/rdf-schema#([^>]+)> <{0}/{1}/rdf-schema#([^>]+)> <{0}/{1}/rdf-schema#([^>]+)>.'
+_NAMESPACE_FORMAT = '<{0}/{1}/rdf-schema#{2}>'  
 
 
 class AnnotationTool(object):
@@ -72,9 +72,9 @@ class AnnotationTool(object):
     def serialize(self, location, rdf_file=None):
         annotation = ''#@prefix pp: <http://physiomeproject.org/workflow/1.0/>.\n'
         for triple in self._triple_store:
-            annotation = annotation + _PHYSIOME_NAMESPACE_FORMAT.format(triple[0]) + ' ' \
-                                    + _PHYSIOME_NAMESPACE_FORMAT.format(triple[1]) + ' ' \
-                                    + _PHYSIOME_NAMESPACE_FORMAT.format(triple[2]) + '.\n'
+            annotation = annotation + _NAMESPACE_FORMAT.format(self._vocab._namespace, self._vocab._version, triple[0]) + ' ' \
+                                    + _NAMESPACE_FORMAT.format(self._vocab._namespace, self._vocab._version, triple[1]) + ' ' \
+                                    + _NAMESPACE_FORMAT.format(self._vocab._namespace, self._vocab._version, triple[2]) + '.\n'
             
         if rdf_file:
             annotationfile = os.path.join(location, rdf_file)
@@ -85,7 +85,8 @@ class AnnotationTool(object):
         f.close()
     
     def deserialize(self, location, rdf_file=None):
-        s = re.compile(_PHYSIOME_NAMESPACE_RE)
+        re_string = _NAMESPACE_RE.format(self._vocab._namespace, self._vocab._version)
+        s = re.compile(re_string)
         
         if rdf_file:
             annotationfile = os.path.join(location, rdf_file)

@@ -49,7 +49,8 @@ ABOUT = {
          }
 
 # APPLICATION
-DEFAULT_WORKFLOW_NAME = '.workflow.conf'
+DEFAULT_WORKFLOW_PROJECT_FILENAME = '.workflow.conf'
+DEFAULT_WORKFLOW_ANNOTATION_FILENAME = '.workflow.rdf'
 
 class PMRInfo(object):
     

@@ -65,10 +65,10 @@ class ImageSourceStep(WorkflowStepMountPoint):
 #        self._location = location
 #        self._name = 'Image source'
         self._icon = QtGui.QImage(':/imagesource/icons/landscapeimages.png')
-        self.addPort(('pho#workflow#port', 'provides', 'images'))
-        self.addPort(('pho#workflow#port', 'provides', 'images'))
-        self.addPort(('pho#workflow#port', 'provides', 'pointcloud'))
-        self.addPort(('pho#workflow#port', 'provides', 'blah'))
+        self.addPort(('http://physiomeproject.org/workflow/1.0/rdf-schema#port', 'http://physiomeproject.org/workflow/1.0/rdf-schema#provides', 'http://physiomeproject.org/workflow/1.0/rdf-schema#images'))
+        self.addPort(('http://physiomeproject.org/workflow/1.0/rdf-schema#port', 'http://physiomeproject.org/workflow/1.0/rdf-schema#provides', 'http://physiomeproject.org/workflow/1.0/rdf-schema#images'))
+        self.addPort(('http://physiomeproject.org/workflow/1.0/rdf-schema#port', 'http://physiomeproject.org/workflow/1.0/rdf-schema#provides', 'http://physiomeproject.org/workflow/1.0/rdf-schema#pointcloud'))
+        self.addPort(('http://physiomeproject.org/workflow/1.0/rdf-schema#port', 'http://physiomeproject.org/workflow/1.0/rdf-schema#provides', 'http://physiomeproject.org/workflow/1.0/rdf-schema#blah'))
         self._configured = False
         self._state = ConfigureDialogState()
         self._threadCommandManager = ThreadCommandManager()
