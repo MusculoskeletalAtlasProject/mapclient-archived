@@ -23,6 +23,7 @@ from PySide import QtCore, QtGui
 
 from core.workflowscene import Connection
 from tools.annotation.annotationdialog import AnnotationDialog
+from tools.pmr.pmrhghelper import repositoryIsUpToDate
 
 class ErrorItem(QtGui.QGraphicsItem):
 
@@ -271,14 +272,23 @@ class Node(Item):
         
         self.updateConfigureIcon()
 
+        self._outofdate_item = MercurialIcon(self)
+        self._outofdate_item.moveBy(5, 40)
+        
+        self.updateMercurialIcon()
+        
     def updateConfigureIcon(self):
-
         if self._metastep._step.isConfigured():
             self._configure_item.hide()
         else:
             self._configure_item.show()
 
-
+    def updateMercurialIcon(self):
+        if repositoryIsUpToDate(self._getStepLocation()):
+            self._outofdate_item.hide()
+        else:
+            self._outofdate_item.show()
+        
     def setPos(self, pos):
         QtGui.QGraphicsItem.setPos(self, pos)
         self.scene().workflowScene().setItemPos(self._metastep, pos)
@@ -286,6 +296,13 @@ class Node(Item):
     def type(self):
         return Node.Type
 
+    def commitMe(self):
+        step_location = self._getStepLocation()
+        if not repositoryIsUpToDate(step_location):
+            self.scene().commitChanges(step_location)
+            self.updateMercurialIcon()
+            
+        
     def configureMe(self):
         self.scene().setConfigureNode(self)
         self._metastep._step.configure()
@@ -385,6 +402,24 @@ class StepPort(QtGui.QGraphicsEllipseItem):
         return QtGui.QGraphicsItem.itemChange(self, change, value)
 
 
+class MercurialIcon(QtGui.QGraphicsItem):
+    
+    def __init__(self, *args, **kwargs):
+        super(MercurialIcon, self).__init__(*args, **kwargs)
+        self._hg_yellow = QtGui.QPixmap(':/workflow/images/yellow_black_exclamation.png').scaled(24, 24, aspectRatioMode=QtCore.Qt.KeepAspectRatio, transformMode=QtCore.Qt.FastTransformation)
+        
+    def paint(self, painter, option, widget):
+        painter.drawPixmap(0, 0, self._hg_yellow)
+
+    def boundingRect(self):
+        return QtCore.QRectF(0, 0, 24, 24)
+
+    def mousePressEvent(self, event):
+        event.accept()
+
+    def mouseReleaseEvent(self, event):
+        if self.scene().itemAt(event.scenePos()) == self:
+            self.parentItem().commitMe()
 
 class ConfigureIcon(QtGui.QGraphicsItem):
 

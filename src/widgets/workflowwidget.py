@@ -190,22 +190,24 @@ class WorkflowWidget(QtGui.QWidget):
         m = self._mainWindow.model().workflowManager()
         m.save()
         if os.path.exists(os.path.join(m.location(), '.hg')):
-            dlg = PMRHgCommitDialog()
-            dlg.setModal(True)
-            if dlg.exec_():
-                try:
-                    # set wait icon
-                    QtGui.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
-                    c = CommandCommit(m.location(), dlg.username(), dlg.password(), dlg.comment())
-                    c.run()
-                    # unset wait icon
-                    QtGui.QApplication.restoreOverrideCursor()
-                except Exception:
-                    QtGui.QMessageBox.warning(self._mainWindow, 'Error Saving', 'The commit to PMR did not succeed')
-                
+            self.commitChanges(m.location())
             
         self._updateUi()
 
+    def commitChanges(self, location):
+        dlg = PMRHgCommitDialog(self)
+        dlg.setModal(True)
+        if dlg.exec_():
+            try:
+                # set wait icon
+                QtGui.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
+                c = CommandCommit(location, dlg.username(), dlg.password(), dlg.comment())
+                c.run()
+                # unset wait icon
+                QtGui.QApplication.restoreOverrideCursor()
+            except Exception:
+                QtGui.QMessageBox.warning(self._mainWindow, 'Error Saving', 'The commit to PMR did not succeed')
+        
     def _setActionProperties(self, action, name, slot, shortcut='', statustip=''):
         action.setObjectName(name)
         action.triggered.connect(slot)

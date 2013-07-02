@@ -79,23 +79,37 @@ class ImageSourceStep(WorkflowStepMountPoint):
             self.serialize(self._location)
             self._state = d.getState()
             step_location = os.path.join(self._location, self._state.identifier())
+            print('hello ------')
             print(step_location)
-            if d.copyToWorkflow():
-                src_location = d.localLocation()
-                if src_location != step_location:
-                    delay = True
-                    c = CommandCopyDirectory(src_location, step_location)
-                    self._threadCommandManager.addCommand(c)
-            if d.addToPMR():
+            if self._state._localLocation:
+                if d.copyToWorkflow():
+                    src_location = d.localLocation()
+                    if src_location != step_location:
+                        delay = True
+                        c = CommandCopyDirectory(src_location, step_location)
+                        self._threadCommandManager.addCommand(c)
+                if d.addToPMR():
+                    pmr_tool = PMRTool()
+                    # Get login details:
+                    dlg = PMRHgLoginDialog()
+                    if dlg.exec_():
+                        repourl = pmr_tool.addWorkspace(ImageSourceData.name + ': ' + self._state.identifier(), None)
+                        c = CommandCloneWorkspace(repourl, step_location, dlg.username(), dlg.password())
+                        self._threadCommandManager.addCommand(c)
+                        self._state._pmrLocation = repourl
+                        delay= True
+            elif self._state._pmrLocation:
                 pmr_tool = PMRTool()
                 # Get login details:
                 dlg = PMRHgLoginDialog()
                 if dlg.exec_():
-                    repourl = pmr_tool.addWorkspace(ImageSourceData.name + ': ' + self._state.identifier(), None)
-                    c = CommandCloneWorkspace(repourl, step_location, dlg.username(), dlg.password())
+                    if not os.path.exists(step_location):
+                        os.mkdir(step_location)
+                    c = CommandCloneWorkspace(self._state._pmrLocation, step_location, dlg.username(), dlg.password())
                     self._threadCommandManager.addCommand(c)
-                    self._state._pmrLocation = repourl
+                    self._state._localLocation = step_location
                     delay= True
+                
             
         
         self._configured = d.validate()
