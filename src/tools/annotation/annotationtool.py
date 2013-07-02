@@ -69,6 +69,13 @@ class AnnotationTool(object):
     def getTerms(self):
         return self._vocab._terms
     
+    def rdfFormOfTerm(self, term):
+        t = term.strip()
+        if t in self._vocab._terms:
+            return _NAMESPACE_FORMAT.format(self._vocab._namespace, self._vocab._version, t)
+        
+        return None
+    
     def serialize(self, location, rdf_file=None):
         annotation = ''#@prefix pp: <http://physiomeproject.org/workflow/1.0/>.\n'
         for triple in self._triple_store:

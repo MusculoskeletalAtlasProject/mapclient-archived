@@ -162,7 +162,8 @@ class ConfigureDialog(QDialog):
         dlg.setModal(True)
         if dlg.exec_():
             ws = dlg.getSelectedWorkspace()
-            self._ui.pmrLineEdit.setText(ws['target'])
+            if ws:
+                self._ui.pmrLineEdit.setText(ws['target'])
         
     def _localLocationClicked(self):
         location = QFileDialog.getExistingDirectory(self, 'Select Image File(s) Location', self._ui.previousLocationLabel.text()) 

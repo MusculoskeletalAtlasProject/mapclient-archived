@@ -149,6 +149,9 @@ class WorkflowGraphicsScene(QtGui.QGraphicsScene):
     def setPreviouslySelectedItems(self, selection):
         self._previousSelection = selection
 
+    def commitChanges(self, location):
+        self.parent().commitChanges(location)
+        
     def setConfigureNode(self, node):
         self._currentConfigureNode = node
 

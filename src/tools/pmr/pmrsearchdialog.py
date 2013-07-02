@@ -19,6 +19,7 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
 '''
 from PySide import QtGui, QtCore
 
+from tools.annotation.annotationtool import AnnotationTool
 from tools.pmr.pmrtool import PMRTool
 from tools.pmr.ui_pmrsearchdialog import Ui_PMRSearchDialog
 
@@ -37,6 +38,7 @@ class PMRSearchDialog(QtGui.QDialog):
         self._ui.setupUi(self)
         
         self._pmrTool = PMRTool()
+        self._annotationTool = AnnotationTool()
         
         self._makeConnections()
         
@@ -58,8 +60,16 @@ class PMRSearchDialog(QtGui.QDialog):
         QtGui.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
         # Set pmrlib to go
         self._ui.searchResultsListWidget.clear()
+        
+        # fix up known terms to be full blown uri
+        search_text = self._ui.searchLineEdit.text()
+        search_terms = search_text.split()
+        for term in search_terms:
+            rdfterm = self._annotationTool.rdfFormOfTerm(term)
+            if rdfterm:
+                search_text = search_text + ' ' + rdfterm[1:-1]
 
-        results = self._pmrTool.search(self._ui.searchLineEdit.text())
+        results = self._pmrTool.search(search_text)
         for r in results:
             if 'title' in r and r['title']:
                 item = QtGui.QListWidgetItem(r['title'], self._ui.searchResultsListWidget)
