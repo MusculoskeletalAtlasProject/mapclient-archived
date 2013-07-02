@@ -33,7 +33,7 @@ class PluginFrameworkTestCase(unittest.TestCase):
         pm.load()
 
         sys.stdout = old_stdout
-        self.assertTrue("Plugin 'pointcloudstorestep' version 0.2.0 by Hugh Sorby loaded" in redirectstdout.messages)
+        self.assertTrue("Plugin 'pointcloudserializerstep' version 0.3.0 by Hugh Sorby loaded" in redirectstdout.messages)
 
 
 if __name__ == "__main__":
