@@ -18,18 +18,33 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
 from PySide import QtGui
-from tools.ui_pmrdialog import Ui_PMRDialog
 
-class PMRDialog(QtGui.QDialog):
-    '''
-    Dialog for managing interaction with PMR.
-    '''
+from tools.pmr.ui_pmrhgcommitdialog import Ui_PMRHgCommitDialog
 
-
+class PMRHgCommitDialog(QtGui.QDialog):
     def __init__(self, parent=None):
-        '''
-        Constructor
-        '''
         QtGui.QDialog.__init__(self, parent)
-        self._ui = Ui_PMRDialog()
+        self._ui = Ui_PMRHgCommitDialog()
         self._ui.setupUi(self)
+
+        self._ui.buttonBox.button(QtGui.QDialogButtonBox.Ok).setText('Commit')
+        self._ui.buttonBox.button(QtGui.QDialogButtonBox.Ok).clicked.connect(self._handleCommit)
+
+    def _handleCommit(self):
+        if (len(self._ui.usernameLineEdit.text()) > 0 and
+            len(self._ui.passwordLineEdit.text()) > 0 and
+            len(self._ui.commentTextEdit.toPlainText())):
+            self.accept()
+        else:
+            QtGui.QMessageBox.warning(
+                self, 'Error', 'Missing username, password or comment')
+
+    def username(self):
+        return self._ui.usernameLineEdit.text()
+    
+    def password(self):
+        return self._ui.passwordLineEdit.text()
+    
+    def comment(self):
+        return self._ui.commentTextEdit.toPlainText()
+    

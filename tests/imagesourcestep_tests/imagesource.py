@@ -7,6 +7,7 @@ import os, sys
 import unittest
 
 from PySide import QtGui
+
 try:
     from PySide.QtTest import QTest
     HAVE_QTTEST = True
@@ -14,6 +15,8 @@ except ImportError:
     HAVE_QTTEST = False
 
 DISABLE_GUI_TESTS = True
+
+
 
 class ImageSourceTestCase(unittest.TestCase):
 
@@ -36,7 +39,7 @@ class ImageSourceTestCase(unittest.TestCase):
             return
         
         from imagesourcestep.step import ImageSourceStep
-        mystep = ImageSourceStep()
+        mystep = ImageSourceStep('empty')
         
         self.assertFalse(mystep.isConfigured())
 
@@ -71,6 +74,7 @@ class ImageSourceTestCase(unittest.TestCase):
                 return
             
             from imagesourcestep.widgets.configuredialog import ConfigureDialog, ConfigureDialogState
+            
             state = ConfigureDialogState()
             d = ConfigureDialog(state)
             

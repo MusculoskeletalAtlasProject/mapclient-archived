@@ -36,7 +36,7 @@ class PointCloudStoreTestCase(unittest.TestCase):
             return
         
         from pointcloudstorestep.step import PointCloudStoreStep
-        mystep = PointCloudStoreStep()
+        mystep = PointCloudStoreStep('empty')
         
         self.assertFalse(mystep.isConfigured())
 

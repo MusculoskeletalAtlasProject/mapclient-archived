@@ -52,6 +52,12 @@ class WorkflowStepPort(object):
         return []
 #        return [triple[2] for triple in self.obj[obj]]
 
+    def hasUses(self):
+        return 'http://physiomeproject.org/workflow/1.0/rdf-schema#uses' in self.pred
+    
+    def hasProvides(self):
+        return 'http://physiomeproject.org/workflow/1.0/rdf-schema#provides' in self.pred
+
     def getTriplesForPred(self, pred):
         if pred in self.pred:
             return self.pred[pred]
@@ -60,11 +66,11 @@ class WorkflowStepPort(object):
 #        return [triple for triple in self.pred[pred]]
 
     def canConnect(self, other):
-        if 'pho#workflow#port' in self.subj and 'pho#workflow#port' in other.subj:
-            myPorts = self.subj['pho#workflow#port']
-            thierPorts = other.subj['pho#workflow#port']
-            mineProvides = [triple for triple in myPorts if 'provides' == triple[1]]
-            thiersUses = [triple for triple in thierPorts if 'uses' == triple[1]]
+        if 'http://physiomeproject.org/workflow/1.0/rdf-schema#port' in self.subj and 'http://physiomeproject.org/workflow/1.0/rdf-schema#port' in other.subj:
+            myPorts = self.subj['http://physiomeproject.org/workflow/1.0/rdf-schema#port']
+            thierPorts = other.subj['http://physiomeproject.org/workflow/1.0/rdf-schema#port']
+            mineProvides = [triple for triple in myPorts if 'http://physiomeproject.org/workflow/1.0/rdf-schema#provides' == triple[1]]
+            thiersUses = [triple for triple in thierPorts if 'http://physiomeproject.org/workflow/1.0/rdf-schema#uses' == triple[1]]
             for mine in mineProvides:
                 for thiers in thiersUses:
                     if mine[2] == thiers[2]:
@@ -75,17 +81,17 @@ class WorkflowStepPort(object):
 '''
 Plugins can inherit this mount point to add a workflow step.
 
-A plugin that registers this mount point must have:
-  - An attribute _icon that is a QImage icon for a visual representation of the step
-  - Implement a function 'configure'
-  - Implement a function 'setIdentifier'
-  - Implement a function 'getIdentifier'
-  - Implement a function 'serialize'
-  - Implement a function 'deserialize'
+A plugin that registers this mount point must:
+  - Pass the name of the step into the base class on init.
+  - Implement a function 'configure(self)'
+  - Implement a function 'setIdentifier(self, identifier)'
+  - Implement a function 'getIdentifier(self)'
+  - Implement a function 'serialize(self, location)'
+  - Implement a function 'deserialize(self, location)'
 
 
 A plugin that registers this mount point could have:
-  - An attribute _name that is a string representation of the name
+  - An attribute _icon that is a QImage icon for a visual representation of the step
   - An attribute _category that is a string representation of the step's category
   
 '''
@@ -95,11 +101,12 @@ A plugin that registers this mount point could have:
 #    '''
 #
 
-def _workflow_step_init(self):
+def _workflow_step_init(self, name, location):
     '''
     Constructor
     '''
-    self._location = None
+    self._name = name
+    self._location = location
     self._ports = []
     self._icon = None
     self._configured = False
@@ -179,11 +186,11 @@ attr_dict['serialize'] = _workflow_step_serialize
 
 WorkflowStepMountPoint = pluginframework.MetaPluginMountPoint('WorkflowStepMountPoint', (object,), attr_dict)
 
-def workflowStepFactory(step_name):
-    for step in WorkflowStepMountPoint.getPlugins():
+def workflowStepFactory(step_name, location):
+    for step in WorkflowStepMountPoint.getPlugins(location):
         if step_name == step.getName():
             return step
 
-    raise ValueError('Failed to find step named: ' + step_name)
+    raise ValueError('Failed to find/create a step named: ' + step_name)
 
 

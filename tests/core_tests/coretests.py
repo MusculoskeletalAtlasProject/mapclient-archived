@@ -33,6 +33,9 @@ def suite():
     tests.addTests(unittest.TestLoader().loadTestsFromTestCase(WorkflowDependencyGraphTestCase))
     tests.addTests(unittest.TestLoader().loadTestsFromTestCase(GraphUtilitiesTestCase))
 
+    from core_tests.threadcommandmanager import ThreadCommandManagerTestCase
+    tests.addTests(unittest.TestLoader().loadTestsFromTestCase(ThreadCommandManagerTestCase))
+
     return tests
 
 def load_tests(loader, tests, pattern):

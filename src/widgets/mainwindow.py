@@ -23,6 +23,7 @@ from PySide import QtGui
 from widgets.ui_mainwindow import Ui_MainWindow
 # from mountpoints.stackedwidget import StackedWidgetMountPoint
 from widgets.workflowwidget import WorkflowWidget
+from settings.info import DEFAULT_WORKFLOW_ANNOTATION_FILENAME
 
 class MainWindow(QtGui.QMainWindow):
     '''
@@ -53,7 +54,7 @@ class MainWindow(QtGui.QMainWindow):
         self._workflowWidget = WorkflowWidget(self)
         self._ui.stackedWidget.addWidget(self._workflowWidget)
         self.setCurrentUndoRedoStack(self._workflowWidget.undoRedoStack())
-
+        
     def _createUndoAction(self, parent):
         self.undoAction = QtGui.QAction('Undo', parent)
         self.undoAction.setShortcut(QtGui.QKeySequence('Ctrl+Z'))
@@ -146,14 +147,15 @@ class MainWindow(QtGui.QMainWindow):
             self._workflowWidget.updateStepTree()
 
     def pmr(self):
-        from tools.pmrdialog import PMRDialog
-        dlg = PMRDialog(self)
+        from tools.pmr.pmrsearchdialog import PMRSearchDialog
+        dlg = PMRSearchDialog(self)
         dlg.setModal(True)
         dlg.exec_()
 
     def annotationTool(self):
-        from tools.annotationtool import AnnotationDialog
-        dlg = AnnotationDialog(self)
+        from tools.annotation.annotationdialog import AnnotationDialog
+        location = self._model.workflowManager().location()
+        dlg = AnnotationDialog(location, DEFAULT_WORKFLOW_ANNOTATION_FILENAME, self)
         dlg.setModal(True)
         dlg.exec_()
 

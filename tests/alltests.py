@@ -32,9 +32,6 @@ def suite():
     from core_tests import coretests
     tests.addTests(coretests.suite())
 
-    from workflow_tests import workflowtests
-    tests.addTests(workflowtests.suite())
-
     from imagesourcestep_tests import imagesourcesteptests
     tests.addTests(imagesourcesteptests.suite())
     

@@ -17,21 +17,3 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     You should have received a copy of the GNU General Public License
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
-import unittest
-
-def suite():
-    tests = unittest.TestSuite()
-
-    from workflow_tests.workflowmanager import WorkflowManagerTestCase
-    tests.addTests(unittest.TestLoader().loadTestsFromTestCase(WorkflowManagerTestCase))
-
-    from workflow_tests.workflowsteps import WorkflowStepsTestCase
-    tests.addTests(unittest.TestLoader().loadTestsFromTestCase(WorkflowStepsTestCase))
-
-    return tests
-
-def load_tests(loader, tests, pattern):
-    return suite()
-
-if __name__ == '__main__':
-    unittest.TextTestRunner().run(suite())
