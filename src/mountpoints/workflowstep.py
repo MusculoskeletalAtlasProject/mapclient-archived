@@ -81,17 +81,17 @@ class WorkflowStepPort(object):
 '''
 Plugins can inherit this mount point to add a workflow step.
 
-A plugin that registers this mount point must have:
-  - An attribute _icon that is a QImage icon for a visual representation of the step
-  - Implement a function 'configure'
-  - Implement a function 'setIdentifier'
-  - Implement a function 'getIdentifier'
-  - Implement a function 'serialize'
-  - Implement a function 'deserialize'
+A plugin that registers this mount point must:
+  - Pass the name of the step into the base class on init.
+  - Implement a function 'configure(self)'
+  - Implement a function 'setIdentifier(self, identifier)'
+  - Implement a function 'getIdentifier(self)'
+  - Implement a function 'serialize(self, location)'
+  - Implement a function 'deserialize(self, location)'
 
 
 A plugin that registers this mount point could have:
-  - An attribute _name that is a string representation of the name
+  - An attribute _icon that is a QImage icon for a visual representation of the step
   - An attribute _category that is a string representation of the step's category
   
 '''

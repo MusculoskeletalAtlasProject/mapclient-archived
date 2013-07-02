@@ -207,7 +207,10 @@ class Node(Item):
         Item.__init__(self)
 
         self._metastep = metastep
-        self._pixmap = QtGui.QPixmap.fromImage(self._metastep._step._icon).scaled(self.Size, self.Size, aspectRatioMode=QtCore.Qt.KeepAspectRatio, transformMode=QtCore.Qt.FastTransformation)
+        icon = self._metastep._step._icon
+        if not icon:
+            icon = QtGui.QImage(':/workflow/images/default_step_icon.png')
+        self._pixmap = QtGui.QPixmap.fromImage(icon).scaled(self.Size, self.Size, aspectRatioMode=QtCore.Qt.KeepAspectRatio, transformMode=QtCore.Qt.FastTransformation)
 
         self.setFlag(QtGui.QGraphicsItem.ItemIsMovable)
         self.setFlag(QtGui.QGraphicsItem.ItemSendsGeometryChanges)
