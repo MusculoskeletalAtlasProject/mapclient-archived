@@ -1,4 +1,3 @@
-#!/usr/bin/python
 '''
 MAP Client, a program to generate detailed musculoskeletal models for OpenSim.
     Copyright (C) 2012  University of Auckland
@@ -18,32 +17,19 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     You should have received a copy of the GNU General Public License
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
-import unittest
+__version__ = '0.1.0'
+__author__ = 'Xxxx Yyyyy'
 
-def suite():
-    tests = unittest.TestSuite()
+import os, sys
 
-    from settings_tests import settingstests
-    tests.addTests(settingstests.suite())
+current_dir = os.path.dirname(os.path.abspath(__file__))
+if current_dir not in sys.path:
+    # Using __file__ will not work if py2exe is used,
+    # Possible problem of OSX10.6 also.
+    sys.path.insert(0, current_dir)
 
-    from widgets_tests import widgetstests
-    tests.addTests(widgetstests.suite())
+# import class that derives itself from the step mountpoint.
+#from skeletonstep import step
 
-    from core_tests import coretests
-    tests.addTests(coretests.suite())
-
-    from imagesourcestep_tests import imagesourcesteptests
-    tests.addTests(imagesourcesteptests.suite())
-    
-    from pointcloudserializerstep_tests import pointcloudserializertests
-    tests.addTests(pointcloudserializertests.suite())
-    
-    return tests
-
-def load_tests(loader, tests, pattern):
-    return suite()
-
-
-if __name__ == '__main__':
-    #unittest.main()
-    unittest.TextTestRunner().run(suite())
+( _, tail ) = os.path.split(current_dir)
+#print("Plugin '{0}' version {1} by {2} loaded".format(tail, __version__, __author__))

@@ -37,6 +37,8 @@ class ErrorItem(QtGui.QGraphicsItem):
         self._dest().addArc(self)
         self.setZValue(-1.5)
         self.adjust()
+        if hasattr(sourceNode, '_step_port_items'):
+            print(sourceNode._step_port_items)
 
     def boundingRect(self):
         extra = (16) / 2.0  # Icon size divided by two
@@ -103,7 +105,7 @@ class Arc(Item):
 
         self._arrowSize = 10.0
 
-        self._connection = Connection(sourceNode._metastep, destNode._metastep)
+        self._connection = Connection(sourceNode.parentItem()._metastep, destNode.parentItem()._metastep)
 
         self._sourcePoint = QtCore.QPointF()
         self._destPoint = QtCore.QPointF()
@@ -199,15 +201,16 @@ class Arc(Item):
 
 class Node(Item):
     Type = QtGui.QGraphicsItem.UserType + 1
+    Size = 64
 
     def __init__(self, metastep):
         Item.__init__(self)
 
         self._metastep = metastep
-        self._pixmap = QtGui.QPixmap.fromImage(self._metastep._step._icon).scaled(64, 64, aspectRatioMode=QtCore.Qt.KeepAspectRatio, transformMode=QtCore.Qt.FastTransformation)
-        self._configure_red = QtGui.QPixmap(':/workflow/images/configure_red.png').scaled(24, 24, aspectRatioMode=QtCore.Qt.KeepAspectRatio, transformMode=QtCore.Qt.FastTransformation)
-        self._connections = []
-#        self.graph = weakref.ref(workflowGraphicsView)
+        icon = self._metastep._step._icon
+        if not icon:
+            icon = QtGui.QImage(':/workflow/images/default_step_icon.png')
+        self._pixmap = QtGui.QPixmap.fromImage(icon).scaled(self.Size, self.Size, aspectRatioMode=QtCore.Qt.KeepAspectRatio, transformMode=QtCore.Qt.FastTransformation)
 
         self.setFlag(QtGui.QGraphicsItem.ItemIsMovable)
         self.setFlag(QtGui.QGraphicsItem.ItemSendsGeometryChanges)
@@ -223,27 +226,47 @@ class Node(Item):
         self._contextMenu.addAction(configureAction)
         self._contextMenu.addAction(annotateAction)
 
-        portsProvidesTip = ''
-        portsUsesTip = ''
+        self._step_port_items = []
+        # Collect all ports that provide or use from the step
+        uses_ports = []
+        provides_ports = []
         for port in self._metastep._step._ports:
-            triples = port.getTriplesForPred('uses')
-            for triple in triples:
-                portsUsesTip += '<li>' + triple[2] + '</li>'
-            triples = port.getTriplesForPred('provides')
-            for triple in triples:
-                portsProvidesTip += '<li>' + triple[2] + '</li>'
-
-        if len(portsUsesTip) > 0:
-            portsUsesTip = '<font color="#FFFF00"><h4>Uses</h4><ul>' + portsUsesTip + '</ul></font>'
-        if len(portsProvidesTip) > 0:
-            portsProvidesTip = '<font color="#33FF33"><h4>Provides</h4><ul>' + portsProvidesTip + '</ul></font>'
-
-        tip = portsProvidesTip + portsUsesTip
-        self.setToolTip(tip)
+            if port.hasUses():
+                uses_ports.append(port)
+            if port.hasProvides():
+                provides_ports.append(port)
+            
+        port_count = len(uses_ports)
+        for index, port in enumerate(uses_ports):
+            triples = port.getTriplesForPred('http://physiomeproject.org/workflow/1.0/rdf-schema#uses')
+            if len(triples) == 1:
+                triple = triples[0]
+                port_item = StepPort(port, self)
+                w = port_item.width()
+                h = port_item.height()
+                port_item.moveBy(-3*w/4, self.Size/2 + h/3 * (4*index - 2*(port_count-1) - 1))
+                port_item.setToolTip('uses: ' + triple[2])
+                self._step_port_items.append(port_item)
+            else:
+                print('Warning: Invalid port.')
+            
+        port_count = len(provides_ports)
+        for index, port in enumerate(provides_ports):
+            triples = port.getTriplesForPred('http://physiomeproject.org/workflow/1.0/rdf-schema#provides')
+            if len(triples) == 1:
+                triple = triples[0]
+                port_item = StepPort(port, self)
+                w = port_item.width()
+                h = port_item.height()
+                port_item.moveBy(self.Size - w/4, self.Size/2 + h/3 * (4*index - 2*(port_count-1) - 1))
+                port_item.setToolTip('provides: ' + triple[2])
+                self._step_port_items.append(port_item)
+            else:
+                print('Warning: Invalid port.')
 
         self._configure_item = ConfigureIcon(self)
         self._configure_item.moveBy(40, 40)
-
+        
         self.updateConfigureIcon()
 
     def updateConfigureIcon(self):
@@ -273,6 +296,61 @@ class Node(Item):
     def metaItem(self):
         return self._metastep
 
+    def boundingRect(self):
+        adjust = 2.0
+        return QtCore.QRectF(-adjust, -adjust,
+                             self._pixmap.width() + 2 * adjust,
+                             self._pixmap.height() + 2 * adjust)
+
+    def paint(self, painter, option, widget):
+            if option.state & QtGui.QStyle.State_Selected:  # or self.selected:
+                painter.setBrush(QtCore.Qt.darkGray)
+                painter.drawRoundedRect(self.boundingRect(), 5, 5)
+
+#            super(Node, self).paint(painter, option, widget)
+            painter.drawPixmap(0, 0, self._pixmap)
+#            if not self._metastep._step.isConfigured():
+#                painter.drawPixmap(40, 40, self._configure_red)
+
+    def itemChange(self, change, value):
+        if change == QtGui.QGraphicsItem.ItemPositionChange and self.scene():
+            return self.scene().ensureItemInScene(self, value)
+        elif change == QtGui.QGraphicsItem.ItemPositionHasChanged:
+            for port_item in self._step_port_items:
+                port_item.itemChange(change, value)
+                
+        return QtGui.QGraphicsItem.itemChange(self, change, value)
+
+    def showContextMenu(self, pos):
+        has_dir = os.path.exists(self._getStepLocation())
+        self._contextMenu.actions()[1].setEnabled(has_dir)
+        self._contextMenu.popup(pos)
+        
+    def _getStepLocation(self):
+        return os.path.join(self._metastep._step._location, self._metastep._step.getIdentifier())
+
+class StepPort(QtGui.QGraphicsEllipseItem):
+
+    Type = QtGui.QGraphicsItem.UserType + 3
+    
+    def __init__(self, port, parent):
+        super(StepPort, self).__init__(0, 0, 11, 11, parent=parent)
+        self.setBrush(QtCore.Qt.black)
+        self._port = port
+        self._connections = []
+
+    def type(self):
+        return StepPort.Type
+    
+    def width(self):
+        return self.boundingRect().width()
+    
+    def height(self):
+        return self.boundingRect().height()
+
+    def canConnect(self, other):
+        return self._port.canConnect(other._port)
+        
     def _removeDeadwood(self):
         '''
         Unfortunately the weakref doesn't work correctly for c based classes.  This function 
@@ -296,45 +374,14 @@ class Node(Item):
     def removeArc(self, arc):
         self._connections = [weakarc for weakarc in self._connections if weakarc() != arc]
 
-    def boundingRect(self):
-        adjust = 2.0
-        return QtCore.QRectF(-adjust, -adjust,
-                             self._pixmap.width() + 2 * adjust,
-                             self._pixmap.height() + 2 * adjust)
-
-    def paint(self, painter, option, widget):
-            if option.state & QtGui.QStyle.State_Selected:  # or self.selected:
-                painter.setBrush(QtCore.Qt.darkGray)
-                painter.drawRoundedRect(self.boundingRect(), 5, 5)
-
-#            super(Node, self).paint(painter, option, widget)
-            painter.drawPixmap(0, 0, self._pixmap)
-#            if not self._metastep._step.isConfigured():
-#                painter.drawPixmap(40, 40, self._configure_red)
-
     def itemChange(self, change, value):
-        if change == QtGui.QGraphicsItem.ItemPositionChange and self.scene():
-            return self.scene().ensureItemInScene(self, value)
-        elif change == QtGui.QGraphicsItem.ItemPositionHasChanged:
+        if change == QtGui.QGraphicsItem.ItemPositionHasChanged:
             self._removeDeadwood()
             for arc in self._connections:
                 arc().adjust()
 
         return QtGui.QGraphicsItem.itemChange(self, change, value)
 
-    def showContextMenu(self, pos):
-        has_dir = os.path.exists(self._getStepLocation())
-        self._contextMenu.actions()[1].setEnabled(has_dir)
-        self._contextMenu.popup(pos)
-        
-    def _getStepLocation(self):
-        return os.path.join(self._metastep._step._location, self._metastep._step.getIdentifier())
-
-class StepPort(QtGui.QGraphicsItem):
-
-    
-    def __init__(self, *args, **kwargs):
-        super(ConfigureIcon, self).__init__(*args, **kwargs)
 
 
 class ConfigureIcon(QtGui.QGraphicsItem):

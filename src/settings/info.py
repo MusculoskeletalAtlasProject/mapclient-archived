@@ -20,7 +20,7 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
 from PySide import QtCore
 
 VERSION_MAJOR = 0
-VERSION_MINOR = 7
+VERSION_MINOR = 9
 VERSION_PATCH = 0
 VERSION_STRING = str(VERSION_MAJOR) + "." + str(VERSION_MINOR) + "." + str(VERSION_PATCH)
 GPL_VERSION = '3'
@@ -49,7 +49,8 @@ ABOUT = {
          }
 
 # APPLICATION
-WORKFLOW_NAME = 'workflow.conf'
+DEFAULT_WORKFLOW_PROJECT_FILENAME = '.workflow.conf'
+DEFAULT_WORKFLOW_ANNOTATION_FILENAME = '.workflow.rdf'
 
 class PMRInfo(object):
     

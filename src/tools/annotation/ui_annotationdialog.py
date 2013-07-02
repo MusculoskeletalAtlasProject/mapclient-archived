@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'qt/annotationdialog.ui'
 #
-# Created: Mon Jun 24 22:27:38 2013
+# Created: Thu Jun 27 16:19:15 2013
 #      by: pyside-uic 0.2.14 running on PySide 1.1.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -59,9 +59,9 @@ class Ui_AnnotationDialog(object):
         self.objectComboBox.setObjectName("objectComboBox")
         self.horizontalLayout.addWidget(self.objectComboBox)
         self.gridLayout.addLayout(self.horizontalLayout, 1, 0, 1, 1)
-        self.pushButton_2 = QtGui.QPushButton(self.groupBox)
-        self.pushButton_2.setObjectName("pushButton_2")
-        self.gridLayout.addWidget(self.pushButton_2, 1, 1, 1, 1)
+        self.addButton = QtGui.QPushButton(self.groupBox)
+        self.addButton.setObjectName("addButton")
+        self.gridLayout.addWidget(self.addButton, 1, 1, 1, 1)
         self.label = QtGui.QLabel(self.groupBox)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
@@ -84,12 +84,15 @@ class Ui_AnnotationDialog(object):
         self.gridLayout.addWidget(self.annotationListWidget, 3, 0, 1, 1)
         self.verticalLayout = QtGui.QVBoxLayout()
         self.verticalLayout.setObjectName("verticalLayout")
-        self.pushButton = QtGui.QPushButton(self.groupBox)
-        self.pushButton.setObjectName("pushButton")
-        self.verticalLayout.addWidget(self.pushButton)
+        self.removeButton = QtGui.QPushButton(self.groupBox)
+        self.removeButton.setObjectName("removeButton")
+        self.verticalLayout.addWidget(self.removeButton)
         spacerItem = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
         self.verticalLayout.addItem(spacerItem)
         self.gridLayout.addLayout(self.verticalLayout, 3, 1, 1, 1)
+        self.fileButton = QtGui.QPushButton(self.groupBox)
+        self.fileButton.setObjectName("fileButton")
+        self.gridLayout.addWidget(self.fileButton, 0, 1, 1, 1)
         self.verticalLayout_2.addWidget(self.groupBox)
         self.buttonBox = QtGui.QDialogButtonBox(AnnotationDialog)
         self.buttonBox.setOrientation(QtCore.Qt.Horizontal)
@@ -98,7 +101,6 @@ class Ui_AnnotationDialog(object):
         self.verticalLayout_2.addWidget(self.buttonBox)
 
         self.retranslateUi(AnnotationDialog)
-        QtCore.QObject.connect(self.buttonBox, QtCore.SIGNAL("accepted()"), AnnotationDialog.accept)
         QtCore.QObject.connect(self.buttonBox, QtCore.SIGNAL("rejected()"), AnnotationDialog.reject)
         QtCore.QMetaObject.connectSlotsByName(AnnotationDialog)
 
@@ -106,8 +108,9 @@ class Ui_AnnotationDialog(object):
         AnnotationDialog.setWindowTitle(QtGui.QApplication.translate("AnnotationDialog", "Annotation Tool", None, QtGui.QApplication.UnicodeUTF8))
         self.groupBox.setTitle(QtGui.QApplication.translate("AnnotationDialog", "Annotation Tool", None, QtGui.QApplication.UnicodeUTF8))
         self.label_2.setText(QtGui.QApplication.translate("AnnotationDialog", "Location:", None, QtGui.QApplication.UnicodeUTF8))
-        self.pushButton_2.setText(QtGui.QApplication.translate("AnnotationDialog", "Add", None, QtGui.QApplication.UnicodeUTF8))
+        self.addButton.setText(QtGui.QApplication.translate("AnnotationDialog", "Add", None, QtGui.QApplication.UnicodeUTF8))
         self.label.setText(QtGui.QApplication.translate("AnnotationDialog", "Annotations:", None, QtGui.QApplication.UnicodeUTF8))
         self.label_3.setText(QtGui.QApplication.translate("AnnotationDialog", "TextLabel", None, QtGui.QApplication.UnicodeUTF8))
-        self.pushButton.setText(QtGui.QApplication.translate("AnnotationDialog", "Remove", None, QtGui.QApplication.UnicodeUTF8))
+        self.removeButton.setText(QtGui.QApplication.translate("AnnotationDialog", "Remove", None, QtGui.QApplication.UnicodeUTF8))
+        self.fileButton.setText(QtGui.QApplication.translate("AnnotationDialog", "...", None, QtGui.QApplication.UnicodeUTF8))
 

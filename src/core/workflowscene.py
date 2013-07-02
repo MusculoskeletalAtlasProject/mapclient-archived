@@ -209,7 +209,10 @@ class WorkflowScene(object):
             ws.setValue('name', metastep._step.getName())
             ws.setValue('position', metastep._pos)
             ws.setValue('selected', metastep._selected)
-            ws.setValue('identifier', metastep._step.getIdentifier())
+            identifier = metastep._step.getIdentifier()
+            if not identifier:
+                identifier = ''
+            ws.setValue('identifier', identifier)
             ws.beginWriteArray('connections')
             connectionIndex = 0
             if metastep in connectionMap:
