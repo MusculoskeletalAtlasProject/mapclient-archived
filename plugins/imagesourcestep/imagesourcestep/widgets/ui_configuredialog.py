@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'qt/configuredialog.ui'
 #
-# Created: Mon Jun 24 14:52:07 2013
+# Created: Thu Jun 27 10:59:19 2013
 #      by: pyside-uic 0.2.14 running on PySide 1.1.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -142,7 +142,7 @@ class Ui_ConfigureDialog(object):
         self.pmrRegisterLabel.setText(QtGui.QApplication.translate("ConfigureDialog", "<a href=\"mapclient.register\">register</a>", None, QtGui.QApplication.UnicodeUTF8))
         self.label_3.setText(QtGui.QApplication.translate("ConfigureDialog", "Location:", None, QtGui.QApplication.UnicodeUTF8))
         self.localButton.setText(QtGui.QApplication.translate("ConfigureDialog", "...", None, QtGui.QApplication.UnicodeUTF8))
-        self.addToPMRCheckBox.setToolTip(QtGui.QApplication.translate("ConfigureDialog", "Requires Mercurial (hg)", None, QtGui.QApplication.UnicodeUTF8))
+        self.addToPMRCheckBox.setToolTip(QtGui.QApplication.translate("ConfigureDialog", "Requires Mercurial (hg), implies copy into workflow", None, QtGui.QApplication.UnicodeUTF8))
         self.addToPMRCheckBox.setText(QtGui.QApplication.translate("ConfigureDialog", "Add to PMR", None, QtGui.QApplication.UnicodeUTF8))
         self.copyToWorkflowCheckBox.setText(QtGui.QApplication.translate("ConfigureDialog", "Copy into workflow", None, QtGui.QApplication.UnicodeUTF8))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.localTab), QtGui.QApplication.translate("ConfigureDialog", "Local file system", None, QtGui.QApplication.UnicodeUTF8))

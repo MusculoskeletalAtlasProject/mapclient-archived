@@ -42,7 +42,7 @@ class PointCloudStoreStep(WorkflowStepMountPoint):
 #        self._name = 'Point Cloud Store'
 #        self._location = location
         self._icon = QtGui.QImage(':/pointcloudstore/icons/pointcloudstore.png')
-        self.addPort(('pho#workflow#port', 'uses', 'pointcloud'))
+        self.addPort(('http://physiomeproject.org/workflow/1.0/rdf-schema#port', 'http://physiomeproject.org/workflow/1.0/rdf-schema#uses', 'http://physiomeproject.org/workflow/1.0/rdf-schema#pointcloud'))
         self._state = ConfigureDialogState()
         self._step_location = None
 

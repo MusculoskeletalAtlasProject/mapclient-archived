@@ -56,7 +56,10 @@ class StepTree(QtGui.QTreeWidget):
 
         stepItem = QtGui.QTreeWidgetItem(parentItem)
         stepItem.setText(0, step.getName())
-        stepItem.setIcon(0, QtGui.QIcon(QtGui.QPixmap.fromImage(step._icon)))
+        if step._icon:
+            stepItem.setIcon(0, QtGui.QIcon(QtGui.QPixmap.fromImage(step._icon)))
+        else:
+            stepItem.setIcon(0, QtGui.QIcon(':/workflow/images/default_step_icon.png'))
         stepItem.setData(0, QtCore.Qt.UserRole, step)
         stepItem.setFlags(QtCore.Qt.ItemIsEnabled)
 
@@ -72,7 +75,10 @@ class StepTree(QtGui.QTreeWidget):
         itemData = QtCore.QByteArray()
         dataStream = QtCore.QDataStream(itemData, QtCore.QIODevice.WriteOnly)
         step = item.data(0, QtCore.Qt.UserRole)
-        pixmap = QtGui.QPixmap(step._icon)
+        if step._icon:
+            pixmap = QtGui.QPixmap(step._icon)
+        else:
+            pixmap = QtGui.QPixmap(':workflow/images/default_step_icon.png')
         pixmap = pixmap.scaled(64, 64, aspectRatioMode=QtCore.Qt.KeepAspectRatio, transformMode=QtCore.Qt.FastTransformation)
         hotspot = QtCore.QPoint(pixmap.width() / 2, pixmap.height() / 2)
 

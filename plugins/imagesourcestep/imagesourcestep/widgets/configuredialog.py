@@ -117,7 +117,7 @@ class ConfigureDialog(QDialog):
         self._ui.pmrButton.clicked.connect(self._pmrLocationClicked)
         self._ui.localButton.clicked.connect(self._localLocationClicked)
         self._ui.pmrRegisterLabel.linkActivated.connect(self._register)
-        self._ui.copyToWorkflowCheckBox.stateChanged.connect(self._updateUi)
+        self._ui.addToPMRCheckBox.stateChanged.connect(self._updateUi)
         
     def setState(self, state):
         self._ui.identifierLineEdit.setText(state._identifier)
@@ -147,7 +147,9 @@ class ConfigureDialog(QDialog):
         if pmr_tool.hasAccess():
             self._ui.pmrRegisterLabel.hide()
             
-        self._ui.addToPMRCheckBox.setEnabled(pmr_tool.hasAccess() and self._ui.copyToWorkflowCheckBox.isChecked())
+        self._ui.addToPMRCheckBox.setEnabled(pmr_tool.hasAccess())
+        if self._ui.addToPMRCheckBox.isChecked():
+            self._ui.copyToWorkflowCheckBox.setChecked(True)
             
     def _register(self):
         pmr_tool = PMRTool()
@@ -163,7 +165,7 @@ class ConfigureDialog(QDialog):
             self._ui.pmrLineEdit.setText(ws['target'])
         
     def _localLocationClicked(self):
-        location = QFileDialog.getExistingDirectory(self, 'Select Image File(s)', self._ui.previousLocationLabel.text()) 
+        location = QFileDialog.getExistingDirectory(self, 'Select Image File(s) Location', self._ui.previousLocationLabel.text()) 
         
         if location:
             self._ui.previousLocationLabel.setText(location)
