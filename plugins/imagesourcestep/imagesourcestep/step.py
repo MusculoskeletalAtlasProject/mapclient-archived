@@ -79,8 +79,6 @@ class ImageSourceStep(WorkflowStepMountPoint):
             self.serialize(self._location)
             self._state = d.getState()
             step_location = os.path.join(self._location, self._state.identifier())
-            print('hello ------')
-            print(step_location)
             if self._state._localLocation:
                 if d.copyToWorkflow():
                     src_location = d.localLocation()
