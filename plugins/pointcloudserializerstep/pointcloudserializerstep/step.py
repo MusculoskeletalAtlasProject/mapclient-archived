@@ -81,7 +81,7 @@ class PointCloudSerializerStep(WorkflowStepMountPoint):
         return os.path.join(self._location, self._state.identifier())
 
     def execute(self, dataIn):
-        f = open(os.path.join(self._step_location, 'pointcloud.txt'), 'w')
+        f = open(os.path.join(self.getOutputDirectory(), 'pointcloud.txt'), 'w')
         for i, pt in enumerate(dataIn):
             f.write(str(i + 1) + '\t' + str(pt[0]) + '\t' + str(pt[1]) + '\t' + str(pt[2]) + '\n')
         f.close()
