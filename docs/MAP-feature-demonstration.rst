@@ -25,7 +25,7 @@ Quick Tour
 
 When you first load MAP, it will look something like this:
 
-.. figure:: /MAP/images/blank_MAP_1.png
+.. figure:: resources/images/blank_MAP_1.png
    :align: center
    :width: 75%
 
@@ -50,7 +50,7 @@ The workflow canvas is where we construct our workflow.  We do this by adding th
 
 When a step is added to the workflow the icon which is visible in the Step box is augmented with visualisations of the Steps ports and the steps configured status.  The annotation of the steps ports will show when the mouse is hovered over a port.  The image below shows the Image Source step with the annotation for the port displayed.
 
-.. figure:: /MAP/images/step_with_port_info_displayed_1.png
+.. figure:: resources/images/step_with_port_info_displayed_1.png
    :align: center
    :width: 40%
   
@@ -68,7 +68,7 @@ The plugin tool is a simple tool that enables the user to add or remove addition
 
 Whilst additions to the plugin path will be visible immediately in the Step box deletions will not be apparent until the next time the MAP Client is started.  This behaviour is a side-effect of the Python programming language.  
 
-.. figure:: /MAP/images/plugin_manager_1.png
+.. figure:: resources/images/plugin_manager_1.png
    :align: center
    :width: 25%
   
@@ -84,7 +84,7 @@ In OAuth we have three players the server, the consumer and the user.  The serve
 
 If you want the PMR tool to have access to privileged information (your non-public workspaces stored on PMR) you will need to register the PMR tool with the PMR website.  We do this by clicking on the `register` link as shown in the figure below.  This does two things: it shows the Application Authorisation dialog; opens a webbrowser at the PMR website.  [If you are not logged on at the PMR website you will need to do so now to continue, instructions on obtaining a PMR account are availble here XXXXX].  On the PMR website you are asked to either accept or deny access to the PMR tool.  If you allow access then the website will display a temporary access token that you will need to copy and paste into the Application Authorisation dialog so that the PMR tool can get the permanent access token.
 
-.. figure:: /MAP/images/PMRTool_1.png
+.. figure:: resources/images/PMRTool_1.png
    :align: center
    :width: 25%
 
@@ -93,13 +93,13 @@ Annotation Tool
 
 The Annotation tool is a very simple tool to help a user annotate the Workflow itself and the Step data directories that are linked to PMR.  At this stage there is a limited vocabulary that the Annotation tool knows about, but this is intended to be extended in coming releases.  The vocabulary that the annotation is aware of is available in the three combo-boxes near the top of the dialog.
 
-.. figure:: /MAP/images/top_annotation_1.png
+.. figure:: resources/images/top_annotation_1.png
    :align: center
    :width: 40%
 
 The main part of the Annotation tool shows the current annotation from the current target.  
 
-.. figure:: /MAP/images/main_annotation_1.png
+.. figure:: resources/images/main_annotation_1.png
    :align: center
    :width: 25%
 

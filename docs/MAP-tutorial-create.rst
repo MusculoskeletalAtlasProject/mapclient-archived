@@ -41,7 +41,7 @@ First each step requires a unique id.  The id is used to create a file containin
 
 Next change to the PMR tab and we will see an ellipses button for bringing up the PMR tool dialog.  You need to register the PMR tool to access certain webservices the details on how to do this are available :doc:`here <MAP-feature-demonstration>`.  The remainder of this tutorial will assume you have setup access to PMR properly.  In the search box of the PMR dialog we need to enter the search term 'blood-vessels'.  The result of the search should look like the image below.
 
-.. figure:: /MAP/images/PMRTool_2.png
+.. figure:: resources/images/PMRTool_2.png
    :align: center
    :width: 35%
 
@@ -59,13 +59,13 @@ Executing the Workflow
 
 At this point you should have a workflow area looking like this:
 
-.. figure:: /MAP/images/configured_MAP_1.png
+.. figure:: resources/images/configured_MAP_1.png
    :align: center
    :width: 75%
 
 Once the All the steps in the workflow are configured (no more red cog icons) we can make connections between the steps.  To make a connection between two steps the first step must provide what the second step uses.  When trying to connect two steps that cannot be connected you will see a no entry icon over the connection for a short period of time and then the connection will be removed.  The following image shows an incorrect connection trying to be made.
 
-.. figure:: /MAP/images/error_connection.png
+.. figure:: resources/images/error_connection.png
    :align: center
    :width: 55%
 
@@ -73,7 +73,7 @@ If the mouse is hovered over a port you will see a description of what the port 
 
 To execute the workflow we need to connect up the steps in the correct manner and save the workflow.  The workflow should be connected up as can be seen in the following image.
 
-.. figure:: /MAP/images/connected_MAP_1.png
+.. figure:: resources/images/connected_MAP_1.png
    :align: center
    :width: 75%
 

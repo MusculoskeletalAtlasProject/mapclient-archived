@@ -103,8 +103,10 @@ class Arc(Item):
 
     def __init__(self, sourceNode, destNode):
         Item.__init__(self)
+#        self.setSelected(False)
 
         self._arrowSize = 10.0
+        self._arrow = QtGui.QPolygonF()
 
         self._connection = Connection(sourceNode.parentItem()._metastep, destNode.parentItem()._metastep)
 
@@ -150,6 +152,13 @@ class Arc(Item):
         self._sourcePoint = line.p1() + arcOffset
         self._destPoint = line.p2() - arcOffset
 
+    def shape(self):
+        print('shape')
+#        path = super(Arc, self).shape()
+        path = QtGui.QPainterPath()
+        path.addPolygon(self._arrow)
+        return path
+
     def boundingRect(self):
         if not self._source() or not self._dest():
             return QtCore.QRectF()
@@ -175,8 +184,10 @@ class Arc(Item):
             return
 
         brush = QtGui.QBrush(QtCore.Qt.black)
-        if option.state & (QtGui.QStyle.State_Selected | QtGui.QStyle.State_HasFocus):  # or self.selected:
-            brush = QtGui.QBrush(QtCore.Qt.red)
+        if self.isSelected():  # or self.selected:
+            painter.setBrush(QtCore.Qt.darkGray)
+            painter.drawRoundedRect(self.boundingRect(), 5, 5)
+#            brush = QtGui.QBrush(QtCore.Qt.red)
 
         painter.setBrush(brush)
 
@@ -194,7 +205,11 @@ class Arc(Item):
             destArrowP2 = midPoint + QtCore.QPointF(math.sin(angle - Arc.Pi + Arc.Pi / 3) * self._arrowSize,
                                                           math.cos(angle - Arc.Pi + Arc.Pi / 3) * self._arrowSize)
 
-            painter.drawPolygon(QtGui.QPolygonF([midPoint, destArrowP1, destArrowP2]))
+            self._arrow.clear()
+            self._arrow.append(midPoint)
+            self._arrow.append(destArrowP1)
+            self._arrow.append(destArrowP2)
+            painter.drawPolygon(self._arrow)
 
         painter.setPen(QtGui.QPen(brush, 1, QtCore.Qt.SolidLine, QtCore.Qt.RoundCap, QtCore.Qt.RoundJoin))
         # painter.setPen(QtGui.QPen(QtCore.Qt.SolidLine))

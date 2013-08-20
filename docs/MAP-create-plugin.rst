@@ -79,6 +79,7 @@ A Step Could
  * Implement the method 'portOutput(self)' if it was providing some information to another step.
  * Implement the method 'execute(self, dataIn)' if it uses some information from another step.  If a step implements the 'execute(self, dataIn)' method then it must call '_doneExecution()' when the step is finished.
  * Define a category using the '_category' attribute.  This attribute will add the step to the named category in the step box, or it will create the named category if it is not present.
+ * Set a widget as the main widget for the MAP Client application.  Calling '_setCurrentWidget(step_widget)' with a widget passed as a parameter will set that widget to the main widget for the MAP Client application.  The widget will be removed when '_doneExecution()' is called.
 
 Ports
 =====
