@@ -78,9 +78,9 @@ class ImageSourceStep(WorkflowStepMountPoint):
         if d.exec_():
             self.serialize(self._location)
             self._state = d.getState()
+            # When a PMR location is given we need to translate that into a 
+            # local path for passing into the ImageSourceData class
             step_location = os.path.join(self._location, self._state.identifier())
-            print('hello ------')
-            print(step_location)
             if self._state._localLocation:
                 if d.copyToWorkflow():
                     src_location = d.localLocation()
