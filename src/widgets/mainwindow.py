@@ -42,9 +42,6 @@ class MainWindow(QtGui.QMainWindow):
         self._ui.setupUi(self)
         self._makeConnections()
 
-        self._createUndoAction(self._ui.menu_Edit)
-        self._createRedoAction(self._ui.menu_Edit)
-
         self._model.readSettings()
         self.resize(self._model.size())
         self.move(self._model.pos())
@@ -54,30 +51,6 @@ class MainWindow(QtGui.QMainWindow):
         self._workflowWidget = WorkflowWidget(self)
         self._ui.stackedWidget.addWidget(self._workflowWidget)
         self.setCurrentUndoRedoStack(self._workflowWidget.undoRedoStack())
-        
-    def _createUndoAction(self, parent):
-        self.undoAction = QtGui.QAction('Undo', parent)
-        self.undoAction.setShortcut(QtGui.QKeySequence('Ctrl+Z'))
-        self.undoAction.triggered.connect(self._model.undoManager().undo)
-        stack = self._model.undoManager().currentStack()
-        if stack:
-            self.undoAction.setEnabled(stack.canUndo())
-        else:
-            self.undoAction.setEnabled(False)
-
-        parent.addAction(self.undoAction)
-
-    def _createRedoAction(self, parent):
-        self.redoAction = QtGui.QAction('Redo', parent)
-        self.redoAction.setShortcut(QtGui.QKeySequence('Ctrl+Shift+Z'))
-        self.redoAction.triggered.connect(self._model.undoManager().redo)
-        stack = self._model.undoManager().currentStack()
-        if stack:
-            self.redoAction.setEnabled(stack.canRedo())
-        else:
-            self.redoAction.setEnabled(False)
-
-        parent.addAction(self.redoAction)
 
     def model(self):
         return self._model
@@ -97,16 +70,16 @@ class MainWindow(QtGui.QMainWindow):
 
         self._model.undoManager().setCurrentStack(stack)
 
-        self.redoAction.setEnabled(stack.canRedo())
-        self.undoAction.setEnabled(stack.canUndo())
+        self._ui.actionRedo.setEnabled(stack.canRedo())
+        self._ui.actionUndo.setEnabled(stack.canUndo())
         stack.canUndoChanged.connect(self._canUndoChanged)
         stack.canRedoChanged.connect(self._canRedoChanged)
 
     def _canRedoChanged(self, canRedo):
-        self.redoAction.setEnabled(canRedo)
+        self._ui.actionRedo.setEnabled(canRedo)
 
     def _canUndoChanged(self, canUndo):
-        self.undoAction.setEnabled(canUndo)
+        self._ui.actionUndo.setEnabled(canUndo)
 
     def execute(self):
         self._ui.stackedWidget.setCurrentWidget(self._workflowWidget)
