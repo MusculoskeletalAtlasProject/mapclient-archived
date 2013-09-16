@@ -61,6 +61,8 @@ class MainWindow(QtGui.QMainWindow):
         self._ui.actionPluginManager.triggered.connect(self.pluginManager)
         self._ui.actionPMR.triggered.connect(self.pmr)
         self._ui.actionAnnotation.triggered.connect(self.annotationTool)
+        self._ui.actionUndo.triggered.connect(self._model.undoManager().undo)
+        self._ui.actionRedo.triggered.connect(self._model.undoManager().redo)
 
     def setCurrentUndoRedoStack(self, stack):
         current_stack = self._model.undoManager().currentStack()
