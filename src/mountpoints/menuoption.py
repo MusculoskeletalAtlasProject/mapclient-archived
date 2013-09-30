@@ -1,3 +1,4 @@
+
 '''
 MAP Client, a program to generate detailed musculoskeletal models for OpenSim.
     Copyright (C) 2012  University of Auckland
@@ -17,3 +18,31 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     You should have received a copy of the GNU General Public License
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
+from PySide.QtCore import QObject
+
+from core.pluginframework import MetaQObjectPluginMountPoint
+
+'''
+Plugins can inherit this mount point in order to add to the menu of the GUI.
+
+ A plugin that registers this mount point must have attributes
+ * parent
+ * menuLabel
+ * menuName
+ * actionLabel
+ 
+ A plugin that registers this mount point could have attributes
+ * subMenuLabel
+ * subMenuName
+ * shortcut
+ * statustip
+  
+ It must implement
+ * def execute(self):
+ 
+ And it must call
+ * QObject.__init__(self)
+ in it's __init__ function
+ '''
+MenuOptionMountPoint = MetaQObjectPluginMountPoint('MenuOptionMountPoint', (QObject,), {'subMenuLabel': None, 'subMenuName': None, 'shortcut': None, 'statustip': ''})
+

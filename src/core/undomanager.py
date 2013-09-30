@@ -17,3 +17,32 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     You should have received a copy of the GNU General Public License
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
+
+class UndoManager(object):
+    '''
+    This class is the undo redo manager for multiple undo stacks. It is a
+    singleton class. 
+    
+    Don't inherit from this class.
+    '''
+    _instance = None
+    stack = None
+
+    def __new__(cls, *args, **kwargs):
+        if not cls._instance:
+            cls._instance = super(UndoManager, cls).__new__(
+                                cls, *args, **kwargs)
+        return cls._instance
+
+    def setCurrentStack(self, stack):
+        self.stack = stack
+
+    def currentStack(self):
+        return self.stack
+
+    def undo(self):
+        self.stack.undo()
+
+    def redo(self):
+        self.stack.redo()
+

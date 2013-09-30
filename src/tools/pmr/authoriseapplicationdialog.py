@@ -17,3 +17,25 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     You should have received a copy of the GNU General Public License
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
+from PySide import QtGui
+
+from tools.pmr.ui_authoriseapplicationdialog import Ui_AuthoriseApplicationDialog
+
+
+class AuthoriseApplicationDialog(QtGui.QDialog):
+    '''
+    Dialog for authorising the application.
+    '''
+
+
+    def __init__(self, parent=None):
+        '''
+        Constructor
+        '''
+        QtGui.QDialog.__init__(self, parent)
+        self._ui = Ui_AuthoriseApplicationDialog()
+        self._ui.setupUi(self)
+        
+
+    def token(self):
+        return self._ui.tokenLineEdit.text()

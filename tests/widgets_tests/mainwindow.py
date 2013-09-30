@@ -17,3 +17,16 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     You should have received a copy of the GNU General Public License
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
+import unittest
+
+class MainWindowTestCase(unittest.TestCase):
+
+
+    def testMain(self):
+        from widgets import mainwindow
+        self.assertEqual(mainwindow.__name__, 'widgets.mainwindow')
+
+
+if __name__ == "__main__":
+    #import sys;sys.argv = ['', 'Test.testMain']
+    unittest.main()

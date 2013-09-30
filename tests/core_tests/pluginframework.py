@@ -17,3 +17,25 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     You should have received a copy of the GNU General Public License
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
+import sys, unittest
+from core.mainapplication import PluginManager
+from utils import ConsumeOutput
+
+class PluginFrameworkTestCase(unittest.TestCase):
+
+
+    def testLoadPlugins(self):
+        pm = PluginManager()
+
+        old_stdout = sys.stdout
+        sys.stdout = redirectstdout = ConsumeOutput()
+
+        pm.load()
+
+        sys.stdout = old_stdout
+        self.assertTrue("Plugin 'pointcloudserializerstep' version 0.3.0 by Hugh Sorby loaded" in redirectstdout.messages)
+
+
+if __name__ == "__main__":
+    #import sys;sys.argv = ['', 'Test.testLoadPlugins']
+    unittest.main()
