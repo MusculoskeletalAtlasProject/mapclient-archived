@@ -32,9 +32,10 @@ class CommandRemove(QtGui.QUndoCommand):
             if item not in self._items:
                 self._items.append(item)
             if item.Type == Node.Type:
-                for arc in item._connections:
-                    if arc() not in self._items:
-                        self._items.append(arc())
+                for port in item._step_port_items:
+                    for arc in port._connections:
+                        if arc() not in self._items:
+                            self._items.append(arc())
 
     def redo(self):
         self._scene.blockSignals(True)
