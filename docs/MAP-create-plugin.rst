@@ -67,7 +67,7 @@ A Step Must
 A Step Should
 -------------
  
- * Implement the configure method to configure the step.  This is typically in the form of a dialog.  When implementing this function the class method self._configureObserver() should be called to inform the application that the step configuration has finished.
+ * Implement the configure method to configure the step.  This is typically in the form of a dialog.  When implementing this function the class method self._configuredObserver() should be called to inform the application that the step configuration has finished.
  * Implement the getIdentifier/setIdentifier methods to return the identifier of the step.
  * Implement the serialize/deserialize methods.  The steps should serialize and deserialize from a file on disk located at the given location.
  * Define a class attribute _icon.  That is of the type QtGui.QImage.
