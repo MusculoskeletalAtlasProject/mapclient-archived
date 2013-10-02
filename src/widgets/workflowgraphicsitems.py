@@ -24,6 +24,7 @@ from PySide import QtCore, QtGui
 from core.workflowscene import Connection
 from tools.annotation.annotationdialog import AnnotationDialog
 from tools.pmr.pmrhghelper import repositoryIsUpToDate
+from widgets.utils import createDefaultImageIcon
 
 class ErrorItem(QtGui.QGraphicsItem):
 
@@ -225,11 +226,12 @@ class Node(Item):
         self._metastep = metastep
         icon = self._metastep._step._icon
         if not icon:
-            icon = QtGui.QImage(':/workflow/images/default_step_icon.png')
+            icon = QtGui.QImage(createDefaultImageIcon(self._metastep._step.getName()))
+
         self._pixmap = QtGui.QPixmap.fromImage(icon).scaled(self.Size, self.Size, aspectRatioMode=QtCore.Qt.KeepAspectRatio, transformMode=QtCore.Qt.FastTransformation)
 
         self.setToolTip(metastep._step._name)
-        
+
         self.setFlag(QtGui.QGraphicsItem.ItemIsMovable)
         self.setFlag(QtGui.QGraphicsItem.ItemSendsGeometryChanges)
         self.setCacheMode(self.DeviceCoordinateCache)
@@ -253,7 +255,7 @@ class Node(Item):
                 uses_ports.append(port)
             if port.hasProvides():
                 provides_ports.append(port)
-            
+
         port_count = len(uses_ports)
         for index, port in enumerate(uses_ports):
             triples = port.getTriplesForPred('http://physiomeproject.org/workflow/1.0/rdf-schema#uses')
@@ -262,12 +264,12 @@ class Node(Item):
                 port_item = StepPort(port, self)
                 w = port_item.width()
                 h = port_item.height()
-                port_item.moveBy(-3*w/4, self.Size/2 + h/3 * (4*index - 2*(port_count-1) - 1))
+                port_item.moveBy(-3 * w / 4, self.Size / 2 + h / 3 * (4 * index - 2 * (port_count - 1) - 1))
                 port_item.setToolTip('uses: ' + triple[2])
                 self._step_port_items.append(port_item)
             else:
                 print('Warning: Invalid port.')
-            
+
         port_count = len(provides_ports)
         for index, port in enumerate(provides_ports):
             triples = port.getTriplesForPred('http://physiomeproject.org/workflow/1.0/rdf-schema#provides')
@@ -276,7 +278,7 @@ class Node(Item):
                 port_item = StepPort(port, self)
                 w = port_item.width()
                 h = port_item.height()
-                port_item.moveBy(self.Size - w/4, self.Size/2 + h/3 * (4*index - 2*(port_count-1) - 1))
+                port_item.moveBy(self.Size - w / 4, self.Size / 2 + h / 3 * (4 * index - 2 * (port_count - 1) - 1))
                 port_item.setToolTip('provides: ' + triple[2])
                 self._step_port_items.append(port_item)
             else:
@@ -284,14 +286,14 @@ class Node(Item):
 
         self._configure_item = ConfigureIcon(self)
         self._configure_item.moveBy(40, 40)
-        
+
         self.updateConfigureIcon()
 
         self._outofdate_item = MercurialIcon(self)
         self._outofdate_item.moveBy(5, 40)
-        
+
         self.updateMercurialIcon()
-        
+
     def updateConfigureIcon(self):
         if self._metastep._step.isConfigured():
             self._configure_item.hide()
@@ -303,7 +305,7 @@ class Node(Item):
             self._outofdate_item.hide()
         else:
             self._outofdate_item.show()
-        
+
     def setPos(self, pos):
         QtGui.QGraphicsItem.setPos(self, pos)
         self.scene().workflowScene().setItemPos(self._metastep, pos)
@@ -316,12 +318,12 @@ class Node(Item):
         if not repositoryIsUpToDate(step_location):
             self.scene().commitChanges(step_location)
             self.updateMercurialIcon()
-            
-        
+
+
     def configureMe(self):
         self.scene().setConfigureNode(self)
         self._metastep._step.configure()
-        
+
     def annotateMe(self):
         dlg = AnnotationDialog(self._getStepLocation())
         dlg.setModal(True)
@@ -352,21 +354,21 @@ class Node(Item):
         elif change == QtGui.QGraphicsItem.ItemPositionHasChanged:
             for port_item in self._step_port_items:
                 port_item.itemChange(change, value)
-                
+
         return QtGui.QGraphicsItem.itemChange(self, change, value)
 
     def showContextMenu(self, pos):
         has_dir = os.path.exists(self._getStepLocation())
         self._contextMenu.actions()[1].setEnabled(has_dir)
         self._contextMenu.popup(pos)
-        
+
     def _getStepLocation(self):
         return os.path.join(self._metastep._step._location, self._metastep._step.getIdentifier())
 
 class StepPort(QtGui.QGraphicsEllipseItem):
 
     Type = QtGui.QGraphicsItem.UserType + 3
-    
+
     def __init__(self, port, parent):
         super(StepPort, self).__init__(0, 0, 11, 11, parent=parent)
         self.setBrush(QtCore.Qt.black)
@@ -375,16 +377,16 @@ class StepPort(QtGui.QGraphicsEllipseItem):
 
     def type(self):
         return StepPort.Type
-    
+
     def width(self):
         return self.boundingRect().width()
-    
+
     def height(self):
         return self.boundingRect().height()
 
     def canConnect(self, other):
         return self._port.canConnect(other._port)
-        
+
     def _removeDeadwood(self):
         '''
         Unfortunately the weakref doesn't work correctly for c based classes.  This function 
@@ -418,11 +420,11 @@ class StepPort(QtGui.QGraphicsEllipseItem):
 
 
 class MercurialIcon(QtGui.QGraphicsItem):
-    
+
     def __init__(self, *args, **kwargs):
         super(MercurialIcon, self).__init__(*args, **kwargs)
         self._hg_yellow = QtGui.QPixmap(':/workflow/images/yellow_black_exclamation.png').scaled(24, 24, aspectRatioMode=QtCore.Qt.KeepAspectRatio, transformMode=QtCore.Qt.FastTransformation)
-        
+
     def paint(self, painter, option, widget):
         painter.drawPixmap(0, 0, self._hg_yellow)
 
