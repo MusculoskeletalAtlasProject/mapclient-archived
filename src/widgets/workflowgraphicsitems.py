@@ -243,8 +243,12 @@ class Node(Item):
         annotateAction = QtGui.QAction('Annotate', self._contextMenu)
         annotateAction.setEnabled(False)
         annotateAction.triggered.connect(self.annotateMe)
+        deleteAction = QtGui.QAction('Delete', self._contextMenu)
+        deleteAction.triggered.connect(self._removeMe)
         self._contextMenu.addAction(configureAction)
         self._contextMenu.addAction(annotateAction)
+        self._contextMenu.addSeparator()
+        self._contextMenu.addAction(deleteAction)
 
         self._step_port_items = []
         # Collect all ports that provide or use from the step
@@ -319,6 +323,8 @@ class Node(Item):
             self.scene().commitChanges(step_location)
             self.updateMercurialIcon()
 
+    def _removeMe(self):
+        self.scene().removeStep(self)
 
     def configureMe(self):
         self.scene().setConfigureNode(self)
