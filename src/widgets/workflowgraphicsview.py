@@ -58,7 +58,7 @@ class WorkflowGraphicsView(QtGui.QGraphicsView):
 
     def setUndoStack(self, stack):
         self._undoStack = stack
-        
+
     def setLocation(self, location):
         self._location = location
 
@@ -203,7 +203,7 @@ class WorkflowGraphicsView(QtGui.QGraphicsView):
             node.setSelected(True)
             self._undoStack.endMacro()
 
-            event.setDropAction(QtCore.Qt.MoveAction);
+            self.setFocus()
             event.accept();
         else:
             event.ignore()

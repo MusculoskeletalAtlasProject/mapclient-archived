@@ -21,7 +21,7 @@ from PySide import QtGui
 
 from core.workflowscene import MetaStep, Connection
 from widgets.workflowgraphicsitems import Node, Arc
-from widgets.workflowcommands import CommandConfigure
+from widgets.workflowcommands import CommandConfigure, CommandRemove
 
 
 class WorkflowGraphicsScene(QtGui.QGraphicsScene):
@@ -93,7 +93,7 @@ class WorkflowGraphicsScene(QtGui.QGraphicsScene):
                 connections.append(workflowitem)
 
         for connection in connections:
-            # Have to figure which port item of the source is connected to which 
+            # Have to figure which port item of the source is connected to which
             # port item of the destination.  There should be exactly one such connection
             src_port_item = None
             dest_port_item = None
@@ -151,9 +151,12 @@ class WorkflowGraphicsScene(QtGui.QGraphicsScene):
 
     def commitChanges(self, location):
         self.parent().commitChanges(location)
-        
+
     def setConfigureNode(self, node):
         self._currentConfigureNode = node
+
+    def removeStep(self, node):
+        self._undoStack.push(CommandRemove(self, [node]))
 
     def stepConfigured(self):
         self._undoStack.push(CommandConfigure(self, self._currentConfigureNode))

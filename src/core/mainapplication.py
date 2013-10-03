@@ -63,7 +63,7 @@ class MainApplication(object):
 
     def pluginManager(self):
         return self._pluginManager
-    
+
     def threadCommandManager(self):
         return self._threadCommandManager
 
@@ -114,7 +114,7 @@ class PluginManager(object):
         plugin_dirs = self._directories[:]
         if self._loadDefaultPlugins:
             file_dir = os.path.dirname(os.path.abspath(__file__))
-            inbuilt_plugin_dir = os.path.realpath(os.path.join(file_dir, '..', '..', 'plugins'))  # fileDir + '/../plugins')
+            inbuilt_plugin_dir = os.path.realpath(os.path.join(file_dir, '..', '..', 'plugins'))
             plugin_dirs.insert(0, inbuilt_plugin_dir)
 
         return plugin_dirs
