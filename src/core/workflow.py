@@ -56,7 +56,7 @@ class WorkflowManager():
         self._title = None
 
         self._scene = WorkflowScene(self)
-    
+
     def title(self):
         self._title = info.APPLICATION_NAME
         if self._location:
@@ -108,6 +108,23 @@ class WorkflowManager():
 #        self._title = info.APPLICATION_NAME + ' - ' + location
         self._scene.clear()
 
+    def exists(self, location):
+        '''
+        Determines whether a workflow exists in the given location.
+        Returns True if a valid workflow exists, False otherwise.
+        '''
+        if location is None:
+            return False
+
+        if not os.path.exists(location):
+            return False
+
+        wf = _getWorkflowConfiguration(location)
+        if wf.contains('version'):
+            return True
+
+        return False
+
     def load(self, location):
         '''
         Open a workflow from the given _location.
@@ -122,7 +139,7 @@ class WorkflowManager():
         wf = _getWorkflowConfiguration(location)
         if not wf.contains('version'):
             raise WorkflowError('The given Workflow configuration file is not valid.')
-        
+
         if wf.value('version') != info.VERSION_STRING:
             raise WorkflowError('Version mismatch in Workflow expected: %s got: %s' % (info.VERSION_STRING, wf.value('version')))
 

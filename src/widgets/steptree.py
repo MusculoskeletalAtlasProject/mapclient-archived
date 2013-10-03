@@ -17,8 +17,8 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     You should have received a copy of the GNU General Public License
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
-import sys
 from PySide import QtCore, QtGui
+from widgets.utils import createDefaultImageIcon
 
 class StepTree(QtGui.QTreeWidget):
 
@@ -59,7 +59,8 @@ class StepTree(QtGui.QTreeWidget):
         if step._icon:
             stepItem.setIcon(0, QtGui.QIcon(QtGui.QPixmap.fromImage(step._icon)))
         else:
-            stepItem.setIcon(0, QtGui.QIcon(':/workflow/images/default_step_icon.png'))
+            stepItem.setIcon(0, QtGui.QIcon(QtGui.QPixmap.fromImage(createDefaultImageIcon(step.getName()))))
+
         stepItem.setData(0, QtCore.Qt.UserRole, step)
         stepItem.setFlags(QtCore.Qt.ItemIsEnabled)
 
@@ -78,16 +79,17 @@ class StepTree(QtGui.QTreeWidget):
         if step._icon:
             pixmap = QtGui.QPixmap(step._icon)
         else:
-            pixmap = QtGui.QPixmap(':workflow/images/default_step_icon.png')
+            icon = createDefaultImageIcon(step.getName())
+            pixmap = QtGui.QPixmap()
+            pixmap.convertFromImage(icon)
+
         pixmap = pixmap.scaled(64, 64, aspectRatioMode=QtCore.Qt.KeepAspectRatio, transformMode=QtCore.Qt.FastTransformation)
         hotspot = QtCore.QPoint(pixmap.width() / 2, pixmap.height() / 2)
 
-        name = step.getName()#bytearray(step.getName(), sys.stdout.encoding)
+        name = step.getName()  # bytearray(step.getName(), sys.stdout.encoding)
         dataStream.writeUInt32(len(name))
         dataStream.writeRawData(name)
 
-#        dataStream = step.serialize(dataStream)
-#        dataStream << pixmap
         dataStream << hotspot
 
         mimeData = QtCore.QMimeData()

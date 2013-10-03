@@ -21,7 +21,7 @@ from PySide import QtCore
 
 VERSION_MAJOR = 0
 VERSION_MINOR = 9
-VERSION_PATCH = 0
+VERSION_PATCH = 1
 VERSION_STRING = str(VERSION_MAJOR) + "." + str(VERSION_MINOR) + "." + str(VERSION_PATCH)
 GPL_VERSION = '3'
 APPLICATION_NAME = 'MAP Client'
@@ -53,10 +53,10 @@ DEFAULT_WORKFLOW_PROJECT_FILENAME = '.workflow.conf'
 DEFAULT_WORKFLOW_ANNOTATION_FILENAME = '.workflow.rdf'
 
 class PMRInfo(object):
-    
+
     def __init__(self):
         self.readSettings()
-        
+
     def readSettings(self):
         settings = QtCore.QSettings()
         settings.beginGroup('PMR')
@@ -70,7 +70,7 @@ class PMRInfo(object):
         if not self._user_secret_token:
             self._user_secret_token = None
         settings.endGroup()
-        
+
     def writeSettings(self):
         settings = QtCore.QSettings()
         settings.beginGroup('PMR')
@@ -83,29 +83,28 @@ class PMRInfo(object):
         settings.setValue('user-public-token', temp_public)
         settings.setValue('user-secret-token', temp_secret)
         settings.endGroup()
-        
+
     def ipAddress(self):
         return self._ipaddress
-    
+
     def consumerPublicToken(self):
         return self._consumer_public_token
-    
+
     def consumerSecretToken(self):
         return self._consumer_secret_token
-    
+
     def userPublicToken(self):
         return self._user_public_token
-    
+
     def userSecretToken(self):
         return self._user_secret_token
-    
+
     def setUserPublicToken(self, token):
         self._user_public_token = token
-        
+
     def setUserSecretToken(self, token):
         self._user_secret_token = token
-    
-    
 
-        
-        
+
+
+
