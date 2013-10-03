@@ -54,7 +54,7 @@ class MainWindow(QtGui.QMainWindow):
         self._workflowWidget = WorkflowWidget(self)
         self._ui.stackedWidget.addWidget(self._workflowWidget)
         self.setCurrentUndoRedoStack(self._workflowWidget.undoRedoStack())
-        
+
     def _createUndoAction(self, parent):
         self.undoAction = QtGui.QAction('Undo', parent)
         self.undoAction.setShortcut(QtGui.QKeySequence('Ctrl+Z'))
@@ -122,6 +122,13 @@ class MainWindow(QtGui.QMainWindow):
         self.quitApplication()
 
     def quitApplication(self):
+        # Check to see if the Workflow is in a saved state.
+        if self._model.workflowManager().isModified():
+            ret = QtGui.QMessageBox.warning(self, 'Unsaved Changes', 'You have unsaved changes, would you like to save these changes now?',
+                                      QtGui.QMessageBox.Yes | QtGui.QMessageBox.No)
+            if ret == QtGui.QMessageBox.Yes:
+                self._model.workflowManager().save()
+
         self._model.setSize(self.size())
         self._model.setPos(self.pos())
         self._model.writeSettings()
