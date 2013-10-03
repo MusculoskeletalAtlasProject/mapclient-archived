@@ -105,6 +105,15 @@ class WorkflowWidget(QtGui.QWidget):
         m = self._mainWindow.model().workflowManager()
         workflowDir = QtGui.QFileDialog.getExistingDirectory(self._mainWindow, caption='Select Workflow Directory', directory=m.previousLocation())
         if len(workflowDir) > 0:
+            # Check if overwriting an existing workflow.
+            if m.exists(workflowDir):
+                # Check to make sure user wishes to overwrite existing workflow.
+                ret = QtGui.QMessageBox.warning(self, 'Replace Existing Workflow',
+                                              'A Workflow already exists at this location.  Do you want to replace this Workflow?',
+                                              QtGui.QMessageBox.Yes | QtGui.QMessageBox.No)  # (QtGui.QMessageBox.Warning, '')
+                if ret == QtGui.QMessageBox.No:
+                    return
+
             m.new(workflowDir)
             m.setPreviousLocation(workflowDir)
             if pmr:
