@@ -299,10 +299,7 @@ class Node(Item):
         self.updateMercurialIcon()
 
     def updateConfigureIcon(self):
-        if self._metastep._step.isConfigured():
-            self._configure_item.hide()
-        else:
-            self._configure_item.show()
+        self._configure_item.setConfigured(self._metastep._step.isConfigured())
 
     def updateMercurialIcon(self):
         if repositoryIsUpToDate(self._getStepLocation()):
@@ -449,10 +446,19 @@ class ConfigureIcon(QtGui.QGraphicsItem):
 
     def __init__(self, *args, **kwargs):
         super(ConfigureIcon, self).__init__(*args, **kwargs)
+        self._configured = False
+        self._configure_green = QtGui.QPixmap(':/workflow/images/configure_green.png').scaled(24, 24, aspectRatioMode=QtCore.Qt.KeepAspectRatio, transformMode=QtCore.Qt.FastTransformation)
         self._configure_red = QtGui.QPixmap(':/workflow/images/configure_red.png').scaled(24, 24, aspectRatioMode=QtCore.Qt.KeepAspectRatio, transformMode=QtCore.Qt.FastTransformation)
 
+    def setConfigured(self, state):
+        self._configured = state
+
     def paint(self, painter, option, widget):
-        painter.drawPixmap(0, 0, self._configure_red)
+        pixmap = self._configure_red
+        if self._configured:
+            pixmap = self._configure_green
+
+        painter.drawPixmap(0, 0, pixmap)
 
     def boundingRect(self):
         return QtCore.QRectF(0, 0, 24, 24)
