@@ -145,13 +145,15 @@ class MainWindow(QtGui.QMainWindow):
         dlg = PluginManagerDialog(self)
         dlg.setDirectories(self._model.pluginManager().directories())
         dlg.setLoadDefaultPlugins(self._model.pluginManager().loadDefaultPlugins())
+        dlg.reloadPlugins = self._model.pluginManager().load
 
         dlg.setModal(True)
         if dlg.exec_():
             self._model.pluginManager().setDirectories(dlg.directories())
             self._model.pluginManager().setLoadDefaultPlugins(dlg.loadDefaultPlugins())
-            self._model.pluginManager().load()
-            self._workflowWidget.updateStepTree()
+            if self._model.pluginManager().pluginsModified():
+                self._model.pluginManager().load()
+                self._workflowWidget.updateStepTree()
 
     def pmr(self):
         from tools.pmr.pmrsearchdialog import PMRSearchDialog
