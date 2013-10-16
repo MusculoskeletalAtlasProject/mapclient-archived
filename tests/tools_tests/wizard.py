@@ -26,7 +26,7 @@ from tools.pluginwizard.skeleton import SkeletonOptions, Skeleton
 if QtGui.qApp == None: QtGui.QApplication([])
 import widgets.resources_rc
 
-PLUGIN_WRITE_TO_DIRECTORY = '/home/hsorby/work/musculoskeletalatlas/mapclient-plugins'
+PLUGIN_WRITE_TO_DIRECTORY = '.'
 PLUGIN_PACKAGE_NAME = 'abcdstep'
 PLUGIN_NAME = 'Abcd'
 PLUGIN_IMAGE_FILE = ''
