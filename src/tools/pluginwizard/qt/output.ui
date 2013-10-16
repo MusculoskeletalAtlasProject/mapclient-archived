@@ -19,12 +19,16 @@
      <item>
       <widget class="QLabel" name="directoryLabel">
        <property name="text">
-        <string>Output directory:</string>
+        <string>Output directory:  </string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QLineEdit" name="directoryLineEdit"/>
+      <widget class="QLineEdit" name="directoryLineEdit">
+       <property name="toolTip">
+        <string>directory must exist and be writable</string>
+       </property>
+      </widget>
      </item>
      <item>
       <widget class="QPushButton" name="directoryButton">

@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'qt/output.ui'
 #
-# Created: Fri Oct  4 13:56:15 2013
+# Created: Thu Oct 17 11:03:13 2013
 #      by: pyside-uic 0.2.14 running on PySide 1.1.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -35,7 +35,8 @@ class Ui_Output(object):
 
     def retranslateUi(self, Output):
         Output.setWindowTitle(QtGui.QApplication.translate("Output", "Form", None, QtGui.QApplication.UnicodeUTF8))
-        self.directoryLabel.setText(QtGui.QApplication.translate("Output", "Output directory:", None, QtGui.QApplication.UnicodeUTF8))
+        self.directoryLabel.setText(QtGui.QApplication.translate("Output", "Output directory:  ", None, QtGui.QApplication.UnicodeUTF8))
+        self.directoryLineEdit.setToolTip(QtGui.QApplication.translate("Output", "directory must exist and be writable", None, QtGui.QApplication.UnicodeUTF8))
         self.directoryButton.setText(QtGui.QApplication.translate("Output", "...", None, QtGui.QApplication.UnicodeUTF8))
 
 import resources_rc

@@ -36,6 +36,10 @@ IMAGE_FILE_FIELD = 'image_file'
 PACKAGE_NAME_FIELD = 'package_name'
 PORTS_FIELD = 'ports_table'
 
+# Style sheets
+REQUIRED_STYLE_SHEET = 'background-color: rgba(239, 16, 16, 20%)'
+DEFAULT_STYLE_SHEET = ''
+
 class WizardDialog(QtGui.QWizard):
 
 
@@ -105,6 +109,10 @@ class NameWizardPage(QtGui.QWizardPage):
         self._ui = Ui_Name()
         self._ui.setupUi(self)
 
+        self._invalidPixmap = QtGui.QPixmap(':wizard/images/cross.png')
+        self._invalidLabel = QtGui.QLabel(self)
+        self._invalidLabel.setStyleSheet('border: none; padding: 0px;')
+
         self._updateImage()
 
         self._makeConnections()
@@ -149,11 +157,18 @@ class NameWizardPage(QtGui.QWizardPage):
             image = createDefaultImageIcon(self._ui.nameLineEdit.text())
             self._ui.iconPictureLabel.setPixmap(QtGui.QPixmap.fromImage(image).scaled(64, 64, aspectRatioMode=QtCore.Qt.KeepAspectRatio, transformMode=QtCore.Qt.FastTransformation))
 
-    def isComplete(self):
+    def resizeEvent(self, event):
+        rect = self._ui.nameLineEdit.rect()
+        pos = self._ui.nameLineEdit.pos()
+        self._invalidLabel.setPixmap(self._invalidPixmap.scaledToHeight(rect.height() / 2))
+        self._invalidLabel.move(pos.x() - rect.height() / 2, pos.y() - rect.height() / 4)
 
+    def isComplete(self):
         status = False
         if len(self._ui.nameLineEdit.text()) > 0:
             status = True
+
+        self._invalidLabel.setVisible(not status)
 
         return status
 
@@ -224,6 +239,10 @@ class OutputWizardPage(QtGui.QWizardPage):
         self._ui = Ui_Output()
         self._ui.setupUi(self)
 
+        self._invalidPixmap = QtGui.QPixmap(':wizard/images/cross.png')
+        self._invalidLabel = QtGui.QLabel(self)
+        self._invalidLabel.setStyleSheet('border: none; padding: 0px;')
+
         self.registerField(OUTPUT_DIRECTORY_FIELD, self._ui.directoryLineEdit)
 
         self._makeConnections()
@@ -237,11 +256,19 @@ class OutputWizardPage(QtGui.QWizardPage):
         if len(directory) > 0:
             self._ui.directoryLineEdit.setText(directory)
 
+    def resizeEvent(self, event):
+        rect = self._ui.directoryLineEdit.rect()
+        pos = self._ui.directoryLineEdit.pos()
+        self._invalidLabel.setPixmap(self._invalidPixmap.scaledToHeight(rect.height() / 2))
+        self._invalidLabel.move(pos.x() - rect.height() / 2, pos.y() - rect.height() / 4)
+
     def isComplete(self):
         status = False
         directory = self._ui.directoryLineEdit.text()
         if os.path.isdir(directory) and os.access(directory, os.W_OK | os.X_OK):
             status = True
+
+        self._invalidLabel.setVisible(not status)
 
         return status
 

@@ -54,10 +54,10 @@ class WizardTestCase(unittest.TestCase):
         pass
 
 
-#     def testRunWizard(self):
-#         dlg = wizarddialog.WizardDialog()
-#         if dlg.exec_() == dlg.Accepted:
-#             print('accepted')
+    def testRunWizard(self):
+        dlg = wizarddialog.WizardDialog()
+        if dlg.exec_() == dlg.Accepted:
+            print('accepted')
 
     def testWizard(self):
         dlg = wizarddialog.WizardDialog()
