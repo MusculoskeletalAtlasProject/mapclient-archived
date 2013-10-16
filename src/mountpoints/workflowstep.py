@@ -54,7 +54,7 @@ class WorkflowStepPort(object):
 
     def hasUses(self):
         return 'http://physiomeproject.org/workflow/1.0/rdf-schema#uses' in self.pred
-    
+
     def hasProvides(self):
         return 'http://physiomeproject.org/workflow/1.0/rdf-schema#provides' in self.pred
 
@@ -128,6 +128,9 @@ def _workflow_step_registerOnExecuteEntry(self, observer, setCurrentUndoRedoStac
     self._setCurrentWidget = observer
     self._setCurrentUndoRedoStack = setCurrentUndoRedoStackObserver
 
+def _workflow_step_registerConfiguredObserver(self, observer):
+    self._configuredObserver = observer
+
 def _workflow_step_configure(self, location):
     raise NotImplementedError
 
@@ -145,9 +148,6 @@ def _workflow_step_deserialize(self):
 
 def _workflow_step_isConfigured(self):
     return self._configured
-
-def _workflow_step_registerConfiguredObserver(self, observer):
-    self._configuredObserver = observer
 
 def _workflow_step_addPort(self, triple):
     port = WorkflowStepPort()

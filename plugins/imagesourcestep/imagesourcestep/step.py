@@ -32,23 +32,23 @@ def getConfigFilename(identifier):
     return identifier + '.conf'
 
 class ImageSourceData(object):
-    
+
     name = 'ImageSourceData'
-    
+
     def __init__(self, identifier, location, imageType):
         self._identifier = identifier
         self._location = location
         self._imageType = imageType
-        
+
     def identifier(self):
         return self._identifier
-    
+
     def location(self):
         return self._location
-    
+
     def imageType(self):
         return self._imageType
-    
+
 
 class ImageSourceStep(WorkflowStepMountPoint):
     '''
@@ -65,7 +65,9 @@ class ImageSourceStep(WorkflowStepMountPoint):
 #        self._location = location
 #        self._name = 'Image source'
         self._icon = QtGui.QImage(':/imagesource/icons/landscapeimages.png')
-        self.addPort(('http://physiomeproject.org/workflow/1.0/rdf-schema#port', 'http://physiomeproject.org/workflow/1.0/rdf-schema#provides', 'http://physiomeproject.org/workflow/1.0/rdf-schema#images'))
+        self.addPort(('http://physiomeproject.org/workflow/1.0/rdf-schema#port',
+                      'http://physiomeproject.org/workflow/1.0/rdf-schema#provides',
+                      'http://physiomeproject.org/workflow/1.0/rdf-schema#images'))
         self._configured = False
         self._state = ConfigureDialogState()
         self._threadCommandManager = ThreadCommandManager()
@@ -78,7 +80,7 @@ class ImageSourceStep(WorkflowStepMountPoint):
         if d.exec_():
             self.serialize(self._location)
             self._state = d.getState()
-            # When a PMR location is given we need to translate that into a 
+            # When a PMR location is given we need to translate that into a
             # local path for passing into the ImageSourceData class
             step_location = os.path.join(self._location, self._state.identifier())
             if self._state._localLocation:
@@ -97,7 +99,7 @@ class ImageSourceStep(WorkflowStepMountPoint):
                         c = CommandCloneWorkspace(repourl, step_location, dlg.username(), dlg.password())
                         self._threadCommandManager.addCommand(c)
                         self._state._pmrLocation = repourl
-                        delay= True
+                        delay = True
             elif self._state._pmrLocation:
                 pmr_tool = PMRTool()
                 # Get login details:
@@ -108,17 +110,17 @@ class ImageSourceStep(WorkflowStepMountPoint):
                     c = CommandCloneWorkspace(self._state._pmrLocation, step_location, dlg.username(), dlg.password())
                     self._threadCommandManager.addCommand(c)
                     self._state._localLocation = step_location
-                    delay= True
-                
-            
-        
+                    delay = True
+
+
+
         self._configured = d.validate()
 
         if self._configured and delay:
             self._threadCommandManager.execute()
         elif self._configured and self._configuredObserver != None:
             self._configuredObserver()
-            
+
     def _threadCommandsFinished(self):
         if self._state._addToPMR:
             self._state._addToPMR = False
@@ -131,24 +133,24 @@ class ImageSourceStep(WorkflowStepMountPoint):
 
         if self._configured and self._configuredObserver != None:
             self._configuredObserver()
-            
+
     def getIdentifier(self):
         return self._state.identifier()
-    
+
     def setIdentifier(self, identifier):
         self._state.setIdentifier(identifier)
-        
+
     def serialize(self, location):
-        configuration_file = os.path.join(location,getConfigFilename(self._state.identifier()))
+        configuration_file = os.path.join(location, getConfigFilename(self._state.identifier()))
         s = QtCore.QSettings(configuration_file, QtCore.QSettings.IniFormat)
         self._state.save(s)
-        
+
     def deserialize(self, location):
-        configuration_file = os.path.join(location,getConfigFilename(self._state.identifier()))
+        configuration_file = os.path.join(location, getConfigFilename(self._state.identifier()))
         s = QtCore.QSettings(configuration_file, QtCore.QSettings.IniFormat)
         self._state.load(s)
         d = ConfigureDialog(self._state)
         self._configured = d.validate()
-        
+
     def portOutput(self):
         return ImageSourceData(self._state.identifier(), self._state.location(), self._state.imageType())

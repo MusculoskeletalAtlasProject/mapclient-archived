@@ -17,8 +17,9 @@ The MAP Client is an application written in Python and based on Qt the cross-pla
    
    MAP-install-setup
    MAP-feature-demonstration
+   MAP-plugin
+   MAP-plugin-wizard
    MAP-tutorial-create
-   MAP-create-plugin
    MAP-tutorial-plugin
    
    glossary
