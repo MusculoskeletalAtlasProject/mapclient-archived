@@ -28,7 +28,7 @@ class Skeleton(object):
     def __init__(self, options):
         self._options = options
 
-    def _writePackageInit(self):
+    def _writePackageInit(self, init_dir):
         init_string = '''
 \'\'\'
 MAP Client Plugin
@@ -52,12 +52,12 @@ print("Plugin '{{0}}' version {{1}} by {{2}} loaded".format(tail, __version__, _
 
 '''.format(package_name=self._options.getPackageName())
 
-        init_file = os.path.join(self._options.getOutputDirectory(), self._options.getPackageName(), '__init__.py')
+        init_file = os.path.join(init_dir, '__init__.py')
         f = open(init_file, 'w')
         f.write(init_string)
         f.close()
 
-    def _writeStep(self):
+    def _writeStep(self, step_dir):
         class_string = '''
 \'\'\'
 MAP Client Plugin Step
@@ -65,7 +65,7 @@ MAP Client Plugin Step
 
 from mountpoints.workflowstep import WorkflowStepMountPoint
 
-class {step_name}Step(WorkflowStepMountPoint):
+class {step_object_name}Step(WorkflowStepMountPoint):
     \'\'\'
     Skeleton step which is intended to be a helpful starting point
     for new steps.
@@ -73,7 +73,7 @@ class {step_name}Step(WorkflowStepMountPoint):
 '''
         init_string = '''
     def __init__(self, location):
-        super({step_name}Step, self).__init__('{step_name}', location)
+        super({step_object_name}Step, self).__init__('{step_name}', location)
         self._configured = False # A step cannot be executed until it has been configured.
         # Add any other initialisation code here:
         # Like ports:
@@ -122,11 +122,12 @@ class {step_name}Step(WorkflowStepMountPoint):
         pass
 
 '''
-        step_file = os.path.join(self._options.getOutputDirectory(), self._options.getPackageName(), self._options.getPackageName(), 'step.py')
+        step_file = os.path.join(step_dir, 'step.py')
         f = open(step_file, 'w')
 
-        f.write(class_string.format(step_name=self._options.getName()))
-        tmp_string = init_string.format(step_name=self._options.getName())
+        object_name = self._options.getName().replace(' ', '')
+        f.write(class_string.format(step_object_name=object_name, step_name=self._options.getName()))
+        tmp_string = init_string.format(step_object_name=object_name, step_name=self._options.getName())
         port_index = 0
         uses = []
         provides = []
@@ -189,19 +190,32 @@ class {step_name}Step(WorkflowStepMountPoint):
         f.write(method_string)
         f.close()
 
+    def _writeStepPackageInit(self, init_dir):
+        init_file = os.path.join(init_dir, '__init__.py')
+        f = open(init_file, 'w')
+        f.close()
+
     def write(self):
+        '''
+        Write out the step using the options set on initialisation, assumes the output
+        directory is writable otherwise an exception will be raised.
+        '''
+        # Make package directory
         package_dir = os.path.join(self._options.getOutputDirectory(), self._options.getPackageName())
         os.mkdir(package_dir)
 
-        self._writePackageInit()
+        # Write the package init file
+        self._writePackageInit(package_dir)
 
+        # Make step pakcage directory
         step_package_dir = os.path.join(package_dir, self._options.getPackageName())
         os.mkdir(step_package_dir)
-        step_package_init_file = os.path.join(step_package_dir, '__init__.py')
-        f = open(step_package_init_file, 'w')
-        f.close()
 
-        self._writeStep()
+        # Write step packate init file
+        self._writeStepPackageInit(step_package_dir)
+
+        # Write out the step file
+        self._writeStep(step_package_dir)
 
 
 class SkeletonOptions(object):
