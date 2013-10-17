@@ -18,6 +18,12 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
 import os
+from shutil import copyfile
+from subprocess import call
+
+QT_RESOURCE_FILENAME = 'resources.qrc'
+PYTHON_QT_RESOURCE_FILENAME = 'resources_rc.py'
+IMAGES_DIRECTORY = 'images'
 
 class Skeleton(object):
     '''
@@ -63,6 +69,8 @@ print("Plugin '{{0}}' version {{1}} by {{2}} loaded".format(tail, __version__, _
 MAP Client Plugin Step
 \'\'\'
 
+from PySide import QtGui
+
 from mountpoints.workflowstep import WorkflowStepMountPoint
 
 class {step_object_name}Step(WorkflowStepMountPoint):
@@ -76,7 +84,6 @@ class {step_object_name}Step(WorkflowStepMountPoint):
         super({step_object_name}Step, self).__init__('{step_name}', location)
         self._configured = False # A step cannot be executed until it has been configured.
         # Add any other initialisation code here:
-        # Like ports:
 '''
 
         method_string = '''
@@ -128,9 +135,16 @@ class {step_object_name}Step(WorkflowStepMountPoint):
         object_name = self._options.getName().replace(' ', '')
         f.write(class_string.format(step_object_name=object_name, step_name=self._options.getName()))
         tmp_string = init_string.format(step_object_name=object_name, step_name=self._options.getName())
+        image_filename = self._options.getImageFile()
+        if image_filename:
+            (_, tail) = os.path.split(image_filename)
+            icon_string = '        self._icon =  QtGui.QImage(\':/{step_package_name}/' + IMAGES_DIRECTORY + '/{image_filename}\')\n'
+            tmp_string += icon_string.format(step_package_name=self._options.getPackageName(), image_filename=tail)
         port_index = 0
         uses = []
         provides = []
+        tmp_string += '''        # Ports:
+'''
         while port_index < self._options.portCount():
             current_port = self._options.getPort(port_index)
             tmp_string += '''        self.addPort(('http://physiomeproject.org/workflow/1.0/rdf-schema#port',
@@ -193,7 +207,47 @@ class {step_object_name}Step(WorkflowStepMountPoint):
     def _writeStepPackageInit(self, init_dir):
         init_file = os.path.join(init_dir, '__init__.py')
         f = open(init_file, 'w')
+        image_filename = self._options.getImageFile()
+        if image_filename:
+            (package, _) = os.path.splitext(PYTHON_QT_RESOURCE_FILENAME)
+            f.write('import ' + package)
         f.close()
+
+    def _createStepIcon(self, step_dir):
+        '''
+        The step icon requires the creation of directories, resources
+        and files if an image file has been specified.
+        
+        The image file in the options is assumed to exist.
+        '''
+        image_filename = self._options.getImageFile()
+        if image_filename:
+            # Create directories
+            qt_dir = os.path.join(step_dir, 'qt')
+            images_dir = os.path.join(qt_dir, IMAGES_DIRECTORY)
+            os.mkdir(qt_dir)
+            os.mkdir(images_dir)
+
+            (_, tail) = os.path.split(image_filename)
+            # Copy image file
+            copyfile(image_filename, os.path.join(images_dir, tail))
+
+            # Create resources file
+            resource_file_string = '''
+<RCC>
+  <qresource prefix="{step_package_name}">
+    <file>images/{image_filename}</file>
+  </qresource>
+</RCC>
+'''
+
+            resource_file = os.path.join(qt_dir, QT_RESOURCE_FILENAME)
+            f = open(resource_file, 'w')
+            f.write(resource_file_string.format(step_package_name=self._options.getPackageName(), image_filename=tail))
+            f.close()
+
+            # Generate resources file, I'm going to assume that I can find pyside-rcc
+            call(['pyside-rcc', '-o', os.path.join(step_dir, PYTHON_QT_RESOURCE_FILENAME), os.path.join(qt_dir, QT_RESOURCE_FILENAME)])
 
     def write(self):
         '''
@@ -216,6 +270,9 @@ class {step_object_name}Step(WorkflowStepMountPoint):
 
         # Write out the step file
         self._writeStep(step_package_dir)
+
+        # Prepare step icon
+        self._createStepIcon(step_package_dir)
 
 
 class SkeletonOptions(object):

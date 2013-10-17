@@ -26,10 +26,14 @@ from tools.pluginwizard.skeleton import SkeletonOptions, Skeleton
 if QtGui.qApp == None: QtGui.QApplication([])
 import widgets.resources_rc
 
-PLUGIN_WRITE_TO_DIRECTORY = '.'
-PLUGIN_PACKAGE_NAME = 'abcdstep'
-PLUGIN_NAME = 'Abcd'
-PLUGIN_IMAGE_FILE = ''
+import alltests
+
+test_path = os.path.join(os.path.dirname(alltests.__file__), 'test_resources', 'wizard_test')
+
+PLUGIN_WRITE_TO_DIRECTORY = test_path
+PLUGIN_PACKAGE_NAME = 'abcdalphastep'
+PLUGIN_NAME = 'Abcd Alpha'
+PLUGIN_IMAGE_FILE = os.path.join(test_path, 'logo.png')
 
 class WizardTestCase(unittest.TestCase):
 
@@ -54,16 +58,20 @@ class WizardTestCase(unittest.TestCase):
         pass
 
 
-    def testRunWizard(self):
-        dlg = wizarddialog.WizardDialog()
-        if dlg.exec_() == dlg.Accepted:
-            print('accepted')
+#     def testRunWizard(self):
+#         '''
+#         Visual test for wizard, uncomment to manually test.
+#         '''
+#         dlg = wizarddialog.WizardDialog()
+#         result = dlg.exec_()
+#         self.assertTrue(result == dlg.Accepted or result == dlg.Rejected)
 
     def testWizard(self):
         dlg = wizarddialog.WizardDialog()
 
         p1 = dlg.page(1)
         p1._ui.nameLineEdit.setText(PLUGIN_NAME)
+        p1._ui.iconLineEdit.setText(PLUGIN_IMAGE_FILE)
         p2 = dlg.page(2)
         p2._ui.portTableWidget.insertRow(0)
         p2._ui.portTableWidget.setItem(0, 0, QtGui.QTableWidgetItem('provides'))
@@ -106,13 +114,10 @@ class WizardTestCase(unittest.TestCase):
         file_contents = open(step_file).read()
         self.assertIn('octopus', file_contents)
 
+        resources_file = os.path.join(package_dir, PLUGIN_PACKAGE_NAME, 'resources_rc.py')
+        self.assertTrue(os.path.exists(resources_file))
 
         self._doCleanUp()  # Move this to the start of the test if you want to see the output
-
-
-
-#         dlg.exec_()
-
 
 
 if __name__ == "__main__":

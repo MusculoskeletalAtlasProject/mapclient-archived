@@ -110,8 +110,12 @@ class NameWizardPage(QtGui.QWizardPage):
         self._ui.setupUi(self)
 
         self._invalidPixmap = QtGui.QPixmap(':wizard/images/cross.png')
-        self._invalidLabel = QtGui.QLabel(self)
-        self._invalidLabel.setStyleSheet('border: none; padding: 0px;')
+        self._invalidNameLabel = QtGui.QLabel(self)
+        self._invalidNameLabel.setStyleSheet('border: none; padding: 0px;')
+        self._invalidPackageLabel = QtGui.QLabel(self)
+        self._invalidPackageLabel.setStyleSheet('border: none; padding: 0px;')
+        self._invalidIconLabel = QtGui.QLabel(self)
+        self._invalidIconLabel.setStyleSheet('border: none; padding: 0px;')
 
         self._updateImage()
 
@@ -157,20 +161,39 @@ class NameWizardPage(QtGui.QWizardPage):
             image = createDefaultImageIcon(self._ui.nameLineEdit.text())
             self._ui.iconPictureLabel.setPixmap(QtGui.QPixmap.fromImage(image).scaled(64, 64, aspectRatioMode=QtCore.Qt.KeepAspectRatio, transformMode=QtCore.Qt.FastTransformation))
 
+        self.completeChanged.emit()
+
     def resizeEvent(self, event):
         rect = self._ui.nameLineEdit.rect()
         pos = self._ui.nameLineEdit.pos()
-        self._invalidLabel.setPixmap(self._invalidPixmap.scaledToHeight(rect.height() / 2))
-        self._invalidLabel.move(pos.x() - rect.height() / 2, pos.y() - rect.height() / 4)
+        self._invalidNameLabel.setPixmap(self._invalidPixmap.scaledToHeight(rect.height() / 2))
+        self._invalidNameLabel.move(pos.x() - rect.height() / 2, pos.y() + rect.height() / 4)
+        self._invalidNameLabel.setFixedSize(self._invalidNameLabel.sizeHint())
+        rect = self._ui.packageNameLineEdit.rect()
+        pos = self._ui.packageNameLineEdit.pos()
+        self._invalidPackageLabel.setPixmap(self._invalidPixmap.scaledToHeight(rect.height() / 2))
+        self._invalidPackageLabel.move(pos.x() - rect.height() / 2, pos.y() + rect.height() / 4)
+        self._invalidPackageLabel.setFixedSize(self._invalidPackageLabel.sizeHint())
+        rect = self._ui.iconLineEdit.rect()
+        pos = self._ui.iconLineEdit.pos()
+        self._invalidIconLabel.setPixmap(self._invalidPixmap.scaledToHeight(rect.height() / 2))
+        self._invalidIconLabel.move(pos.x() - rect.height() / 2, pos.y() + rect.height() / 4)
+        self._invalidIconLabel.setFixedSize(self._invalidIconLabel.sizeHint())
 
     def isComplete(self):
-        status = False
+        name_status = False
         if len(self._ui.nameLineEdit.text()) > 0:
-            status = True
+            name_status = True
 
-        self._invalidLabel.setVisible(not status)
+        package_status = isValidPythonPackageName(self._ui.packageNameLineEdit.text())
 
-        return status
+        image_status = os.path.exists(self._ui.iconLineEdit.text()) if len(self._ui.iconLineEdit.text()) > 0 else True
+
+        self._invalidNameLabel.setVisible(not name_status)
+        self._invalidPackageLabel.setVisible(not package_status)
+        self._invalidIconLabel.setVisible(not image_status)
+
+        return name_status and package_status and image_status
 
 
 class PortsWizardPage(QtGui.QWizardPage):
@@ -240,8 +263,8 @@ class OutputWizardPage(QtGui.QWizardPage):
         self._ui.setupUi(self)
 
         self._invalidPixmap = QtGui.QPixmap(':wizard/images/cross.png')
-        self._invalidLabel = QtGui.QLabel(self)
-        self._invalidLabel.setStyleSheet('border: none; padding: 0px;')
+        self._invalidDirectoryLabel = QtGui.QLabel(self)
+        self._invalidDirectoryLabel.setStyleSheet('border: none; padding: 0px;')
 
         self.registerField(OUTPUT_DIRECTORY_FIELD, self._ui.directoryLineEdit)
 
@@ -259,8 +282,9 @@ class OutputWizardPage(QtGui.QWizardPage):
     def resizeEvent(self, event):
         rect = self._ui.directoryLineEdit.rect()
         pos = self._ui.directoryLineEdit.pos()
-        self._invalidLabel.setPixmap(self._invalidPixmap.scaledToHeight(rect.height() / 2))
-        self._invalidLabel.move(pos.x() - rect.height() / 2, pos.y() - rect.height() / 4)
+        self._invalidDirectoryLabel.setPixmap(self._invalidPixmap.scaledToHeight(rect.height() / 2))
+        self._invalidDirectoryLabel.move(pos.x() - rect.height() / 2, pos.y() + rect.height() / 4)
+        self._invalidDirectoryLabel.setFixedSize(self._invalidDirectoryLabel.sizeHint())
 
     def isComplete(self):
         status = False
@@ -268,7 +292,10 @@ class OutputWizardPage(QtGui.QWizardPage):
         if os.path.isdir(directory) and os.access(directory, os.W_OK | os.X_OK):
             status = True
 
-        self._invalidLabel.setVisible(not status)
+        self._invalidDirectoryLabel.setVisible(not status)
 
         return status
+
+def isValidPythonPackageName(name):
+    return True
 
