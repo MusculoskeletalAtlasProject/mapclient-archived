@@ -86,6 +86,7 @@ class MainWindow(QtGui.QMainWindow):
         self._ui.action_Quit.triggered.connect(self.quitApplication)
         self._ui.action_About.triggered.connect(self.about)
         self._ui.actionPluginManager.triggered.connect(self.pluginManager)
+        self._ui.actionPluginWizard.triggered.connect(self.pluginWizard)
         self._ui.actionPMR.triggered.connect(self.pmr)
         self._ui.actionAnnotation.triggered.connect(self.annotationTool)
 
@@ -154,6 +155,16 @@ class MainWindow(QtGui.QMainWindow):
             if self._model.pluginManager().pluginsModified():
                 self._model.pluginManager().load()
                 self._workflowWidget.updateStepTree()
+
+    def pluginWizard(self):
+        from tools.pluginwizard.wizarddialog import WizardDialog
+        from tools.pluginwizard.skeleton import Skeleton
+        dlg = WizardDialog(self)
+
+        dlg.setModal(True)
+        if dlg.exec_() == dlg.Accepted:
+            s = Skeleton(dlg.getOptions())
+            s.write()
 
     def pmr(self):
         from tools.pmr.pmrsearchdialog import PMRSearchDialog

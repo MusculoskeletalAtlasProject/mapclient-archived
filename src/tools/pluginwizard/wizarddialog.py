@@ -28,6 +28,8 @@ from tools.pluginwizard.skeleton import SkeletonOptions
 from tools.pluginwizard.ui_output import Ui_Output
 from tools.pluginwizard.ui_name import Ui_Name
 from tools.pluginwizard.ui_ports import Ui_Ports
+from tools.pluginwizard.ui_config import Ui_Config
+from tools.pluginwizard.ui_misc import Ui_Misc
 
 # Registered field names:
 OUTPUT_DIRECTORY_FIELD = 'output_directory'
@@ -35,7 +37,9 @@ NAME_FIELD = 'name'
 IMAGE_FILE_FIELD = 'image_file'
 PACKAGE_NAME_FIELD = 'package_name'
 PORTS_FIELD = 'ports_table'
-
+IDENTIFIER_CHECKBOX = 'identifier_checkbox'
+CATEGORY_FIELD = 'category'
+AUTHOR_NAME_FIELD = 'author_name'
 # Style sheets
 REQUIRED_STYLE_SHEET = 'background-color: rgba(239, 16, 16, 20%)'
 DEFAULT_STYLE_SHEET = ''
@@ -46,11 +50,14 @@ class WizardDialog(QtGui.QWizard):
     def __init__(self, parent=None):
         super(WizardDialog, self).__init__(parent)
         self.setWindowTitle('Workflow Step Wizard')
+        self.setFixedSize(675, 550)
 
         # set pages
         self.addPage(createIntroPage())
         self.addPage(NameWizardPage())
         self.addPage(PortsWizardPage())
+        self.addPage(ConfigWizardPage())
+        self.addPage(MiscWizardPage())
         self.addPage(OutputWizardPage())
 
         # set images banner, logo, watermark and background
@@ -68,17 +75,31 @@ class WizardDialog(QtGui.QWizard):
         self._options.setImageFile(self.field(IMAGE_FILE_FIELD))
         self._options.setName(self.field(NAME_FIELD))
         self._options.setPackageName(self.field(PACKAGE_NAME_FIELD))
+
         # Registered field failed to return table, may need to set up
         # default property for this to work.  Currently using workaround
         # by directly getting desired widget
         ports_table = self.page(2)._ui.portTableWidget
         row_index = 0
         while row_index < ports_table.rowCount():
-            self._options.addPort(ports_table.item(row_index, 0).text(), ports_table.item(row_index, 1).text())
+            self._options.addPort('http://physiomeproject.org/workflow/1.0/rdf-schema#' + ports_table.cellWidget(row_index, 0).currentText(),
+                                   ports_table.item(row_index, 1).text())
             row_index += 1
 
+        if self.page(3)._ui.identifierCheckBox.isChecked():
+            self._options.addConfig('identifier', '')
+
+        configs_table = self.page(3)._ui.configTableWidget
+        row_index = 0
+        while row_index < configs_table.rowCount():
+            self._options.addConfig(configs_table.item(row_index, 0).text(),
+                                    configs_table.item(row_index, 1).text())
+            row_index += 1
+
+        self._options.setCategory(self.field(CATEGORY_FIELD))
+        self._options.setAuthorName(self.field(AUTHOR_NAME_FIELD))
+
         super(WizardDialog, self).accept()
-#         QtGui.QDialog.accept()
 
 
 def createIntroPage():
@@ -229,8 +250,6 @@ class PortsWizardPage(QtGui.QWizardPage):
         self._ui.removeButton.clicked.connect(self._removePort)
         self._ui.portTableWidget.itemSelectionChanged.connect(self._updateUi)
 
-
-
     def _addPort(self):
 
         def createPortTypeComboBox():
@@ -250,6 +269,65 @@ class PortsWizardPage(QtGui.QWizardPage):
         for row in reversed_rows:
             self._ui.portTableWidget.removeRow(row.row())
 
+class ConfigWizardPage(QtGui.QWizardPage):
+
+    def __init__(self, parent=None):
+        super(ConfigWizardPage, self).__init__(parent)
+
+        self.setTitle('Configure Workflow Step')
+        self.setSubTitle('Setup the configuration for the workflow step.')
+
+        self._ui = Ui_Config()
+        self._ui.setupUi(self)
+
+        self._ui.identifierCheckBox.setChecked(True)
+
+        horizontal_header = self._ui.configTableWidget.horizontalHeader()
+        horizontal_header.setStretchLastSection(True)
+#         self._addConfigurationRow()
+#         self._ui.configTableWidget.setItem(0, 0, QtGui.QTableWidgetItem('Identifier'))
+#         self._ui.configTableWidget.setItem(0, 1, QtGui.QTableWidgetItem(''))
+
+        self._updateUi()
+        self._makeConnections()
+
+    def _defineFields(self):
+        self.registerField(IDENTIFIER_CHECKBOX, self._ui.identifierCheckBox)
+
+    def _makeConnections(self):
+        self._ui.addButton.clicked.connect(self._addConfigurationRow)
+        self._ui.removeButton.clicked.connect(self._removeConfigurationRow)
+        self._ui.configTableWidget.itemSelectionChanged.connect(self._updateUi)
+
+    def _updateUi(self):
+        have_selected_rows = len(self._ui.configTableWidget.selectedIndexes()) > 0
+        self._ui.removeButton.setEnabled(have_selected_rows)
+
+    def _addConfigurationRow(self):
+        next_row = self._ui.configTableWidget.rowCount()
+        self._ui.configTableWidget.insertRow(next_row)
+
+    def _removeConfigurationRow(self):
+        indexes = self._ui.configTableWidget.selectedIndexes()
+        reversed_rows = indexes[::2]
+        reversed_rows.reverse()
+        for row in reversed_rows:
+            self._ui.configTableWidget.removeRow(row.row())
+
+
+class MiscWizardPage(QtGui.QWizardPage):
+
+    def __init__(self, parent=None):
+        super(MiscWizardPage, self).__init__(parent)
+
+        self.setTitle('Miscellaneous Options')
+        self.setSubTitle('Specify miscellaneous options for the plugin.')
+
+        self._ui = Ui_Misc()
+        self._ui.setupUi(self)
+
+        self.registerField(AUTHOR_NAME_FIELD, self._ui.authorNameLineEdit)
+        self.registerField(CATEGORY_FIELD, self._ui.categoryLineEdit)
 
 class OutputWizardPage(QtGui.QWizardPage):
 

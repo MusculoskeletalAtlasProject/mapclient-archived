@@ -81,6 +81,7 @@ class WorkflowGraphicsScene(QtGui.QGraphicsScene):
                 workflowitem._step.registerConfiguredObserver(self.stepConfigured)
                 workflowitem._step.registerDoneExecution(self.doneExecution)
                 workflowitem._step.registerOnExecuteEntry(self.setCurrentWidget, self.setWidgetUndoRedoStack)
+                workflowitem._step.registerIdentifierOccursCount(self.identifierOccursCount)
                 # Put the node into the scene straight away so that the items scene will
                 # be valid when we set the position.
                 QtGui.QGraphicsScene.addItem(self, node)
@@ -169,4 +170,8 @@ class WorkflowGraphicsScene(QtGui.QGraphicsScene):
 
     def doneExecution(self):
         self.parent().executeWorkflow()
+
+    def identifierOccursCount(self, identifier):
+        return self.parent().identifierOccursCount(identifier)
+
 

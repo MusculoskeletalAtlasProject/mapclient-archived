@@ -90,21 +90,22 @@ A step has a number of pre-defined attributes with default values, they are:
 
  * self._name = name
  * self._location = location
+ * self._category = 'General'
  * self._ports = []
  * self._icon = None
  * self._configured = False
 
-The '_name' and '_location' attributes are passed in to the '__init__' method of the mount point.  By default a step has no ports and at least one port must be defined before it can be used in a workflow.  If the '_icon' attribute is not defined then a default icon is supplied.  The '_configured' property is set to False initially as most steps will not be configured in their initial state.
+The '_name' and '_location' attributes are passed in to the '__init__' method of the mount point.  The '_category' attribute can be used to group steps in the step box.  By default a step has no ports and at least one port must be defined before it can be used in a workflow.  If the '_icon' attribute is not defined then a default icon is supplied.  The '_configured' property is set to False initially as most steps will not be configured in their initial state.
 
 Pre-defined Step Methods
 ------------------------
 
 A step has a number of pre-defined methods, they are:
 
- * execute(self, dataIn)
-     A method that gets called when execution passes to this step with the ports input data passed through 'dataIn'. 
+ * execute(self, dataIn1, dataIn2, ..., dataInN)
+     A method that gets called when execution passes to this step with the ports input data passed through 'dataIn' parameters. 
  * portOutput(self)
-     A method that returns the object that is defined by a port of the step. 
+     A method that returns the object that is defined by a port of the step, it either returns an object or a list of objects depending on the number of ports defined. 
  * configure(self)
      A method called by the framework to inform the step that it needs to follow it's configuration procedure. 
  * isConfigured(self)
@@ -112,12 +113,11 @@ A step has a number of pre-defined methods, they are:
      need to be overridden.
  * _configuredObserver
      A method to call to let the framework know that the step configuration has finished.
+ * _identifierOccursCount
+     A method to call to determine the number of identifiers with the given value.  This method can be used to decide whether the current identifier is unique across the workflow.
  * addPort
      Adds a port to the step, the port is defined using an RDF triple.  See the
      Ports section for more information.
- * canConnect(self, other)
-     A method to determine if a port on this step can be connected to a port on the other step.  In most cases this method will not 
-     need to be overridden.
  * getName(self)
      Returns the '_name' attribute if it is set otherwise returns the class name.  In most cases this method will not 
      need to be overridden.
@@ -135,6 +135,8 @@ A step has a number of pre-defined methods, they are:
      A method used by the framework to set a callable to set up the step for execution.  This method should not be overwritten.
  * registerConfiguredObserver(self, observer)
      A method used by the framework to set a callable for notifying when the step has been configured.  This method should not be overwritten.
+ * registerIdentifierOccursCount
+     A method used by the framework to set a callable for determining the number of times the given identifier occurs in the current workflow.  This method should not be overwritten.
 
 Ports
 =====

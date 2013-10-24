@@ -37,7 +37,12 @@ The introduction page contains a short welcome message and a paragraph on the Pl
 Identification Page
 ===================
 
-The identification page sets the name for the Workflow step, the Python package name and optionally the step icon.  The Workflow step name can be set in the text box (1).  As a recommendation Workflow step names should be defined in camel case.  The Workflow step name is visible in the Step box when active in the application so a descriptive name will aide users.  Examples of step names are: 'Image Source', 'Point Cloud Serializer' and 'Segmentation'.  The wizard will derive the package name from the step name automatically, it will also make changes so that the package name conforms to the PEP8 guidelines for Python.  The wizard will also append the text 'step' to the package name.  However if the default name is unsatisfactory the package name can be edited directly (2) and given an alternative name.  The matching package names for the examples given above would be: 'imagesourcestep', 'pointcloudserializerstep' and 'segementationstep'.  An icon may also be specified using the icon text box (3), the file may also be chosen from the file system using the file chooser button (4).  When an icon is specified it will be copied into the created skeleton step and be made available as a qt resource.
+The identification page sets the name for the Workflow step, the Python package name and optionally the step icon.  The Workflow step name can be set in the text box (1).  As a recommendation Workflow step names should be defined in camel case as this name will be given to a class, spaces between words are acceptable however.  The Workflow step name is visible in the Step box when active in the application so a descriptive name will aide users.  The 'cross' icon (6) indicates that the entry for the step name is not valid.  When a valid step name has been entered in the text box the 'cross' icon will be removed.  Examples of valid step names are: 'Image Source', 'Point Cloud Serializer' and 'Segmentation'.
+
+
+The package name for the step will be automatically derived from the step name and set into the package name text box (2).  The wizard will make changes so that the package name conforms to the PEP8 guidelines for Python.  The wizard will also append the text 'step' to the package name.  However if the default name is unsatisfactory the package name can be edited directly and given an alternative name.  The matching package names for the examples given above would be: 'imagesourcestep', 'pointcloudserializerstep' and 'segementationstep'.
+
+An icon may be specified using the icon text box (3), the icon file may be chosen from the file system using the file chooser button (4).  When an icon is specified it will be copied into the created skeleton step and be made available as a Qt resource.  The suggested size of the icon is that it should be around 128px by 128px.
 
 .. figure:: resources/images/plugin_wizard_identify_1.png
    :align: center
@@ -46,6 +51,14 @@ The identification page sets the name for the Workflow step, the Python package 
    **Figure:** The identification page.
 
 The step icon is an important part of the Workflow step as it is used to identify it graphically on the Workflow canvas.  The default icon displays the step name across the icon to help differentiate it from other steps with no icon specified.  A preview of the step icon (5) is shown so that you can see how it will look in the application.
+
+.. note::
+
+  The PySide resource compiler application 'pyside-rcc' is required when choosing an icon image from the file system 
+  
+.. note::
+
+  When a 'cross' icon appears on any page of the wizard it is used to indicate that the current field is not valid.  When a field on a page is not valid the wizard cannot be progressed or finished.  Therefore the 'cross' icon also indicates which fields require modification before the wizard can be continued.
 
 Ports Page
 ==========
@@ -87,18 +100,42 @@ Because my images class is of my own design I give it a unique name by prefixing
    
    **Figure:** An example port definition for using a users proprietary images object.
 
+Configuration Page
+==================
+
+The configuration page can help setup the configuration dialog for the step.  The 'Identifier' check box (1) will add standard code to the step to set up the getIdentifier/setIdentifier methods in  the step, it will also add an entry to the 'ConfigurationDialog' and validate the identifier.  It is highly recommended that the 'Identifier' check box is checked.  Use the 'Add' button (2) to add a configuration parameter to the configuration list (3).  The configuration list has a 'Label' column (4), the value entered here will become a label on the configuration dialog.  The 'Default Value' column (5) will be used to set the default value for the corresponding label.  Edit the values in this list as appropriate.  The 'Remove' button (6) can be used to delete the selected rows.  The configuration parameters entered will be used in generating a configuration dialog. 
+
+.. figure:: resources/images/plugin_wizard_configuration_1.png
+   :align: center
+   :width: 75%
+   
+   **Figure:** The configuration page.
+
+.. note::
+
+  The PySide ui compiler application 'pyside-uic' is required when using the wizard to generate a step which has at least one configuration parameter.
+
+Miscellaneous Page
+==================
+
+The miscellaneous page sets a number of properties that are not important to the function of the step.  The author name(s) for the step can be set in the text box (1).  The author's name appears when the step plugin is loaded and is not seen or used anywhere else.  The category for the step can be set in the text box (2).  The category determines the group that the step appears in in the Step Box of the application.
+
+.. figure:: resources/images/plugin_wizard_misc_1.png
+   :align: center
+   :width: 75%
+   
+   **Figure:** The miscellaneous page.
+
 Output Page
 ===========
 
-The output page sets the directory where the skeleton step will be generated.  The output directory can be set in the text box (1), or selected from the file system using the directory chooser button (2).
+The output page sets the directory where the skeleton step will be generated.  The output directory can be set in the text box (1), or selected from the file system using the directory chooser button (2).  The 'cross' icon (3) indicates that the current directory entry is not a directory that can be written into.  The output directory specified in (1) must be an existing directory that you have the ability/permission to write to before the wizard can be successfully finished.
 
 .. figure:: resources/images/plugin_wizard_output_1.png
    :align: center
    :width: 75%
    
    **Figure:** The output page.
-
-The output directory chosen must be a directory that you have permission to write to before the wizard can be successfully finished.
 
 Generation
 ==========
