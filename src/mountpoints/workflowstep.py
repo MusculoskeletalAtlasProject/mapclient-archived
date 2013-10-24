@@ -95,11 +95,6 @@ A plugin that registers this mount point could have:
   - An attribute _category that is a string representation of the step's category
   
 '''
-# class WorkflowStep(WorkflowStepMountPoint):
-#    '''
-#    A step that acts like the step plugin duck
-#    '''
-#
 
 def _workflow_step_init(self, name, location):
     '''
@@ -107,12 +102,14 @@ def _workflow_step_init(self, name, location):
     '''
     self._name = name
     self._location = location
+    self._category = 'General'
     self._ports = []
     self._icon = None
     self._configured = False
     self._configuredObserver = None
     self._doneExecution = None
     self._setCurrentWidget = None
+    self._identifierOccursCount = None
 
 def _workflow_step_execute(self, dataIn=None):
     print('executing: ' + self.getName())
@@ -130,6 +127,9 @@ def _workflow_step_registerOnExecuteEntry(self, observer, setCurrentUndoRedoStac
 
 def _workflow_step_registerConfiguredObserver(self, observer):
     self._configuredObserver = observer
+
+def _workflow_step_registerIdentifierOccursCount(self, observer):
+    self._identifierOccursCount = observer
 
 def _workflow_step_configure(self, location):
     raise NotImplementedError
@@ -154,22 +154,13 @@ def _workflow_step_addPort(self, triple):
     port.addProperty(triple)
     self._ports.append(port)
 
-def _workflow_step_canConnect(self, other):
-    # Try to find compatible ports
-    for port in self._ports:
-        for otherPort in other._ports:
-            if port.canConnect(otherPort):
-                return True
-
-    return False
-
 def _workflow_step_getName(self):
     if hasattr(self, '_name'):
         return self._name
 
     return self.__class__.__name__
 
-attr_dict = {'_category': 'General'}
+attr_dict = {}
 attr_dict['__init__'] = _workflow_step_init
 attr_dict['execute'] = _workflow_step_execute
 attr_dict['portOutput'] = _workflow_step_portOutput
@@ -177,9 +168,9 @@ attr_dict['registerDoneExecution'] = _workflow_step_registerDoneExecution
 attr_dict['registerOnExecuteEntry'] = _workflow_step_registerOnExecuteEntry
 attr_dict['configure'] = _workflow_step_configure
 attr_dict['isConfigured'] = _workflow_step_isConfigured
+attr_dict['registerIdentifierOccursCount'] = _workflow_step_registerIdentifierOccursCount
 attr_dict['registerConfiguredObserver'] = _workflow_step_registerConfiguredObserver
 attr_dict['addPort'] = _workflow_step_addPort
-attr_dict['canConnect'] = _workflow_step_canConnect
 attr_dict['getName'] = _workflow_step_getName
 attr_dict['deserialize'] = _workflow_step_deserialize
 attr_dict['serialize'] = _workflow_step_serialize

@@ -45,6 +45,9 @@ class MetaStep(Item):
     def pos(self):
         return self._pos
 
+    def getIdentifier(self):
+        return self._step.getIdentifier()
+
 class Connection(Item):
 
 
@@ -240,13 +243,16 @@ class WorkflowScene(object):
             selected = ws.value('selected', 'false') == 'true'
             identifier = ws.value('identifier')
             step = workflowStepFactory(name, location)
+            step.registerIdentifierOccursCount(self.identifierOccursCount)
             step.setIdentifier(identifier)
-            step.deserialize(location)
             metastep = MetaStep(step)
             metastep._pos = position
             metastep._selected = selected
             metaStepList.append(metastep)
             self.addItem(metastep)
+            # Deserialize after adding the step to the scene, this is so
+            # we can validate the step identifier
+            step.deserialize(location)
             arcCount = ws.beginReadArray('connections')
             for j in range(arcCount):
                 ws.setArrayIndex(j)
@@ -293,4 +299,24 @@ class WorkflowScene(object):
         if item in self._items:
             self._items[item]._selected = selected
 
+    def identifierOccursCount(self, identifier):
+        '''
+        Return the number of times the given identifier occurs in
+        all the steps present in the workflow.  The count stops at two
+        and returns indicating an excess number of the given identifier.
+        An empty identifier will return the value 2 also, this is used
+        to signify that the identifier is invalid.
+        '''
+        if len(identifier) == 0:
+            return 2
+
+        identifier_occurrence_count = 0
+        for key in self._items:
+            item = self._items[key]
+            if item.Type == MetaStep.Type and identifier == item.getIdentifier():
+                identifier_occurrence_count += 1
+                if identifier_occurrence_count > 1:
+                    return identifier_occurrence_count
+
+        return identifier_occurrence_count
 
