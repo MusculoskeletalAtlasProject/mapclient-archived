@@ -59,6 +59,7 @@ class WorkflowManager():
 
     def title(self):
         self._title = info.APPLICATION_NAME
+        print(self._saveStateIndex, self._currentStateIndex)
         if self._location:
             self._title = self._title + ' - ' + self._location
         if self._saveStateIndex != self._currentStateIndex:

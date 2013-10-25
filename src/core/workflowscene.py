@@ -53,16 +53,24 @@ class Connection(Item):
 
     Type = 'Connection'
 
-    def __init__(self, source, destination):
+    def __init__(self, source, sourceIndex, destination, destinationIndex):
         Item.__init__(self)
         self._source = source
+        self._sourceIndex = sourceIndex
         self._destination = destination
+        self._destinationIndex = destinationIndex
 
     def source(self):
         return self._source
 
+    def sourceIndex(self):
+        return self._sourceIndex
+
     def destination(self):
         return self._destination
+
+    def destinationIndex(self):
+        return self._destinationIndex
 
 
 def _findPath(graph, start, end, path=[]):
@@ -188,17 +196,15 @@ class WorkflowScene(object):
 
     def saveState(self, ws):
         connectionMap = {}
-        connectionSelectionMap = {}
         stepList = []
         for item in self._items:
             if item.Type == MetaStep.Type:
                 stepList.append(item)
             elif item.Type == Connection.Type:
-                connectionSelectionMap[item.source()] = item.selected()
                 if item.source() in connectionMap:
-                    connectionMap[item.source()].append(item.destination())
+                    connectionMap[item.source()].append(item)
                 else:
-                    connectionMap[item.source()] = [item.destination()]
+                    connectionMap[item.source()] = [item]
 
         location = self._manager.location()
         ws.remove('nodes')
@@ -219,10 +225,12 @@ class WorkflowScene(object):
             ws.beginWriteArray('connections')
             connectionIndex = 0
             if metastep in connectionMap:
-                for destination in connectionMap[metastep]:
+                for connectionItem in connectionMap[metastep]:
                     ws.setArrayIndex(connectionIndex)
-                    ws.setValue('connectedTo', stepList.index(destination))
-                    ws.setValue('selected', connectionSelectionMap[metastep])
+                    ws.setValue('connectedFromIndex', connectionItem.sourceIndex())
+                    ws.setValue('connectedTo', stepList.index(connectionItem.destination()))
+                    ws.setValue('connectedToIndex', connectionItem.destinationIndex())
+                    ws.setValue('selected', connectionItem.selected())
                     connectionIndex += 1
             ws.endArray()
             nodeIndex += 1
@@ -257,16 +265,18 @@ class WorkflowScene(object):
             for j in range(arcCount):
                 ws.setArrayIndex(j)
                 connectedTo = int(ws.value('connectedTo'))
+                connectedToIndex = int(ws.value('connectedToIndex'))
+                connectedFromIndex = int(ws.value('connectedFromIndex'))
                 selected = ws.value('selected', 'false') == 'true'
-                connections.append((i, connectedTo, selected))
+                connections.append((i, connectedFromIndex, connectedTo, connectedToIndex, selected))
             ws.endArray()
         ws.endArray()
         ws.endGroup()
         for arc in connections:
             node1 = metaStepList[arc[0]]
-            node2 = metaStepList[arc[1]]
-            c = Connection(node1, node2)
-            c._selected = arc[2]
+            node2 = metaStepList[arc[2]]
+            c = Connection(node1, arc[1], node2, arc[3])
+            c._selected = arc[4]
             self.addItem(c)
 
     def manager(self):

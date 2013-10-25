@@ -65,6 +65,14 @@ class WorkflowStepPort(object):
         return []
 #        return [triple for triple in self.pred[pred]]
 
+    def index(self):
+        index = -1
+        if 'http://physiomeproject.org/workflow/1.0/rdf-schema#index' in self.pred:
+            indexList = self.pred['http://physiomeproject.org/workflow/1.0/rdf-schema#index']
+            index = indexList[0][2]
+
+        return index
+
     def canConnect(self, other):
         if 'http://physiomeproject.org/workflow/1.0/rdf-schema#port' in self.subj and 'http://physiomeproject.org/workflow/1.0/rdf-schema#port' in other.subj:
             myPorts = self.subj['http://physiomeproject.org/workflow/1.0/rdf-schema#port']
@@ -152,6 +160,7 @@ def _workflow_step_isConfigured(self):
 def _workflow_step_addPort(self, triple):
     port = WorkflowStepPort()
     port.addProperty(triple)
+    port.addProperty(('http://physiomeproject.org/workflow/1.0/rdf-schema#port', 'http://physiomeproject.org/workflow/1.0/rdf-schema#index', len(self._ports)))
     self._ports.append(port)
 
 def _workflow_step_getName(self):

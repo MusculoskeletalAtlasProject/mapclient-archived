@@ -3,32 +3,50 @@ Created on Mar 14, 2013
 
 @author: hsorby
 '''
-import unittest
+import os, unittest
 
 from PySide import QtCore
 
 from core.workflowscene import WorkflowScene, WorkflowDependencyGraph, MetaStep, Connection, _findAllPaths, _findPath, _findHead, _findTail
 
+import alltests
+
+test_path = os.path.join(os.path.dirname(alltests.__file__), 'test_resources', 'core_test')
+
 class DumbManager(object):
-    pass
+
+    def location(self):
+        return self._location
 
 
 class DumbStep(object):
-    
+
     def isConfigured(self):
         return True
+
+    def getName(self):
+        return self._name
+
+    def getIdentifier(self):
+        return self._identifier
+
+    def serialize(self, location):
+        pass
+
+    def deserialize(self, location):
+        pass
 
 
 class WorkflowSceneTestCase(unittest.TestCase):
 
 
     def testCreate(self):
-        
+
         s = WorkflowScene(DumbManager())
         self.assertTrue(s != None)
 
     def testItemAPI(self):
-        
+
         item = MetaStep(DumbStep())
         s = WorkflowScene(DumbManager())
         s.addItem(item)
@@ -40,34 +58,59 @@ class WorkflowSceneTestCase(unittest.TestCase):
         self.assertFalse(s._items[item]._selected)
         s.removeItem(item)
         self.assertEqual(len(s._items), 0)
-       
+
+    def testSaveLoad(self):
+        test_conf = os.path.join(test_path, 'test.conf')
+        dm = DumbManager()
+        dm._location = test_conf
+
+        s = WorkflowScene(dm)
+        ws = QtCore.QSettings(test_conf, QtCore.QSettings.IniFormat)
+        ds1 = DumbStep()
+        ds1._identifier = '1'
+        ds1._name = 'a'
+        ds2 = DumbStep()
+        ds2._identifier = '2'
+        ds2._name = 'b'
+        item1 = MetaStep(ds1)
+        item2 = MetaStep(ds2)
+        s.addItem(item1)
+        s.addItem(item2)
+        s.saveState(ws)
+        del ws
+
+        file_content = open(test_conf).read()
+        self.assertIn('Point(0 0)', file_content)
+        self.assertIn('name=a', file_content)
+        self.assertIn('name=b', file_content)
+
 
 class WorkflowDependencyGraphTestCase(unittest.TestCase):
-    
+
 
     def setUp(self):
-        self._s =  WorkflowScene(DumbManager())
+        self._s = WorkflowScene(DumbManager())
         self._nodes = []
         self._nodes.append(MetaStep(DumbStep()))
         self._nodes.append(MetaStep(DumbStep()))
         self._nodes.append(MetaStep(DumbStep()))
         self._nodes.append(MetaStep(DumbStep()))
-        
+
     def tearDown(self):
         self._s.clear()
         self._nodes = []
-           
+
     def testCreate(self):
         g = WorkflowDependencyGraph(self._s)
         self.assertTrue(g != None)
-        
+
     def testGraph1(self):
         g = WorkflowDependencyGraph(self._s)
-        c1 = Connection(self._nodes[0], self._nodes[1])
+        c1 = Connection(self._nodes[0], 0, self._nodes[1], 0)
         self._s.addItem(self._nodes[0])
         self._s.addItem(self._nodes[1])
         self._s.addItem(c1)
-        
+
         self.assertTrue(g.canExecute())
         g._calculateGraph()
         self.assertEqual(len(g._graph), 2)
@@ -76,14 +119,14 @@ class WorkflowDependencyGraphTestCase(unittest.TestCase):
 
     def testGraph2(self):
         g = WorkflowDependencyGraph(self._s)
-        c1 = Connection(self._nodes[0], self._nodes[1])
-        c2 = Connection(self._nodes[1], self._nodes[2])
+        c1 = Connection(self._nodes[0], 0, self._nodes[1], 0)
+        c2 = Connection(self._nodes[1], 0, self._nodes[2], 0)
         self._s.addItem(self._nodes[0])
         self._s.addItem(self._nodes[1])
         self._s.addItem(self._nodes[2])
         self._s.addItem(c1)
         self._s.addItem(c2)
-        
+
         self.assertTrue(g.canExecute())
         g._calculateGraph()
         self.assertEqual(len(g._graph), 3)
@@ -93,9 +136,9 @@ class WorkflowDependencyGraphTestCase(unittest.TestCase):
 
     def testGraph3(self):
         g = WorkflowDependencyGraph(self._s)
-        c1 = Connection(self._nodes[0], self._nodes[1])
-        c2 = Connection(self._nodes[1], self._nodes[2])
-        c3 = Connection(self._nodes[2], self._nodes[3])
+        c1 = Connection(self._nodes[0], 0, self._nodes[1], 0)
+        c2 = Connection(self._nodes[1], 0, self._nodes[2], 0)
+        c3 = Connection(self._nodes[2], 0, self._nodes[3], 0)
         self._s.addItem(self._nodes[0])
         self._s.addItem(self._nodes[1])
         self._s.addItem(self._nodes[2])
@@ -103,7 +146,7 @@ class WorkflowDependencyGraphTestCase(unittest.TestCase):
         self._s.addItem(c3)
         self._s.addItem(c1)
         self._s.addItem(c2)
-        
+
         self.assertTrue(g.canExecute())
         g._calculateGraph()
         self.assertEqual(len(g._graph), 4)
@@ -111,10 +154,10 @@ class WorkflowDependencyGraphTestCase(unittest.TestCase):
         self.assertEqual(g._graph[1], self._nodes[1])
         self.assertEqual(g._graph[2], self._nodes[2])
         self.assertEqual(g._graph[3], self._nodes[3])
-        
+
 class GraphUtilitiesTestCase(unittest.TestCase):
-    
-    
+
+
     _graph = {'A': ['B', 'C'],
              'B': ['C', 'D'],
              'C': ['D'],
@@ -125,24 +168,24 @@ class GraphUtilitiesTestCase(unittest.TestCase):
     def testFindPath(self):
         path = _findPath(self._graph, 'A', 'D')
         self.assertEqual(path, ['A', 'B', 'C', 'D'])
-        
+
     def testFindPath1(self):
         path = _findPath(self._graph, 'A', 'G')
         self.assertEqual(path, [])
-        
+
     def testFindAllPath(self):
         path = _findAllPaths(self._graph, 'A', 'D')
         self.assertEqual(path, [['A', 'B', 'C', 'D'], ['A', 'B', 'D'], ['A', 'C', 'D']])
-        
+
     def testFindHead1(self):
         head = _findHead(self._graph, 'C')
         self.assertTrue(head in ['A', 'E'])
-        
+
     def testFindTail1(self):
         tail = _findTail(self._graph, 'C')
         self.assertEqual(tail, 'D')
-        
+
 
 if __name__ == "__main__":
-    #import sys;sys.argv = ['', 'Test.testCreate']
+    # import sys;sys.argv = ['', 'Test.testCreate']
     unittest.main()

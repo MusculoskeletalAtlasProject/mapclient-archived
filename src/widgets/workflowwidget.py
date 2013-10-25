@@ -190,10 +190,11 @@ class WorkflowWidget(QtGui.QWidget):
 
 
     def close(self):
+        self._mainWindow.confirmClose()
         m = self._mainWindow.model().workflowManager()
         self._undoStack.clear()
-        m.close()
         self._graphicsScene.clear()
+        m.close()
         self._updateUi()
 
     def save(self):

@@ -122,13 +122,16 @@ class MainWindow(QtGui.QMainWindow):
     def closeEvent(self, event):
         self.quitApplication()
 
-    def quitApplication(self):
+    def confirmClose(self):
         # Check to see if the Workflow is in a saved state.
         if self._model.workflowManager().isModified():
             ret = QtGui.QMessageBox.warning(self, 'Unsaved Changes', 'You have unsaved changes, would you like to save these changes now?',
                                       QtGui.QMessageBox.Yes | QtGui.QMessageBox.No)
             if ret == QtGui.QMessageBox.Yes:
                 self._model.workflowManager().save()
+
+    def quitApplication(self):
+        self.confirmClose()
 
         self._model.setSize(self.size())
         self._model.setPos(self.pos())

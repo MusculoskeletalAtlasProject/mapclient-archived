@@ -94,17 +94,9 @@ class WorkflowGraphicsScene(QtGui.QGraphicsScene):
                 connections.append(workflowitem)
 
         for connection in connections:
-            # Have to figure which port item of the source is connected to which
-            # port item of the destination.  There should be exactly one such connection
-            src_port_item = None
-            dest_port_item = None
-            for source_port_item in meta_steps[connection.source()]._step_port_items:
-                for destination_port_item in meta_steps[connection.destination()]._step_port_items:
-                    if source_port_item.canConnect(destination_port_item):
-                        src_port_item = source_port_item
-                        dest_port_item = destination_port_item
-                        break
-            arc = Arc(src_port_item, dest_port_item)
+            src_port_item = meta_steps[connection.source()]._step_port_items[connection.sourceIndex()]
+            destination_port_item = meta_steps[connection.destination()]._step_port_items[connection.destinationIndex()]
+            arc = Arc(src_port_item, destination_port_item)
             # Overwrite the connection created in the Arc with the original one that is in the
             # WorkflowScene
             arc._connection = connection
