@@ -7,7 +7,7 @@ import os, unittest
 
 from PySide import QtCore
 
-from core.workflowscene import WorkflowScene, WorkflowDependencyGraph, MetaStep, Connection, _findAllPaths, _findPath, _findHead, _findTail
+from core.workflowscene import WorkflowScene, WorkflowDependencyGraph, MetaStep, Connection
 
 import alltests
 
@@ -324,36 +324,6 @@ class WorkflowDependencyGraphTestCase(unittest.TestCase):
 
         for _ in range(len(g._topologicalOrder)):
             g.execute()
-
-class GraphUtilitiesTestCase(unittest.TestCase):
-
-
-    _graph = {'A': ['B', 'C'],
-             'B': ['C', 'D'],
-             'C': ['D'],
-             'D': ['C'],
-             'E': ['F'],
-             'F': ['C']}
-
-    def testFindPath(self):
-        path = _findPath(self._graph, 'A', 'D')
-        self.assertEqual(path, ['A', 'B', 'C', 'D'])
-
-    def testFindPath1(self):
-        path = _findPath(self._graph, 'A', 'G')
-        self.assertEqual(path, [])
-
-    def testFindAllPath(self):
-        path = _findAllPaths(self._graph, 'A', 'D')
-        self.assertEqual(path, [['A', 'B', 'C', 'D'], ['A', 'B', 'D'], ['A', 'C', 'D']])
-
-    def testFindHead1(self):
-        head = _findHead(self._graph, 'C')
-        self.assertTrue(head in ['A', 'E'])
-
-    def testFindTail1(self):
-        tail = _findTail(self._graph, 'C')
-        self.assertEqual(tail, 'D')
 
 class DictUtilsTestCase(unittest.TestCase):
 

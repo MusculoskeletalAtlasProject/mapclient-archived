@@ -73,67 +73,6 @@ class Connection(Item):
         return self._destinationIndex
 
 
-def _findPath(graph, start, end, path=[]):
-    path = path + [start]
-    if start == end:
-        return path
-    if not start in graph:
-        return []
-    for node in graph[start]:
-        if node not in path:
-            newpath = _findPath(graph, node, end, path)
-            if newpath:
-                return newpath
-
-    return []
-
-def _findAllPaths(graph, start, end, path=[]):
-    path = path + [start]
-    if start == end:
-        return [path]
-    if not start in graph:
-        return []
-    paths = []
-    for node in graph[start]:
-        if node not in path:
-            newpaths = _findAllPaths(graph, node, end, path)
-            for newpath in newpaths:
-                paths.append(newpath)
-
-    return paths
-
-def _findEndPoint(graph, seed, path=[]):
-    path = path + [seed]
-    if not seed in graph:
-        return path
-    for node in graph[seed]:
-        if node not in path:
-            newpath = _findEndPoint(graph, node, path)
-            if newpath:
-                return newpath
-
-    return path
-
-def _findHead(graph, seed):
-    inv_graph = {}
-    for k, v in graph.items():
-        for entry in v:
-            inv_graph[entry] = inv_graph.get(entry, [])
-            inv_graph[entry].append(k)
-
-    path = _findEndPoint(inv_graph, seed)
-    if path:
-        return path[-1]
-
-    return None
-
-def _findTail(graph, seed):
-    path = _findEndPoint(graph, seed)
-    if path:
-        return path[-1]
-
-    return None
-
 class WorkflowDependencyGraph(object):
 
 
@@ -226,27 +165,6 @@ class WorkflowDependencyGraph(object):
                     connections.append(item)
 
         return connections
-
-    def _calculateGraph2(self):
-        '''
-        Create a dependency graph based on the items in the scene.
-        '''
-        seed = None
-
-        self._graph = []
-        dependencyGraph = {}
-        for item in self._scene.items():
-            if item.Type == Connection.Type:
-                dependencyGraph[item.source()] = dependencyGraph.get(item.source(), [])
-                dependencyGraph[item.source()].append(item.destination())
-            elif item.Type == MetaStep.Type and seed == None:
-                seed = item
-
-        if seed:
-            self._head = _findHead(dependencyGraph, seed)
-            self._tail = _findTail(dependencyGraph, seed)
-
-            self._graph = _findPath(dependencyGraph, self._head, self._tail)
 
     def canExecute(self):
         self._dependencyGraph = self._calculateDependencyGraph()
