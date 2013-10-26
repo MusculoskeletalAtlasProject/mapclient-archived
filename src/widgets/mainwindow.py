@@ -167,7 +167,11 @@ class MainWindow(QtGui.QMainWindow):
         dlg.setModal(True)
         if dlg.exec_() == dlg.Accepted:
             s = Skeleton(dlg.getOptions())
-            s.write()
+            try:
+                s.write()
+                QtGui.QMessageBox.information(self, 'Skeleton Step', 'The Skeleton step has successfully been written to disk.')
+            except:
+                QtGui.QMessageBox.critical(self, 'Error Writing Step', 'There was an error writing the step, perhaps the step already exists.')
 
     def pmr(self):
         from tools.pmr.pmrsearchdialog import PMRSearchDialog
