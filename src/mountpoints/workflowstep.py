@@ -122,8 +122,11 @@ def _workflow_step_init(self, name, location):
 def _workflow_step_execute(self, dataIn=None):
     self._doneExecution()
 
-def _workflow_step_portOutput(self):
+def _workflow_step_getPortData(self, index):
     return None
+
+def _workflow_step_setPortData(self, index, dataIn):
+    pass
 
 def _workflow_step_registerDoneExecution(self, observer):
     self._doneExecution = observer
@@ -171,7 +174,8 @@ def _workflow_step_getName(self):
 attr_dict = {}
 attr_dict['__init__'] = _workflow_step_init
 attr_dict['execute'] = _workflow_step_execute
-attr_dict['portOutput'] = _workflow_step_portOutput
+attr_dict['getPortData'] = _workflow_step_getPortData
+attr_dict['setPortData'] = _workflow_step_setPortData
 attr_dict['registerDoneExecution'] = _workflow_step_registerDoneExecution
 attr_dict['registerOnExecuteEntry'] = _workflow_step_registerOnExecuteEntry
 attr_dict['configure'] = _workflow_step_configure

@@ -22,6 +22,7 @@ class DumbManager(object):
 class DumbStep(object):
 
     _ports = ['one', 'two', 'three']
+
     def isConfigured(self):
         return True
 
@@ -37,11 +38,14 @@ class DumbStep(object):
     def deserialize(self, location):
         pass
 
-    def execute(self, dataIn):
+    def execute(self):
         pass
 
-    def portOutput(self):
-        return [None, None, None]
+    def setPortData(self, index, data):
+        pass
+
+    def getPortData(self, index):
+        return None
 
 
 class WorkflowSceneTestCase(unittest.TestCase):

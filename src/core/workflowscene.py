@@ -187,7 +187,6 @@ class WorkflowDependencyGraph(object):
         else:
             # Form input requirements
             current_node = self._topologicalOrder[self._current]
-            dataIn = None
             if current_node in self._reverseDependencyGraph:
                 connections = []
                 for node in self._reverseDependencyGraph[current_node]:
@@ -197,18 +196,11 @@ class WorkflowDependencyGraph(object):
                     if len(new_connections) == 0:
                         raise('Connection in workflow not found, something has gone horribly wrong')
 
-                dataIn = []
                 for connection in connections:
-                    if len(connection.source()._step._ports) > 1:
-                        output = connection.source()._step.portOutput()[connection.sourceIndex()]
-                    else:
-                        output = connection.source()._step.portOutput()
-                    dataIn.append(output)
+                    dataIn = connection.source()._step.getPortData(connection.sourceIndex())
+                    current_node._step.setPortData(connection.destinationIndex(), dataIn)
 
-
-            if dataIn and len(dataIn) == 1:
-                dataIn = dataIn[0]
-            self._topologicalOrder[self._current]._step.execute(dataIn)
+            current_node._step.execute()
 
 
 class WorkflowScene(object):

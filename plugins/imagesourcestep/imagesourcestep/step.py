@@ -152,5 +152,5 @@ class ImageSourceStep(WorkflowStepMountPoint):
         d = ConfigureDialog(self._state)
         self._configured = d.validate()
 
-    def portOutput(self):
+    def getPortData(self, index):
         return ImageSourceData(self._state.identifier(), self._state.location(), self._state.imageType())

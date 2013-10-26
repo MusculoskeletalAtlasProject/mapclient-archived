@@ -57,68 +57,104 @@ class Skeleton(object):
         f.write(PACKAGE_INIT_STRING.format(package_name=self._options.getPackageName(), author_name=self._options.getAuthorName()))
         f.close()
 
-    def _generateExecuteMethod(self, uses):
-        '''
-        Generates the execute method string.  Returns an empty
-        string if this step has no input ports.
-        '''
-        method_string = ''
-        uses_count = len(uses)
-        if uses_count > 0:
-            uses_index = 0
-            method_string += '''
-    def execute(self, dataIn):
+    def _generateExecuteMethod(self):
+        method_string = '''
+    def execute(self):
         \'\'\'
         Add your code here that will kick off the execution of the step.
         Make sure you call the _doneExecution() method when finished.  This method
         may be connected up to a button in a widget for example.
         \'\'\'
         # Put your execute step code here before calling the '_doneExecution' method.
-'''
-            while uses_index < uses_count:
-                uses_index += 1
-                method_string += '        dataIn{0} = dataIn[{1}] # {2}'.format(uses_index, uses_index - 1, uses[uses_index - 1])
-                if uses_index < uses_count:
-                    method_string += '\n'
-
-
-            method_string += '''
         self._doneExecution()
-    '''
+'''
 
         return method_string
 
-    def _generatePortOutputMethod(self, provides):
+    def _generateSetPortDataMethod(self, ports):
         '''
-        Generate the port output method string.  Returns the empty
-        string if this step has no output ports.
+        Generates the set port data method string.  Returns an empty
+        string if this step has no uses ports.
         '''
         method_string = ''
-        provides_count = len(provides)
-        if provides_count > 0:
-            provides_index = 0
+        uses_total = 0
+        for current_port in ports:
+            if current_port[0].endswith('uses'):
+                uses_total += 1
+
+        if uses_total > 0:
             method_string += '''
-    def portOutput(self):
+    def setPortData(self, index, dataIn):
         \'\'\'
-        Add your code here that will return the appropriate objects for this step.
-        The objects must be returned in the *order* they are specified in 
-        the port list.
+        Add your code here that will set the appropriate objects for this step.
+        The index is the index of the port in the port list.  If there is only one
+        uses port for this step then the index can be ignored.
         \'\'\'
 '''
-            init_out_string = ''
-            return_string = '        return '
-            while provides_index < provides_count:
-                provides_index += 1
-                if provides_count > 1 and provides_index == 1:
-                    return_string += '['
-                return_string += 'dataOut{0}'.format(provides_index)
-                init_out_string += '        dataOut{0} = None # {1}\n'.format(provides_index, provides[provides_index - 1])
-                if provides_count > 1 and provides_index != provides_count:
-                    return_string += ', '
+            uses_count = 0
+            for index, current_port in enumerate(ports):
+                if current_port[0].endswith('uses'):
+                    uses_count += 1
+                    if uses_total == 1:
+                        method_string += '        portData{0} = dataIn # {1}\n'.format(index, current_port[1])
+                    else:
+                        if uses_count == 1:
+                            method_string += '''        if index == {0}:
+            portData{0} = dataIn # {1}
+'''.format(index, current_port[1])
+                        elif uses_count == uses_total:
+                            method_string += '''        else:
+            portData{0} = dataIn # {1}
+'''.format(index, current_port[1])
+                        else:
+                            method_string += '''        elif index == {0}:
+            portData{0} = dataIn # {1}
+'''.format(index, current_port[1])
 
-            if provides_count > 1:
-                return_string += ']'
-            method_string += init_out_string + return_string + '\n'
+        return method_string
+
+    def _generateGetPortDataMethod(self, ports):
+        '''
+        Generate the get port data method string.  Returns the empty
+        string if this step has no provides ports.
+        '''
+        method_string = ''
+        provides_total = 0
+        for current_port in ports:
+            if current_port[0].endswith('provides'):
+                provides_total += 1
+
+        if provides_total > 0:
+            method_string += '''
+    def getPortData(self, index):
+        \'\'\'
+        Add your code here that will return the appropriate objects for this step.
+        The index is the index of the port in the port list.  If there is only one
+        provides port for this step then the index can be ignored.
+        \'\'\'
+'''
+            provides_count = 0
+            for index, current_port in enumerate(ports):
+                if current_port[0].endswith('provides'):
+                    provides_count += 1
+                    if provides_total == 1:
+                        method_string += '        return portData{0} # {1}\n'.format(index, current_port[1])
+                    else:
+                        if provides_count == 1:
+                            method_string += '''        if index == {0}:
+            portData{0} = None # {1}
+            return portData{0}
+'''.format(index, current_port[1])
+                        elif provides_count == provides_total:
+                            method_string += '''        else:
+            portData{0} = None # {1}
+            return portData{0}
+'''.format(index, current_port[1])
+                        else:
+                            method_string += '''        elif index == {0}:
+            portData{0} = None # {1}
+            return portData{0}
+'''.format(index, current_port[1])
 
         return method_string
 
@@ -163,8 +199,7 @@ class Skeleton(object):
             icon_string = '        self._icon =  QtGui.QImage(\':/{step_package_name}/' + IMAGES_DIRECTORY + '/{image_filename}\')\n'
             init_string += icon_string.format(step_package_name=self._options.getPackageName(), image_filename=tail)
         port_index = 0
-        uses = []
-        provides = []
+        ports = []
         init_string += '''        # Ports:
 '''
         while port_index < self._options.portCount():
@@ -172,11 +207,8 @@ class Skeleton(object):
             init_string += '''        self.addPort(('http://physiomeproject.org/workflow/1.0/rdf-schema#port',
                       '{0}',
                       '{1}'))\n'''.format(current_port[0], current_port[1])
-            if current_port[0].endswith('uses'):
-                uses.append(current_port[1])
-            elif current_port[0].endswith('provides'):
-                provides.append(current_port[1])
             port_index += 1
+            ports.append(current_port)
 
         if self._options.configCount() > 0:
             init_string += '        self._config = {}\n'
@@ -220,8 +252,9 @@ class Skeleton(object):
         f.write(self._generateImportStatements())
         f.write(CLASS_STRING.format(step_object_name=object_name, step_name=self._options.getName()))
         f.write(init_string)
-        f.write(self._generateExecuteMethod(uses))
-        f.write(self._generatePortOutputMethod(provides))
+        f.write(self._generateExecuteMethod())
+        f.write(self._generateSetPortDataMethod(ports))
+        f.write(self._generateGetPortDataMethod(ports))
         f.write(self._generateConfigureMethod())
         f.write(id_method_string)
         f.write(serialize_method_string)
