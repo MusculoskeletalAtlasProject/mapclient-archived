@@ -66,22 +66,26 @@ class Skeleton(object):
         uses_count = len(uses)
         if uses_count > 0:
             uses_index = 0
-            method_string += '\n    def execute(self, '
-            while uses_index < uses_count:
-                uses_index += 1
-                method_string += 'dataIn{0}'.format(uses_index)
-                if uses_index != uses_count:
-                    method_string += ', '
-
-            method_string += '''):
+            method_string += '''
+    def execute(self, dataIn):
         \'\'\'
         Add your code here that will kick off the execution of the step.
         Make sure you call the _doneExecution() method when finished.  This method
         may be connected up to a button in a widget for example.
         \'\'\'
         # Put your execute step code here before calling the '_doneExecution' method.
+'''
+            while uses_index < uses_count:
+                uses_index += 1
+                method_string += '        dataIn{0} = dataIn[{1}] # {2}'.format(uses_index, uses_index - 1, uses[uses_index - 1])
+                if uses_index < uses_count:
+                    method_string += '\n'
+
+
+            method_string += '''
         self._doneExecution()
     '''
+
         return method_string
 
     def _generatePortOutputMethod(self, provides):
