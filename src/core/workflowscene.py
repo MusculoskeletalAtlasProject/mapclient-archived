@@ -140,10 +140,8 @@ class WorkflowDependencyGraph(object):
     def __init__(self, scene):
         self._scene = scene
         self._dependencyGraph = {}
+        self._reverseDependencyGraph = {}
         self._topologicalOrder = []
-        self._graph = []
-        self._head = None
-        self._tail = None
         self._current = -1
 
     def _findAllConnectedNodes(self):
@@ -185,24 +183,10 @@ class WorkflowDependencyGraph(object):
 
         return starting_set
 
-    def _calculateGraph(self):
-        '''
-        Calculate the graph for the current set of nodes and connections.
-        '''
-        # Calculate the helper graph
-        graph = self._calculateDependencyGraph()
-        # Find all connected nodes in the graph
-        nodes = self._findAllConnectedNodes()
-        # Find starting point set, uses helper graph
-        starting_set = self._findStartingSet(graph, nodes)
-
-        self._topologicalOrder = self._determineTopologicalOrder(graph, starting_set)
-
     def _determineTopologicalOrder(self, graph, starting_set):
         '''
         Determine the topological order of the graph.  Returns
-        an empty list if the graph contains a loop or consists
-        of independent graphs.
+        an empty list if the graph contains a loop.
         '''
         # Find topological order
         temp_graph = graph.copy()
@@ -226,13 +210,22 @@ class WorkflowDependencyGraph(object):
         return topologicalOrder
 
     def _calculateDependencyGraph(self):
-        self._dependencyGraph = {}
+        graph = {}
         for item in self._scene.items():
             if item.Type == Connection.Type:
-                self._dependencyGraph[item.source()] = self._dependencyGraph.get(item.source(), [])
-                self._dependencyGraph[item.source()].append(item.destination())
+                graph[item.source()] = graph.get(item.source(), [])
+                graph[item.source()].append(item.destination())
 
-        return self._dependencyGraph
+        return graph
+
+    def _connectionsForNodes(self, source, destination):
+        connections = []
+        for item in self._scene.items():
+            if item.Type == Connection.Type:
+                if item.source() == source and item.destination() == destination:
+                    connections.append(item)
+
+        return connections
 
     def _calculateGraph2(self):
         '''
@@ -256,21 +249,48 @@ class WorkflowDependencyGraph(object):
             self._graph = _findPath(dependencyGraph, self._head, self._tail)
 
     def canExecute(self):
-        self._calculateGraph()
+        self._dependencyGraph = self._calculateDependencyGraph()
+        self._reverseDependencyGraph = reverseDictWithLists(self._dependencyGraph)
+        # Find all connected nodes in the graph
+        nodes = self._findAllConnectedNodes()
+        # Find starting point set, uses helper graph
+        starting_set = self._findStartingSet(self._dependencyGraph, nodes)
 
-        configured = [metastep for metastep in self._graph if metastep._step.isConfigured()]
-        can = len(configured) == len(self._graph) and len(self._graph) >= 0
+        self._topologicalOrder = self._determineTopologicalOrder(self._dependencyGraph, starting_set)
+
+        configured = [metastep for metastep in self._topologicalOrder if metastep._step.isConfigured()]
+        can = len(configured) == len(self._topologicalOrder) and len(self._topologicalOrder) >= 0
         return can and self._current == -1
 
     def execute(self):
         self._current += 1
-        if self._current >= len(self._graph):
+        if self._current >= len(self._topologicalOrder):
             self._current = -1
         else:
+            # Form input requirements
+            current_node = self._topologicalOrder[self._current]
             dataIn = None
-            if self._current > 0:
-                dataIn = self._graph[self._current - 1]._step.portOutput()
-            self._graph[self._current]._step.execute(dataIn)
+            if current_node in self._reverseDependencyGraph:
+                connections = []
+                for node in self._reverseDependencyGraph[current_node]:
+                    # Find connection information and extract outputs from steps
+                    new_connections = self._connectionsForNodes(node, current_node)
+                    connections.extend([c for c in new_connections if c not in connections])
+                    if len(new_connections) == 0:
+                        raise('Connection in workflow not found, something has gone horribly wrong')
+
+                dataIn = []
+                for connection in connections:
+                    if len(connection.source()._step._ports) > 1:
+                        output = connection.source()._step.portOutput()[connection.sourceIndex()]
+                    else:
+                        output = connection.source()._step.portOutput()
+                    dataIn.append(output)
+
+
+            if dataIn and len(dataIn) == 1:
+                dataIn = dataIn[0]
+            self._topologicalOrder[self._current]._step.execute(dataIn)
 
 
 class WorkflowScene(object):
@@ -419,3 +439,11 @@ class WorkflowScene(object):
 
         return identifier_occurrence_count
 
+def reverseDictWithLists(inDict):
+    reverseDictOut = {}  # defaultdict(list)
+    for k, v in inDict.items():
+        for rk in v:
+            reverseDictOut[rk] = reverseDictOut.get(rk, [])
+            reverseDictOut[rk].append(k)
+
+    return reverseDictOut

@@ -21,6 +21,7 @@ class DumbManager(object):
 
 class DumbStep(object):
 
+    _ports = ['one', 'two', 'three']
     def isConfigured(self):
         return True
 
@@ -35,6 +36,12 @@ class DumbStep(object):
 
     def deserialize(self, location):
         pass
+
+    def execute(self, dataIn):
+        pass
+
+    def portOutput(self):
+        return [None, None, None]
 
 
 class WorkflowSceneTestCase(unittest.TestCase):
@@ -115,7 +122,6 @@ class WorkflowDependencyGraphTestCase(unittest.TestCase):
         self._s.addItem(c1)
 
         self.assertTrue(g.canExecute())
-        g._calculateGraph()
         self.assertEqual(len(g._topologicalOrder), 2)
         self.assertEqual(g._topologicalOrder[0], self._nodes[0])
         self.assertEqual(g._topologicalOrder[1], self._nodes[1])
@@ -131,7 +137,6 @@ class WorkflowDependencyGraphTestCase(unittest.TestCase):
         self._s.addItem(c2)
 
         self.assertTrue(g.canExecute())
-        g._calculateGraph()
         self.assertEqual(len(g._topologicalOrder), 3)
         self.assertEqual(g._topologicalOrder[0], self._nodes[0])
         self.assertEqual(g._topologicalOrder[1], self._nodes[1])
@@ -151,7 +156,6 @@ class WorkflowDependencyGraphTestCase(unittest.TestCase):
         self._s.addItem(c2)
 
         self.assertTrue(g.canExecute())
-        g._calculateGraph()
         self.assertEqual(len(g._topologicalOrder), 4)
         self.assertEqual(g._topologicalOrder[0], self._nodes[0])
         self.assertEqual(g._topologicalOrder[1], self._nodes[1])
@@ -302,6 +306,25 @@ class WorkflowDependencyGraphTestCase(unittest.TestCase):
         order = g._determineTopologicalOrder(graph, starting_set)
         self.assertEqual(7, len(order))
 
+    def testExecute(self):
+        g = WorkflowDependencyGraph(self._s)
+        c1 = Connection(self._nodes[0], 0, self._nodes[2], 0)
+        c2 = Connection(self._nodes[1], 0, self._nodes[2], 1)
+        c3 = Connection(self._nodes[1], 1, self._nodes[2], 2)
+        c4 = Connection(self._nodes[2], 0, self._nodes[3], 0)
+        self._s.addItem(self._nodes[0])
+        self._s.addItem(self._nodes[1])
+        self._s.addItem(self._nodes[2])
+        self._s.addItem(self._nodes[3])
+        self._s.addItem(c1)
+        self._s.addItem(c2)
+        self._s.addItem(c3)
+        self._s.addItem(c4)
+        g.canExecute()
+
+        for _ in range(len(g._topologicalOrder)):
+            g.execute()
+
 class GraphUtilitiesTestCase(unittest.TestCase):
 
 
@@ -332,6 +355,22 @@ class GraphUtilitiesTestCase(unittest.TestCase):
         tail = _findTail(self._graph, 'C')
         self.assertEqual(tail, 'D')
 
+class DictUtilsTestCase(unittest.TestCase):
+
+    def testReverseDict(self):
+        d = {'a': ['1', '2'], 'b': ['2', '3']}
+#         from collections import defaultdict
+        rd = {}  # defaultdict(list)
+        for k, v in d.items():
+            for rk in v:
+                rd[rk] = rd.get(rk, [])
+                rd[rk].append(k)
+
+        self.assertIn('1', rd)
+        self.assertIn('2', rd)
+        self.assertIn('3', rd)
+        self.assertEqual(['a'], rd['1'])
+        self.assertEqual(['a', 'b'], rd['2'])
 
 if __name__ == "__main__":
     # import sys;sys.argv = ['', 'Test.testCreate']

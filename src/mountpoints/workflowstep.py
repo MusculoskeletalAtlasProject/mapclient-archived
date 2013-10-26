@@ -120,7 +120,6 @@ def _workflow_step_init(self, name, location):
     self._identifierOccursCount = None
 
 def _workflow_step_execute(self, dataIn=None):
-    print('executing: ' + self.getName())
     self._doneExecution()
 
 def _workflow_step_portOutput(self):
