@@ -139,12 +139,102 @@ class WorkflowDependencyGraph(object):
 
     def __init__(self, scene):
         self._scene = scene
+        self._dependencyGraph = {}
+        self._topologicalOrder = []
         self._graph = []
         self._head = None
         self._tail = None
         self._current = -1
 
+    def _findAllConnectedNodes(self):
+        '''
+        Return a list of all the nodes that have a connection.
+        '''
+        nodes = []
+        for item in self._scene.items():
+            if item.Type == Connection.Type:
+                if item.source() not in nodes:
+                    nodes.append(item.source())
+                if item.destination() not in nodes:
+                    nodes.append(item.destination())
+
+        return nodes
+
+    def _nodeIsDestination(self, graph, node):
+        '''
+        Determine whether or not the given node features
+        in a destination of another node.  Return True if
+        the node is a destination, False otherwise..
+        '''
+        for graph_node in graph:
+            if node in graph[graph_node]:
+                return True
+
+        return False
+
+    def _findStartingSet(self, graph, nodes):
+        '''
+        Find the set of all nodes that are connected but are
+        not destinations for any other node.
+        '''
+        starting_set = []
+        for node in nodes:
+            # Determine if node is a destination, if it is it is not a starting node
+            if not self._nodeIsDestination(graph, node):
+                starting_set.append(node)
+
+        return starting_set
+
     def _calculateGraph(self):
+        '''
+        Calculate the graph for the current set of nodes and connections.
+        '''
+        # Calculate the helper graph
+        graph = self._calculateDependencyGraph()
+        # Find all connected nodes in the graph
+        nodes = self._findAllConnectedNodes()
+        # Find starting point set, uses helper graph
+        starting_set = self._findStartingSet(graph, nodes)
+
+        self._topologicalOrder = self._determineTopologicalOrder(graph, starting_set)
+
+    def _determineTopologicalOrder(self, graph, starting_set):
+        '''
+        Determine the topological order of the graph.  Returns
+        an empty list if the graph contains a loop or consists
+        of independent graphs.
+        '''
+        # Find topological order
+        temp_graph = graph.copy()
+        topologicalOrder = []
+        while len(starting_set) > 0:
+            node = starting_set.pop()
+            topologicalOrder.append(node)
+            if node in temp_graph:
+                for m in temp_graph[node][:]:
+                    temp_graph[node].remove(m)
+                    if len(temp_graph[node]) == 0:
+                        del temp_graph[node]
+                    if not self._nodeIsDestination(temp_graph, m):
+                        starting_set.append(m)
+
+        # If the graph is not empty we have detected a loop,
+        # or independent graphs.
+        if temp_graph:
+            return []
+
+        return topologicalOrder
+
+    def _calculateDependencyGraph(self):
+        self._dependencyGraph = {}
+        for item in self._scene.items():
+            if item.Type == Connection.Type:
+                self._dependencyGraph[item.source()] = self._dependencyGraph.get(item.source(), [])
+                self._dependencyGraph[item.source()].append(item.destination())
+
+        return self._dependencyGraph
+
+    def _calculateGraph2(self):
         '''
         Create a dependency graph based on the items in the scene.
         '''
@@ -187,7 +277,6 @@ class WorkflowScene(object):
     '''
     This is the authoratative model for the workflow scene.
     '''
-
 
     def __init__(self, manager):
         self._manager = manager
