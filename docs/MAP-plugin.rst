@@ -78,8 +78,9 @@ A Step Should
 A Step Could
 ------------
 
- * Implement the method 'portOutput(self)' if it was providing some information to another step.
- * Implement the method 'execute(self, dataIn)' if it uses some information from another step.  If a step implements the 'execute(self, dataIn)' method then it must call '_doneExecution()' when the step is finished.
+ * Implement the method 'setPortData(self, index, dataIn)' if it uses some information from another step.  
+ * Implement the method 'getPortData(self, index)' if it was providing some information to another step.
+ * Implement the method 'execute(self)' If a step implements the 'execute(self)' method then it must call '_doneExecution()' when the step is finished.
  * Define a category using the '_category' attribute.  This attribute will add the step to the named category in the step box, or it will create the named category if it is not present.
  * Set a widget as the main widget for the MAP Client application.  Calling '_setCurrentWidget(step_widget)' with a widget passed as a parameter will set that widget to the main widget for the MAP Client application.  The widget will be removed when '_doneExecution()' is called.
 
@@ -102,10 +103,12 @@ Pre-defined Step Methods
 
 A step has a number of pre-defined methods, they are:
 
- * execute(self, dataIn1, dataIn2, ..., dataInN)
-     A method that gets called when execution passes to this step with the ports input data passed through 'dataIn' parameters. 
- * portOutput(self)
-     A method that returns the object that is defined by a port of the step, it either returns an object or a list of objects depending on the number of ports defined. 
+ * execute(self)
+     A method that gets called when execution passes to this step.
+ * getPortData(self, index)
+     A method that returns the object that is defined by the port for the given index of the step 
+ * setPortData(self, index, dataIn)
+     A method that sets the ports data for the given index.
  * configure(self)
      A method called by the framework to inform the step that it needs to follow it's configuration procedure. 
  * isConfigured(self)
