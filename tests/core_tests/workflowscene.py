@@ -90,10 +90,14 @@ class WorkflowSceneTestCase(unittest.TestCase):
         s.saveState(ws)
         del ws
 
+        self.assertTrue(os.path.exists(test_conf))
         file_content = open(test_conf).read()
         self.assertIn('Point(0 0)', file_content)
         self.assertIn('name=a', file_content)
         self.assertIn('name=b', file_content)
+        self.assertNotIn('selected=false', file_content)
+
+        os.remove(test_conf)
 
 
 class WorkflowDependencyGraphTestCase(unittest.TestCase):
@@ -309,6 +313,41 @@ class WorkflowDependencyGraphTestCase(unittest.TestCase):
         self.assertEqual(3, len(starting_set))
         order = g._determineTopologicalOrder(graph, starting_set)
         self.assertEqual(7, len(order))
+
+    def testGraph8(self):
+        '''
+        Testing graph with loop
+        '''
+        g = WorkflowDependencyGraph(self._s)
+        c1 = Connection(self._nodes[0], 0, self._nodes[1], 0)
+        c2 = Connection(self._nodes[1], 0, self._nodes[2], 0)
+        c3 = Connection(self._nodes[2], 0, self._nodes[3], 0)
+        c4 = Connection(self._nodes[3], 0, self._nodes[4], 0)
+        c5 = Connection(self._nodes[3], 0, self._nodes[5], 0)
+        c6 = Connection(self._nodes[5], 0, self._nodes[6], 0)
+        c7 = Connection(self._nodes[6], 0, self._nodes[2], 0)
+        self._s.addItem(self._nodes[0])
+        self._s.addItem(self._nodes[1])
+        self._s.addItem(self._nodes[2])
+        self._s.addItem(self._nodes[3])
+        self._s.addItem(self._nodes[4])
+        self._s.addItem(self._nodes[5])
+        self._s.addItem(self._nodes[6])
+        self._s.addItem(c1)
+        self._s.addItem(c2)
+        self._s.addItem(c3)
+        self._s.addItem(c4)
+        self._s.addItem(c5)
+        self._s.addItem(c6)
+        self._s.addItem(c7)
+
+        nodes = g._findAllConnectedNodes()
+        self.assertEqual(7, len(nodes))
+        graph = g._calculateDependencyGraph()
+        starting_set = g._findStartingSet(graph, nodes)
+        self.assertEqual(1, len(starting_set))
+        order = g._determineTopologicalOrder(graph, starting_set)
+        self.assertEqual(0, len(order))
 
     def testExecute(self):
         g = WorkflowDependencyGraph(self._s)
