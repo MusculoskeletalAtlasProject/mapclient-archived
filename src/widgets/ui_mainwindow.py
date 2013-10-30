@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'qt/mainwindow.ui'
 #
-# Created: Thu Oct 17 15:59:45 2013
+# Created: Wed Oct 30 13:52:47 2013
 #      by: pyside-uic 0.2.14 running on PySide 1.1.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -82,4 +82,4 @@ class Ui_MainWindow(object):
         self.actionAnnotation.setText(QtGui.QApplication.translate("MainWindow", "&Annotation", None, QtGui.QApplication.UnicodeUTF8))
         self.actionPluginWizard.setText(QtGui.QApplication.translate("MainWindow", "Plugin Wi&zard", None, QtGui.QApplication.UnicodeUTF8))
 
-import resources_rc
+from . import resources_rc
