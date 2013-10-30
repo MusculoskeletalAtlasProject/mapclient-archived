@@ -383,7 +383,8 @@ class DictUtilsTestCase(unittest.TestCase):
         self.assertIn('2', rd)
         self.assertIn('3', rd)
         self.assertEqual(['a'], rd['1'])
-        self.assertEqual(['a', 'b'], rd['2'])
+        self.assertIn('a', rd['2'])
+        self.assertIn('b', rd['2'])
 
 if __name__ == "__main__":
     # import sys;sys.argv = ['', 'Test.testCreate']
