@@ -139,6 +139,15 @@ class WorkflowDependencyGraphTestCase(unittest.TestCase):
         else:
             f(a, b, *args, **kwargs)
 
+    def assertLess(self, a, b, *args, **kwargs):
+        ''''Python < v2.7 compatibility.  Assert "a" less "b"'''
+        try:
+            f = super(WorkflowDependencyGraphTestCase, self).assertLess
+        except AttributeError:
+            self.assertTrue(a < b, *args, **kwargs)
+        else:
+            f(a, b, *args, **kwargs)
+
     def setUp(self):
         self._s = WorkflowScene(DumbManager())
         self._nodes = []
@@ -405,6 +414,16 @@ class WorkflowDependencyGraphTestCase(unittest.TestCase):
             g.execute()
 
 class DictUtilsTestCase(unittest.TestCase):
+
+
+    def assertIn(self, a, b, *args, **kwargs):
+        ''''Python < v2.7 compatibility.  Assert "a" in "b"'''
+        try:
+            f = super(WorkflowSceneTestCase, self).assertIn
+        except AttributeError:
+            self.assertTrue(a in b, *args, **kwargs)
+        else:
+            f(a, b, *args, **kwargs)
 
     def testReverseDict(self):
         d = {'a': ['1', '2'], 'b': ['2', '3']}
