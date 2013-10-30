@@ -419,7 +419,7 @@ class DictUtilsTestCase(unittest.TestCase):
     def assertIn(self, a, b, *args, **kwargs):
         ''''Python < v2.7 compatibility.  Assert "a" in "b"'''
         try:
-            f = super(WorkflowSceneTestCase, self).assertIn
+            f = super(DictUtilsTestCase, self).assertIn
         except AttributeError:
             self.assertTrue(a in b, *args, **kwargs)
         else:
