@@ -81,6 +81,16 @@
             </property>
            </spacer>
           </item>
+          <item>
+           <widget class="QPushButton" name="reloadButton">
+            <property name="toolTip">
+             <string>Reload the plugins from the current plugin directories</string>
+            </property>
+            <property name="text">
+             <string>Reload</string>
+            </property>
+           </widget>
+          </item>
          </layout>
         </item>
        </layout>

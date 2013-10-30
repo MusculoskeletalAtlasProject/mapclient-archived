@@ -86,6 +86,7 @@ class MainWindow(QtGui.QMainWindow):
         self._ui.action_Quit.triggered.connect(self.quitApplication)
         self._ui.action_About.triggered.connect(self.about)
         self._ui.actionPluginManager.triggered.connect(self.pluginManager)
+        self._ui.actionPluginWizard.triggered.connect(self.pluginWizard)
         self._ui.actionPMR.triggered.connect(self.pmr)
         self._ui.actionAnnotation.triggered.connect(self.annotationTool)
 
@@ -121,13 +122,16 @@ class MainWindow(QtGui.QMainWindow):
     def closeEvent(self, event):
         self.quitApplication()
 
-    def quitApplication(self):
+    def confirmClose(self):
         # Check to see if the Workflow is in a saved state.
         if self._model.workflowManager().isModified():
             ret = QtGui.QMessageBox.warning(self, 'Unsaved Changes', 'You have unsaved changes, would you like to save these changes now?',
                                       QtGui.QMessageBox.Yes | QtGui.QMessageBox.No)
             if ret == QtGui.QMessageBox.Yes:
                 self._model.workflowManager().save()
+
+    def quitApplication(self):
+        self.confirmClose()
 
         self._model.setSize(self.size())
         self._model.setPos(self.pos())
@@ -145,13 +149,29 @@ class MainWindow(QtGui.QMainWindow):
         dlg = PluginManagerDialog(self)
         dlg.setDirectories(self._model.pluginManager().directories())
         dlg.setLoadDefaultPlugins(self._model.pluginManager().loadDefaultPlugins())
+        dlg.reloadPlugins = self._model.pluginManager().load
 
         dlg.setModal(True)
         if dlg.exec_():
             self._model.pluginManager().setDirectories(dlg.directories())
             self._model.pluginManager().setLoadDefaultPlugins(dlg.loadDefaultPlugins())
-            self._model.pluginManager().load()
-            self._workflowWidget.updateStepTree()
+            if self._model.pluginManager().pluginsModified():
+                self._model.pluginManager().load()
+                self._workflowWidget.updateStepTree()
+
+    def pluginWizard(self):
+        from tools.pluginwizard.wizarddialog import WizardDialog
+        from tools.pluginwizard.skeleton import Skeleton
+        dlg = WizardDialog(self)
+
+        dlg.setModal(True)
+        if dlg.exec_() == dlg.Accepted:
+            s = Skeleton(dlg.getOptions())
+            try:
+                s.write()
+                QtGui.QMessageBox.information(self, 'Skeleton Step', 'The Skeleton step has successfully been written to disk.')
+            except:
+                QtGui.QMessageBox.critical(self, 'Error Writing Step', 'There was an error writing the step, perhaps the step already exists.')
 
     def pmr(self):
         from tools.pmr.pmrsearchdialog import PMRSearchDialog

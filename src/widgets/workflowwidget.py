@@ -95,6 +95,9 @@ class WorkflowWidget(QtGui.QWidget):
     def executeWorkflow(self):
         self._mainWindow.execute()  # .model().workflowManager().execute()
 
+    def identifierOccursCount(self, identifier):
+        return self._mainWindow.model().workflowManager().identifierOccursCount(identifier)
+
     def setCurrentWidget(self, widget):
         self._mainWindow.setCurrentWidget(widget)
 
@@ -187,10 +190,11 @@ class WorkflowWidget(QtGui.QWidget):
 
 
     def close(self):
+        self._mainWindow.confirmClose()
         m = self._mainWindow.model().workflowManager()
         self._undoStack.clear()
-        m.close()
         self._graphicsScene.clear()
+        m.close()
         self._updateUi()
 
     def save(self):

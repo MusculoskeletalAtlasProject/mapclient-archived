@@ -26,35 +26,36 @@ def createDefaultImageIcon(name):
     The default image size is 512x512
     '''
     image = QtGui.QImage(':/workflow/images/default_step_icon.png')
-    p = QtGui.QPainter(image)
+    if name:
+        p = QtGui.QPainter(image)
 
-    text_width = 0.9 * image.size().width()
-    text_height = 0.2 * image.size().height()
-    text_padding = 0.05 * image.size().height()
-    rect = p.fontMetrics().boundingRect(0, 0, text_width, 0,
-                                         QtCore.Qt.AlignCenter | QtCore.Qt.AlignVCenter | QtCore.Qt.TextWordWrap,
-                                         name)
-    factor = text_height / rect.height()
-    f = p.font();
-    f.setPointSizeF(f.pointSizeF() * factor)
-    p.setFont(f);
+        text_width = 0.9 * image.size().width()
+        text_height = 0.2 * image.size().height()
+        text_padding = 0.05 * image.size().height()
+        rect = p.fontMetrics().boundingRect(0, 0, text_width, 0,
+                                             QtCore.Qt.AlignCenter | QtCore.Qt.AlignVCenter | QtCore.Qt.TextWordWrap,
+                                             name)
+        factor = text_height / rect.height()
+        f = p.font();
+        f.setPointSizeF(f.pointSizeF() * factor)
+        p.setFont(f);
 
-    # Updated text rect
-    rect = p.fontMetrics().boundingRect(0, 0, text_width, 0,
-                                         QtCore.Qt.AlignCenter | QtCore.Qt.AlignVCenter | QtCore.Qt.TextWordWrap,
-                                         name)
-    # Draw the text with a background rectangle
-    pen = QtGui.QPen()
-    pen.setWidth(11)
-    pen.setColor(QtCore.Qt.black)
-    p.setPen(pen);
-    p.setBrush(QtCore.Qt.darkGray)
+        # Updated text rect
+        rect = p.fontMetrics().boundingRect(0, 0, text_width, 0,
+                                             QtCore.Qt.AlignCenter | QtCore.Qt.AlignVCenter | QtCore.Qt.TextWordWrap,
+                                             name)
+        # Draw the text with a background rectangle
+        pen = QtGui.QPen()
+        pen.setWidth(11)
+        pen.setColor(QtCore.Qt.black)
+        p.setPen(pen);
+        p.setBrush(QtCore.Qt.darkGray)
 
-    rect.moveTo((image.size().width() - rect.width()) / 2, (image.height() - rect.height()) / 2)
-    background_rect = rect.adjusted(-text_padding, -text_padding, text_padding, text_padding)
+        rect.moveTo((image.size().width() - rect.width()) / 2, (image.height() - rect.height()) / 2)
+        background_rect = rect.adjusted(-text_padding, -text_padding, text_padding, text_padding)
 
-    p.drawRoundedRect(background_rect, text_padding / 2, text_padding / 2)
-    p.setPen(QtCore.Qt.white);
-    p.drawText(rect, QtCore.Qt.AlignCenter | QtCore.Qt.AlignVCenter | QtCore.Qt.TextWordWrap, name)
+        p.drawRoundedRect(background_rect, text_padding / 2, text_padding / 2)
+        p.setPen(QtCore.Qt.white);
+        p.drawText(rect, QtCore.Qt.AlignCenter | QtCore.Qt.AlignVCenter | QtCore.Qt.TextWordWrap, name)
 
     return image

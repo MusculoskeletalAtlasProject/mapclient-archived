@@ -84,6 +84,9 @@ class WorkflowManager():
     def undoStackIndexChanged(self, index):
         self._currentStateIndex = index
 
+    def identifierOccursCount(self, identifier):
+        return self._scene.identifierOccursCount(identifier)
+
     def execute(self):
         self._scene.execute()
 
