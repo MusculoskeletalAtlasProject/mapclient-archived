@@ -51,6 +51,24 @@ class DumbStep(object):
 class WorkflowSceneTestCase(unittest.TestCase):
 
 
+    def assertIn(self, a, b, *args, **kwargs):
+        ''''Python < v2.7 compatibility.  Assert "a" in "b"'''
+        try:
+            f = super(WorkflowSceneTestCase, self).assertIn
+        except AttributeError:
+            self.assertTrue(a in b, *args, **kwargs)
+        else:
+            f(a, b, *args, **kwargs)
+
+    def assertNotIn(self, a, b, *args, **kwargs):
+        ''''Python < v2.7 compatibility.  Assert "a" NOT in "b"'''
+        try:
+            f = super(WorkflowSceneTestCase, self).assertNotIn
+        except AttributeError:
+            self.assertFalse(a in b, *args, **kwargs)
+        else:
+            f(a, b, *args, **kwargs)
+
     def testCreate(self):
 
         s = WorkflowScene(DumbManager())
@@ -102,6 +120,24 @@ class WorkflowSceneTestCase(unittest.TestCase):
 
 class WorkflowDependencyGraphTestCase(unittest.TestCase):
 
+
+    def assertIn(self, a, b, *args, **kwargs):
+        ''''Python < v2.7 compatibility.  Assert "a" in "b"'''
+        try:
+            f = super(WorkflowDependencyGraphTestCase, self).assertIn
+        except AttributeError:
+            self.assertTrue(a in b, *args, **kwargs)
+        else:
+            f(a, b, *args, **kwargs)
+
+    def assertNotIn(self, a, b, *args, **kwargs):
+        ''''Python < v2.7 compatibility.  Assert "a" NOT in "b"'''
+        try:
+            f = super(WorkflowDependencyGraphTestCase, self).assertNotIn
+        except AttributeError:
+            self.assertFalse(a in b, *args, **kwargs)
+        else:
+            f(a, b, *args, **kwargs)
 
     def setUp(self):
         self._s = WorkflowScene(DumbManager())

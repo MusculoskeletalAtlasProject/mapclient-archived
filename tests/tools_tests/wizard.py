@@ -40,6 +40,24 @@ AUTHOR_NAME = 'Prince of Persia'
 class WizardTestCase(unittest.TestCase):
 
 
+    def assertIn(self, a, b, *args, **kwargs):
+        ''''Python < v2.7 compatibility.  Assert "a" in "b"'''
+        try:
+            f = super(WizardTestCase, self).assertIn
+        except AttributeError:
+            self.assertTrue(a in b, *args, **kwargs)
+        else:
+            f(a, b, *args, **kwargs)
+
+    def assertNotIn(self, a, b, *args, **kwargs):
+        ''''Python < v2.7 compatibility.  Assert "a" NOT in "b"'''
+        try:
+            f = super(WizardTestCase, self).assertNotIn
+        except AttributeError:
+            self.assertFalse(a in b, *args, **kwargs)
+        else:
+            f(a, b, *args, **kwargs)
+
     def _doCleanUp(self, package_name):
         rmdir = os.path.join(PLUGIN_WRITE_TO_DIRECTORY, package_name)
         if os.path.exists(rmdir):
