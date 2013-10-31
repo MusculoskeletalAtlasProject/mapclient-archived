@@ -54,7 +54,7 @@ class WorkflowStepPort(object):
 
     def hasUses(self):
         return 'http://physiomeproject.org/workflow/1.0/rdf-schema#uses' in self.pred
-    
+
     def hasProvides(self):
         return 'http://physiomeproject.org/workflow/1.0/rdf-schema#provides' in self.pred
 
@@ -64,6 +64,14 @@ class WorkflowStepPort(object):
 
         return []
 #        return [triple for triple in self.pred[pred]]
+
+    def index(self):
+        index = -1
+        if 'http://physiomeproject.org/workflow/1.0/rdf-schema#index' in self.pred:
+            indexList = self.pred['http://physiomeproject.org/workflow/1.0/rdf-schema#index']
+            index = indexList[0][2]
+
+        return index
 
     def canConnect(self, other):
         if 'http://physiomeproject.org/workflow/1.0/rdf-schema#port' in self.subj and 'http://physiomeproject.org/workflow/1.0/rdf-schema#port' in other.subj:
@@ -95,11 +103,6 @@ A plugin that registers this mount point could have:
   - An attribute _category that is a string representation of the step's category
   
 '''
-# class WorkflowStep(WorkflowStepMountPoint):
-#    '''
-#    A step that acts like the step plugin duck
-#    '''
-#
 
 def _workflow_step_init(self, name, location):
     '''
@@ -107,19 +110,23 @@ def _workflow_step_init(self, name, location):
     '''
     self._name = name
     self._location = location
+    self._category = 'General'
     self._ports = []
     self._icon = None
     self._configured = False
     self._configuredObserver = None
     self._doneExecution = None
     self._setCurrentWidget = None
+    self._identifierOccursCount = None
 
 def _workflow_step_execute(self, dataIn=None):
-    print('executing: ' + self.getName())
     self._doneExecution()
 
-def _workflow_step_portOutput(self):
+def _workflow_step_getPortData(self, index):
     return None
+
+def _workflow_step_setPortData(self, index, dataIn):
+    pass
 
 def _workflow_step_registerDoneExecution(self, observer):
     self._doneExecution = observer
@@ -127,6 +134,12 @@ def _workflow_step_registerDoneExecution(self, observer):
 def _workflow_step_registerOnExecuteEntry(self, observer, setCurrentUndoRedoStackObserver=None):
     self._setCurrentWidget = observer
     self._setCurrentUndoRedoStack = setCurrentUndoRedoStackObserver
+
+def _workflow_step_registerConfiguredObserver(self, observer):
+    self._configuredObserver = observer
+
+def _workflow_step_registerIdentifierOccursCount(self, observer):
+    self._identifierOccursCount = observer
 
 def _workflow_step_configure(self, location):
     raise NotImplementedError
@@ -146,22 +159,11 @@ def _workflow_step_deserialize(self):
 def _workflow_step_isConfigured(self):
     return self._configured
 
-def _workflow_step_registerConfiguredObserver(self, observer):
-    self._configuredObserver = observer
-
 def _workflow_step_addPort(self, triple):
     port = WorkflowStepPort()
     port.addProperty(triple)
+    port.addProperty(('http://physiomeproject.org/workflow/1.0/rdf-schema#port', 'http://physiomeproject.org/workflow/1.0/rdf-schema#index', len(self._ports)))
     self._ports.append(port)
-
-def _workflow_step_canConnect(self, other):
-    # Try to find compatible ports
-    for port in self._ports:
-        for otherPort in other._ports:
-            if port.canConnect(otherPort):
-                return True
-
-    return False
 
 def _workflow_step_getName(self):
     if hasattr(self, '_name'):
@@ -169,17 +171,18 @@ def _workflow_step_getName(self):
 
     return self.__class__.__name__
 
-attr_dict = {'_category': 'General'}
+attr_dict = {}
 attr_dict['__init__'] = _workflow_step_init
 attr_dict['execute'] = _workflow_step_execute
-attr_dict['portOutput'] = _workflow_step_portOutput
+attr_dict['getPortData'] = _workflow_step_getPortData
+attr_dict['setPortData'] = _workflow_step_setPortData
 attr_dict['registerDoneExecution'] = _workflow_step_registerDoneExecution
 attr_dict['registerOnExecuteEntry'] = _workflow_step_registerOnExecuteEntry
 attr_dict['configure'] = _workflow_step_configure
 attr_dict['isConfigured'] = _workflow_step_isConfigured
+attr_dict['registerIdentifierOccursCount'] = _workflow_step_registerIdentifierOccursCount
 attr_dict['registerConfiguredObserver'] = _workflow_step_registerConfiguredObserver
 attr_dict['addPort'] = _workflow_step_addPort
-attr_dict['canConnect'] = _workflow_step_canConnect
 attr_dict['getName'] = _workflow_step_getName
 attr_dict['deserialize'] = _workflow_step_deserialize
 attr_dict['serialize'] = _workflow_step_serialize

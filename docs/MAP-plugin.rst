@@ -1,8 +1,10 @@
-.. _MAP-create-plugin:
+.. _MAP-plugin:
 
 ===========
 MAP Plugins
 ===========
+
+.. sectionauthor:: Hugh Sorby
 
 The Plugin lies at the heart of the MAP framework.  The key idea behind the plugins is to make them as simple as possible to implement.  The interface is defined in documentation and the plugin developer is expected to adhere to it.  The framework leaves the responsibility of conforming to the plugin interface up to the plugin developer.  The plugin framework is based on Marty Alchin's [1] article on a plugin framework for Django.  The plugin framework is very lightweight and requires no external libraries and can be made to work with Python 2 and Python 3 simultaneously.
 
@@ -16,7 +18,7 @@ The Workflow Step is the basic item that a plugin developers need to place their
 
  from mountpoints.workflowstep import WorkflowStepMountPoint
 
-A skeleton step is provided as a starting point for the developer to create their own workflow steps.  The skeleton step is actually a valid step in its own right and it will show up in the Step box if enabled.  However the skeleton step has no use other than as an item to drag around on the workflow area.  The skeleton step is discussed below, first however the plugin interface is discussed.
+A skeleton step is provided as a starting point for the developer to create their own workflow steps.  The skeleton step is actually a valid step in its own right and it will show up in the Step box if enabled.  However the skeleton step has no use other than as an item to drag around on the workflow area.  The skeleton step is discussed below, before that the plugin interface itself is discussed.
 
 Plugin Interface
 ----------------
@@ -76,10 +78,68 @@ A Step Should
 A Step Could
 ------------
 
- * Implement the method 'portOutput(self)' if it was providing some information to another step.
- * Implement the method 'execute(self, dataIn)' if it uses some information from another step.  If a step implements the 'execute(self, dataIn)' method then it must call '_doneExecution()' when the step is finished.
+ * Implement the method 'setPortData(self, index, dataIn)' if it uses some information from another step.  
+ * Implement the method 'getPortData(self, index)' if it was providing some information to another step.
+ * Implement the method 'execute(self)' If a step implements the 'execute(self)' method then it must call '_doneExecution()' when the step is finished.
  * Define a category using the '_category' attribute.  This attribute will add the step to the named category in the step box, or it will create the named category if it is not present.
  * Set a widget as the main widget for the MAP Client application.  Calling '_setCurrentWidget(step_widget)' with a widget passed as a parameter will set that widget to the main widget for the MAP Client application.  The widget will be removed when '_doneExecution()' is called.
+
+Pre-defined Step Attributes
+---------------------------
+
+A step has a number of pre-defined attributes with default values, they are:
+
+ * self._name = name
+ * self._location = location
+ * self._category = 'General'
+ * self._ports = []
+ * self._icon = None
+ * self._configured = False
+
+The '_name' and '_location' attributes are passed in to the '__init__' method of the mount point.  The '_category' attribute can be used to group steps in the step box.  By default a step has no ports and at least one port must be defined before it can be used in a workflow.  If the '_icon' attribute is not defined then a default icon is supplied.  The '_configured' property is set to False initially as most steps will not be configured in their initial state.
+
+Pre-defined Step Methods
+------------------------
+
+A step has a number of pre-defined methods, they are:
+
+ * execute(self)
+     A method that gets called when execution passes to this step.
+ * getPortData(self, index)
+     A method that returns the object that is defined by the port for the given index of the step 
+ * setPortData(self, index, dataIn)
+     A method that sets the ports data for the given index.
+ * configure(self)
+     A method called by the framework to inform the step that it needs to follow it's configuration procedure. 
+ * isConfigured(self)
+     A method to return the value of '_configued'.  In most cases this method will not 
+     need to be overridden.
+ * _configuredObserver
+     A method to call to let the framework know that the step configuration has finished.
+ * _identifierOccursCount
+     A method to call to determine the number of identifiers with the given value.  This method can be used to decide whether the current identifier is unique across the workflow.
+ * addPort
+     Adds a port to the step, the port is defined using an RDF triple.  See the
+     Ports section for more information.
+ * getName(self)
+     Returns the '_name' attribute if it is set otherwise returns the class name.  In most cases this method will not 
+     need to be overridden.
+ * deserialize(self, location)
+     Must be implemented in the plugin otherwise an exception is raised. 
+ * serialize(self, location)
+     Must be implemented in the plugin otherwise an exception is raised. 
+ * _setCurrentWidget(step_widget)
+     Set widget 'step_widget' to the main widget for the framework.
+ * _doneExecution()
+     Inform the framework that the step has finished it's task.
+ * registerDoneExecution(self, observer)
+     A method used by the framework to set the callable when execution is done.  This method should not be overwritten.
+ * registerOnExecuteEntry(self, observer, undoRedoObserver)
+     A method used by the framework to set a callable to set up the step for execution.  This method should not be overwritten.
+ * registerConfiguredObserver(self, observer)
+     A method used by the framework to set a callable for notifying when the step has been configured.  This method should not be overwritten.
+ * registerIdentifierOccursCount
+     A method used by the framework to set a callable for determining the number of times the given identifier occurs in the current workflow.  This method should not be overwritten.
 
 Ports
 =====
@@ -87,7 +147,11 @@ Ports
 A port is a device to specify what a workflow step provides or uses.  A port is described using Resource Description Framework (RDF) triples.  The port description is used to determine whether or not two ports may be connected together.
 One port can either use or provide one thing. A single port must not both provide a thing and use a thing.  Ports are ordered by entry position.
 
-Ports are added by using the 'addPort(self, triple)' method from the base class.
+A port is defined with the subject of *http://physiomeproject.org/workflow/1.0/rdf-schema#port* and it can be defined with a property or characteristic as either providing (*http://physiomeproject.org/workflow/1.0/rdf-schema#provides*) or using (*http://physiomeproject.org/workflow/1.0/rdf-schema#uses*) an object.  What that object is is defined by the step, for example the image source step defines the following port:
+
+  (http://physiomeproject.org/workflow/1.0/rdf-schema#port, http://physiomeproject.org/workflow/1.0/rdf-schema#provides, http://physiomeproject.org/workflow/1.0/rdf-schema#images)
+
+Any step that understands the *http://physiomeproject.org/workflow/1.0/rdf-schema#images* object can define it's own port that uses this object.  Ports are added to a step by using the 'addPort(self, triple)' method from the base class.
 
 Skeleton Step
 =============

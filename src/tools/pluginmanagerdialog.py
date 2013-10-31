@@ -44,6 +44,7 @@ class PluginManagerDialog(QtGui.QDialog):
         self._ui.addButton.clicked.connect(self._addDirectoryClicked)
         self._ui.directoryListing.itemSelectionChanged.connect(self._directorySelectionChanged)
         self._ui.removeButton.clicked.connect(self._removeButtonClicked)
+        self._ui.reloadButton.clicked.connect(self.reloadPlugins)
 
     def _directorySelectionChanged(self):
         self._ui.removeButton.setEnabled(len(self._ui.directoryListing.selectedItems()) > 0)
@@ -60,6 +61,12 @@ class PluginManagerDialog(QtGui.QDialog):
         directory = QtGui.QFileDialog.getExistingDirectory(self, caption='Select External Plugin Directory', directory=last, options=QtGui.QFileDialog.ShowDirsOnly | QtGui.QFileDialog.DontResolveSymlinks | QtGui.QFileDialog.ReadOnly)
         if len(directory) > 0:
             self._ui.directoryListing.addItem(directory)
+
+    def reloadPlugins(self):
+        '''
+        Set this to a callable that will reload the plugins from the current plugin directories.
+        '''
+        pass
 
     def setDirectories(self, directories):
         self._ui.directoryListing.addItems([directory for directory in directories if os.path.exists(directory)])

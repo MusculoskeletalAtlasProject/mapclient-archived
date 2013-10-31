@@ -16,7 +16,7 @@ The MAP application consists of the framework and various tools, by itself it ca
 To execute the barebones application we need to first install some dependencies:
 
  #. `Python <http://python.org/>`_ (and make sure to add the ``Python`` and ``Python\Scripts`` folders to your system ``PATH``).
- #. `PySide <http://qt-project.org/wiki/PySide>`_ (PySide and PyQt4 are virtually interchangeable but currently this would require some textual changes)
+ #. `PySide <http://qt-project.org/wiki/PySide>`_ (PySide and PyQt4 are virtually interchangeable, to use PyQt4 in place of PySide all occurrences of PySide would need to be replaced with PyQt4 and the user interface files would need to be regenerated using pyuic4).
  #. `Python setup tools <https://pypi.python.org/pypi/setuptools/0.7.5#id73>`_ and then using ``easy_install.exe`` to install:
  
    #. `Requests <http://docs.python-requests.org/en/latest/>`_ Python library (``easy_install requests``)
@@ -43,12 +43,12 @@ MAP Plugins
 
 .. _github project: https://github.com/mapclient-plugins
 
-The installation of MAP plugins simply requires obtaining the plugins and then using the :ref:`MAP plugin manager <MAP-plugin-manager-tool>` to let the MAP client know where to look for plugins. Furthermore, there is a `github project`_ which is used to provide a common collection of MAP plugins. For the purposes of this tutorial, the ``autosegmentationstep`` plugin will be used. You can `download <https://github.com/mapclient-plugins/autosegmentationstep/archive/master.zip>`_ a copy of the plugin, extract it, and then follow the instructions for adding the folder in which you extracted the plugin to the :ref:`MAP plugin manager <MAP-plugin-manager-tool>`.
+The installation of MAP plugins simply requires obtaining the plugins and then using the :ref:`MAP plugin manager <MAP-plugin-manager-tool>` to let the MAP client know where to look for plugins. Furthermore, there is a `github project`_ which is used to provide a common collection of MAP plugins. For the purposes of this tutorial, the ``autosegmentationstep`` plugin will be used. You can `download <https://github.com/mapclient-plugins/autosegmentationstep/archive/master.zip>`__ a copy of the plugin, extract it, and then follow the instructions for adding the folder in which you extracted the plugin to the :ref:`MAP plugin manager <MAP-plugin-manager-tool>`.
 
 Zinc and PyZinc
 ===============
 
-`Zinc <http://physiomeproject.org/software/zinclibrary/>`_ is an advanced field manipulation and visualisation library and `PyZinc <http://physiomeproject.org/software/pyzinc/>`_ provides :term:`Python` bindings to the Zinc library.  There are a number of plugins for the MAP application that rely on the Zinc/PyZinc libraries.  Zinc and PyZinc are typically required to run some of the advanced visualisation and image processing plugins.  The MAP client is able to make use of Zinc for advanced visualisation and image processing steps.  Binaries are available for `download <ftp://ftp.bioeng.auckland.ac.nz/cmiss/zinclibrary/embc2013/>`_ for Linux, Windows, and OS X.  To get PyZinc installed, follow these steps:
+`Zinc <http://physiomeproject.org/software/zinclibrary/>`_ is an advanced field manipulation and visualisation library and `PyZinc <http://physiomeproject.org/software/pyzinc/>`_ provides :term:`Python` bindings to the Zinc library.  There are a number of plugins for the MAP application that rely on the Zinc/PyZinc libraries.  Zinc and PyZinc are typically required to run some of the advanced visualisation and image processing plugins.  The MAP client is able to make use of Zinc for advanced visualisation and image processing steps.  Binaries are available for `download <ftp://ftp.bioeng.auckland.ac.nz/cmiss/zinclibrary/embc2013/>`__ for Linux, Windows, and OS X.  To get PyZinc installed, follow these steps:
 
 #. Install Zinc using either: the Windows installer (ensuring that you enable the option for the installer to add Zinc to the system PATH); or unzip the archive and manually copy library file to somewhere on your PATH (which could include the PyZinc installation folder).
 #. Unzip the downloaded PyZinc archive.
