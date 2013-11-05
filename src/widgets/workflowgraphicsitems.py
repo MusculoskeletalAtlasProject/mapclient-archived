@@ -269,17 +269,19 @@ class Node(Item):
                 x_pos = -3 * w / 4
                 uses_count += 1
                 pred = 'http://physiomeproject.org/workflow/1.0/rdf-schema#uses'
+                tooltip_stub = 'uses: '
             else:  # port in provides_ports:
                 port_total = provides_total
                 index = provides_count
                 x_pos = self.Size - w / 4
                 provides_count += 1
                 pred = 'http://physiomeproject.org/workflow/1.0/rdf-schema#provides'
+                tooltip_stub = 'provides: '
 
             triples = port.getTriplesForPred(pred)
             triple_objects = [triple[2] for triple in triples]
             port_item.moveBy(x_pos, self.Size / 2 + h / 3 * (4 * index - 2 * (port_total - 1) - 1))
-            port_item.setToolTip('uses: ' + ', '.join(triple_objects))
+            port_item.setToolTip(tooltip_stub + ', '.join(triple_objects))
             self._step_port_items.append(port_item)
 
         self._configure_item = ConfigureIcon(self)
