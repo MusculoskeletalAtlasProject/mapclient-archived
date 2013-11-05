@@ -109,7 +109,7 @@ class Arc(Item):
         self._arrowSize = 10.0
         self._arrow = QtGui.QPolygonF()
 
-        self._connection = Connection(sourceNode.parentItem()._metastep, destNode.parentItem()._metastep)
+        self._connection = Connection(sourceNode.parentItem()._metastep, sourceNode.portIndex(), destNode.parentItem()._metastep, destNode.portIndex())
 
         self._sourcePoint = QtCore.QPointF()
         self._destPoint = QtCore.QPointF()
@@ -154,7 +154,7 @@ class Arc(Item):
         self._destPoint = line.p2() - arcOffset
 
     def shape(self):
-        print('shape')
+#         print('shape')
 #        path = super(Arc, self).shape()
         path = QtGui.QPainterPath()
         path.addPolygon(self._arrow)
@@ -252,41 +252,35 @@ class Node(Item):
 
         self._step_port_items = []
         # Collect all ports that provide or use from the step
-        uses_ports = []
-        provides_ports = []
+        uses_ports = [port for port in self._metastep._step._ports if port.hasUses()]
+        provides_ports = [port for port in self._metastep._step._ports if port.hasProvides()]
+
+        uses_count = 0
+        uses_total = len(uses_ports)
+        provides_count = 0
+        provides_total = len(provides_ports)
         for port in self._metastep._step._ports:
-            if port.hasUses():
-                uses_ports.append(port)
-            if port.hasProvides():
-                provides_ports.append(port)
+            port_item = StepPort(port, self)
+            w = port_item.width()
+            h = port_item.height()
+            if port in uses_ports:
+                port_total = uses_total
+                index = uses_count
+                x_pos = -3 * w / 4
+                uses_count += 1
+                pred = 'http://physiomeproject.org/workflow/1.0/rdf-schema#uses'
+            else:  # port in provides_ports:
+                port_total = provides_total
+                index = provides_count
+                x_pos = self.Size - w / 4
+                provides_count += 1
+                pred = 'http://physiomeproject.org/workflow/1.0/rdf-schema#provides'
 
-        port_count = len(uses_ports)
-        for index, port in enumerate(uses_ports):
-            triples = port.getTriplesForPred('http://physiomeproject.org/workflow/1.0/rdf-schema#uses')
-            if len(triples) == 1:
-                triple = triples[0]
-                port_item = StepPort(port, self)
-                w = port_item.width()
-                h = port_item.height()
-                port_item.moveBy(-3 * w / 4, self.Size / 2 + h / 3 * (4 * index - 2 * (port_count - 1) - 1))
-                port_item.setToolTip('uses: ' + triple[2])
-                self._step_port_items.append(port_item)
-            else:
-                print('Warning: Invalid port.')
-
-        port_count = len(provides_ports)
-        for index, port in enumerate(provides_ports):
-            triples = port.getTriplesForPred('http://physiomeproject.org/workflow/1.0/rdf-schema#provides')
-            if len(triples) == 1:
-                triple = triples[0]
-                port_item = StepPort(port, self)
-                w = port_item.width()
-                h = port_item.height()
-                port_item.moveBy(self.Size - w / 4, self.Size / 2 + h / 3 * (4 * index - 2 * (port_count - 1) - 1))
-                port_item.setToolTip('provides: ' + triple[2])
-                self._step_port_items.append(port_item)
-            else:
-                print('Warning: Invalid port.')
+            triples = port.getTriplesForPred(pred)
+            triple_objects = [triple[2] for triple in triples]
+            port_item.moveBy(x_pos, self.Size / 2 + h / 3 * (4 * index - 2 * (port_total - 1) - 1))
+            port_item.setToolTip('uses: ' + ', '.join(triple_objects))
+            self._step_port_items.append(port_item)
 
         self._configure_item = ConfigureIcon(self)
         self._configure_item.moveBy(40, 40)
@@ -380,6 +374,9 @@ class StepPort(QtGui.QGraphicsEllipseItem):
 
     def type(self):
         return StepPort.Type
+
+    def portIndex(self):
+        return self._port.index()
 
     def width(self):
         return self.boundingRect().width()

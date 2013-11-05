@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'qt/pluginmanagerdialog.ui'
 #
-# Created: Fri Jun 14 11:27:17 2013
+# Created: Thu Oct 10 15:24:46 2013
 #      by: pyside-uic 0.2.14 running on PySide 1.1.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -46,6 +46,9 @@ class Ui_PluginManagerDialog(object):
         self.verticalLayout_2.addWidget(self.removeButton)
         spacerItem = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
         self.verticalLayout_2.addItem(spacerItem)
+        self.reloadButton = QtGui.QPushButton(self.groupBox)
+        self.reloadButton.setObjectName("reloadButton")
+        self.verticalLayout_2.addWidget(self.reloadButton)
         self.horizontalLayout.addLayout(self.verticalLayout_2)
         self.verticalLayout_4.addLayout(self.horizontalLayout)
         self.verticalLayout.addWidget(self.groupBox)
@@ -67,4 +70,6 @@ class Ui_PluginManagerDialog(object):
         self.defaultPluginCheckBox.setText(QtGui.QApplication.translate("PluginManagerDialog", "Use default plugin directory", None, QtGui.QApplication.UnicodeUTF8))
         self.addButton.setText(QtGui.QApplication.translate("PluginManagerDialog", "Add Directory", None, QtGui.QApplication.UnicodeUTF8))
         self.removeButton.setText(QtGui.QApplication.translate("PluginManagerDialog", "Remove Directory", None, QtGui.QApplication.UnicodeUTF8))
+        self.reloadButton.setToolTip(QtGui.QApplication.translate("PluginManagerDialog", "Reload the plugins from the current plugin directories", None, QtGui.QApplication.UnicodeUTF8))
+        self.reloadButton.setText(QtGui.QApplication.translate("PluginManagerDialog", "Reload", None, QtGui.QApplication.UnicodeUTF8))
 

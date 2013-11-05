@@ -84,6 +84,9 @@ class WorkflowManager():
     def undoStackIndexChanged(self, index):
         self._currentStateIndex = index
 
+    def identifierOccursCount(self, identifier):
+        return self._scene.identifierOccursCount(identifier)
+
     def execute(self):
         self._scene.execute()
 
@@ -140,7 +143,9 @@ class WorkflowManager():
         if not wf.contains('version'):
             raise WorkflowError('The given Workflow configuration file is not valid.')
 
-        if wf.value('version') != info.VERSION_STRING:
+        workflow_version = versionTuple(wf.value('version'))
+        software_version = versionTuple(info.VERSION_STRING)
+        if not (workflow_version[0] == software_version[0] and workflow_version[1] == software_version[1] and workflow_version[2] <= software_version[2]):
             raise WorkflowError('Version mismatch in Workflow expected: %s got: %s' % (info.VERSION_STRING, wf.value('version')))
 
         self._location = location
@@ -175,6 +180,10 @@ class WorkflowManager():
         settings.beginGroup(self.name)
         self._previousLocation = settings.value(_PREVIOUS_LOCATION_STRING, '')
         settings.endGroup()
+
+def versionTuple(v):
+    return tuple(map(int, (v.split("."))))
+
 
 
 
