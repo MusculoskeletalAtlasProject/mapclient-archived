@@ -131,7 +131,10 @@ class PluginManager(object):
         self._pluginsChanged = False
         for directory in self.allDirectories():
             for p in getPlugins(directory):
-                loadPlugin(p)
+                try:
+                    loadPlugin(p)
+                except:
+                    print('Plugin \'' + p['name'] + '\' not loaded')
 
     def readSettings(self, settings):
         self._directories = []
