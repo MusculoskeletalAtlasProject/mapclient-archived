@@ -18,6 +18,8 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
 import os
+from urlparse import urlsplit, urlunsplit
+from ConfigParser import ConfigParser
 
 from PySide import QtGui, QtCore
 
@@ -121,19 +123,21 @@ class WorkflowWidget(QtGui.QWidget):
             m.setPreviousLocation(workflowDir)
             if pmr:
                 dir_name = os.path.basename(workflowDir)
+                QtGui.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
                 pmr_tool = PMRTool()
-                # Get login details:
-                dlg = PMRHgLoginDialog(self._mainWindow)
-                if dlg.exec_():
-                    # set wait icon
-                    QtGui.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
-                    repourl = pmr_tool.addWorkspace('Workflow: ' + dir_name, None)
-                    c = CommandCloneWorkspace(repourl, workflowDir, dlg.username(), dlg.password())
-                    c.run()
-                    c = CommandIgnoreDirectoriesHg(workflowDir)
-                    c.run()
-                    # unset wait icon
-                    QtGui.QApplication.restoreOverrideCursor()
+                repourl = pmr_tool.addWorkspace('Workflow: ' + dir_name, None)
+
+                p = pmr_tool.requestTemporaryPassword(repourl)
+                username = p.get('user', None)
+                password = p.get('key', None)
+
+                c = CommandCloneWorkspace(repourl, workflowDir,
+                    username, password)
+                c.run()
+                c = CommandIgnoreDirectoriesHg(workflowDir)
+                c.run()
+                # unset wait icon
+                QtGui.QApplication.restoreOverrideCursor()
 
 
             self._undoStack.clear()
@@ -205,14 +209,41 @@ class WorkflowWidget(QtGui.QWidget):
 
         self._updateUi()
 
+    def getDefaultRemotePath(self, location):
+        hgrcpath = os.path.join(location, '.hg', 'hgrc')
+        if not os.path.exists(hgrcpath):
+            raise ValueError('location not tracked with PMR')
+
+        confp = ConfigParser()
+        with open(hgrcpath) as f:
+            confp.readfp(f)
+        rawurl = confp.get('paths', 'default')
+
+        # strip out the user element (not even sure how/why that gets
+        # stuffed into there)
+
+        urlparts = list(urlsplit(rawurl))
+        if '@' in urlparts[1]:
+            urlparts[1] = urlparts[1].split('@')[-1]
+        
+        return urlunsplit(urlparts)
+
     def commitChanges(self, location):
         dlg = PMRHgCommitDialog(self)
         dlg.setModal(True)
         if dlg.exec_():
             try:
                 # set wait icon
+                pmr_tool = PMRTool()
                 QtGui.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
-                c = CommandCommit(location, dlg.username(), dlg.password(), dlg.comment())
+                remote = self.getDefaultRemotePath(location)
+
+                p = pmr_tool.requestTemporaryPassword(remote)
+                # fallback values using dialog?
+                username = p.get('user', None) # or dlg.username()
+                password = p.get('key', None) # or dlg.password()
+
+                c = CommandCommit(location, username, password, dlg.comment())
                 c.run()
                 # unset wait icon
                 QtGui.QApplication.restoreOverrideCursor()

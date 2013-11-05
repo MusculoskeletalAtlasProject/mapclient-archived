@@ -13,7 +13,12 @@ from tools.pmr.jsonclient.credential import OAuthCredential
 _PROTOCOL = 'application/vnd.physiome.pmr2.json.0'
 _UA = 'pmr.jsonclient.Client/0.2'
 
-_DEFAULT_SCOPE = '{0}/scope/collection,{0}/scope/search,{0}/scope/workspace_full'
+_DEFAULT_SCOPE = (
+    '{0}/scope/collection,'
+    '{0}/scope/search,'
+    '{0}/scope/workspace_full,'
+    '{0}/scope/workspace_tempauth'
+)
 
 def std_headers():
     h = {'Accept': _PROTOCOL,
@@ -60,6 +65,74 @@ class Client(object):
         response = requests.post(url, headers=headers, data=json.dumps(data))
         
         return response.json()
+
+    def post(self, url, data=None, headers=None):
+        if data is None:
+            data = {}
+
+        headers = std_headers()
+        if headers:
+            headers.update(headers)
+
+        if self.hasAccess():
+            headers.update(self._credential.getAuthorization('POST', url))
+
+        response = requests.post(url, headers=headers, data=json.dumps(data))
+        return response.json()
+
+    def requestTemporaryPassword(self, workspace_url):
+        url = '%s/request_temporary_password' % workspace_url
+        try:
+            return self.post(url)
+        except:
+            import pdb;pdb.post_mortem()
+            raise
+
+    def addWorkspace(self, title=None, description=None):
+        url = '%s/workspace/+/addWorkspace' % self._site
+        if not self.hasAccess():
+            return ''
+        
+        headers = std_headers()
+        headers.update(self._credential.getAuthorization('POST', url))
+        data = {}
+        data['actions'] = {'add': '1'}
+        # XXX fields are assumed to be like so: need to verify what exactly
+        # they are.
+        data['fields'] = {'storage': 'mercurial', 'description': description, 'title': title}
+        response = requests.post(url, headers=headers, data=json.dumps(data), allow_redirects=False)
+        
+        return response.headers['Location']
+    
+    def requestTemporaryCredential(self):
+        url = '%s/%s?scope=%s' % (self._site, OAuthCredential._REQUEST_TOKEN, quote_plus(self._scope))
+        
+        headers = self._credential.getAuthorization('GET', url, callback='oob')
+        response = requests.get(url, headers=headers)
+        response_dict = parse_qs(response.text)
+        key = response_dict.get('oauth_token', ['']).pop()
+        secret = response_dict.get('oauth_token_secret', ['']).pop()
+        self._credential.setAccess(key, secret)
+        
+        return key
+    
+    def setPermanentCredential(self, verifier):
+        # Assume self.key is a request token key.
+        url = '%s/%s' % (self._site, OAuthCredential._GET_ACCESS_TOKEN)
+
+        headers = self._credential.getAuthorization('GET', url, verifier=verifier)
+        response = requests.get(url, headers=headers)
+        response_dict = parse_qs(response.text)
+        key = response_dict.get('oauth_token', ['']).pop()
+        secret = response_dict.get('oauth_token_secret', ['']).pop()
+        self._credential.setAccess(key, secret)
+        
+    def authorizationUrl(self, key):
+        return '%s/%s?oauth_token=%s' % (self._site, OAuthCredential._AUTHORIZE_TOKEN, key)
+    
+    def setSite(self, site):
+        self._site = site
+        self.updateDashboard()
     
     def addWorkspace(self, title=None, description=None):
         url = '%s/workspace/+/addWorkspace' % self._site
@@ -70,10 +143,19 @@ class Client(object):
         headers.update(self._credential.getAuthorization('POST', url))
         data = {}
         data['actions'] = {'add': '1'}
+        # XXX fields are assumed to be like so: need to verify what exactly
+        # they are.
         data['fields'] = {'storage': 'mercurial', 'description': description, 'title': title}
         response = requests.post(url, headers=headers, data=json.dumps(data), allow_redirects=False)
         
-        return response.headers['Location']
+        location = response.headers.get('Location', None)
+        if not location:
+            try:
+                error = response.json()
+            except:
+                error = response.text
+            raise ValueError(error)
+        return location
     
     def requestTemporaryCredential(self):
         url = '%s/%s?scope=%s' % (self._site, OAuthCredential._REQUEST_TOKEN, quote_plus(self._scope))

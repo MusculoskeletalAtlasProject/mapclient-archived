@@ -40,6 +40,9 @@ class PMRTool(object):
     def search(self, text):
         return self._client.search(text)
         
+    def requestTemporaryPassword(self, workspace_url):
+        return self._client.requestTemporaryPassword(workspace_url)
+
     def requestTemporaryCredential(self):
         return self._client.requestTemporaryCredential()
     

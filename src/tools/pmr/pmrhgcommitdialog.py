@@ -31,13 +31,11 @@ class PMRHgCommitDialog(QtGui.QDialog):
         self._ui.buttonBox.button(QtGui.QDialogButtonBox.Ok).clicked.connect(self._handleCommit)
 
     def _handleCommit(self):
-        if (len(self._ui.usernameLineEdit.text()) > 0 and
-            len(self._ui.passwordLineEdit.text()) > 0 and
-            len(self._ui.commentTextEdit.toPlainText())):
+        if len(self._ui.commentTextEdit.toPlainText()):
             self.accept()
         else:
             QtGui.QMessageBox.warning(
-                self, 'Error', 'Missing username, password or comment')
+                self, 'Error', 'Missing comment')
 
     def username(self):
         return self._ui.usernameLineEdit.text()
