@@ -29,7 +29,7 @@ if current_dir not in sys.path:
     sys.path.insert(0, current_dir)
 
 # import class that derives itself from the step mountpoint.
-#from skeletonstep import step
+from skeletonstep import step
 
-( _, tail ) = os.path.split(current_dir)
-#print("Plugin '{0}' version {1} by {2} loaded".format(tail, __version__, __author__))
+(_, tail) = os.path.split(current_dir)
+print("Plugin '{0}' version {1} by {2} loaded".format(tail, __version__, __author__))
