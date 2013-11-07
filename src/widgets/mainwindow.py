@@ -55,6 +55,8 @@ class MainWindow(QtGui.QMainWindow):
         self._ui.stackedWidget.addWidget(self._workflowWidget)
         self.setCurrentUndoRedoStack(self._workflowWidget.undoRedoStack())
 
+        self._pluginManagerDlg = None
+
     def _createUndoAction(self, parent):
         self.undoAction = QtGui.QAction('Undo', parent)
         self.undoAction.setShortcut(QtGui.QKeySequence('Ctrl+Z'))
@@ -147,9 +149,10 @@ class MainWindow(QtGui.QMainWindow):
     def pluginManager(self):
         from tools.pluginmanagerdialog import PluginManagerDialog
         dlg = PluginManagerDialog(self)
+        self._pluginManagerDlg = dlg
         dlg.setDirectories(self._model.pluginManager().directories())
         dlg.setLoadDefaultPlugins(self._model.pluginManager().loadDefaultPlugins())
-        dlg.reloadPlugins = self._model.pluginManager().load
+        dlg.reloadPlugins = self._pluginManagerReloadPlugins
 
         dlg.setModal(True)
         if dlg.exec_():
@@ -158,6 +161,17 @@ class MainWindow(QtGui.QMainWindow):
             if self._model.pluginManager().pluginsModified():
                 self._model.pluginManager().load()
                 self._workflowWidget.updateStepTree()
+
+        self._pluginManagerDlg = None
+
+    def _pluginManagerReloadPlugins(self):
+        '''
+        Callback from the plugin manager to reload the current plugins.
+        '''
+        self._model.pluginManager().setDirectories(self._pluginManagerDlg.directories())
+        self._model.pluginManager().setLoadDefaultPlugins(self._pluginManagerDlg.loadDefaultPlugins())
+        self._model.pluginManager().load()
+        self._workflowWidget.updateStepTree()
 
     def pluginWizard(self):
         from tools.pluginwizard.wizarddialog import WizardDialog

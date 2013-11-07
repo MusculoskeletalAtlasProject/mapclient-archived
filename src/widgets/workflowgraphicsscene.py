@@ -161,7 +161,7 @@ class WorkflowGraphicsScene(QtGui.QGraphicsScene):
         self.parent().setWidgetUndoRedoStack(stack)
 
     def doneExecution(self):
-        self.parent().executeWorkflow()
+        self.parent().executeNext()
 
     def identifierOccursCount(self, identifier):
         return self.parent().identifierOccursCount(identifier)
