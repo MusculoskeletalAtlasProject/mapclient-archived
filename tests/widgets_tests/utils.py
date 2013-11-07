@@ -17,22 +17,30 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     You should have received a copy of the GNU General Public License
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
-
 import unittest
 
-def suite():
-    tests = unittest.TestSuite()
+class UtilsTestCase(unittest.TestCase):
 
-    from widgets_tests.mainwindow import MainWindowTestCase
-    tests.addTests(unittest.TestLoader().loadTestsFromTestCase(MainWindowTestCase))
+    size = 60
+    h = 10
+    alpha = 5
 
-    from widgets_tests.utils import UtilsTestCase
-    tests.addTests(unittest.TestLoader().loadTestsFromTestCase(UtilsTestCase))
 
-    return tests
+    def portPosition(self, n, i):
+#         print(self.size / 2.0 - self.h / 2.0, -(n - 1) * self.h - (n - 1) / 2 * self.alpha / 2.0, (self.h + self.alpha / 2.0) * i)
+        return self.size / 2.0 - (n * self.h + (n - 1) * self.alpha) / 2.0 + (self.h + self.alpha) * i
+#         return self.size / 2.0 - self.h / 2.0 - (n - 1) * self.h - (n - 1) / 2 * self.alpha / 2.0 + (self.h + self.alpha / 2.0) * i
 
-def load_tests(loader, tests, pattern):
-    return suite()
+    def testPortLocation_neq1(self):
+        loc = self.portPosition(1, 0)
+        self.assertEqual(25, loc)
 
-if __name__ == '__main__':
-    unittest.TextTestRunner().run(suite())
+    def testPortLocation_neq2(self):
+        loc = self.portPosition(2, 0)
+        self.assertEqual(17.5, loc)
+        loc = self.portPosition(2, 1)
+        self.assertEqual(32.5, loc)
+
+if __name__ == "__main__":
+    # import sys;sys.argv = ['', 'Test.testName']
+    unittest.main()
