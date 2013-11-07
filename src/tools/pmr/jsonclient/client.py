@@ -85,7 +85,6 @@ class Client(object):
         try:
             return self.post(url)
         except:
-            import pdb;pdb.post_mortem()
             raise
 
     def addWorkspace(self, title=None, description=None):
