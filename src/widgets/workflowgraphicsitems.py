@@ -280,7 +280,9 @@ class Node(Item):
 
             triples = port.getTriplesForPred(pred)
             triple_objects = [triple[2] for triple in triples]
-            port_item.moveBy(x_pos, self.Size / 2 + h / 3 * (4 * index - 2 * (port_total - 1) - 1))
+            alpha = h / 4.0  # Controls the spacing between the ports
+            y_pos = self.Size / 2.0 - (port_total * h + (port_total - 1) * alpha) / 2.0 + (h + alpha) * index
+            port_item.moveBy(x_pos, y_pos)
             port_item.setToolTip(tooltip_stub + ', '.join(triple_objects))
             self._step_port_items.append(port_item)
 

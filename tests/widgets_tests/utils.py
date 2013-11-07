@@ -18,57 +18,28 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
 import unittest
-from PySide import QtGui
-
-import widgets.resources_rc
-from widgets.utils import _checkExtent, createDefaultImageIcon
-
-if QtGui.qApp == None: QtGui.QApplication([])
 
 class UtilsTestCase(unittest.TestCase):
 
-
-    def testExtentA(self):
-        name = 'A'
-        image = QtGui.QImage(':/workflow/images/default_step_icon.png')
-        p = QtGui.QPainter(image)
-        result = _checkExtent(p, image.size(), name)
-        self.assertFalse(result)
-#         p.end()
+    size = 60
+    h = 10
+    alpha = 5
 
 
-    def testExtentB(self):
-        name = 'BBBBBBBBBBBBBBBBBBBBBBBBBBBBB'
-        image = QtGui.QImage(':/workflow/images/default_step_icon.png')
-        p = QtGui.QPainter(image)
-        result = _checkExtent(p, image.size(), name)
-        self.assertFalse(result)
+    def portPosition(self, n, i):
+#         print(self.size / 2.0 - self.h / 2.0, -(n - 1) * self.h - (n - 1) / 2 * self.alpha / 2.0, (self.h + self.alpha / 2.0) * i)
+        return self.size / 2.0 - (n * self.h + (n - 1) * self.alpha) / 2.0 + (self.h + self.alpha) * i
+#         return self.size / 2.0 - self.h / 2.0 - (n - 1) * self.h - (n - 1) / 2 * self.alpha / 2.0 + (self.h + self.alpha / 2.0) * i
 
+    def testPortLocation_neq1(self):
+        loc = self.portPosition(1, 0)
+        self.assertEqual(25, loc)
 
-    def testIncreaseA(self):
-        name = 'AAAA'
-        image = QtGui.QImage(':/workflow/images/default_step_icon.png')
-        p = QtGui.QPainter(image)
-        f = p.font()
-        point_size = f.pointSize()
-        count = 1
-        while not _checkExtent(p, image.size(), name) and count < 500:
-            p.begin(image)
-            point_size += 1
-            count += 1
-            f = p.font()
-            f.setPointSize(point_size)
-            p.setFont(f)
-            print(f.pointSize())
-
-        p.begin(image)
-        f = p.font()
-        f.setPointSize(point_size)
-        p.setFont(f)
-        self.assertTrue(_checkExtent(p, image.size(), name))
-
-#         p.end()
-
+    def testPortLocation_neq2(self):
+        loc = self.portPosition(2, 0)
+        self.assertEqual(17.5, loc)
+        loc = self.portPosition(2, 1)
+        self.assertEqual(32.5, loc)
 
 if __name__ == "__main__":
     # import sys;sys.argv = ['', 'Test.testName']
