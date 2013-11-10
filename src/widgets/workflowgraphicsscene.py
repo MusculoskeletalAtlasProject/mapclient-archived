@@ -21,7 +21,7 @@ from PySide import QtGui
 
 from core.workflowscene import MetaStep, Connection
 from widgets.workflowgraphicsitems import Node, Arc
-from widgets.workflowcommands import CommandConfigure
+from widgets.workflowcommands import CommandConfigure, CommandRemove
 
 
 class WorkflowGraphicsScene(QtGui.QGraphicsScene):
@@ -81,6 +81,7 @@ class WorkflowGraphicsScene(QtGui.QGraphicsScene):
                 workflowitem._step.registerConfiguredObserver(self.stepConfigured)
                 workflowitem._step.registerDoneExecution(self.doneExecution)
                 workflowitem._step.registerOnExecuteEntry(self.setCurrentWidget, self.setWidgetUndoRedoStack)
+                workflowitem._step.registerIdentifierOccursCount(self.identifierOccursCount)
                 # Put the node into the scene straight away so that the items scene will
                 # be valid when we set the position.
                 QtGui.QGraphicsScene.addItem(self, node)
@@ -93,17 +94,9 @@ class WorkflowGraphicsScene(QtGui.QGraphicsScene):
                 connections.append(workflowitem)
 
         for connection in connections:
-            # Have to figure which port item of the source is connected to which 
-            # port item of the destination.  There should be exactly one such connection
-            src_port_item = None
-            dest_port_item = None
-            for source_port_item in meta_steps[connection.source()]._step_port_items:
-                for destination_port_item in meta_steps[connection.destination()]._step_port_items:
-                    if source_port_item.canConnect(destination_port_item):
-                        src_port_item = source_port_item
-                        dest_port_item = destination_port_item
-                        break
-            arc = Arc(src_port_item, dest_port_item)
+            src_port_item = meta_steps[connection.source()]._step_port_items[connection.sourceIndex()]
+            destination_port_item = meta_steps[connection.destination()]._step_port_items[connection.destinationIndex()]
+            arc = Arc(src_port_item, destination_port_item)
             # Overwrite the connection created in the Arc with the original one that is in the
             # WorkflowScene
             arc._connection = connection
@@ -151,9 +144,12 @@ class WorkflowGraphicsScene(QtGui.QGraphicsScene):
 
     def commitChanges(self, location):
         self.parent().commitChanges(location)
-        
+
     def setConfigureNode(self, node):
         self._currentConfigureNode = node
+
+    def removeStep(self, node):
+        self._undoStack.push(CommandRemove(self, [node]))
 
     def stepConfigured(self):
         self._undoStack.push(CommandConfigure(self, self._currentConfigureNode))
@@ -165,5 +161,9 @@ class WorkflowGraphicsScene(QtGui.QGraphicsScene):
         self.parent().setWidgetUndoRedoStack(stack)
 
     def doneExecution(self):
-        self.parent().executeWorkflow()
+        self.parent().executeNext()
+
+    def identifierOccursCount(self, identifier):
+        return self.parent().identifierOccursCount(identifier)
+
 

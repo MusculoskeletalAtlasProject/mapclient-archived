@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'qt/mainwindow.ui'
 #
-# Created: Fri Jun 14 11:23:51 2013
+# Created: Wed Oct 30 13:52:47 2013
 #      by: pyside-uic 0.2.14 running on PySide 1.1.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -26,7 +26,7 @@ class Ui_MainWindow(object):
         self.horizontalLayout.addWidget(self.stackedWidget)
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 800, 24))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 800, 19))
         self.menubar.setObjectName("menubar")
         self.menu_Help = QtGui.QMenu(self.menubar)
         self.menu_Help.setObjectName("menu_Help")
@@ -50,10 +50,13 @@ class Ui_MainWindow(object):
         self.actionPMR.setObjectName("actionPMR")
         self.actionAnnotation = QtGui.QAction(MainWindow)
         self.actionAnnotation.setObjectName("actionAnnotation")
+        self.actionPluginWizard = QtGui.QAction(MainWindow)
+        self.actionPluginWizard.setObjectName("actionPluginWizard")
         self.menu_Help.addAction(self.action_About)
         self.menu_File.addSeparator()
         self.menu_File.addAction(self.action_Quit)
         self.menu_Tools.addAction(self.actionPluginManager)
+        self.menu_Tools.addAction(self.actionPluginWizard)
         self.menu_Tools.addAction(self.actionPMR)
         self.menu_Tools.addAction(self.actionAnnotation)
         self.menubar.addAction(self.menu_File.menuAction())
@@ -77,5 +80,6 @@ class Ui_MainWindow(object):
         self.actionPluginManager.setText(QtGui.QApplication.translate("MainWindow", "Plugin &Manager", None, QtGui.QApplication.UnicodeUTF8))
         self.actionPMR.setText(QtGui.QApplication.translate("MainWindow", "&PMR", None, QtGui.QApplication.UnicodeUTF8))
         self.actionAnnotation.setText(QtGui.QApplication.translate("MainWindow", "&Annotation", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionPluginWizard.setText(QtGui.QApplication.translate("MainWindow", "Plugin Wi&zard", None, QtGui.QApplication.UnicodeUTF8))
 
 from . import resources_rc

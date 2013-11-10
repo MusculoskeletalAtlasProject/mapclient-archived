@@ -21,9 +21,14 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
 import unittest
 
 def suite():
-    from widgets_tests.mainwindow import MainWindowTestCase
     tests = unittest.TestSuite()
+
+    from widgets_tests.mainwindow import MainWindowTestCase
     tests.addTests(unittest.TestLoader().loadTestsFromTestCase(MainWindowTestCase))
+
+    from widgets_tests.utils import UtilsTestCase
+    tests.addTests(unittest.TestLoader().loadTestsFromTestCase(UtilsTestCase))
+
     return tests
 
 def load_tests(loader, tests, pattern):

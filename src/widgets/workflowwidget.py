@@ -61,8 +61,6 @@ class WorkflowWidget(QtGui.QWidget):
         self.action_Close = None  # Keep a handle to this for modifying the Ui.
         self._action_annotation = self._mainWindow.findChild(QtGui.QAction, "actionAnnotation")
         self._createMenuItems()
-        # load tools
-#        self.toolPlugins = ToolMountPoint.getPlugins(self.menu_Tools, self)
 
         self.updateStepTree()
 
@@ -75,7 +73,6 @@ class WorkflowWidget(QtGui.QWidget):
         self.action_Close.setEnabled(workflowOpen)
         self.setEnabled(workflowOpen)
         self.action_Save.setEnabled(wfm.isModified())
-        self._ui.executeButton.setEnabled(wfm.scene().canExecute() and not wfm.isModified())
         self._action_annotation.setEnabled(workflowOpen)
 
     def updateStepTree(self):
@@ -94,8 +91,32 @@ class WorkflowWidget(QtGui.QWidget):
         print('setting active - workflow widget')
         self._mainWindow.setCurrentUndoRedoStack(self._undoStack)
 
+    def executeNext(self):
+        self._mainWindow.execute()
+
     def executeWorkflow(self):
-        self._mainWindow.execute()  # .model().workflowManager().execute()
+        wfm = self._mainWindow.model().workflowManager()
+        error_count = 0
+        error_msg = ''
+        if wfm.isModified():
+            error_count += 1
+            error_msg += '  ' + str(error_count) + '. The workflow has not been saved.\n'
+
+        if not wfm.scene().canExecute():
+            error_count += 1
+            error_msg += '  ' + str(error_count) + '. Not all steps in the workflow have been successfully configured.\n'
+
+        if error_count == 0:
+            self._mainWindow.execute()  # .model().workflowManager().execute()
+        else:
+            error_prefix = 'The workflow could not be executed for the following reason'
+            if error_count > 1:
+                error_prefix += 's'
+            error_prefix += ':\n\n'
+            QtGui.QMessageBox.critical(self, 'Workflow Execution', error_prefix + error_msg, QtGui.QMessageBox.Ok)
+
+    def identifierOccursCount(self, identifier):
+        return self._mainWindow.model().workflowManager().identifierOccursCount(identifier)
 
     def setCurrentWidget(self, widget):
         self._mainWindow.setCurrentWidget(widget)
@@ -107,6 +128,15 @@ class WorkflowWidget(QtGui.QWidget):
         m = self._mainWindow.model().workflowManager()
         workflowDir = QtGui.QFileDialog.getExistingDirectory(self._mainWindow, caption='Select Workflow Directory', directory=m.previousLocation())
         if len(workflowDir) > 0:
+            # Check if overwriting an existing workflow.
+            if m.exists(workflowDir):
+                # Check to make sure user wishes to overwrite existing workflow.
+                ret = QtGui.QMessageBox.warning(self, 'Replace Existing Workflow',
+                                              'A Workflow already exists at this location.  Do you want to replace this Workflow?',
+                                              QtGui.QMessageBox.Yes | QtGui.QMessageBox.No)  # (QtGui.QMessageBox.Warning, '')
+                if ret == QtGui.QMessageBox.No:
+                    return
+
             m.new(workflowDir)
             m.setPreviousLocation(workflowDir)
             if pmr:
@@ -130,7 +160,7 @@ class WorkflowWidget(QtGui.QWidget):
             self._ui.graphicsView.setLocation(workflowDir)
             self._graphicsScene.updateModel()
             self._updateUi()
-            
+
     def newpmr(self):
         self.new(pmr=True)
 
@@ -149,7 +179,7 @@ class WorkflowWidget(QtGui.QWidget):
                 self._updateUi()
             except (ValueError, WorkflowError) as e:
                 self.close()
-                QtGui.QMessageBox.critical( self, 'Error Caught', 'Invalid Workflow.  ' + str(e))
+                QtGui.QMessageBox.critical(self, 'Error Caught', 'Invalid Workflow.  ' + str(e))
 
     def importFromPMR(self):
         m = self._mainWindow.model().workflowManager()
@@ -176,14 +206,15 @@ class WorkflowWidget(QtGui.QWidget):
                         self._updateUi()
                     except (ValueError, WorkflowError) as e:
                         self.close()
-                        QtGui.QMessageBox.critical( self, 'Error Caught', 'Invalid Workflow.  ' + str(e))
-                    
-        
+                        QtGui.QMessageBox.critical(self, 'Error Caught', 'Invalid Workflow.  ' + str(e))
+
+
     def close(self):
+        self._mainWindow.confirmClose()
         m = self._mainWindow.model().workflowManager()
         self._undoStack.clear()
-        m.close()
         self._graphicsScene.clear()
+        m.close()
         self._updateUi()
 
     def save(self):
@@ -191,7 +222,7 @@ class WorkflowWidget(QtGui.QWidget):
         m.save()
         if os.path.exists(os.path.join(m.location(), '.hg')):
             self.commitChanges(m.location())
-            
+
         self._updateUi()
 
     def commitChanges(self, location):
@@ -207,7 +238,7 @@ class WorkflowWidget(QtGui.QWidget):
                 QtGui.QApplication.restoreOverrideCursor()
             except Exception:
                 QtGui.QMessageBox.warning(self._mainWindow, 'Error Saving', 'The commit to PMR did not succeed')
-        
+
     def _setActionProperties(self, action, name, slot, shortcut='', statustip=''):
         action.setObjectName(name)
         action.triggered.connect(slot)
@@ -218,7 +249,7 @@ class WorkflowWidget(QtGui.QWidget):
     def _createMenuItems(self):
         menu_File = self._mainWindow._ui.menubar.findChild(QtGui.QMenu, 'menu_File')
         lastFileMenuAction = menu_File.actions()[-1]
-        menu_New = QtGui.QMenu('&New', menu_File)            
+        menu_New = QtGui.QMenu('&New', menu_File)
 #        menu_Open = QtGui.QMenu('&Open', menu_File)
 
         action_NewPMR = QtGui.QAction('PMR Workflow', menu_New)

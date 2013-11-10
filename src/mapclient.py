@@ -20,7 +20,13 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
 '''
 import os, sys, locale
 
-from settings import info
+# With PEP366 we need to conditionally import the settings module based on
+# whether we are executing the file directly of indirectly.  This is my
+# workaround.
+if __package__:
+    from .settings import info
+else:
+    from settings import info
 
 # Ensure the MAP Client module directory is in the system path so relative 'import' statements work
 base_path = os.path.dirname(os.path.abspath(__file__))

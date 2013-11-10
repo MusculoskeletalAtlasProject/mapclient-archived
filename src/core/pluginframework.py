@@ -28,8 +28,14 @@ import os, imp
 MAIN_MODULE = '__init__'
 
 def getPlugins(pluginDirectory):
+    '''
+    Get all plugins from the given directory.
+    '''
     plugins = []
-    possibleplugins = os.listdir(pluginDirectory)
+    try:
+        possibleplugins = os.listdir(pluginDirectory)
+    except OSError:
+        possibleplugins = []
     for i in possibleplugins:
         # print('possible plugin: ' + i)
         location = os.path.join(pluginDirectory, i)
