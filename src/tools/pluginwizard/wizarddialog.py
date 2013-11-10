@@ -18,7 +18,7 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
 
-import os
+import os, platform
 
 from PySide import QtCore, QtGui
 
@@ -52,6 +52,10 @@ class WizardDialog(QtGui.QWizard):
         self.setWindowTitle('Workflow Step Wizard')
         self.setFixedSize(675, 550)
 
+        if platform.system() == 'Darwin':
+            self.setWizardStyle(QtGui.QWizard.MacStyle)
+        else:
+            self.setWizardStyle(QtGui.QWizard.ModernStyle)
         # set pages
         self.addPage(createIntroPage())
         self.addPage(NameWizardPage())
