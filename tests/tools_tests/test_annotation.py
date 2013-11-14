@@ -22,7 +22,7 @@ import re, os, sys
 
 from PySide import QtGui
 
-import alltests
+from .. import utils
 from tools.annotation.annotationtool import AnnotationTool, _SECTION_HEADER_RE, _NAMESPACE_RE
 from tools.annotation.annotationdialog import AnnotationDialog
 
@@ -71,15 +71,15 @@ class AnnotationToolTestCase(unittest.TestCase):
         
     if not DISABLE_GUI_TESTS:
         def testAnnotationDialog(self):
-            QtGui.QApplication(sys.argv)
-            to_path = os.path.join(os.path.dirname(alltests.__file__), 'test_resources/annotation_test/')
+            QtGui.QApplication.instance()
+            to_path = os.path.join(os.path.dirname(utils.__file__), 'test_resources/annotation_test/')
             if not os.path.exists(to_path):
                 os.mkdir(to_path)
             
             dlg = AnnotationDialog(to_path)
             dlg.setModal(True)
-            if dlg.exec_():
-                pass
+            #if dlg.exec_():
+            #    pass
 #            shutil.rmtree(to_path)
         
 

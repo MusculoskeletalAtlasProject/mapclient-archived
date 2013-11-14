@@ -9,9 +9,9 @@ from PySide import QtCore
 
 from core.workflowscene import WorkflowScene, WorkflowDependencyGraph, MetaStep, Connection
 
-import alltests
+from .. import utils
 
-test_path = os.path.join(os.path.dirname(alltests.__file__), 'test_resources', 'core_test')
+test_path = os.path.join(os.path.dirname(utils.__file__), 'test_resources', 'core_test')
 
 class DumbManager(object):
 

@@ -26,9 +26,9 @@ from tools.pluginwizard.skeleton import SkeletonOptions, Skeleton
 if QtGui.qApp == None: QtGui.QApplication([])
 import widgets.resources_rc
 
-import alltests
+from .. import utils
 
-test_path = os.path.join(os.path.dirname(alltests.__file__), 'test_resources', 'wizard_test')
+test_path = os.path.join(os.path.dirname(utils.__file__), 'test_resources', 'wizard_test')
 
 PLUGIN_WRITE_TO_DIRECTORY = test_path
 PLUGIN_PACKAGE_NAME = 'abcdalphastep'

@@ -23,7 +23,7 @@ import shutil
 from time import sleep
 
 from core.threadcommandmanager import CommandCopyDirectory, ThreadCommandManager, which
-import alltests
+from .. import utils
 
 
 class ThreadCommandManagerTestCase(unittest.TestCase):
@@ -40,8 +40,8 @@ class ThreadCommandManagerTestCase(unittest.TestCase):
     def testCopyDirectory(self):
         # create to directory
         
-        from_path = os.path.join(os.path.dirname(alltests.__file__), 'test_resources/utils/')
-        to_path = os.path.join(os.path.dirname(alltests.__file__), 'test_resources/utils_copy/')
+        from_path = os.path.join(os.path.dirname(utils.__file__), 'test_resources/utils/')
+        to_path = os.path.join(os.path.dirname(utils.__file__), 'test_resources/utils_copy/')
         
         os.mkdir(to_path)
 
@@ -64,8 +64,8 @@ class ThreadCommandManagerTestCase(unittest.TestCase):
         
     def testRunCommand(self):
 
-        from_path = os.path.join(os.path.dirname(alltests.__file__), 'test_resources/utils/')
-        to_path = os.path.join(os.path.dirname(alltests.__file__), 'test_resources/utils_copy/')
+        from_path = os.path.join(os.path.dirname(utils.__file__), 'test_resources/utils/')
+        to_path = os.path.join(os.path.dirname(utils.__file__), 'test_resources/utils_copy/')
         
         os.mkdir(to_path)
 
