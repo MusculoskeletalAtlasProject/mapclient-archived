@@ -24,8 +24,11 @@ setup(name='MAPClient',
      author='MAP Client Developers',
      author_email='mapclient-devs@physiomeproject.org',
      url='https://launchpad.net/mapclient',
-     packages=['core', 'mountpoints', 'settings', 'tools', 'tools.annotation', 'tools.pluginwizard', 'tools.pmr', 'tools.pmr.jsonclient', 'widgets'],
+     packages=['core', 'mountpoints', 'settings', 'tools', 'tools.annotation', 'tools.pluginwizard', 'tools.pmr', 'tools.pmr.jsonclient', 'widgets', 'mapclient'],
      package_dir={'': 'src'},
      py_modules=['mapclient'],
-     entry_points={'console_scripts':['mapclient=mapclient:main']}
+     entry_points={'console_scripts':['mapclient=mapclient.main:winmain']},
+     install_requires=[
+        'pmr.wfctrl',
+     ],
 )
