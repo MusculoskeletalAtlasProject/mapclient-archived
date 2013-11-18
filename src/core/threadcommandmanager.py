@@ -39,35 +39,35 @@ class ThreadCommand(Thread):
         It has no functional purpose.
         '''
         Thread.__init__(self, name=name)
-        
+
     def setCaller(self, caller):
         self._caller = caller
-        
+
     def runFinished(self):
         self._caller and self._caller._commandFinished(self.name)
-    
-    
+
+
 class CommandCopyDirectory(ThreadCommand):
     ''' Threadable command to copy the contents of one directory to another.
     This copy is not recursive.
     '''
-    
+
     def __init__(self, from_dir, to_dir):
         ThreadCommand.__init__(self, 'CommandCopyDirectory')
         self._from_dir = from_dir
         self._to_dir = to_dir
-        
+
     def run(self):
         if not os.path.exists(self._to_dir):
             os.mkdir(self._to_dir)
-            
+
         onlyfiles = [ join(self._from_dir, f) for f in listdir(self._from_dir) if isfile(join(self._from_dir, f)) ]
         for f in onlyfiles:
             copy(f, self._to_dir)
-            
+
         self.runFinished()
-        
-        
+
+
 class CommandCreateWorkspace(ThreadCommand):
     '''Threadable command to create a workspace on PMR.
     '''
@@ -75,12 +75,12 @@ class CommandCreateWorkspace(ThreadCommand):
         ThreadCommand.__init__(self, 'CommandCreateWorkspace')
         self._title = title
         self._description = description
-        
+
     def run(self):
         print('Warning: Not fully implemented')
         self.runFinished()
-        
-    
+
+
 class CommandIgnoreDirectoriesHg(ThreadCommand):
     ''' Threadable command to add ignore directives to
     all directories in given location.  Requires a Mercurial
@@ -92,8 +92,8 @@ class CommandIgnoreDirectoriesHg(ThreadCommand):
         self._hg = None
         hg = which('hg')
         if len(hg) > 0:
-            self._hg = hg[0] 
-        
+            self._hg = hg[0]
+
     def run(self):
         if self._hg and os.path.exists(join(self._location, '.hg')):
             onlydirs = [x for x in listdir(self._location) if isdir(join(self._location, x)) ]
@@ -101,11 +101,11 @@ class CommandIgnoreDirectoriesHg(ThreadCommand):
             f = open(join(self._location, '.hgignore'), 'w')
             f.writelines(ignoredirs)
             f.close()
-    
+
 class CommandCloneWorkspace(ThreadCommand):
     ''' Threadable command to clone a PMR workspace.
     '''
-    
+
     def __init__(self, repourl, location, username, password):
         ThreadCommand.__init__(self, 'CommandCloneWorkspace')
         self._repourl = repourl
@@ -115,8 +115,8 @@ class CommandCloneWorkspace(ThreadCommand):
         self._hg = None
         hg = which('hg')
         if len(hg) > 0:
-            self._hg = hg[0] 
-        
+            self._hg = hg[0]
+
     def run(self):
         '''Mercurial will not clone into a directory that is not empty.  To work
         around this we clone into a temporary directory and then move the '.hg'
@@ -124,20 +124,20 @@ class CommandCloneWorkspace(ThreadCommand):
         '''
         if self._hg and not os.path.exists(join(self._location, '.hg')):
             d = tempfile.mkdtemp(dir=self._location)
-            
+
             repourl = self._repourl[:7] + self._username + ':' + self._password + '@' + self._repourl[7:]
             call([self._hg, 'clone', repourl, d])
             mvdir(d, self._location)
 #            move(join(d, '.hg'), self._location)
             rmtree(d)
-        
+
         self.runFinished()
-    
+
 
 class CommandCommit(ThreadCommand):
     '''Threadable command to commit all changes at location to PMR
     '''
-    
+
     def __init__(self, location, username, password, comment):
         ThreadCommand.__init__(self, 'CommandCommit')
         self._location = location
@@ -147,8 +147,8 @@ class CommandCommit(ThreadCommand):
         self._hg = None
         hg = which('hg')
         if len(hg) > 0:
-            self._hg = hg[0] 
-        
+            self._hg = hg[0]
+
     def run(self):
         if self._hg and os.path.exists(join(self._location, '.hg')):
             # This is for the commit command
@@ -163,25 +163,25 @@ class CommandCommit(ThreadCommand):
                 repourl = repourl[:insert] + ':' + self._password + repourl[insert:]
                 process = Popen([self._hg, 'push', repourl], cwd=self._location)
                 process.communicate()
-        
+
         self.runFinished()
-        
+
 
 class ThreadCommandManager(object):
     '''This class managers thread commands in a queue.  The queue will
     be executed in order serially.
     '''
-    
+
     def __init__(self):
         self._queue = []
-        self._finished = None # Callback for informing when the queue is empty
-        
+        self._finished = None  # Callback for informing when the queue is empty
+
     def registerFinishedCallback(self, callback):
         self._finished = callback
-        
+
     def addCommand(self, c):
         self._queue.append(c)
-        
+
     def execute(self):
         if len(self._queue) > 0:
             c = self._queue.pop(0)
@@ -189,10 +189,10 @@ class ThreadCommandManager(object):
             c.start()
         elif self._finished:
             self._finished()
-        
+
     def _commandFinished(self, thread_name):
         self.execute()
-        
+
 
 def which(name, flags=os.X_OK):
         result = []
@@ -222,6 +222,5 @@ def mvdir(root_src_dir, root_dst_dir):
             if os.path.exists(dst_file):
                 os.remove(dst_file)
             move(src_file, dst_dir)
-        
-        
-    
+
+

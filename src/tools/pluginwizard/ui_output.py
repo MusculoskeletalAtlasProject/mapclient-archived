@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'qt/output.ui'
 #
-# Created: Thu Oct 17 11:03:13 2013
+# Created: Fri Nov  1 11:58:22 2013
 #      by: pyside-uic 0.2.14 running on PySide 1.1.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -39,4 +39,4 @@ class Ui_Output(object):
         self.directoryLineEdit.setToolTip(QtGui.QApplication.translate("Output", "directory must exist and be writable", None, QtGui.QApplication.UnicodeUTF8))
         self.directoryButton.setText(QtGui.QApplication.translate("Output", "...", None, QtGui.QApplication.UnicodeUTF8))
 
-import resources_rc
+from . import resources_rc

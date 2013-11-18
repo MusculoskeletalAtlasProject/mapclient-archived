@@ -17,19 +17,22 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     You should have received a copy of the GNU General Public License
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
-__version__ = '0.1.0'
-__author__ = 'Xxxx Yyyyy'
 
-import os, sys
+import unittest
 
-current_dir = os.path.dirname(os.path.abspath(__file__))
-if current_dir not in sys.path:
-    # Using __file__ will not work if py2exe is used,
-    # Possible problem of OSX10.6 also.
-    sys.path.insert(0, current_dir)
+def suite():
+    tests = unittest.TestSuite()
 
-# import class that derives itself from the step mountpoint.
-# from skeletonstep import step
+    from widgets_tests.mainwindow import MainWindowTestCase
+    tests.addTests(unittest.TestLoader().loadTestsFromTestCase(MainWindowTestCase))
 
-(_, tail) = os.path.split(current_dir)
-# print("Plugin '{0}' version {1} by {2} loaded".format(tail, __version__, __author__))
+    from widgets_tests.utils import UtilsTestCase
+    tests.addTests(unittest.TestLoader().loadTestsFromTestCase(UtilsTestCase))
+
+    return tests
+
+def load_tests(loader, tests, pattern):
+    return suite()
+
+if __name__ == '__main__':
+    unittest.TextTestRunner().run(suite())

@@ -75,7 +75,6 @@ class WorkflowWidget(QtGui.QWidget):
         self.action_Close.setEnabled(workflowOpen)
         self.setEnabled(workflowOpen)
         self.action_Save.setEnabled(wfm.isModified())
-        self._ui.executeButton.setEnabled(wfm.scene().canExecute() and not wfm.isModified())
         self._action_annotation.setEnabled(workflowOpen)
 
     def updateStepTree(self):
@@ -94,8 +93,29 @@ class WorkflowWidget(QtGui.QWidget):
         print('setting active - workflow widget')
         self._mainWindow.setCurrentUndoRedoStack(self._undoStack)
 
+    def executeNext(self):
+        self._mainWindow.execute()
+
     def executeWorkflow(self):
-        self._mainWindow.execute()  # .model().workflowManager().execute()
+        wfm = self._mainWindow.model().workflowManager()
+        error_count = 0
+        error_msg = ''
+        if wfm.isModified():
+            error_count += 1
+            error_msg += '  ' + str(error_count) + '. The workflow has not been saved.\n'
+
+        if not wfm.scene().canExecute():
+            error_count += 1
+            error_msg += '  ' + str(error_count) + '. Not all steps in the workflow have been successfully configured.\n'
+
+        if error_count == 0:
+            self._mainWindow.execute()  # .model().workflowManager().execute()
+        else:
+            error_prefix = 'The workflow could not be executed for the following reason'
+            if error_count > 1:
+                error_prefix += 's'
+            error_prefix += ':\n\n'
+            QtGui.QMessageBox.critical(self, 'Workflow Execution', error_prefix + error_msg, QtGui.QMessageBox.Ok)
 
     def identifierOccursCount(self, identifier):
         return self._mainWindow.model().workflowManager().identifierOccursCount(identifier)

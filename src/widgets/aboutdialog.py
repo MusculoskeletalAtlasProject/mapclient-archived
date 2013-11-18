@@ -18,7 +18,10 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
 from PySide.QtGui import QDialog
+
+from settings import info
 from widgets.ui_aboutdialog import Ui_AboutDialog
+
 class AboutDialog(QDialog):
     '''
     About dialog to display program about information.
@@ -32,12 +35,14 @@ class AboutDialog(QDialog):
         QDialog.__init__(self, parent)
         self._ui = Ui_AboutDialog()
         self._ui.setupUi(self)
+        text = self._ui.aboutTextLabel.text()
+        self._ui.aboutTextLabel.setText(text.replace('##version##', info.VERSION_STRING))
         self._makeConnections()
-        
+
     def _makeConnections(self):
         self._ui.btn_Credits.clicked.connect(self.showCreditsDialog)
         self._ui.btn_License.clicked.connect(self.showLicenseDialog)
-        
+
     def showCreditsDialog(self):
         from widgets.creditsdialog import CreditsDialog
         dlg = CreditsDialog(self)

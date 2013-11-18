@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'qt/aboutdialog.ui'
 #
-# Created: Fri Jun 14 11:25:36 2013
+# Created: Tue Nov  5 15:34:40 2013
 #      by: pyside-uic 0.2.14 running on PySide 1.1.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -34,11 +34,11 @@ class Ui_AboutDialog(object):
         self.label_2.setAlignment(QtCore.Qt.AlignCenter)
         self.label_2.setObjectName("label_2")
         self.verticalLayout.addWidget(self.label_2)
-        self.label = QtGui.QLabel(self.frame)
-        self.label.setStyleSheet("QLabel { background-color : white }")
-        self.label.setWordWrap(True)
-        self.label.setObjectName("label")
-        self.verticalLayout.addWidget(self.label)
+        self.aboutTextLabel = QtGui.QLabel(self.frame)
+        self.aboutTextLabel.setStyleSheet("QLabel { background-color : white }")
+        self.aboutTextLabel.setWordWrap(True)
+        self.aboutTextLabel.setObjectName("aboutTextLabel")
+        self.verticalLayout.addWidget(self.aboutTextLabel)
         self.gridLayout.addWidget(self.frame, 0, 0, 1, 1)
         self.frame_3 = QtGui.QFrame(AboutDialog)
         self.frame_3.setFrameShape(QtGui.QFrame.StyledPanel)
@@ -70,7 +70,7 @@ class Ui_AboutDialog(object):
 
     def retranslateUi(self, AboutDialog):
         AboutDialog.setWindowTitle(QtGui.QApplication.translate("AboutDialog", "About MAP Client", None, QtGui.QApplication.UnicodeUTF8))
-        self.label.setText(QtGui.QApplication.translate("AboutDialog", "<html><head/><body><p align=\"center\"><span style=\" font-size:24pt; font-weight:600;\">MAP Client</span></p><p align=\"center\">MAP Client, a program to generate detailed musculoskeletal models for OpenSim.</p><p align=\"center\">Copyright (C) 2012 University of Auckland</p><p align=\"justify\">MAP Client is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.</p><p align=\"justify\">MAP Client is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.</p><p align=\"justify\">You should have received a copy of the GNU General Public License along with MAP Client. If not, see &lt;http://www.gnu.org/licenses/&gt;.</p><p><br/></p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
+        self.aboutTextLabel.setText(QtGui.QApplication.translate("AboutDialog", "<html><head/><body><p align=\"center\"><span style=\" font-size:24pt; font-weight:600;\">MAP Client ##version##</span></p><p align=\"center\">MAP Client, a program to generate detailed musculoskeletal models for OpenSim.</p><p align=\"center\">Copyright (C) 2012 University of Auckland</p><p align=\"justify\">MAP Client is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.</p><p align=\"justify\">MAP Client is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.</p><p align=\"justify\">You should have received a copy of the GNU General Public License along with MAP Client. If not, see &lt;http://www.gnu.org/licenses/&gt;.</p><p><br/></p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
         self.btn_Credits.setText(QtGui.QApplication.translate("AboutDialog", "C&redits", None, QtGui.QApplication.UnicodeUTF8))
         self.btn_License.setText(QtGui.QApplication.translate("AboutDialog", "&License", None, QtGui.QApplication.UnicodeUTF8))
         self.btn_Close.setText(QtGui.QApplication.translate("AboutDialog", "&Close", None, QtGui.QApplication.UnicodeUTF8))
