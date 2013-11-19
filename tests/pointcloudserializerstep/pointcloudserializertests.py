@@ -19,23 +19,11 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
 '''
 import unittest
 
+
 def suite():
+    from pointcloudserializerstep.test_pointcloudserializer import PointCloudSerializerTestCase
     tests = unittest.TestSuite()
-
-    from core_tests.pluginframework import PluginFrameworkTestCase
-    tests.addTests(unittest.TestLoader().loadTestsFromTestCase(PluginFrameworkTestCase))
-
-    from core_tests.mainapplication import MainApplicationTestCase
-    tests.addTests(unittest.TestLoader().loadTestsFromTestCase(MainApplicationTestCase))
-
-    from core_tests.workflowscene import WorkflowSceneTestCase, WorkflowDependencyGraphTestCase, DictUtilsTestCase
-    tests.addTests(unittest.TestLoader().loadTestsFromTestCase(WorkflowSceneTestCase))
-    tests.addTests(unittest.TestLoader().loadTestsFromTestCase(WorkflowDependencyGraphTestCase))
-    tests.addTests(unittest.TestLoader().loadTestsFromTestCase(DictUtilsTestCase))
-
-    from core_tests.threadcommandmanager import ThreadCommandManagerTestCase
-    tests.addTests(unittest.TestLoader().loadTestsFromTestCase(ThreadCommandManagerTestCase))
-
+    tests.addTests(unittest.TestLoader().loadTestsFromTestCase(PointCloudSerializerTestCase))
     return tests
 
 def load_tests(loader, tests, pattern):

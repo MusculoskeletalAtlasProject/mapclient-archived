@@ -17,17 +17,24 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     You should have received a copy of the GNU General Public License
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
-
 import unittest
 
 def suite():
     tests = unittest.TestSuite()
 
-    from widgets_tests.mainwindow import MainWindowTestCase
-    tests.addTests(unittest.TestLoader().loadTestsFromTestCase(MainWindowTestCase))
+    from core.test_pluginframework import PluginFrameworkTestCase
+    tests.addTests(unittest.TestLoader().loadTestsFromTestCase(PluginFrameworkTestCase))
 
-    from widgets_tests.utils import UtilsTestCase
-    tests.addTests(unittest.TestLoader().loadTestsFromTestCase(UtilsTestCase))
+    from core.test_mainapplication import MainApplicationTestCase
+    tests.addTests(unittest.TestLoader().loadTestsFromTestCase(MainApplicationTestCase))
+
+    from core.test_workflowscene import WorkflowSceneTestCase, WorkflowDependencyGraphTestCase, DictUtilsTestCase
+    tests.addTests(unittest.TestLoader().loadTestsFromTestCase(WorkflowSceneTestCase))
+    tests.addTests(unittest.TestLoader().loadTestsFromTestCase(WorkflowDependencyGraphTestCase))
+    tests.addTests(unittest.TestLoader().loadTestsFromTestCase(DictUtilsTestCase))
+
+    from core.test_threadcommandmanager import ThreadCommandManagerTestCase
+    tests.addTests(unittest.TestLoader().loadTestsFromTestCase(ThreadCommandManagerTestCase))
 
     return tests
 

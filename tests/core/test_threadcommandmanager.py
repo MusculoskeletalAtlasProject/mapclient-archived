@@ -23,7 +23,7 @@ import shutil
 from time import sleep
 
 from mapclient.core.threadcommandmanager import CommandCopyDirectory, ThreadCommandManager, which
-from .. import utils
+from tests import utils
 
 
 class ThreadCommandManagerTestCase(unittest.TestCase):

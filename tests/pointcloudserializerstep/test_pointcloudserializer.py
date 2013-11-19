@@ -3,6 +3,8 @@ Created on Feb 27, 2013
 
 @author: hsorby
 '''
+from __future__ import absolute_import
+
 import os, sys
 import unittest
 

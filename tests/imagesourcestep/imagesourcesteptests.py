@@ -21,7 +21,7 @@ import unittest
 
 
 def suite():
-    from imagesourcestep_tests.imagesource import ImageSourceTestCase
+    from imagesourcestep.test_imagesource import ImageSourceTestCase
     tests = unittest.TestSuite()
     tests.addTests(unittest.TestLoader().loadTestsFromTestCase(ImageSourceTestCase))
     return tests

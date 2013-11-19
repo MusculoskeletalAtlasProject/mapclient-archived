@@ -26,7 +26,7 @@ from mapclient.tools.pluginwizard.skeleton import SkeletonOptions, Skeleton
 if QtGui.qApp == None: QtGui.QApplication([])
 import mapclient.widgets.resources_rc
 
-from .. import utils
+from tests import utils
 
 test_path = os.path.join(os.path.dirname(utils.__file__), 'test_resources', 'wizard_test')
 

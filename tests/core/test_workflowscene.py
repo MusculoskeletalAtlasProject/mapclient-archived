@@ -9,7 +9,7 @@ from PySide import QtCore
 
 from mapclient.core.workflowscene import WorkflowScene, WorkflowDependencyGraph, MetaStep, Connection
 
-from .. import utils
+from tests import utils
 
 test_path = os.path.join(os.path.dirname(utils.__file__), 'test_resources', 'core_test')
 
