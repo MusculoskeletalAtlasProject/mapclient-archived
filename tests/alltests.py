@@ -32,10 +32,10 @@ def suite():
     from core import coretests
     tests.addTests(coretests.suite())
 
-    from imagesourcestep import imagesourcesteptests
+    from plugins.imagesourcestep import imagesourcesteptests
     tests.addTests(imagesourcesteptests.suite())
     
-    from pointcloudserializerstep import pointcloudserializertests
+    from plugins.pointcloudserializerstep import pointcloudserializertests
     tests.addTests(pointcloudserializertests.suite())
     
     return tests

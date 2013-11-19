@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 '''
 MAP Client, a program to generate detailed musculoskeletal models for OpenSim.
     Copyright (C) 2012  University of Auckland

@@ -21,7 +21,7 @@ import unittest
 
 
 def suite():
-    from pointcloudserializerstep.test_pointcloudserializer import PointCloudSerializerTestCase
+    from plugins.pointcloudserializerstep.test_pointcloudserializer import PointCloudSerializerTestCase
     tests = unittest.TestSuite()
     tests.addTests(unittest.TestLoader().loadTestsFromTestCase(PointCloudSerializerTestCase))
     return tests
