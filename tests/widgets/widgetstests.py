@@ -23,10 +23,10 @@ import unittest
 def suite():
     tests = unittest.TestSuite()
 
-    from widgets.test_mainwindow import MainWindowTestCase
+    from tests.widgets.test_mainwindow import MainWindowTestCase
     tests.addTests(unittest.TestLoader().loadTestsFromTestCase(MainWindowTestCase))
 
-    from widgets.utils import UtilsTestCase
+    from tests.widgets.utils import UtilsTestCase
     tests.addTests(unittest.TestLoader().loadTestsFromTestCase(UtilsTestCase))
 
     return tests

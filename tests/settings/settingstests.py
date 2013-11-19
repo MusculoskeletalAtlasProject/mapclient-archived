@@ -20,7 +20,7 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
 import unittest
 
 def suite():
-    from settings.test_info import InfoTestCase
+    from tests.settings.test_info import InfoTestCase
     tests = unittest.TestSuite()
     tests.addTests(unittest.TestLoader().loadTestsFromTestCase(InfoTestCase))
     return tests

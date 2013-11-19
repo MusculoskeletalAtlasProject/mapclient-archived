@@ -22,18 +22,18 @@ import unittest
 def suite():
     tests = unittest.TestSuite()
 
-    from core.test_pluginframework import PluginFrameworkTestCase
+    from tests.core.test_pluginframework import PluginFrameworkTestCase
     tests.addTests(unittest.TestLoader().loadTestsFromTestCase(PluginFrameworkTestCase))
 
-    from core.test_mainapplication import MainApplicationTestCase
+    from tests.core.test_mainapplication import MainApplicationTestCase
     tests.addTests(unittest.TestLoader().loadTestsFromTestCase(MainApplicationTestCase))
 
-    from core.test_workflowscene import WorkflowSceneTestCase, WorkflowDependencyGraphTestCase, DictUtilsTestCase
+    from tests.core.test_workflowscene import WorkflowSceneTestCase, WorkflowDependencyGraphTestCase, DictUtilsTestCase
     tests.addTests(unittest.TestLoader().loadTestsFromTestCase(WorkflowSceneTestCase))
     tests.addTests(unittest.TestLoader().loadTestsFromTestCase(WorkflowDependencyGraphTestCase))
     tests.addTests(unittest.TestLoader().loadTestsFromTestCase(DictUtilsTestCase))
 
-    from core.test_threadcommandmanager import ThreadCommandManagerTestCase
+    from tests.core.test_threadcommandmanager import ThreadCommandManagerTestCase
     tests.addTests(unittest.TestLoader().loadTestsFromTestCase(ThreadCommandManagerTestCase))
 
     return tests
