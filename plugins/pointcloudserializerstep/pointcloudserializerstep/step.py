@@ -21,7 +21,7 @@ import os
 
 from PySide import QtGui, QtCore
 
-from mountpoints.workflowstep import WorkflowStepMountPoint
+from mapclient.mountpoints.workflowstep import WorkflowStepMountPoint
 
 from pointcloudserializerstep.widgets.configuredialog import ConfigureDialog, ConfigureDialogState
 

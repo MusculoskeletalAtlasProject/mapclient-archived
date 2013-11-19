@@ -23,8 +23,8 @@ import re, os, sys
 from PySide import QtGui
 
 from .. import utils
-from tools.annotation.annotationtool import AnnotationTool, _SECTION_HEADER_RE, _NAMESPACE_RE
-from tools.annotation.annotationdialog import AnnotationDialog
+from mapclient.tools.annotation.annotationtool import AnnotationTool, _SECTION_HEADER_RE, _NAMESPACE_RE
+from mapclient.tools.annotation.annotationdialog import AnnotationDialog
 
 DISABLE_GUI_TESTS = False
 

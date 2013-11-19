@@ -19,7 +19,7 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
 '''
 import unittest
 
-from core.mainapplication import MainApplication
+from mapclient.core.mainapplication import MainApplication
 
 class MainApplicationTestCase(unittest.TestCase):
 

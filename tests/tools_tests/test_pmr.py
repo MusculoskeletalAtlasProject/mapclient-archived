@@ -21,7 +21,7 @@ import unittest, sys
 
 from PySide import QtGui
 
-from settings import info
+from mapclient.settings import info
 
 DISABLE_GUI_TESTS = True
 
@@ -44,7 +44,7 @@ class PMRSearchDialogTestCase(unittest.TestCase):
     if sys.version < '2.7.0':
         @unittest.skipIf(DISABLE_GUI_TESTS, 'GUI tests are disabled')
         def testPMRSearchDialog(self):        
-            from tools.pmr.pmrsearchdialog import PMRSearchDialog
+            from mapclient.tools.pmr.pmrsearchdialog import PMRSearchDialog
             dlg = PMRSearchDialog()
             dlg.setModal(True)
             if dlg.exec_():
@@ -55,7 +55,7 @@ class PMRSearchDialogTestCase(unittest.TestCase):
 class PMRToolTestCase(unittest.TestCase):
     
     def setUp(self):
-        from tools.pmr.pmrtool import PMRTool
+        from mapclient.tools.pmr.pmrtool import PMRTool
         self._tool = PMRTool()
 
     def tearDown(self):
@@ -69,7 +69,7 @@ class PMRToolTestCase(unittest.TestCase):
             self.assertTrue(location.startswith('http://'))
     
     def testGetDashboard(self):
-        from tools.pmr.pmrtool import PMRTool
+        from mapclient.tools.pmr.pmrtool import PMRTool
         t = PMRTool()
         d = t.getDashboard()
         

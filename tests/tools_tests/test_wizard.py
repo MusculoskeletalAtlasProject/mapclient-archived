@@ -20,11 +20,11 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
 import os, unittest
 from PySide import QtGui
 
-from tools.pluginwizard import wizarddialog
-from tools.pluginwizard.skeleton import SkeletonOptions, Skeleton
+from mapclient.tools.pluginwizard import wizarddialog
+from mapclient.tools.pluginwizard.skeleton import SkeletonOptions, Skeleton
 
 if QtGui.qApp == None: QtGui.QApplication([])
-import widgets.resources_rc
+import mapclient.widgets.resources_rc
 
 from .. import utils
 

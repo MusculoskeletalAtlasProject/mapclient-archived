@@ -22,7 +22,7 @@ import os
 import shutil
 from time import sleep
 
-from core.threadcommandmanager import CommandCopyDirectory, ThreadCommandManager, which
+from mapclient.core.threadcommandmanager import CommandCopyDirectory, ThreadCommandManager, which
 from .. import utils
 
 

@@ -21,12 +21,12 @@ import os
 
 from PySide import QtGui, QtCore
 
-from mountpoints.workflowstep import WorkflowStepMountPoint
+from mapclient.mountpoints.workflowstep import WorkflowStepMountPoint
 from imagesourcestep.widgets.configuredialog import ConfigureDialog, ConfigureDialogState
 
-from core.threadcommandmanager import ThreadCommandManager, CommandCopyDirectory, CommandCloneWorkspace
-from tools.pmr.pmrtool import PMRTool
-from tools.pmr.pmrhglogindialog import PMRHgLoginDialog
+from mapclient.core.threadcommandmanager import ThreadCommandManager, CommandCopyDirectory, CommandCloneWorkspace
+from mapclient.tools.pmr.pmrtool import PMRTool
+from mapclient.tools.pmr.pmrhglogindialog import PMRHgLoginDialog
 
 def getConfigFilename(identifier):
     return identifier + '.conf'

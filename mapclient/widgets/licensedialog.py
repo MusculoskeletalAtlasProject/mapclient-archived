@@ -17,25 +17,21 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     You should have received a copy of the GNU General Public License
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
-import sys, unittest
-from mapclient.core.mainapplication import PluginManager
-from ..utils import ConsumeOutput
 
-class PluginFrameworkTestCase(unittest.TestCase):
+from PySide.QtGui import QDialog
+from mapclient.widgets.ui_licensedialog import Ui_LicenseDialog
 
-
-    def testLoadPlugins(self):
-        pm = PluginManager()
-
-        old_stdout = sys.stdout
-        sys.stdout = redirectstdout = ConsumeOutput()
-
-        pm.load()
-
-        sys.stdout = old_stdout
-        self.assertTrue("Plugin 'pointcloudserializerstep' version 0.3.0 by Hugh Sorby loaded" in redirectstdout.messages)
+class LicenseDialog(QDialog):
+    '''
+    Dialog for displaying the license.
+    '''
 
 
-if __name__ == "__main__":
-    #import sys;sys.argv = ['', 'Test.testLoadPlugins']
-    unittest.main()
+    def __init__(self, parent=None):
+        '''
+        Constructor
+        '''
+        QDialog.__init__(self, parent)
+        self._ui = Ui_LicenseDialog()
+        self._ui.setupUi(self)
+        

@@ -17,25 +17,25 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     You should have received a copy of the GNU General Public License
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
-import sys, unittest
-from mapclient.core.mainapplication import PluginManager
-from ..utils import ConsumeOutput
+import os
 
-class PluginFrameworkTestCase(unittest.TestCase):
+from subprocess import Popen, PIPE
 
+from mapclient.core.threadcommandmanager import which
 
-    def testLoadPlugins(self):
-        pm = PluginManager()
+def isHgRepository(location):
+    return os.path.exists(os.path.join(location, '.hg'))
 
-        old_stdout = sys.stdout
-        sys.stdout = redirectstdout = ConsumeOutput()
-
-        pm.load()
-
-        sys.stdout = old_stdout
-        self.assertTrue("Plugin 'pointcloudserializerstep' version 0.3.0 by Hugh Sorby loaded" in redirectstdout.messages)
-
-
-if __name__ == "__main__":
-    #import sys;sys.argv = ['', 'Test.testLoadPlugins']
-    unittest.main()
+def repositoryIsUpToDate(location):
+    result = True
+    if isHgRepository(location):
+        hg = which('hg')
+        if len(hg) > 0:
+            process = Popen([hg[0], "status", location], stdout=PIPE, stderr=PIPE)
+            outputs = process.communicate()
+            stdout = outputs[0]
+            stderr = outputs[1]
+            if len(stdout) > 0 or len(stderr) > 0:
+                result = False
+        
+    return result

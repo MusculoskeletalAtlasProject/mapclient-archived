@@ -17,25 +17,25 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     You should have received a copy of the GNU General Public License
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
-import sys, unittest
-from mapclient.core.mainapplication import PluginManager
-from ..utils import ConsumeOutput
+from PySide import QtGui
 
-class PluginFrameworkTestCase(unittest.TestCase):
+from mapclient.tools.pmr.ui_authoriseapplicationdialog import Ui_AuthoriseApplicationDialog
 
 
-    def testLoadPlugins(self):
-        pm = PluginManager()
-
-        old_stdout = sys.stdout
-        sys.stdout = redirectstdout = ConsumeOutput()
-
-        pm.load()
-
-        sys.stdout = old_stdout
-        self.assertTrue("Plugin 'pointcloudserializerstep' version 0.3.0 by Hugh Sorby loaded" in redirectstdout.messages)
+class AuthoriseApplicationDialog(QtGui.QDialog):
+    '''
+    Dialog for authorising the application.
+    '''
 
 
-if __name__ == "__main__":
-    #import sys;sys.argv = ['', 'Test.testLoadPlugins']
-    unittest.main()
+    def __init__(self, parent=None):
+        '''
+        Constructor
+        '''
+        QtGui.QDialog.__init__(self, parent)
+        self._ui = Ui_AuthoriseApplicationDialog()
+        self._ui.setupUi(self)
+        
+
+    def token(self):
+        return self._ui.tokenLineEdit.text()

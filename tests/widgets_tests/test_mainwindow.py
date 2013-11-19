@@ -23,8 +23,8 @@ class MainWindowTestCase(unittest.TestCase):
 
 
     def testMain(self):
-        from widgets import mainwindow
-        self.assertEqual(mainwindow.__name__, 'widgets.mainwindow')
+        from mapclient.widgets import mainwindow
+        self.assertEqual(mainwindow.__name__, 'mapclient.widgets.mainwindow')
 
 
 if __name__ == "__main__":
