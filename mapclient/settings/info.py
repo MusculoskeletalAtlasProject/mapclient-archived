@@ -87,3 +87,11 @@ class PMRInfo(object):
 
     def has_access(self):
         return bool(self.user_public_token and self.user_secret_token)
+
+    def get_session_kwargs(self):
+        return {
+            'client_key': self.consumer_public_token,
+            'client_secret': self.consumer_secret_token,
+            'resource_owner_key': self.user_public_token,
+            'resource_owner_secret': self.user_secret_token,
+        }

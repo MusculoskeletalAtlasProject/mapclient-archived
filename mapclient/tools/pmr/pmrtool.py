@@ -4,9 +4,32 @@ Created on Jun 20, 2013
 @author: hsorby
 '''
 
+from requests_oauthlib import OAuth1Session
+
 from mapclient.settings import info
 from mapclient.tools.pmr.jsonclient.client import Client
 from mapclient.tools.pmr.authoriseapplicationdialog import AuthoriseApplicationDialog
+
+endpoints = {
+    '': {
+        'dashboard': 'pmr2-dashboard',
+    },
+
+    'WorkspaceContainer': {
+        'add-workspace': '+/addWorkspace',
+    },
+
+    'Workspace': {
+        'temppass': 'request_temporary_password',
+    },
+
+}
+
+def make_form_request(action=None, **kw):
+    return {
+        'fields': kw,
+        'actions': {action: True},
+    }
 
 
 class PMRTool(object):
@@ -22,18 +45,8 @@ class PMRTool(object):
         Constructor
         '''
 
-        self._client_credentials = {
-            'client_key': info.DEFAULT_CONSUMER_PUBLIC_TOKEN,
-            'client_secret': info.DEFAULT_CONSUMER_SECRET_TOKEN,
-        }
-
-        self._token_credentials = {}
-
-    def make_session(self):
-        kwargs = {}
-        kwargs.update(self._client_credentials)
-        kwargs.update(self._token_credentials)
-
+    def make_session(self, pmr_info):
+        kwargs = pmr_info.get_session_kwargs()
         session = OAuth1Session(**kwargs)
         session.headers.update({
             'Accept': self.PROTOCOL,
@@ -42,16 +55,10 @@ class PMRTool(object):
         })
         return session
 
-    def update_session(self):
-        self.session = self.make_session()
-        return self.session
-
     def hasAccess(self):
         pmr_info = info.PMRInfo()
         return pmr_info.has_access()
 
-    # XXX clean up read/writing of tokens somewhere else.
-    # consolidate the requests to use OAuth1Session
     # also workaround the resigning redirections by manually resolving
     # redirects while using allow_redirect=False when making all requests
 
@@ -61,14 +68,22 @@ class PMRTool(object):
     def requestTemporaryPassword(self, workspace_url):
         return self._client.requestTemporaryPassword(workspace_url)
 
-    def requestTemporaryCredential(self):
-        return self._client.requestTemporaryCredential()
-
     def authorizationUrl(self, key):
         return self._client.authorizationUrl(key)
 
     def getDashboard(self):
-        raise NotImplementedError
+        pmr_info = info.PMRInfo()
+        session = self.make_session(pmr_info)
+        target = '/'.join([pmr_info.host, endpoints['']['dashboard']])
+        return session.get(target).json()
 
     def addWorkspace(self, title, description):
-        return self._client.addWorkspace(title, description)
+        session = self.make_session()
+
+    def cloneWorkspace(self, source_url, target_dir):
+        pass
+
+    def linkWorkspaceDirToUrl(self, local_workspace_dir, remote_workspace_url):
+        # links a non-pmr workspace dir to a remote workspace url.
+        # prereq is that the remote must be new.
+        pass

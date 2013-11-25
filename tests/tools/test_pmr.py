@@ -71,11 +71,11 @@ class PMRToolTestCase(unittest.TestCase):
     def testGetDashboard(self):
         from mapclient.tools.pmr.pmrtool import PMRTool
         t = PMRTool()
-        # XXX will be redone using the session
-        #d = t.getDashboard()
-        #
-        #self.assertTrue('workspace-home' in d)
-        #self.assertTrue('workspace-add' in d)
+        # XXX will be respecified to be a live integration testing.
+        d = t.getDashboard()
+        
+        self.assertTrue('workspace-home' in d)
+        self.assertTrue('workspace-add' in d)
 
     def test_hasAccess(self):
         from mapclient.tools.pmr.pmrtool import PMRTool

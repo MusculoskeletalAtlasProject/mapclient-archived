@@ -13,27 +13,6 @@ DEFAULT_SCOPE = (
     '{0}/scope/workspace_full'
 ).format(DEFAULT_SITE_URL,)
 
-endpoints = {
-    '': [
-        'pmr2-dashboard',
-    ],
-
-    'WorkspaceContainer': [
-        '+/addWorkspace',
-    ],
-
-    'Workspace': [
-        'request_temporary_password',
-    ],
-
-}
-
-def make_form_request(action=None, **kw):
-    return {
-        'fields': kw,
-        'actions': {action: True},
-    }
-
  
 class TokenHelper(object):
 
