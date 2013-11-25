@@ -36,6 +36,5 @@ class AuthoriseApplicationDialog(QtGui.QDialog):
         self._ui = Ui_AuthoriseApplicationDialog()
         self._ui.setupUi(self)
         
-
     def token(self):
         return self._ui.tokenLineEdit.text()

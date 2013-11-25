@@ -21,6 +21,7 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
 from __future__ import absolute_import
 
 import os, sys, locale
+import logging
 
 # With PEP366 we need to conditionally import the settings module based on
 # whether we are executing the file directly of indirectly.  This is my
@@ -87,6 +88,8 @@ def main():
     from optparse import OptionParser
     from PySide import QtCore
     app = QtCore.QCoreApplication(sys.argv)
+
+    logging.basicConfig(level='DEBUG')
 
     # Set the default organisation name and application name used to store application settings
     QtCore.QCoreApplication.setOrganizationName(info.ORGANISATION_NAME)

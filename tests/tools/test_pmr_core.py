@@ -17,7 +17,10 @@ class DummySession(object):
 
     def fetch_access_token(self, target):
         self.targets.append(target)
-        return 'dummy_token'
+        return {
+            'oauth_token': 'dummy_access',
+            'oauth_token_secret': 'dummy_access_secret',
+        }
 
 
 class DummySessionFactory(object):
@@ -73,6 +76,9 @@ class TokenHelperTestCase(TestCase):
             'verifier': 'test_verifier',
         }))
 
-        result = 'dummy_token'
+        self.assertEqual(result, {
+            'oauth_token': 'dummy_access',
+            'oauth_token_secret': 'dummy_access_secret',
+        })
         self.assertEqual(self.dsf.targets[0],
             'https://models.physiomeproject.org/OAuthGetAccessToken')

@@ -28,7 +28,7 @@ APPLICATION_NAME = 'MAP Client'
 ORGANISATION_NAME = 'Musculo Skeletal'
 ORGANISATION_DOMAIN = 'musculoskeletal.org'
 
-DEFAULT_PMR_IPADDRESS = 'teaching.physiomeproject.org'
+DEFAULT_PMR_IPADDRESS = 'http://teaching.physiomeproject.org'
 DEFAULT_CONSUMER_PUBLIC_TOKEN = 'ghRsy25tpMnt36Aj7R_LsxUS'
 DEFAULT_CONSUMER_SECRET_TOKEN = '41IgdRjQS1HsO_mq8VN2M2Dg'
 
@@ -60,51 +60,30 @@ class PMRInfo(object):
     def readSettings(self):
         settings = QtCore.QSettings()
         settings.beginGroup('PMR')
-        self._ipaddress = settings.value('pmr-website', DEFAULT_PMR_IPADDRESS)
-        self._consumer_public_token = settings.value('consumer-public-token', DEFAULT_CONSUMER_PUBLIC_TOKEN)
-        self._consumer_secret_token = settings.value('consumer-secret-token', DEFAULT_CONSUMER_SECRET_TOKEN)
-        self._user_public_token = settings.value('user-public-token', '')
-        self._user_secret_token = settings.value('user-secret-token', '')
-        if not self._user_public_token:
-            self._user_public_token = None
-        if not self._user_secret_token:
-            self._user_secret_token = None
+        # pmr_host?  this is a domain name...
+        self.ipaddress = settings.value('pmr-website', DEFAULT_PMR_IPADDRESS)
+        self.host = self.ipaddress
+        self.consumer_public_token = settings.value('consumer-public-token', DEFAULT_CONSUMER_PUBLIC_TOKEN)
+        self.consumer_secret_token = settings.value('consumer-secret-token', DEFAULT_CONSUMER_SECRET_TOKEN)
+        self.user_public_token = settings.value('user-public-token', None)
+        self.user_secret_token = settings.value('user-secret-token', None)
         settings.endGroup()
 
     def writeSettings(self):
         settings = QtCore.QSettings()
         settings.beginGroup('PMR')
-        temp_public = ''
-        if self._user_public_token:
-            temp_public = self._user_public_token
-        temp_secret = ''
-        if self._user_secret_token:
-            temp_secret = self._user_secret_token
+
+        temp_public = self.user_public_token or ''
+        temp_secret = self.user_secret_token or ''
+
         settings.setValue('user-public-token', temp_public)
         settings.setValue('user-secret-token', temp_secret)
         settings.endGroup()
 
-    def ipAddress(self):
-        return self._ipaddress
+    def update_token(self, oauth_token, oauth_token_secret):
+        self.user_public_token = oauth_token
+        self.user_secret_token = oauth_token_secret
+        self.writeSettings()
 
-    def consumerPublicToken(self):
-        return self._consumer_public_token
-
-    def consumerSecretToken(self):
-        return self._consumer_secret_token
-
-    def userPublicToken(self):
-        return self._user_public_token
-
-    def userSecretToken(self):
-        return self._user_secret_token
-
-    def setUserPublicToken(self, token):
-        self._user_public_token = token
-
-    def setUserSecretToken(self, token):
-        self._user_secret_token = token
-
-
-
-
+    def has_access(self):
+        return bool(self.user_public_token and self.user_secret_token)

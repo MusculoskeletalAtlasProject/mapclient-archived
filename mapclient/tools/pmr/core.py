@@ -1,7 +1,9 @@
+import logging
 from urllib import quote_plus
 
 from requests_oauthlib.oauth1_session import OAuth1Session
 
+logger = logging.getLogger(__name__)
 
 DEFAULT_SITE_URL = 'https://models.physiomeproject.org'
 DEFAULT_SCOPE = (
@@ -11,7 +13,28 @@ DEFAULT_SCOPE = (
     '{0}/scope/workspace_full'
 ).format(DEFAULT_SITE_URL,)
 
+endpoints = {
+    '': [
+        'pmr2-dashboard',
+    ],
 
+    'WorkspaceContainer': [
+        '+/addWorkspace',
+    ],
+
+    'Workspace': [
+        'request_temporary_password',
+    ],
+
+}
+
+def make_form_request(action=None, **kw):
+    return {
+        'fields': kw,
+        'actions': {action: True},
+    }
+
+ 
 class TokenHelper(object):
 
     request_token_endpoint = 'OAuthRequestToken'
@@ -50,6 +73,8 @@ class TokenHelper(object):
             callback_uri=self.callback_url,
         )
 
+        logger.debug('Requesting temporary credentials from %s', target)
+
         result = oauth.fetch_request_token(target)
         self.request_token = result.get('oauth_token')
         self.request_secret = result.get('oauth_token_secret')
@@ -79,6 +104,8 @@ class TokenHelper(object):
             'site_url': self.site_url,
             'endpoint': self.access_token_endpoint,
         }
+
+        logger.debug('Requesting token credentials from %s', target)
 
         oauth = self.oauth_session_cls(
             client_key=self.client_key,

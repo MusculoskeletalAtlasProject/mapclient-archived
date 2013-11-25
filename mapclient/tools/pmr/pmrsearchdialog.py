@@ -17,10 +17,15 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     You should have received a copy of the GNU General Public License
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
+import webbrowser
+
 from PySide import QtGui, QtCore
 
+from mapclient.settings import info
 from mapclient.tools.annotation.annotationtool import AnnotationTool
+from mapclient.tools.pmr.core import TokenHelper
 from mapclient.tools.pmr.pmrtool import PMRTool
+from mapclient.tools.pmr.oauthcheckdialog import OAuthCheckDialog
 from mapclient.tools.pmr.ui_pmrsearchdialog import Ui_PMRSearchDialog
 
 class PMRSearchDialog(QtGui.QDialog):
@@ -84,16 +89,17 @@ class PMRSearchDialog(QtGui.QDialog):
         for item in items:
             return item.data(QtCore.Qt.UserRole)
         
-
     def register(self, link):
-        if link == 'mapclient.register':
-            self._pmrTool.registerWithPMR(self)
+        if link != 'mapclient.register':
+            return
+
+        dlg = OAuthCheckDialog(self)
+        dlg.setModal(True)
+        dlg.exec_()
                         
         self._updateUi()
         
     def deregister(self):
-        self._pmrTool.deregisterWithPMR()
+        pmr_info = info.PMRInfo()
+        pmr_info.update_token(None, None)
         self._updateUi()
-        
-        
-        
