@@ -129,41 +129,53 @@ class WorkflowWidget(QtGui.QWidget):
     def new(self, pmr=False):
         m = self._mainWindow.model().workflowManager()
         workflowDir = QtGui.QFileDialog.getExistingDirectory(self._mainWindow, caption='Select Workflow Directory', directory=m.previousLocation())
-        if len(workflowDir) > 0:
-            # Check if overwriting an existing workflow.
-            if m.exists(workflowDir):
-                # Check to make sure user wishes to overwrite existing workflow.
-                ret = QtGui.QMessageBox.warning(self, 'Replace Existing Workflow',
-                                              'A Workflow already exists at this location.  Do you want to replace this Workflow?',
-                                              QtGui.QMessageBox.Yes | QtGui.QMessageBox.No)  # (QtGui.QMessageBox.Warning, '')
-                if ret == QtGui.QMessageBox.No:
-                    return
+        if not workflowDir:
+            # user abort
+            return
 
-            m.new(workflowDir)
-            m.setPreviousLocation(workflowDir)
-            if pmr:
-                dir_name = os.path.basename(workflowDir)
-                QtGui.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
-                pmr_tool = PMRTool()
-                repourl = pmr_tool.addWorkspace('Workflow: ' + dir_name, None)
+        if m.exists(workflowDir):
+            # Check to make sure user wishes to overwrite existing workflow.
+            ret = QtGui.QMessageBox.warning(self,
+                'Replace Existing Workflow',
+                'A Workflow already exists at this location.  '
+                    'Do you want to replace this Workflow?',
+                QtGui.QMessageBox.Yes | QtGui.QMessageBox.No)
+            # (QtGui.QMessageBox.Warning, '')
+            if ret == QtGui.QMessageBox.No:
+                # user abort
+                return
 
-                p = pmr_tool.requestTemporaryPassword(repourl)
-                username = p.get('user', None)
-                password = p.get('key', None)
+        # got dir, continue
+        return self._createNewWorkflow(workflowDir, pmr)
 
-                c = CommandCloneWorkspace(repourl, workflowDir,
-                    username, password)
-                c.run()
-                c = CommandIgnoreDirectoriesHg(workflowDir)
-                c.run()
-                # unset wait icon
-                QtGui.QApplication.restoreOverrideCursor()
+    def _createNewWorkflow(self, workflowDir, pmr):
+        m.new(workflowDir)
+        m.setPreviousLocation(workflowDir)
 
+        if pmr:
+            QtGui.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
 
-            self._undoStack.clear()
-            self._ui.graphicsView.setLocation(workflowDir)
-            self._graphicsScene.updateModel()
-            self._updateUi()
+            dir_name = os.path.basename(workflowDir)
+            pmr_tool = PMRTool()
+            repourl = pmr_tool.addWorkspace('Workflow: ' + dir_name, None)
+
+            p = pmr_tool.requestTemporaryPassword(repourl)
+            username = p.get('user', None)
+            password = p.get('key', None)
+
+            c = CommandCloneWorkspace(repourl, workflowDir,
+                username, password)
+            c.run()
+            c = CommandIgnoreDirectoriesHg(workflowDir)
+            c.run()
+            # unset wait icon
+
+            QtGui.QApplication.restoreOverrideCursor()
+
+        self._undoStack.clear()
+        self._ui.graphicsView.setLocation(workflowDir)
+        self._graphicsScene.updateModel()
+        self._updateUi()
 
     def newpmr(self):
         self.new(pmr=True)

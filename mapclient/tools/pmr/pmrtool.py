@@ -4,6 +4,8 @@ Created on Jun 20, 2013
 @author: hsorby
 '''
 
+import json
+
 from requests_oauthlib import OAuth1Session
 
 from mapclient.settings import info
@@ -25,11 +27,11 @@ endpoints = {
 
 }
 
-def make_form_request(action=None, **kw):
-    return {
+def make_form_request(action_=None, **kw):
+    return json.dumps({
         'fields': kw,
-        'actions': {action: True},
-    }
+        'actions': {action_: 1},
+    })
 
 
 class PMRTool(object):
@@ -45,7 +47,9 @@ class PMRTool(object):
         Constructor
         '''
 
-    def make_session(self, pmr_info):
+    def make_session(self, pmr_info=None):
+        if pmr_info is None:
+            pmr_info = info.PMRInfo()
         kwargs = pmr_info.get_session_kwargs()
         session = OAuth1Session(**kwargs)
         session.headers.update({
@@ -60,7 +64,7 @@ class PMRTool(object):
         return pmr_info.has_access()
 
     # also workaround the resigning redirections by manually resolving
-    # redirects while using allow_redirect=False when making all requests
+    # redirects while using allow_redirects=False when making all requests
 
     def search(self, text):
         return self._client.search(text)
@@ -77,8 +81,42 @@ class PMRTool(object):
         target = '/'.join([pmr_info.host, endpoints['']['dashboard']])
         return session.get(target).json()
 
-    def addWorkspace(self, title, description):
+    def addWorkspace(self, title, description, storage='mercurial'):
         session = self.make_session()
+
+        dashboard = self.getDashboard()
+        option = dashboard.get('workspace-add', {})
+        target = option.get('target')
+
+        if target is None:
+            # XXX exception?
+            return
+
+        # XXX until requests and requests_oauthlib work together to
+        # provide a fix for the redirection and OAuth signature
+        # regeneration, we have to handle all redirects manually.
+        r = session.get(target, allow_redirects=False)
+        target = r.headers.get('Location')
+
+        # the real form get
+        # XXX I need to get PMR to generate IDs if the autoinc isn't
+        # enabled.
+        # XXX should verify the contents
+        # r = session.get(target, allow_redirects=False)
+
+        # For now, just post
+        r = session.post(target,
+            data=make_form_request('add',
+                title=title,
+                description=description,
+                storage=storage,
+            ),
+            allow_redirects=False)
+
+        workspace_target = r.headers.get('Location')
+        # verify that this is an actual workspace by getting it.
+        r = session.get(workspace_target)
+        return r.json().get('url')
 
     def cloneWorkspace(self, source_url, target_dir):
         pass
