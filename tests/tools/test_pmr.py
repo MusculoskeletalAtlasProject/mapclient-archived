@@ -118,6 +118,12 @@ class PMRToolTestCase(TestCase):
                 )
             ),
 
+            ('http://example.com/w/1/request_temporary_password',
+                TestAdapter(
+                    stream='{"user": "tester", "key": "secret"}',
+                )
+            ),
+
         ]
 
         # and tool, with the end points.
@@ -149,6 +155,11 @@ class PMRToolTestCase(TestCase):
         d = self._tool.getDashboard()
         self.assertTrue('workspace-home' in d)
         self.assertTrue('workspace-add' in d)
+
+    def test_requestTemporaryPassword(self):
+        result = self._tool.requestTemporaryPassword('http://example.com/w/1')
+        self.assertEqual(result['user'], 'tester')
+        self.assertEqual(result['key'], 'secret')
 
     def test_linkWorkspaceDirToUrl_success(self):
         self._tool.linkWorkspaceDirToUrl(

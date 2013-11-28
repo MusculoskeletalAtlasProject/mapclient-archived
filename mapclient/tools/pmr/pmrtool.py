@@ -73,7 +73,12 @@ class PMRTool(object):
         return self._client.search(text)
 
     def requestTemporaryPassword(self, workspace_url):
-        return self._client.requestTemporaryPassword(workspace_url)
+        session = self.make_session()
+        r = session.post(
+            '/'.join((workspace_url, endpoints['Workspace']['temppass'])),
+            data='{}',
+        )
+        return r.json()
 
     def authorizationUrl(self, key):
         return self._client.authorizationUrl(key)
