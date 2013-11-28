@@ -149,27 +149,16 @@ class WorkflowWidget(QtGui.QWidget):
         return self._createNewWorkflow(workflowDir, pmr)
 
     def _createNewWorkflow(self, workflowDir, pmr):
+        m = self._mainWindow.model().workflowManager()
         m.new(workflowDir)
         m.setPreviousLocation(workflowDir)
 
         if pmr:
             QtGui.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
-
-            dir_name = os.path.basename(workflowDir)
             pmr_tool = PMRTool()
+            dir_name = os.path.basename(workflowDir)
             repourl = pmr_tool.addWorkspace('Workflow: ' + dir_name, None)
-
-            p = pmr_tool.requestTemporaryPassword(repourl)
-            username = p.get('user', None)
-            password = p.get('key', None)
-
-            c = CommandCloneWorkspace(repourl, workflowDir,
-                username, password)
-            c.run()
-            c = CommandIgnoreDirectoriesHg(workflowDir)
-            c.run()
-            # unset wait icon
-
+            pmr_tool.linkWorkspaceDirToUrl(workflowDir, repourl)
             QtGui.QApplication.restoreOverrideCursor()
 
         self._undoStack.clear()

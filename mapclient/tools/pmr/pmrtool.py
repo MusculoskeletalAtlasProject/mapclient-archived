@@ -8,6 +8,9 @@ import json
 
 from requests_oauthlib import OAuth1Session
 
+from pmr.wfctrl.cmd import MercurialDvcsCmd
+from pmr.wfctrl.core import CmdWorkspace
+
 from mapclient.settings import info
 from mapclient.tools.pmr.jsonclient.client import Client
 from mapclient.tools.pmr.authoriseapplicationdialog import AuthoriseApplicationDialog
@@ -101,7 +104,7 @@ class PMRTool(object):
         # the real form get
         # XXX I need to get PMR to generate IDs if the autoinc isn't
         # enabled.
-        # XXX should verify the contents
+        # XXX should verify the contents of the fields.
         # r = session.get(target, allow_redirects=False)
 
         # For now, just post
@@ -124,4 +127,15 @@ class PMRTool(object):
     def linkWorkspaceDirToUrl(self, local_workspace_dir, remote_workspace_url):
         # links a non-pmr workspace dir to a remote workspace url.
         # prereq is that the remote must be new.
-        pass
+
+        # XXX should assert availability of Mercurial
+
+        # brand new command module for init.
+        new_cmd = MercurialDvcsCmd()
+        workspace = CmdWorkspace(local_workspace_dir, new_cmd)
+
+        # Add the remote using a new command
+        cmd = MercurialDvcsCmd(remote=remote_workspace_url)
+
+        # Do the writing.
+        cmd.write_remote(workspace)

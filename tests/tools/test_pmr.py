@@ -150,12 +150,18 @@ class PMRToolTestCase(TestCase):
         self.assertTrue('workspace-home' in d)
         self.assertTrue('workspace-add' in d)
 
+    def test_linkWorkspaceDirToUrl_success(self):
+        self._tool.linkWorkspaceDirToUrl(
+            self.working_dir, 'http://example.com/repo')
+        with open(os.path.join(self.working_dir, '.hg', 'hgrc')) as fd:
+            self.assertTrue('default = http://example.com/repo' in fd.read())
+
     def test_hasAccess(self):
         # update tokens using another instance
         info = PMRInfo()
         t = PMRTool()
-        # Ensure no access
-        info.update_token('', '')
+
+        # Fresh token should have no access
         self.assertFalse(t.hasAccess())
 
         info.update_token('test', 'token')
