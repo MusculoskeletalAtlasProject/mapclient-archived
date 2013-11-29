@@ -167,6 +167,19 @@ class PMRToolTestCase(TestCase):
         with open(os.path.join(self.working_dir, '.hg', 'hgrc')) as fd:
             self.assertTrue('default = http://example.com/repo' in fd.read())
 
+    def test_cloneWorkspace(self):
+        # We have tested the password retrival works.
+
+        # In pmr.wfctrl the pull is tested to work.
+
+        # Network test should be done, but that's really ensuring the
+        # correct values are instantiated to be sent as arguments to the
+        # binary call.
+
+        # Ideally we should be able to replace the command call with a
+        # mock.
+        pass
+
     def test_hasAccess(self):
         # update tokens using another instance
         info = PMRInfo()

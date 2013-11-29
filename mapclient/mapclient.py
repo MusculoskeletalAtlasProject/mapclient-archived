@@ -52,6 +52,8 @@ def winmain():
     Initialise common settings and check the operating environment before starting the application.
     '''
 
+    logging.basicConfig(level='DEBUG')
+
     progheader()
     # import the locale, and set the locale. This is used for
     # locale-aware number to string formatting

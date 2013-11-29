@@ -126,8 +126,30 @@ class PMRTool(object):
         r = session.get(workspace_target)
         return r.json().get('url')
 
-    def cloneWorkspace(self, source_url, target_dir):
-        pass
+    def cloneWorkspace(self, remote_workspace_url, local_workspace_dir):
+        creds = self.requestTemporaryPassword(remote_workspace_url)
+        # XXX target_dir is assumed to exist, so we can't just clone
+        # but we have to instantiate that as a new repo, define the
+        # remote and pull.
+
+        # link
+        self.linkWorkspaceDirToUrl(
+            local_workspace_dir=local_workspace_dir,
+            remote_workspace_url=remote_workspace_url,
+        )
+
+        # Another caveat: that workspace is probably private.  Acquire
+        # temporary password.
+
+        creds = self.requestTemporaryPassword(remote_workspace_url)
+
+        # pull
+        cmd = MercurialDvcsCmd(remote=remote_workspace_url)
+        workspace = CmdWorkspace(local_workspace_dir, cmd)
+        result = cmd.pull(workspace,
+            username=creds['user'], psasword=creds['key'])
+
+        return result
 
     def linkWorkspaceDirToUrl(self, local_workspace_dir, remote_workspace_url):
         # links a non-pmr workspace dir to a remote workspace url.
@@ -144,3 +166,28 @@ class PMRTool(object):
 
         # Do the writing.
         cmd.write_remote(workspace)
+
+    def commitFiles(self, local_workspace_dir, message, files):
+        cmd = MercurialDvcsCmd()
+        workspace = CmdWorkspace(local_workspace_dir, cmd)
+        for fn in files:
+            sout, serr = cmd.add(workspace, fn)
+            # if serr has something we need to handle?
+        
+        # XXX committer will be a problem if unset in git.
+        return cmd.commit(workspace, message)
+
+    def pushToRemote(self, local_workspace_dir, remote_workspace_url=None):
+        # XXX need a flag to ensure this is NOT new workspace.
+        cmd = MercurialDvcsCmd(remote=remote_workspace_url)
+        workspace = CmdWorkspace(local_workspace_dir, cmd)
+
+        if remote_workspace_url is None:
+            remote_workspace_url = cmd.read_remote(workspace)
+        # acquire temporary creds
+        creds = self.requestTemporaryPassword(remote_workspace_url)
+
+        result = cmd.push(workspace,
+            username=creds['user'], password=creds['key'])
+
+        return result

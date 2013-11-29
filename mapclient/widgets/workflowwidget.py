@@ -18,6 +18,7 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
 import os
+import logging
 from urlparse import urlsplit, urlunsplit
 from ConfigParser import ConfigParser
 
@@ -32,6 +33,9 @@ from mapclient.tools.pmr.pmrsearchdialog import PMRSearchDialog
 from mapclient.tools.pmr.pmrhglogindialog import PMRHgLoginDialog
 from mapclient.tools.pmr.pmrhgcommitdialog import PMRHgCommitDialog
 from mapclient.core.threadcommandmanager import CommandCloneWorkspace, CommandIgnoreDirectoriesHg, CommandCommit
+
+logger = logging.getLogger(__name__)
+
 
 class WorkflowWidget(QtGui.QWidget):
     '''
@@ -189,29 +193,38 @@ class WorkflowWidget(QtGui.QWidget):
     def importFromPMR(self):
         m = self._mainWindow.model().workflowManager()
         workflowDir = QtGui.QFileDialog.getExistingDirectory(self._mainWindow, caption='Select Workflow Directory', directory=m.previousLocation())
-        if len(workflowDir) > 0:
-            dlg = PMRSearchDialog(self._mainWindow)
-            dlg.setModal(True)
-            if dlg.exec_():
-                ws = dlg.getSelectedWorkspace()
-                login = PMRHgLoginDialog(self._mainWindow)
-                login.setModal(True)
-                if login.exec_():
-                    # set wait icon
-                    QtGui.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
-                    c = CommandCloneWorkspace(ws['target'], workflowDir, login.username(), login.password())
-                    c.run()
-                    # unset wait icon
-                    QtGui.QApplication.restoreOverrideCursor()
-                    print('Analyze first before attempting load ...')
-                    try:
-                        m.load(workflowDir)
-                        m.setPreviousLocation(workflowDir)
-                        self._graphicsScene.updateModel()
-                        self._updateUi()
-                    except (ValueError, WorkflowError) as e:
-                        self.close()
-                        QtGui.QMessageBox.critical(self, 'Error Caught', 'Invalid Workflow.  ' + str(e))
+        if not workflowDir:
+            return
+
+        dlg = PMRSearchDialog(self._mainWindow)
+        dlg.setModal(True)
+        if not dlg.exec_():
+            return
+
+        ws = dlg.getSelectedWorkspace()
+        workspace_url = ws.get('target')
+
+        # set wait icon
+        QtGui.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
+
+        pmr_tool = PMRTool()
+        pmr_tool.cloneWorkspace(
+            remote_workspace_url=workspace_url,
+            local_workspace_dir=workflowDir,
+        )
+
+        # unset wait icon
+        QtGui.QApplication.restoreOverrideCursor()
+
+        print('Analyze first before attempting load ...')
+        try:
+            m.load(workflowDir)
+            m.setPreviousLocation(workflowDir)
+            self._graphicsScene.updateModel()
+            self._updateUi()
+        except (ValueError, WorkflowError) as e:
+            self.close()
+            QtGui.QMessageBox.critical(self, 'Error Caught', 'Invalid Workflow.  ' + str(e))
 
 
     def close(self):
@@ -252,24 +265,23 @@ class WorkflowWidget(QtGui.QWidget):
     def commitChanges(self, location):
         dlg = PMRHgCommitDialog(self)
         dlg.setModal(True)
-        if dlg.exec_():
-            try:
-                # set wait icon
-                pmr_tool = PMRTool()
-                QtGui.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
-                remote = self.getDefaultRemotePath(location)
+        if not dlg.exec_():
+            return
 
-                p = pmr_tool.requestTemporaryPassword(remote)
-                # fallback values using dialog?
-                username = p.get('user', None) # or dlg.username()
-                password = p.get('key', None) # or dlg.password()
-
-                c = CommandCommit(location, username, password, dlg.comment())
-                c.run()
-                # unset wait icon
-                QtGui.QApplication.restoreOverrideCursor()
-            except Exception:
-                QtGui.QMessageBox.warning(self._mainWindow, 'Error Saving', 'The commit to PMR did not succeed')
+        try:
+            # set wait icon
+            pmr_tool = PMRTool()
+            QtGui.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
+            remote = self.getDefaultRemotePath(location)
+            pmr_tool.commitFiles(location, dlg.comment(),
+                [location + '/.workflow.conf'])
+            pmr_tool.pushToRemote(location)
+        except Exception:
+            logger.exception('Error')
+            QtGui.QMessageBox.warning(self._mainWindow, 'Error Saving', 'The commit to PMR did not succeed')
+        finally:
+            # unset wait icon
+            QtGui.QApplication.restoreOverrideCursor()
 
     def _setActionProperties(self, action, name, slot, shortcut='', statustip=''):
         action.setObjectName(name)
