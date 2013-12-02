@@ -18,6 +18,7 @@ from mapclient.tools.pmr.authoriseapplicationdialog import AuthoriseApplicationD
 endpoints = {
     '': {
         'dashboard': 'pmr2-dashboard',
+        'search': 'search',
     },
 
     'WorkspaceContainer': {
@@ -70,7 +71,14 @@ class PMRTool(object):
     # redirects while using allow_redirects=False when making all requests
 
     def search(self, text):
-        return self._client.search(text)
+        pmr_info = info.PMRInfo()
+        session = self.make_session()
+        data = json.dumps({'SearchableText': text, 'portal_type': 'Workspace'})
+        r = session.post(
+            '/'.join((pmr_info.host, endpoints['']['search'])),
+            data=data,
+        )
+        return r.json()
 
     def requestTemporaryPassword(self, workspace_url):
         session = self.make_session()
@@ -148,7 +156,8 @@ class PMRTool(object):
         workspace = CmdWorkspace(local_workspace_dir, cmd)
         result = cmd.pull(workspace,
             username=creds['user'], psasword=creds['key'])
-
+        # TODO trap this result too?
+        cmd.reset_to_remote(workspace)
         return result
 
     def linkWorkspaceDirToUrl(self, local_workspace_dir, remote_workspace_url):
