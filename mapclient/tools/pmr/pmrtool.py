@@ -12,7 +12,6 @@ from pmr.wfctrl.cmd import MercurialDvcsCmd
 from pmr.wfctrl.core import CmdWorkspace
 
 from mapclient.settings import info
-from mapclient.tools.pmr.jsonclient.client import Client
 from mapclient.tools.pmr.authoriseapplicationdialog import AuthoriseApplicationDialog
 
 endpoints = {
