@@ -20,6 +20,8 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
 import webbrowser
 
 from PySide import QtGui, QtCore
+from requests import HTTPError
+from simplejson import JSONDecodeError
 
 from mapclient.settings import info
 from mapclient.tools.annotation.annotationtool import AnnotationTool
@@ -74,7 +76,32 @@ class PMRSearchDialog(QtGui.QDialog):
             if rdfterm:
                 search_text = search_text + ' ' + rdfterm[1:-1]
 
-        results = self._pmrTool.search(search_text)
+        results = []
+
+        try:
+            results = self._pmrTool.search(search_text)
+        except HTTPError as e:
+            msg_403 = 'The configured PMR server may have disallowed searching.'
+            if self._pmrTool.hasAccess():
+                msg_403 = (
+                    'Access credentials have become longer valid.  Please '
+                    'deregister and register the application to renew access '
+                    'and try again.'
+                )
+            if e.response.status_code == 403:
+                QtGui.QMessageBox.critical(self, 'Permission Error', msg_403)
+            else:
+                QtGui.QMessageBox.critical(self, 'Web Service Error',
+                    'The PMR search service may be misconfigured and/or '
+                    'is unavailable at this moment.  Please check '
+                    'configuration settings and try again.'
+                )
+        except JSONDecodeError:
+            QtGui.QMessageBox.critical(self, 'Unexpected Server Response',
+                'The server returned an unexpected response and MAP Client is '
+                'unable to proceed.'
+            )
+
         for r in results:
             if 'title' in r and r['title']:
                 item = QtGui.QListWidgetItem(r['title'], self._ui.searchResultsListWidget)

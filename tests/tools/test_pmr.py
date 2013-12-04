@@ -45,6 +45,7 @@ import tempfile
 import os
 import shutil
 
+from requests import HTTPError
 from PySide.QtCore import QSettings
 
 from mapclient.tools.pmr.pmrtool import PMRTool
@@ -124,6 +125,13 @@ class PMRToolTestCase(TestCase):
                 )
             ),
 
+            (info.host + '/search',
+                TestAdapter(
+                    stream='[{"title": "Test Workspace", '
+                           '"target": "http://example.com/w/1"}]',
+                )
+            ),
+
         ]
 
         # and tool, with the end points.
@@ -132,10 +140,13 @@ class PMRToolTestCase(TestCase):
     def tearDown(self):
         shutil.rmtree(self.working_dir)
 
-    def make_tool(self):
+    def make_tool(self, endpoints=None):
+        if endpoints is None:
+            endpoints = self.endpoints
+
         def make_session(pmr_info=None):
             session = TestSession()
-            for url, adapter in self.endpoints:
+            for url, adapter in endpoints:
                 session.mount(url, adapter)
             return session
         tool = PMRTool()
@@ -166,6 +177,20 @@ class PMRToolTestCase(TestCase):
             self.working_dir, 'http://example.com/repo')
         with open(os.path.join(self.working_dir, '.hg', 'hgrc')) as fd:
             self.assertTrue('default = http://example.com/repo' in fd.read())
+
+    def test_search_success(self):
+        results = self._tool.search('')
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results[0]['title'], 'Test Workspace')
+
+    def test_search_failure(self):
+        info = PMRInfo()
+        tool = self.make_tool(endpoints=[
+            (info.host + '/search',
+                TestAdapter(stream='Invalid', status=403)
+            ),
+        ])
+        self.assertRaises(HTTPError, tool.search, '')
 
     def test_cloneWorkspace(self):
         # We have tested the password retrival works.

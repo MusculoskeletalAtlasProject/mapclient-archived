@@ -77,6 +77,7 @@ class PMRTool(object):
             '/'.join((pmr_info.host, endpoints['']['search'])),
             data=data,
         )
+        r.raise_for_status()
         return r.json()
 
     def requestTemporaryPassword(self, workspace_url):
@@ -85,6 +86,7 @@ class PMRTool(object):
             '/'.join((workspace_url, endpoints['Workspace']['temppass'])),
             data='{}',
         )
+        r.raise_for_status()
         return r.json()
 
     def authorizationUrl(self, key):
@@ -94,6 +96,7 @@ class PMRTool(object):
         pmr_info = info.PMRInfo()
         session = self.make_session(pmr_info)
         target = '/'.join([pmr_info.host, endpoints['']['dashboard']])
+        r.raise_for_status()
         return session.get(target).json()
 
     def addWorkspace(self, title, description, storage='mercurial'):
