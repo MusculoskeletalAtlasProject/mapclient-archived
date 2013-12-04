@@ -238,31 +238,14 @@ class WorkflowWidget(QtGui.QWidget):
     def save(self):
         m = self._mainWindow.model().workflowManager()
         m.save()
+        # XXX pmr.wfctrl should provide a way to instantiate the correct
+        # workspace object to check for this.
         if os.path.exists(os.path.join(m.location(), '.hg')):
             self.commitChanges(m.location())
 
         self._updateUi()
 
-    def getDefaultRemotePath(self, location):
-        hgrcpath = os.path.join(location, '.hg', 'hgrc')
-        if not os.path.exists(hgrcpath):
-            raise ValueError('location not tracked with PMR')
-
-        confp = ConfigParser()
-        with open(hgrcpath) as f:
-            confp.readfp(f)
-        rawurl = confp.get('paths', 'default')
-
-        # strip out the user element (not even sure how/why that gets
-        # stuffed into there)
-
-        urlparts = list(urlsplit(rawurl))
-        if '@' in urlparts[1]:
-            urlparts[1] = urlparts[1].split('@')[-1]
-        
-        return urlunsplit(urlparts)
-
-    def commitChanges(self, location):
+    def commitChanges(self, workflowDir):
         dlg = PMRHgCommitDialog(self)
         dlg.setModal(True)
         if not dlg.exec_():
@@ -272,10 +255,9 @@ class WorkflowWidget(QtGui.QWidget):
             # set wait icon
             pmr_tool = PMRTool()
             QtGui.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
-            remote = self.getDefaultRemotePath(location)
-            pmr_tool.commitFiles(location, dlg.comment(),
-                [location + '/.workflow.conf'])
-            pmr_tool.pushToRemote(location)
+            pmr_tool.commitFiles(workflowDir, dlg.comment(),
+                [workflowDir + '/.workflow.conf'])
+            pmr_tool.pushToRemote(workflowDir)
         except Exception:
             logger.exception('Error')
             QtGui.QMessageBox.warning(self._mainWindow, 'Error Saving', 'The commit to PMR did not succeed')
