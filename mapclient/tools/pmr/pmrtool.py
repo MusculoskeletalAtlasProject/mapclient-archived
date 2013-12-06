@@ -96,8 +96,9 @@ class PMRTool(object):
         pmr_info = info.PMRInfo()
         session = self.make_session(pmr_info)
         target = '/'.join([pmr_info.host, endpoints['']['dashboard']])
+        r = session.get(target)
         r.raise_for_status()
-        return session.get(target).json()
+        return r.json()
 
     def addWorkspace(self, title, description, storage='mercurial'):
         session = self.make_session()
@@ -167,6 +168,7 @@ class PMRTool(object):
         # prereq is that the remote must be new.
 
         # XXX should assert availability of Mercurial
+        # XXX figure out if/when/how to offer Git.
 
         # brand new command module for init.
         new_cmd = MercurialDvcsCmd()
@@ -178,9 +180,19 @@ class PMRTool(object):
         # Do the writing.
         cmd.write_remote(workspace)
 
+    def hasDVCS(self, local_workspace_dir):
+        workspace = CmdWorkspace(local_workspace_dir, auto=True)
+        return workspace.cmd is not None
+
     def commitFiles(self, local_workspace_dir, message, files):
-        cmd = MercurialDvcsCmd()
-        workspace = CmdWorkspace(local_workspace_dir, cmd)
+        workspace = CmdWorkspace(local_workspace_dir, auto=True)
+        cmd = workspace.cmd
+        if cmd is None:
+            logger.info('skipping commit, no underlying repo detected')
+            return
+
+        logger.info('Using `%s` for committing files.', cmd.__class__.__name__)
+
         for fn in files:
             sout, serr = cmd.add(workspace, fn)
             # if serr has something we need to handle?
