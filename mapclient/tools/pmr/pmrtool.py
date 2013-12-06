@@ -5,6 +5,7 @@ Created on Jun 20, 2013
 '''
 
 import json
+import logging
 
 from requests_oauthlib import OAuth1Session
 
@@ -13,6 +14,8 @@ from pmr.wfctrl.core import CmdWorkspace
 
 from mapclient.settings import info
 from mapclient.tools.pmr.authoriseapplicationdialog import AuthoriseApplicationDialog
+
+logger = logging.getLogger(__name__)
 
 endpoints = {
     '': {

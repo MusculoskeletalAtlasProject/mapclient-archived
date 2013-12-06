@@ -238,14 +238,15 @@ class WorkflowWidget(QtGui.QWidget):
     def save(self):
         m = self._mainWindow.model().workflowManager()
         m.save()
-        # XXX pmr.wfctrl should provide a way to instantiate the correct
-        # workspace object to check for this.
-        if os.path.exists(os.path.join(m.location(), '.hg')):
-            self.commitChanges(m.location())
-
+        self.commitChanges(m.location())
         self._updateUi()
 
     def commitChanges(self, workflowDir):
+        pmr_tool = PMRTool()
+        if not pmr_tool.hasDVCS(workflowDir):
+            # nothing to commit.
+            return
+
         dlg = PMRHgCommitDialog(self)
         dlg.setModal(True)
         if not dlg.exec_():
@@ -253,7 +254,6 @@ class WorkflowWidget(QtGui.QWidget):
 
         try:
             # set wait icon
-            pmr_tool = PMRTool()
             QtGui.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
             pmr_tool.commitFiles(workflowDir, dlg.comment(),
                 [workflowDir + '/.workflow.conf'])

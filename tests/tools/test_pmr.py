@@ -156,6 +156,11 @@ class PMRToolTestCase(TestCase):
     def tearDown(self):
         pass
 
+    def test_hasDVCS(self):
+        # this is actually a wrapper around the pmr.wfctrl workspace
+        # auto detection
+        self.assertFalse(self._tool.hasDVCS(self.working_dir))
+
     def testAddWorkspace(self):
         info = PMRInfo()
         location = self._tool.addWorkspace('my title', 'my description')
