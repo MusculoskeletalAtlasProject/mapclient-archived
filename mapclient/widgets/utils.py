@@ -18,6 +18,7 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
 
+from functools import wraps
 from PySide import QtCore, QtGui
 
 
@@ -59,3 +60,19 @@ def createDefaultImageIcon(name):
         p.drawText(rect, QtCore.Qt.AlignCenter | QtCore.Qt.AlignVCenter | QtCore.Qt.TextWordWrap, name)
 
     return image
+
+def set_wait_cursor(f):
+    """
+    Decorator to a gui action method (e.g. methods in QtGui.QWidget) to
+    set and unset a wait cursor and unset after the method is finished.
+    """
+
+    @wraps(f)
+    def do_wait_cursor(*a, **kw):
+        try:
+            QtGui.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
+            f(*a, **kw)
+        finally:
+            # Always unset
+            QtGui.QApplication.restoreOverrideCursor()
+    return do_wait_cursor

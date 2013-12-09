@@ -37,7 +37,7 @@ def _getWorkflowConfigurationAbsoluteFilename(location):
 
 class WorkflowManager(object):
     '''
-    This class manages the workflow.
+    This class manages (models?) the workflow.
     '''
 
     def __init__(self):

@@ -24,6 +24,7 @@ from ConfigParser import ConfigParser
 
 from PySide import QtGui, QtCore
 
+from mapclient.widgets.utils import set_wait_cursor
 from mapclient.widgets.ui_workflowwidget import Ui_WorkflowWidget
 from mapclient.mountpoints.workflowstep import WorkflowStepMountPoint
 from mapclient.widgets.workflowgraphicsscene import WorkflowGraphicsScene
@@ -94,7 +95,7 @@ class WorkflowWidget(QtGui.QWidget):
         return self._undoStack
 
     def setActive(self):
-        print('setting active - workflow widget')
+        logger.info('setting active - workflow widget')
         self._mainWindow.setCurrentUndoRedoStack(self._undoStack)
 
     def executeNext(self):
@@ -152,18 +153,17 @@ class WorkflowWidget(QtGui.QWidget):
         # got dir, continue
         return self._createNewWorkflow(workflowDir, pmr)
 
+    @set_wait_cursor
     def _createNewWorkflow(self, workflowDir, pmr):
         m = self._mainWindow.model().workflowManager()
         m.new(workflowDir)
         m.setPreviousLocation(workflowDir)
 
         if pmr:
-            QtGui.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
             pmr_tool = PMRTool()
             dir_name = os.path.basename(workflowDir)
             repourl = pmr_tool.addWorkspace('Workflow: ' + dir_name, None)
             pmr_tool.linkWorkspaceDirToUrl(workflowDir, repourl)
-            QtGui.QApplication.restoreOverrideCursor()
 
         self._undoStack.clear()
         self._ui.graphicsView.setLocation(workflowDir)
@@ -178,7 +178,16 @@ class WorkflowWidget(QtGui.QWidget):
         # Warning: when switching between PySide and PyQt4 the keyword argument for the directory to initialise the dialog to is different.
         # In PySide the keyword argument is 'dir'
         # In PyQt4 the keyword argument is 'directory'
-        workflowDir = QtGui.QFileDialog.getExistingDirectory(self._mainWindow, caption='Open Workflow', dir=m.previousLocation(), options=QtGui.QFileDialog.ShowDirsOnly | QtGui.QFileDialog.DontResolveSymlinks | QtGui.QFileDialog.ReadOnly)
+        workflowDir = QtGui.QFileDialog.getExistingDirectory(
+            self._mainWindow,
+            caption='Open Workflow',
+            dir=m.previousLocation(),
+            options=(
+                QtGui.QFileDialog.ShowDirsOnly |
+                QtGui.QFileDialog.DontResolveSymlinks |
+                QtGui.QFileDialog.ReadOnly
+            )
+        )
         if len(workflowDir) > 0:
             try:
                 m.load(workflowDir)
@@ -188,7 +197,8 @@ class WorkflowWidget(QtGui.QWidget):
                 self._updateUi()
             except (ValueError, WorkflowError) as e:
                 self.close()
-                QtGui.QMessageBox.critical(self, 'Error Caught', 'Invalid Workflow.  ' + str(e))
+                QtGui.QMessageBox.critical(self, 'Error Caught',
+                    'Invalid Workflow.  ' + str(e))
 
     def importFromPMR(self):
         m = self._mainWindow.model().workflowManager()
@@ -204,28 +214,29 @@ class WorkflowWidget(QtGui.QWidget):
         ws = dlg.getSelectedWorkspace()
         workspace_url = ws.get('target')
 
-        # set wait icon
-        QtGui.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
+        try:
+            self._importFromPMR(workspace_url, workflowDir)
+        except (ValueError, WorkflowError) as e:
+            QtGui.QMessageBox.critical(self, 'Error Caught', 'Invalid Workflow.  ' + str(e))
 
+    @set_wait_cursor
+    def _importFromPMR(self, workspace_url, workflowDir):
         pmr_tool = PMRTool()
         pmr_tool.cloneWorkspace(
             remote_workspace_url=workspace_url,
             local_workspace_dir=workflowDir,
         )
 
-        # unset wait icon
-        QtGui.QApplication.restoreOverrideCursor()
-
-        print('Analyze first before attempting load ...')
+        logger.info('Analyze first before attempting load ...')
         try:
+            m = self._mainWindow.model().workflowManager()
             m.load(workflowDir)
             m.setPreviousLocation(workflowDir)
             self._graphicsScene.updateModel()
             self._updateUi()
-        except (ValueError, WorkflowError) as e:
+        except:
             self.close()
-            QtGui.QMessageBox.critical(self, 'Error Caught', 'Invalid Workflow.  ' + str(e))
-
+            raise
 
     def close(self):
         self._mainWindow.confirmClose()
@@ -251,19 +262,19 @@ class WorkflowWidget(QtGui.QWidget):
         dlg.setModal(True)
         if not dlg.exec_():
             return
+        self._commitChanges(workflowDir, dlg.comment())
 
+    @set_wait_cursor
+    def _commitChanges(self, workflowDir, comment):
+        pmr_tool = PMRTool()
         try:
             # set wait icon
-            QtGui.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
-            pmr_tool.commitFiles(workflowDir, dlg.comment(),
-                [workflowDir + '/.workflow.conf'])
+            pmr_tool.commitFiles(workflowDir, comment,
+                [workflowDir + '/.workflow.conf'])  # XXX make/use file tracker
             pmr_tool.pushToRemote(workflowDir)
         except Exception:
             logger.exception('Error')
             QtGui.QMessageBox.warning(self._mainWindow, 'Error Saving', 'The commit to PMR did not succeed')
-        finally:
-            # unset wait icon
-            QtGui.QApplication.restoreOverrideCursor()
 
     def _setActionProperties(self, action, name, slot, shortcut='', statustip=''):
         action.setObjectName(name)
