@@ -64,7 +64,6 @@ class PMRSearchDialog(QtGui.QDialog):
         self._ui.registerLabel.linkActivated.connect(self.register)
         self._ui.deregisterLabel.linkActivated.connect(self.deregister)
         
-    @set_wait_cursor
     def _searchClicked(self):
         # Set pmrlib to go
         self._ui.searchResultsListWidget.clear()
@@ -80,7 +79,7 @@ class PMRSearchDialog(QtGui.QDialog):
         results = []
 
         try:
-            results = self._pmrTool.search(search_text)
+            results = set_wait_cursor(self._pmrTool.search)(search_text)
         except PMRToolError as e:
             QtGui.QMessageBox.critical(self, e.title, e.description)
 

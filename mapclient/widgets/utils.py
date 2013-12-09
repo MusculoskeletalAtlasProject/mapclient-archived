@@ -71,7 +71,7 @@ def set_wait_cursor(f):
     def do_wait_cursor(*a, **kw):
         try:
             QtGui.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
-            f(*a, **kw)
+            return f(*a, **kw)
         finally:
             # Always unset
             QtGui.QApplication.restoreOverrideCursor()
