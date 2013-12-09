@@ -35,9 +35,9 @@ def _getWorkflowConfiguration(location):
 def _getWorkflowConfigurationAbsoluteFilename(location):
     return os.path.join(location, info.DEFAULT_WORKFLOW_PROJECT_FILENAME)
 
-class WorkflowManager():
+class WorkflowManager(object):
     '''
-    This class managers the workflow.
+    This class manages the workflow.
     '''
 
     def __init__(self):
@@ -66,6 +66,8 @@ class WorkflowManager():
 
         return self._title
 
+    # Why set/get? all _prefix are public anyway, just use attributes...
+    # if they need to be modified they can be turned into properties
     def setLocation(self, location):
         self._location = location
 
@@ -145,8 +147,20 @@ class WorkflowManager():
 
         workflow_version = versionTuple(wf.value('version'))
         software_version = versionTuple(info.VERSION_STRING)
-        if not (workflow_version[0] == software_version[0] and workflow_version[1] == software_version[1] and workflow_version[2] <= software_version[2]):
-            raise WorkflowError('Version mismatch in Workflow expected: %s got: %s' % (info.VERSION_STRING, wf.value('version')))
+        if not workflow_version[0:2] == software_version[0:2]:
+            # compare first two elements of version (major, minor)
+            raise WorkflowError(
+                'Major/Minor version number mismatch - '
+                'application version: %s; workflow version: %s.'
+                    (info.VERSION_STRING, wf.value('version'))
+            )
+        if not workflow_version[2] <= software_version[2]:
+            raise WorkflowError(
+                'Patch version number of the workflow cannot be newer than '
+                'application - '
+                'application version: %s; workflow version: %s' % 
+                    (info.VERSION_STRING, wf.value('version'))
+            )
 
         self._location = location
 #        wf = _getWorkflowConfiguration()
@@ -183,18 +197,3 @@ class WorkflowManager():
 
 def versionTuple(v):
     return tuple(map(int, (v.split("."))))
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
