@@ -7,6 +7,8 @@ Created on Jun 20, 2013
 import json
 import logging
 
+from requests import HTTPError
+from simplejson import JSONDecodeError
 from requests_oauthlib import OAuth1Session
 
 from pmr.wfctrl.cmd import MercurialDvcsCmd
@@ -38,6 +40,15 @@ def make_form_request(action_=None, **kw):
         'fields': kw,
         'actions': {action_: 1},
     })
+
+
+
+class PMRToolError(Exception):
+
+    def __init__(self, title='Error', description='Error Details', *a, **kw):
+        self.title = title
+        self.description = description
+        super(PMRToolError, self).__init__(*a, **kw)
 
 
 class PMRTool(object):
@@ -72,7 +83,7 @@ class PMRTool(object):
     # also workaround the resigning redirections by manually resolving
     # redirects while using allow_redirects=False when making all requests
 
-    def search(self, text):
+    def _search(self, text):
         pmr_info = info.PMRInfo()
         session = self.make_session()
         data = json.dumps({'SearchableText': text, 'portal_type': 'Workspace'})
@@ -82,6 +93,33 @@ class PMRTool(object):
         )
         r.raise_for_status()
         return r.json()
+
+    def search(self, text):
+        try:
+            return self._search(text)
+        except HTTPError as e:
+            msg_403 = 'The configured PMR server may have disallowed searching.'
+            if self.hasAccess():
+                msg_403 = (
+                    'Access credentials have become longer valid.  Please '
+                    'deregister and register the application to renew access '
+                    'and try again.'
+                )
+            if e.response.status_code == 403:
+                raise PMRToolError('Permission Error', msg_403)
+            else:
+                raise PMRToolError('Web Service Error',
+                    'The PMR search service may be misconfigured and/or '
+                    'is unavailable at this moment.  Please check '
+                    'configuration settings and try again.'
+                )
+        except JSONDecodeError:
+            raise PMRToolError('Unexpected Server Response',
+                'The server returned an unexpected response and MAP Client is '
+                'unable to proceed.'
+            )
+        except Exception as e:
+            raise PMRToolError('Unexpected exception', str(e))
 
     def requestTemporaryPassword(self, workspace_url):
         session = self.make_session()

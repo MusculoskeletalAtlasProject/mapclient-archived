@@ -20,15 +20,17 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
 import webbrowser
 
 from PySide import QtGui, QtCore
-from requests import HTTPError
-from simplejson import JSONDecodeError
 
 from mapclient.settings import info
 from mapclient.tools.annotation.annotationtool import AnnotationTool
 from mapclient.tools.pmr.core import TokenHelper
 from mapclient.tools.pmr.pmrtool import PMRTool
+from mapclient.tools.pmr.pmrtool import PMRToolError
 from mapclient.tools.pmr.oauthcheckdialog import OAuthCheckDialog
 from mapclient.tools.pmr.ui_pmrsearchdialog import Ui_PMRSearchDialog
+
+from mapclient.widgets.utils import set_wait_cursor
+
 
 class PMRSearchDialog(QtGui.QDialog):
     '''
@@ -62,9 +64,8 @@ class PMRSearchDialog(QtGui.QDialog):
         self._ui.registerLabel.linkActivated.connect(self.register)
         self._ui.deregisterLabel.linkActivated.connect(self.deregister)
         
+    @set_wait_cursor
     def _searchClicked(self):
-        # set wait icon
-        QtGui.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
         # Set pmrlib to go
         self._ui.searchResultsListWidget.clear()
         
@@ -80,27 +81,8 @@ class PMRSearchDialog(QtGui.QDialog):
 
         try:
             results = self._pmrTool.search(search_text)
-        except HTTPError as e:
-            msg_403 = 'The configured PMR server may have disallowed searching.'
-            if self._pmrTool.hasAccess():
-                msg_403 = (
-                    'Access credentials have become longer valid.  Please '
-                    'deregister and register the application to renew access '
-                    'and try again.'
-                )
-            if e.response.status_code == 403:
-                QtGui.QMessageBox.critical(self, 'Permission Error', msg_403)
-            else:
-                QtGui.QMessageBox.critical(self, 'Web Service Error',
-                    'The PMR search service may be misconfigured and/or '
-                    'is unavailable at this moment.  Please check '
-                    'configuration settings and try again.'
-                )
-        except JSONDecodeError:
-            QtGui.QMessageBox.critical(self, 'Unexpected Server Response',
-                'The server returned an unexpected response and MAP Client is '
-                'unable to proceed.'
-            )
+        except PMRToolError as e:
+            QtGui.QMessageBox.critical(self, e.title, e.description)
 
         for r in results:
             if 'title' in r and r['title']:
@@ -108,8 +90,6 @@ class PMRSearchDialog(QtGui.QDialog):
             else:
                 item = QtGui.QListWidgetItem(r['target'], self._ui.searchResultsListWidget)
             item.setData(QtCore.Qt.UserRole, r)
-        # unset wait icon
-        QtGui.QApplication.restoreOverrideCursor()
         
     def getSelectedWorkspace(self):
         items = self._ui.searchResultsListWidget.selectedItems()

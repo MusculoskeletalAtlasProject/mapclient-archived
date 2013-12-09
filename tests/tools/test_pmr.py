@@ -49,6 +49,7 @@ from requests import HTTPError
 from PySide.QtCore import QSettings
 
 from mapclient.tools.pmr.pmrtool import PMRTool
+from mapclient.tools.pmr.pmrtool import PMRToolError
 from mapclient.settings.info import PMRInfo
 
 workspace_home = json.dumps({
@@ -195,7 +196,10 @@ class PMRToolTestCase(TestCase):
                 TestAdapter(stream='Invalid', status=403)
             ),
         ])
-        self.assertRaises(HTTPError, tool.search, '')
+        # the private method exposes exceptions
+        self.assertRaises(HTTPError, tool._search, '')
+        # the real method traps all exceptions
+        self.assertRaises(PMRToolError, tool.search, '')
 
     def test_cloneWorkspace(self):
         # We have tested the password retrival works.
