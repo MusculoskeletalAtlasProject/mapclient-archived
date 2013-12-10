@@ -24,7 +24,11 @@ from ConfigParser import ConfigParser
 
 from PySide import QtGui, QtCore
 
+from mapclient.exceptions import ClientRuntimeError
+
 from mapclient.widgets.utils import set_wait_cursor
+from mapclient.widgets.utils import handle_runtime_error
+
 from mapclient.widgets.ui_workflowwidget import Ui_WorkflowWidget
 from mapclient.mountpoints.workflowstep import WorkflowStepMountPoint
 from mapclient.widgets.workflowgraphicsscene import WorkflowGraphicsScene
@@ -103,24 +107,26 @@ class WorkflowWidget(QtGui.QWidget):
 
     def executeWorkflow(self):
         wfm = self._mainWindow.model().workflowManager()
-        error_count = 0
-        error_msg = ''
+        errors = []
+
         if wfm.isModified():
-            error_count += 1
-            error_msg += '  ' + str(error_count) + '. The workflow has not been saved.\n'
+            errors.append('The workflow has not been saved.')
 
         if not wfm.scene().canExecute():
-            error_count += 1
-            error_msg += '  ' + str(error_count) + '. Not all steps in the workflow have been successfully configured.\n'
+            errors.append('Not all steps in the workflow have been '
+                'successfully configured.')
 
-        if error_count == 0:
+        if not errors:
             self._mainWindow.execute()  # .model().workflowManager().execute()
         else:
-            error_prefix = 'The workflow could not be executed for the following reason'
-            if error_count > 1:
-                error_prefix += 's'
-            error_prefix += ':\n\n'
-            QtGui.QMessageBox.critical(self, 'Workflow Execution', error_prefix + error_msg, QtGui.QMessageBox.Ok)
+            errors_str = '\n'.join(
+                ['  %d. %s' % (i + 1, e) for i, e in enumerate(errors)])
+            error_msg = ('The workflow could not be executed for the '
+                'following reason%s:\n\n%s' % (
+                    len(errors) > 1 and 's' or '', errors_str,
+            ))
+            QtGui.QMessageBox.critical(self, 'Workflow Execution', error_msg,
+                QtGui.QMessageBox.Ok)
 
     def identifierOccursCount(self, identifier):
         return self._mainWindow.model().workflowManager().identifierOccursCount(identifier)
@@ -219,6 +225,7 @@ class WorkflowWidget(QtGui.QWidget):
         except (ValueError, WorkflowError) as e:
             QtGui.QMessageBox.critical(self, 'Error Caught', 'Invalid Workflow.  ' + str(e))
 
+    @handle_runtime_error
     @set_wait_cursor
     def _importFromPMR(self, workspace_url, workflowDir):
         pmr_tool = PMRTool()
@@ -264,17 +271,21 @@ class WorkflowWidget(QtGui.QWidget):
             return
         self._commitChanges(workflowDir, dlg.comment())
 
+    @handle_runtime_error
     @set_wait_cursor
     def _commitChanges(self, workflowDir, comment):
         pmr_tool = PMRTool()
         try:
-            # set wait icon
             pmr_tool.commitFiles(workflowDir, comment,
                 [workflowDir + '/.workflow.conf'])  # XXX make/use file tracker
             pmr_tool.pushToRemote(workflowDir)
+        except ClientRuntimeError:
+            # handler will deal with this.
+            raise
         except Exception:
             logger.exception('Error')
-            QtGui.QMessageBox.warning(self._mainWindow, 'Error Saving', 'The commit to PMR did not succeed')
+            raise ClientRuntimeError(
+                'Error Saving', 'The commit to PMR did not succeed')
 
     def _setActionProperties(self, action, name, slot, shortcut='', statustip=''):
         action.setObjectName(name)

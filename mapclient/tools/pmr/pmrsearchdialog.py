@@ -30,6 +30,7 @@ from mapclient.tools.pmr.oauthcheckdialog import OAuthCheckDialog
 from mapclient.tools.pmr.ui_pmrsearchdialog import Ui_PMRSearchDialog
 
 from mapclient.widgets.utils import set_wait_cursor
+from mapclient.widgets.utils import handle_runtime_error
 
 
 class PMRSearchDialog(QtGui.QDialog):
@@ -64,6 +65,8 @@ class PMRSearchDialog(QtGui.QDialog):
         self._ui.registerLabel.linkActivated.connect(self.register)
         self._ui.deregisterLabel.linkActivated.connect(self.deregister)
         
+    @handle_runtime_error
+    @set_wait_cursor
     def _searchClicked(self):
         # Set pmrlib to go
         self._ui.searchResultsListWidget.clear()
@@ -76,12 +79,7 @@ class PMRSearchDialog(QtGui.QDialog):
             if rdfterm:
                 search_text = search_text + ' ' + rdfterm[1:-1]
 
-        results = []
-
-        try:
-            results = set_wait_cursor(self._pmrTool.search)(search_text)
-        except PMRToolError as e:
-            QtGui.QMessageBox.critical(self, e.title, e.description)
+        results = self._pmrTool.search(search_text)
 
         for r in results:
             if 'title' in r and r['title']:

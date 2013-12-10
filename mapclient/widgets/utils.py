@@ -21,6 +21,8 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
 from functools import wraps
 from PySide import QtCore, QtGui
 
+from mapclient.exceptions import ClientRuntimeError
+
 
 def createDefaultImageIcon(name):
     '''
@@ -76,3 +78,17 @@ def set_wait_cursor(f):
             # Always unset
             QtGui.QApplication.restoreOverrideCursor()
     return do_wait_cursor
+
+def handle_runtime_error(f):
+    """
+    Decorator to a gui action so that all exceptions raised will result
+    in user notification via a dialog.
+    """
+
+    @wraps(f)
+    def do_runtime_error(*a, **kw):
+        try:
+            return f(*a, **kw)
+        except ClientRuntimeError as e:
+            QtGui.QMessageBox.critical(None, e.title, e.description)
+    return do_runtime_error

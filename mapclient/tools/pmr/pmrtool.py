@@ -14,6 +14,7 @@ from requests_oauthlib import OAuth1Session
 from pmr.wfctrl.cmd import MercurialDvcsCmd
 from pmr.wfctrl.core import CmdWorkspace
 
+from mapclient.exceptions import ClientRuntimeError
 from mapclient.settings import info
 from mapclient.tools.pmr.authoriseapplicationdialog import AuthoriseApplicationDialog
 
@@ -43,12 +44,8 @@ def make_form_request(action_=None, **kw):
 
 
 
-class PMRToolError(Exception):
-
-    def __init__(self, title='Error', description='Error Details', *a, **kw):
-        self.title = title
-        self.description = description
-        super(PMRToolError, self).__init__(*a, **kw)
+class PMRToolError(ClientRuntimeError):
+    pass
 
 
 class PMRTool(object):
@@ -251,7 +248,12 @@ class PMRTool(object):
         # acquire temporary creds
         creds = self.requestTemporaryPassword(remote_workspace_url)
 
-        result = cmd.push(workspace,
+        stdout, stderr = cmd.push(workspace,
             username=creds['user'], password=creds['key'])
+
+        if stderr:
+            raise PMRToolError('Error pushing changes to PMR',
+                'The command line tool gave us this error message:\n\n' +
+                    stderr)
 
         return result
