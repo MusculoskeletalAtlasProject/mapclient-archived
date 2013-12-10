@@ -118,7 +118,30 @@ class PMRTool(object):
         except Exception as e:
             raise PMRToolError('Unexpected exception', str(e))
 
+    def _getObjectInfo(self, target_url):
+        session = self.make_session()
+        r = session.get(target_url)
+        r.raise_for_status()
+        return r.json()
+
+    def getObjectInfo(self, target_url):
+        try:
+            return self._getObjectInfo(target_url)
+        except HTTPError as e:
+            raise PMRToolError('Remote server error',
+                'Server responded with an error message and MAP Client is '
+                'unable to continue the action.')
+        except JSONDecodeError:
+            raise PMRToolError('Unexpected Server Response',
+                'The server returned an unexpected response that MAP Client '
+                'cannot process.')
+        except Exception as e:
+            raise PMRToolError('Unexpected exception', str(e))
+
     def requestTemporaryPassword(self, workspace_url):
+        if not self.hasAccess():
+            return None
+
         session = self.make_session()
         r = session.post(
             '/'.join((workspace_url, endpoints['Workspace']['temppass'])),
@@ -176,7 +199,6 @@ class PMRTool(object):
         return r.json().get('url')
 
     def cloneWorkspace(self, remote_workspace_url, local_workspace_dir):
-        creds = self.requestTemporaryPassword(remote_workspace_url)
         # XXX target_dir is assumed to exist, so we can't just clone
         # but we have to instantiate that as a new repo, define the
         # remote and pull.
@@ -187,16 +209,20 @@ class PMRTool(object):
             remote_workspace_url=remote_workspace_url,
         )
 
-        # Another caveat: that workspace is probably private.  Acquire
-        # temporary password.
-
-        creds = self.requestTemporaryPassword(remote_workspace_url)
-
         # pull
         cmd = MercurialDvcsCmd(remote=remote_workspace_url)
         workspace = CmdWorkspace(local_workspace_dir, cmd)
-        result = cmd.pull(workspace,
-            username=creds['user'], psasword=creds['key'])
+
+        # Another caveat: that workspace is possibly private.  Acquire
+        # temporary password.
+        creds = self.requestTemporaryPassword(remote_workspace_url)
+        if creds:
+            result = cmd.pull(workspace,
+                username=creds['user'], psasword=creds['key'])
+        else:
+            # no credentials
+            result = cmd.pull(workspace)
+
         # TODO trap this result too?
         cmd.reset_to_remote(workspace)
         return result

@@ -174,9 +174,17 @@ class PMRToolTestCase(TestCase):
         self.assertTrue('workspace-add' in d)
 
     def test_requestTemporaryPassword(self):
+        # Available with access
+        info = PMRInfo()
+        info.update_token('test', 'token')
+
         result = self._tool.requestTemporaryPassword('http://example.com/w/1')
         self.assertEqual(result['user'], 'tester')
         self.assertEqual(result['key'], 'secret')
+
+        info.update_token('', '')
+        result = self._tool.requestTemporaryPassword('http://example.com/w/1')
+        self.assertTrue(result is None)
 
     def test_linkWorkspaceDirToUrl_success(self):
         self._tool.linkWorkspaceDirToUrl(
