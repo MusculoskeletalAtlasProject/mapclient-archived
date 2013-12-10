@@ -20,49 +20,54 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
 '''
 
 import unittest
+from os.path import dirname, join
 
-from utils import parseUnitTestOutput
+from tests.utils import parseUnitTestOutput
+
+def logpath(logfile):
+    return join(dirname(__file__), 'test_resources', 'utils', logfile)
+
 
 class UnitTestOutputTestCase(unittest.TestCase):
 
     def test1(self):
-        [rc, p, f] = parseUnitTestOutput('test_resources/utils/utoutput1.log')
+        [rc, p, f] = parseUnitTestOutput(logpath('utoutput1.log'))
         self.assertEqual(rc, 0)
         self.assertEqual(p, 9)
         self.assertEqual(f, 0)
 
     def test2(self):
-        [rc, p, f] = parseUnitTestOutput('test_resources/utils/utoutput2.log')
+        [rc, p, f] = parseUnitTestOutput(logpath('utoutput2.log'))
         self.assertEqual(rc, 1)
         self.assertEqual(p, 8)
         self.assertEqual(f, 1)
 
     def test3(self):
-        [rc, p, f] = parseUnitTestOutput('test_resources/utils/utoutput3.log')
+        [rc, p, f] = parseUnitTestOutput(logpath('utoutput3.log'))
         self.assertEqual(rc, 1)
         self.assertEqual(p, 12)
         self.assertEqual(f, 2)
 
     def test4(self):
-        [rc, p, f] = parseUnitTestOutput('test_resources/utils/utoutput4.log')
+        [rc, p, f] = parseUnitTestOutput(logpath('utoutput4.log'))
         self.assertEqual(rc, 1)
         self.assertEqual(p, 13)
         self.assertEqual(f, 1)
         
     def test5(self):
-        [rc, p, f] = parseUnitTestOutput('test_resources/utils/utoutput5.log')
+        [rc, p, f] = parseUnitTestOutput(logpath('utoutput5.log'))
         self.assertEqual(rc, 0)
         self.assertEqual(p, 21)
         self.assertEqual(f, 0)
       
     def test6(self):
-        [rc, p, f] = parseUnitTestOutput('test_resources/utils/utoutput6.log')
+        [rc, p, f] = parseUnitTestOutput(logpath('utoutput6.log'))
         self.assertEqual(rc, 1)
         self.assertEqual(p, 0)
         self.assertEqual(f, 0)
       
     def test7(self):
-        [rc, p, f] = parseUnitTestOutput('test_resources/utils/utoutput7.log')
+        [rc, p, f] = parseUnitTestOutput(logpath('utoutput7.log'))
         self.assertEqual(rc, 0)
         self.assertEqual(p, 31)
         self.assertEqual(f, 0)
