@@ -8,8 +8,9 @@ import json
 import logging
 
 from requests import HTTPError
-from simplejson import JSONDecodeError
+from requests import Session
 from requests_oauthlib import OAuth1Session
+from simplejson import JSONDecodeError
 
 from pmr.wfctrl.cmd import MercurialDvcsCmd
 from pmr.wfctrl.core import CmdWorkspace
@@ -64,8 +65,14 @@ class PMRTool(object):
     def make_session(self, pmr_info=None):
         if pmr_info is None:
             pmr_info = info.PMRInfo()
-        kwargs = pmr_info.get_session_kwargs()
-        session = OAuth1Session(**kwargs)
+
+        if self.hasAccess():
+            kwargs = pmr_info.get_session_kwargs()
+            session = OAuth1Session(**kwargs)
+        else:
+            # normal session without OAuth requirements.
+            session = Session()
+
         session.headers.update({
             'Accept': self.PROTOCOL,
             'Content-Type': self.PROTOCOL,
@@ -202,6 +209,13 @@ class PMRTool(object):
         # XXX target_dir is assumed to exist, so we can't just clone
         # but we have to instantiate that as a new repo, define the
         # remote and pull.
+
+        workspace_obj = self.getObjectInfo(remote_workspace_url)
+        # XXX only supporting mercurial now even though we can clone both
+        if not workspace_obj.get('storage') == 'mercurial':
+            raise PMRToolError('Remote storage format unsupported',
+                'The remote storage `%(storage)s` is not one of the ones that '
+                'the MAP Client currently supports.' % workspace_obj)
 
         # link
         self.linkWorkspaceDirToUrl(

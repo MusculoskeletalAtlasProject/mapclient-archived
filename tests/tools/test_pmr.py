@@ -46,6 +46,8 @@ import os
 import shutil
 
 from requests import HTTPError
+from requests import Session
+from requests_oauthlib import OAuth1Session
 from PySide.QtCore import QSettings
 
 from mapclient.tools.pmr.pmrtool import PMRTool
@@ -156,6 +158,21 @@ class PMRToolTestCase(TestCase):
 
     def tearDown(self):
         pass
+
+    def test_make_session_no_access(self):
+        tool = PMRTool()
+        session = tool.make_session()
+        self.assertFalse(isinstance(session, OAuth1Session))
+        # Make sure this really is a requests.Session
+        self.assertTrue(isinstance(session, Session))
+
+    def test_make_session_with_access(self):
+        tool = PMRTool()
+        info = PMRInfo()
+        info.update_token('test', 'token')
+        session = tool.make_session()
+        self.assertTrue(isinstance(session, OAuth1Session))
+        info.update_token('', '')
 
     def test_hasDVCS(self):
         # this is actually a wrapper around the pmr.wfctrl workspace

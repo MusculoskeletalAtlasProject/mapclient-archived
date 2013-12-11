@@ -230,10 +230,6 @@ class WorkflowWidget(QtGui.QWidget):
     def _importFromPMR(self, workspace_url, workflowDir):
         pmr_tool = PMRTool()
 
-        # XXX once repo type information is provided by this, use it to
-        # instantiate the right repo format
-        # info = pmr_tool.getObjectInfo(workspace_url)
-
         pmr_tool.cloneWorkspace(
             remote_workspace_url=workspace_url,
             local_workspace_dir=workflowDir,
