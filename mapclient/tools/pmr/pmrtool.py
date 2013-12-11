@@ -12,8 +12,12 @@ from requests import Session
 from requests_oauthlib import OAuth1Session
 from simplejson import JSONDecodeError
 
-from pmr.wfctrl.cmd import MercurialDvcsCmd
+from pmr.wfctrl.core import get_cmd_by_name
 from pmr.wfctrl.core import CmdWorkspace
+
+# This ensures the get_cmd_by_name will work, as any classes that needs
+# to be registered has to be imported first, usually at the module level.
+import pmr.wfctrl.cmd
 
 from mapclient.exceptions import ClientRuntimeError
 from mapclient.settings import info
@@ -210,50 +214,50 @@ class PMRTool(object):
         # but we have to instantiate that as a new repo, define the
         # remote and pull.
 
-        workspace_obj = self.getObjectInfo(remote_workspace_url)
-        # XXX only supporting mercurial now even though we can clone both
-        if not workspace_obj.get('storage') == 'mercurial':
-            raise PMRToolError('Remote storage format unsupported',
-                'The remote storage `%(storage)s` is not one of the ones that '
-                'the MAP Client currently supports.' % workspace_obj)
-
         # link
         self.linkWorkspaceDirToUrl(
             local_workspace_dir=local_workspace_dir,
             remote_workspace_url=remote_workspace_url,
         )
 
-        # pull
-        cmd = MercurialDvcsCmd(remote=remote_workspace_url)
-        workspace = CmdWorkspace(local_workspace_dir, cmd)
+        workspace = CmdWorkspace(local_workspace_dir, auto=True)
 
         # Another caveat: that workspace is possibly private.  Acquire
         # temporary password.
         creds = self.requestTemporaryPassword(remote_workspace_url)
         if creds:
-            result = cmd.pull(workspace,
-                username=creds['user'], psasword=creds['key'])
+            result = workspace.cmd.pull(workspace,
+                username=creds['user'], password=creds['key'])
         else:
             # no credentials
-            result = cmd.pull(workspace)
+            logger.info('not using credentials as none are detected')
+            result = workspace.cmd.pull(workspace)
 
         # TODO trap this result too?
-        cmd.reset_to_remote(workspace)
+        workspace.cmd.reset_to_remote(workspace)
         return result
 
     def linkWorkspaceDirToUrl(self, local_workspace_dir, remote_workspace_url):
         # links a non-pmr workspace dir to a remote workspace url.
         # prereq is that the remote must be new.
 
-        # XXX should assert availability of Mercurial
+        # XXX should assert availability of storage
         # XXX figure out if/when/how to offer Git.
 
+        workspace_obj = self.getObjectInfo(remote_workspace_url)
+        # XXX only supporting mercurial now even though we can clone both
+        cmd_cls = get_cmd_by_name(workspace_obj.get('storage'))
+        if cmd_cls is None:
+            raise PMRToolError('Remote storage format unsupported',
+                'The remote storage `%(storage)s` is not one of the ones that '
+                'the MAP Client currently supports.' % workspace_obj)
+
         # brand new command module for init.
-        new_cmd = MercurialDvcsCmd()
+        new_cmd = cmd_cls()
         workspace = CmdWorkspace(local_workspace_dir, new_cmd)
 
         # Add the remote using a new command
-        cmd = MercurialDvcsCmd(remote=remote_workspace_url)
+        cmd = cmd_cls(remote=remote_workspace_url)
 
         # Do the writing.
         cmd.write_remote(workspace)
@@ -279,9 +283,7 @@ class PMRTool(object):
         return cmd.commit(workspace, message)
 
     def pushToRemote(self, local_workspace_dir, remote_workspace_url=None):
-        # XXX need a flag to ensure this is NOT new workspace.
-        cmd = MercurialDvcsCmd(remote=remote_workspace_url)
-        workspace = CmdWorkspace(local_workspace_dir, cmd)
+        workspace = CmdWorkspace(local_workspace_dir, auto=True)
 
         if remote_workspace_url is None:
             remote_workspace_url = cmd.read_remote(workspace)

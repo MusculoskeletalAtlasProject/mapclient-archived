@@ -114,11 +114,21 @@ class PMRToolTestCase(TestCase):
                 )
             ),
 
+            ('http://example.com/hgrepo',
+                TestAdapter(
+                    # XXX need to make this a real thing when we test that
+                    # responses from server matters.
+                    stream='{"url": "http://example.com/hgrepo", '
+                        '"storage": "mercurial"}',
+                )
+            ),
+
             ('http://example.com/w/1',
                 TestAdapter(
                     # XXX need to make this a real thing when we test that
                     # responses from server matters.
-                    stream='{"url": "http://example.com/w/1"}',
+                    stream='{"url": "http://example.com/w/1", '
+                        '"storage": "mercurial"}',
                 )
             ),
 
@@ -203,11 +213,11 @@ class PMRToolTestCase(TestCase):
         result = self._tool.requestTemporaryPassword('http://example.com/w/1')
         self.assertTrue(result is None)
 
-    def test_linkWorkspaceDirToUrl_success(self):
+    def test_linkWorkspaceDirToUrl_hg_success(self):
         self._tool.linkWorkspaceDirToUrl(
-            self.working_dir, 'http://example.com/repo')
+            self.working_dir, 'http://example.com/hgrepo')
         with open(os.path.join(self.working_dir, '.hg', 'hgrc')) as fd:
-            self.assertTrue('default = http://example.com/repo' in fd.read())
+            self.assertTrue('default = http://example.com/hgrepo' in fd.read())
 
     def test_search_success(self):
         results = self._tool.search('')
