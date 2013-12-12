@@ -284,6 +284,7 @@ class PMRTool(object):
 
     def pushToRemote(self, local_workspace_dir, remote_workspace_url=None):
         workspace = CmdWorkspace(local_workspace_dir, auto=True)
+        cmd = workspace.cmd
 
         if remote_workspace_url is None:
             remote_workspace_url = cmd.read_remote(workspace)
@@ -298,4 +299,4 @@ class PMRTool(object):
                 'The command line tool gave us this error message:\n\n' +
                     stderr)
 
-        return result
+        return stdout, stderr
