@@ -14,5 +14,9 @@ setup(name='mapclient',
      package_data={'mapclient.tools.annotation': ['annotation.voc']},
      #py_modules=['mapclient.mapclient'],
      entry_points={'console_scripts':['mapclient=mapclient.mapclient:winmain']},
-     install_requires=['PySide', 'requests-oauthlib'],
+     install_requires=[
+        'PySide',
+        'requests-oauthlib',
+        'pmr.wfctrl',
+    ],
 )
