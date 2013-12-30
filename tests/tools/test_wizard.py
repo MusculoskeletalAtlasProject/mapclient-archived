@@ -117,7 +117,7 @@ class WizardTestCase(_TestCase):
 
     def testSkeleton1(self):
 
-        local_package_name = PLUGIN_PACKAGE_NAME.replace('step', str(1) + 'step')
+        local_package_name = PLUGIN_PACKAGE_NAME
 
         options = SkeletonOptions()
         options.setImageFile(PLUGIN_IMAGE_FILE)
@@ -166,7 +166,7 @@ class WizardTestCase(_TestCase):
 
     def testSkeleton2(self):
 
-        local_package_name = PLUGIN_PACKAGE_NAME.replace('step', str(2) + 'step')
+        local_package_name = PLUGIN_PACKAGE_NAME
 
         options = SkeletonOptions()
         options.setImageFile(PLUGIN_IMAGE_FILE)
@@ -203,7 +203,7 @@ class WizardTestCase(_TestCase):
 
     def testSkeleton3(self):
 
-        local_package_name = PLUGIN_PACKAGE_NAME.replace('step', str(3) + 'step')
+        local_package_name = PLUGIN_PACKAGE_NAME
 
         options = SkeletonOptions()
         options.setImageFile(PLUGIN_IMAGE_FILE)
@@ -247,7 +247,7 @@ class WizardTestCase(_TestCase):
 
     def testSkeleton4(self):
 
-        local_package_name = PLUGIN_PACKAGE_NAME.replace('step', str(4) + 'step')
+        local_package_name = PLUGIN_PACKAGE_NAME
 
         options = SkeletonOptions()
         options.setImageFile(PLUGIN_IMAGE_FILE)
