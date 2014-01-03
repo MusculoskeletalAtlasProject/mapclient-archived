@@ -30,6 +30,11 @@ from mapclient.tools.pluginwizard.skeletonstrings import DESERIALIZE_DEFAULT_CON
 from mapclient.tools.pluginwizard.skeletonstrings import CONFIGURE_DIALOG_INIT_ADDITIONS, CONFIGURE_DIALOG_ACCEPT_METHOD, CONFIGURE_DIALOG_MAKE_CONNECTIONS_METHOD
 from mapclient.tools.pluginwizard.skeletonstrings import CONFIGURE_DIALOG_IDENTIFIER_VALIDATE_METHOD, CONFIGURE_DIALOG_DEFAULT_VALIDATE_METHOD
 
+from mapclient.tools.pluginwizard.skeletonstrings import (
+    SETUP_PY_TEMPLATE,
+    NAMESPACE_INIT,
+)
+
 # from mapclient.tools.pluginwizard.skeletonstrings import
 QT_RESOURCE_FILENAME = 'resources.qrc'
 PYTHON_QT_RESOURCE_FILENAME = 'resources_rc.py'
@@ -37,6 +42,9 @@ IMAGES_DIRECTORY = 'images'
 CONFIG_DIALOG_FILE = 'configuredialog.py'
 QT_CONFDIALOG_UI_FILENAME = 'configuredialog.ui'
 PYTHON_QT_CONFDIALOG_UI_FILENAME = 'ui_configuredialog.py'
+
+PLUGIN_NAMESPACE = 'mapclientplugins'
+
 
 class Skeleton(object):
     '''
@@ -46,6 +54,33 @@ class Skeleton(object):
 
     def __init__(self, options):
         self._options = options
+
+    def _writeSetup(self, target_dir):
+        '''
+        Write the setup file, for integration with setuptools.
+        '''
+        target_file = os.path.join(target_dir, 'setup.py')
+        f = open(target_file, 'w')
+        f.write(SETUP_PY_TEMPLATE % dict(
+            version='0.0',
+            description='',
+            name=self._options.getPackageName(),
+            author=self._options.getAuthorName(),
+            author_email='',
+            url='',
+            license='GPL',
+            namespace_packages=[PLUGIN_NAMESPACE],
+        ))
+        f.close()
+
+    def _writeNamespaceInit(self, target_dir):
+        '''
+        Write the namespace declaration init file.
+        '''
+        target_file = os.path.join(target_dir, '__init__.py')
+        f = open(target_file, 'w')
+        f.write(NAMESPACE_INIT)
+        f.close()
 
     def _writePackageInit(self, init_dir):
         '''
@@ -386,18 +421,28 @@ class Skeleton(object):
         Write out the step using the options set on initialisation, assumes the output
         directory is writable otherwise an exception will be raised.
         '''
-        # Make package directory
-        package_dir = os.path.join(self._options.getOutputDirectory(), self._options.getPackageName())
+
+        out_dir = self._options.getOutputDirectory()
+        package_name = self._options.getPackageName()
+
+        package_full_name = '%s.%s' % (PLUGIN_NAMESPACE, package_name)
+
+        package_dir = os.path.join(out_dir, package_full_name)
+        namespace_dir = os.path.join(package_dir, PLUGIN_NAMESPACE)
+        step_package_dir = os.path.join(namespace_dir, package_name)
+
+        # Make directories
         os.mkdir(package_dir)
-
-        # Write the package init file
-        self._writePackageInit(package_dir)
-
-        # Make step pakcage directory
-        step_package_dir = os.path.join(package_dir, self._options.getPackageName())
+        os.mkdir(namespace_dir)
         os.mkdir(step_package_dir)
 
-        # Write step packate init file
+        self._writeSetup(package_dir)
+        self._writeNamespaceInit(namespace_dir)
+
+        # Write the package init file
+        #self._writePackageInit(package_dir)
+
+        # Write step package init file
         self._writeStepPackageInit(step_package_dir)
 
         # Write out the step file

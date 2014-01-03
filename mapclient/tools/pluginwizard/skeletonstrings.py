@@ -321,3 +321,37 @@ CONFIGURE_DIALOG_UI = '''<?xml version="1.0" encoding="UTF-8"?>
  </connections>
 </ui>
 '''
+
+
+SETUP_PY_TEMPLATE = """\
+from setuptools import setup, find_packages
+import sys, os
+
+setup(name=%(name)r,
+      version=%(version)r,
+      description=%(description)r,
+      long_description="",
+      classifiers=[],
+      author=%(author)r,
+      author_email=%(author_email)r,
+      url=%(url)r,
+      license=%(license)r,
+      packages=find_packages(exclude=['ez_setup',]),
+      namespace_packages=%(namespace_packages)r,
+      include_package_data=True,
+      zip_safe=False,
+      install_requires=[
+          # -*- Extra requirements: -*-
+      ],
+      )
+"""
+
+
+NAMESPACE_INIT = """\
+http://peak.telecommunity.com/DevCenter/setuptools#namespace-packages
+try:
+    __import__('pkg_resources').declare_namespace(__name__)
+except ImportError:
+    from pkgutil import extend_path
+    __path__ = extend_path(__path__, __name__)
+"""
