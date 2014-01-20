@@ -348,7 +348,7 @@ setup(name=%(name)r,
 
 
 NAMESPACE_INIT = """\
-http://peak.telecommunity.com/DevCenter/setuptools#namespace-packages
+#http://peak.telecommunity.com/DevCenter/setuptools#namespace-packages
 try:
     __import__('pkg_resources').declare_namespace(__name__)
 except ImportError:
