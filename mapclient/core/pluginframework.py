@@ -257,3 +257,71 @@ keyword arguments, the tool menu ('menu_Tool') and the parent widget ('parent').
 '''
 ToolMountPoint = MetaPluginMountPoint('ToolMountPoint', (object,), {})
 
+
+class PluginManager(object):
+
+
+    def __init__(self):
+        self._directories = []
+        self._loadDefaultPlugins = True
+        self._pluginsChanged = False
+
+    def directories(self):
+        return self._directories
+
+    def setDirectories(self, directories):
+        if self._directories != directories:
+            self._directories = directories
+            self._pluginsChanged = True
+
+    def loadDefaultPlugins(self):
+        return self._loadDefaultPlugins
+
+    def setLoadDefaultPlugins(self, loadDefaultPlugins):
+        if self._loadDefaultPlugins != loadDefaultPlugins:
+            self._loadDefaultPlugins = loadDefaultPlugins
+            self._pluginsChanged = True
+
+    def allDirectories(self):
+        plugin_dirs = self._directories[:]
+        if self._loadDefaultPlugins:
+            file_dir = os.path.dirname(os.path.abspath(__file__))
+            inbuilt_plugin_dir = os.path.realpath(os.path.join(file_dir, '..', '..', 'plugins'))
+            plugin_dirs.insert(0, inbuilt_plugin_dir)
+
+        return plugin_dirs
+
+    def pluginsModified(self):
+        return self._pluginsChanged
+
+    def load(self):
+        self._pluginsChanged = False
+        for directory in self.allDirectories():
+            for p in getPlugins(directory):
+                try:
+                    loadPlugin(p)
+                except:
+                    print('Plugin \'' + p['name'] + '\' not loaded')
+
+    def readSettings(self, settings):
+        self._directories = []
+        settings.beginGroup('Plugins')
+        self._loadDefaultPlugins = settings.value('load_defaults', 'true') == 'true'
+        directory_count = settings.beginReadArray('directories')
+        for i in range(directory_count):
+            settings.setArrayIndex(i)
+            self._directories.append(settings.value('directory'))
+        settings.endArray()
+        settings.endGroup()
+
+    def writeSettings(self, settings):
+        settings.beginGroup('Plugins')
+        settings.setValue('load_defaults', self._loadDefaultPlugins)
+        settings.beginWriteArray('directories')
+        directory_index = 0
+        for directory in self._directories:
+            settings.setArrayIndex(directory_index)
+            settings.setValue('directory', directory)
+            directory_index += 1
+        settings.endArray()
+        settings.endGroup()
