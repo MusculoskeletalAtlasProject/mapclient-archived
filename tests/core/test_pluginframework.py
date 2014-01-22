@@ -18,7 +18,7 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
 import sys, unittest
-from mapclient.core.mainapplication import PluginManager
+from mapclient.core.pluginframework import PluginManager
 from tests.utils import ConsumeOutput
 
 class PluginFrameworkTestCase(unittest.TestCase):
