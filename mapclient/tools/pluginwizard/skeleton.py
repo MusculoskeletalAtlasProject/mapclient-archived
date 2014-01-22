@@ -64,7 +64,7 @@ class Skeleton(object):
         f.write(SETUP_PY_TEMPLATE % dict(
             version='0.0',
             description='',
-            name=self._options.getPackageName(),
+            name=self._options.getFullPackageName(),
             author=self._options.getAuthorName(),
             author_email='',
             url='',
@@ -89,7 +89,10 @@ class Skeleton(object):
         '''
         init_file = os.path.join(init_dir, '__init__.py')
         f = open(init_file, 'w')
-        f.write(PACKAGE_INIT_STRING.format(package_name=self._options.getPackageName(), author_name=self._options.getAuthorName()))
+        f.write(PACKAGE_INIT_STRING.format(
+            package_name=self._options.getFullPackageName(),
+            author_name=self._options.getAuthorName())
+        )
         f.close()
 
     def _generateExecuteMethod(self):
@@ -404,7 +407,7 @@ class Skeleton(object):
 
             dialog_file = os.path.join(step_dir, CONFIG_DIALOG_FILE)
             f = open(dialog_file, 'w')
-            f.write(CONFIGURE_DIALOG_STRING.format(package_name=self._options.getPackageName()))
+            f.write(CONFIGURE_DIALOG_STRING.format(package_name=self._options.getFullPackageName()))
             if self._options.hasIdentifierConfig():
                 f.write(CONFIGURE_DIALOG_INIT_ADDITIONS)
                 f.write(CONFIGURE_DIALOG_MAKE_CONNECTIONS_METHOD)
@@ -488,6 +491,9 @@ class SkeletonOptions(object):
 
     def setPackageName(self, packageName):
         self._packageName = packageName
+
+    def getFullPackageName(self):
+        return PLUGIN_NAMESPACE + '.' + self._packageName
 
     def getImageFile(self):
         return self._imageFile
