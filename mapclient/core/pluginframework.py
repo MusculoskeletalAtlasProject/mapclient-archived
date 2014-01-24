@@ -23,8 +23,11 @@ Inspired by Marty Alchin's Simple plugin framework.
 http://martyalchin.com/2008/jan/10/simple-plugin-framework/
 '''
 
-import os, imp
+import os
+import imp
+import site
 
+PLUGINS_PTH = 'mapclientplugins.pth'
 MAIN_MODULE = '__init__'
 
 def getPlugins(pluginDirectory):
@@ -325,3 +328,27 @@ class PluginManager(object):
             directory_index += 1
         settings.endArray()
         settings.endGroup()
+
+
+class PluginSiteManager(object):
+
+    def __init__(self):
+        pass
+
+    def generate_pth_entries(self, target_dir):
+        if not os.path.isdir(target_dir):
+            return []
+        g = os.walk(target_dir)
+        p, dirs, files = next(g)
+        return [os.path.join(target_dir, d) for d in dirs]
+
+    def build_site(self, target_dir):
+        pth_entries = self.generate_pth_entries(target_dir)
+        pth_filename = os.path.join(target_dir, PLUGINS_PTH)
+
+        with open(pth_filename, 'w') as f:
+            # should probably check that they are valid packages
+            f.write('\n'.join(pth_entries))
+
+    def load_site(self, target_dir):
+        site.addsitedir(target_dir)
