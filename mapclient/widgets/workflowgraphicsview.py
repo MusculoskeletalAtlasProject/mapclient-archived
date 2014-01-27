@@ -95,11 +95,22 @@ class WorkflowGraphicsView(QtGui.QGraphicsView):
         if len(self._selectedNodes) == 2:
             self.connectNodes(self._selectedNodes[0], self._selectedNodes[1])
 
+    def deleteSelected(self):
+        command = CommandRemove(self.scene(), self.scene().selectedItems())
+        self._undoStack.push(command)
+
+    def addNode(self, position, node):
+        self._undoStack.beginMacro('Add node')
+        self._undoStack.push(CommandAdd(self.scene(), node))  # Set the position after it has been added to the scene
+        self._undoStack.push(CommandMove(node, position, self.scene().ensureItemInScene(node, position)))
+        self.scene().clearSelection()
+        node.setSelected(True)
+        self._undoStack.endMacro()
+
     def keyPressEvent(self, event):
 #        super(WorkflowGraphicsView, self).keyPressEvent(event)
         if event.key() == QtCore.Qt.Key_Backspace or event.key() == QtCore.Qt.Key_Delete:
-            command = CommandRemove(self.scene(), self.scene().selectedItems())
-            self._undoStack.push(command)
+            self.deleteSelected()
             event.accept()
         else:
             event.ignore()
@@ -196,13 +207,7 @@ class WorkflowGraphicsView(QtGui.QGraphicsView):
             metastep._step.registerOnExecuteEntry(self.scene().setCurrentWidget)
             metastep._step.registerIdentifierOccursCount(self.scene().identifierOccursCount)
 
-            self._undoStack.beginMacro('Add node')
-            self._undoStack.push(CommandAdd(self.scene(), node))
-            # Set the position after it has been added to the scene
-            self._undoStack.push(CommandMove(node, position, self.scene().ensureItemInScene(node, position)))
-            self.scene().clearSelection()
-            node.setSelected(True)
-            self._undoStack.endMacro()
+            self.addNode(position, node)
 
             self.setFocus()
             event.accept();

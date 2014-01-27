@@ -42,9 +42,6 @@ class MainWindow(QtGui.QMainWindow):
         self._ui.setupUi(self)
         self._makeConnections()
 
-        self._createUndoAction(self._ui.menu_Edit)
-        self._createRedoAction(self._ui.menu_Edit)
-
         self._model.readSettings()
         self.resize(self._model.size())
         self.move(self._model.pos())
@@ -91,6 +88,8 @@ class MainWindow(QtGui.QMainWindow):
         self._ui.actionPluginWizard.triggered.connect(self.pluginWizard)
         self._ui.actionPMR.triggered.connect(self.pmr)
         self._ui.actionAnnotation.triggered.connect(self.annotationTool)
+        self._ui.actionUndo.triggered.connect(self._model.undoManager().undo)
+        self._ui.actionRedo.triggered.connect(self._model.undoManager().redo)
 
     def setCurrentUndoRedoStack(self, stack):
         current_stack = self._model.undoManager().currentStack()
@@ -100,16 +99,16 @@ class MainWindow(QtGui.QMainWindow):
 
         self._model.undoManager().setCurrentStack(stack)
 
-        self.redoAction.setEnabled(stack.canRedo())
-        self.undoAction.setEnabled(stack.canUndo())
+        self._ui.actionRedo.setEnabled(stack.canRedo())
+        self._ui.actionUndo.setEnabled(stack.canUndo())
         stack.canUndoChanged.connect(self._canUndoChanged)
         stack.canRedoChanged.connect(self._canRedoChanged)
 
     def _canRedoChanged(self, canRedo):
-        self.redoAction.setEnabled(canRedo)
+        self._ui.actionRedo.setEnabled(canRedo)
 
     def _canUndoChanged(self, canUndo):
-        self.undoAction.setEnabled(canUndo)
+        self._ui.actionUndo.setEnabled(canUndo)
 
     def execute(self):
         self._ui.stackedWidget.setCurrentWidget(self._workflowWidget)

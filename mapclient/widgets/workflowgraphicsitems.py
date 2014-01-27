@@ -154,11 +154,17 @@ class Arc(Item):
         self._destPoint = line.p2() - arcOffset
 
     def shape(self):
+#     def shape(self):
 #         print('shape')
 #        path = super(Arc, self).shape()
         path = QtGui.QPainterPath()
         path.addPolygon(self._arrow)
         return path
+# #        path = super(Arc, self).shape()
+#         path = QtGui.QPainterPath()
+#         path.addPolygon(self._arrow)
+#         path.addRect()
+#         return path
 
     def boundingRect(self):
         if not self._source() or not self._dest():
@@ -184,18 +190,18 @@ class Arc(Item):
         if line.length() == 0.0:
             return
 
-        brush = QtGui.QBrush(QtCore.Qt.black)
-        if self.isSelected():  # or self.selected:
-            painter.setBrush(QtCore.Qt.darkGray)
-            painter.drawRoundedRect(self.boundingRect(), 5, 5)
-#            brush = QtGui.QBrush(QtCore.Qt.red)
-
-        painter.setBrush(brush)
-
         angle = math.acos(line.dx() / line.length())
         if line.dy() >= 0:
             angle = Arc.TwoPi - angle
 
+        painter.setBrush(QtCore.Qt.black)
+        painter.setPen(QtGui.QPen(QtCore.Qt.black, 1, QtCore.Qt.SolidLine, QtCore.Qt.RoundCap, QtCore.Qt.RoundJoin))
+
+        if self.isSelected():  # or self.selected:
+#             painter.setBrush(QtCore.Qt.NoBrush)
+            painter.setPen(QtGui.QPen(QtCore.Qt.black, 1, QtCore.Qt.DashLine, QtCore.Qt.RoundCap, QtCore.Qt.RoundJoin))
+
+        painter.drawLine(line)
 
         # Draw the arrows if there's enough room.
         if line.dy() * line.dy() + line.dx() * line.dx() > 200 * self._arrowSize:
@@ -212,9 +218,6 @@ class Arc(Item):
             self._arrow.append(destArrowP2)
             painter.drawPolygon(self._arrow)
 
-        painter.setPen(QtGui.QPen(brush, 1, QtCore.Qt.SolidLine, QtCore.Qt.RoundCap, QtCore.Qt.RoundJoin))
-        # painter.setPen(QtGui.QPen(QtCore.Qt.SolidLine))
-        painter.drawLine(line)
 
 class Node(Item):
     Type = QtGui.QGraphicsItem.UserType + 1
@@ -259,32 +262,34 @@ class Node(Item):
         uses_total = len(uses_ports)
         provides_count = 0
         provides_total = len(provides_ports)
-        for port in self._metastep._step._ports:
-            port_item = StepPort(port, self)
-            w = port_item.width()
-            h = port_item.height()
-            if port in uses_ports:
-                port_total = uses_total
-                index = uses_count
-                x_pos = -3 * w / 4
-                uses_count += 1
-                pred = 'http://physiomeproject.org/workflow/1.0/rdf-schema#uses'
-                tooltip_stub = 'uses: '
-            else:  # port in provides_ports:
-                port_total = provides_total
-                index = provides_count
-                x_pos = self.Size - w / 4
-                provides_count += 1
-                pred = 'http://physiomeproject.org/workflow/1.0/rdf-schema#provides'
-                tooltip_stub = 'provides: '
 
-            triples = port.getTriplesForPred(pred)
-            triple_objects = [triple[2] for triple in triples]
-            alpha = h / 4.0  # Controls the spacing between the ports
-            y_pos = self.Size / 2.0 - (port_total * h + (port_total - 1) * alpha) / 2.0 + (h + alpha) * index
-            port_item.moveBy(x_pos, y_pos)
-            port_item.setToolTip(tooltip_stub + ', '.join(triple_objects))
-            self._step_port_items.append(port_item)
+        port_count = len(uses_ports)
+        for index, port in enumerate(uses_ports):
+            triples = port.getTriplesForPred('http://physiomeproject.org/workflow/1.0/rdf-schema#uses')
+            if len(triples) == 1:
+                triple = triples[0]
+                port_item = StepPort(port, self)
+                w = port_item.width()
+                h = port_item.height()
+                port_item.moveBy(-3 * w / 4, self.Size / 2 + h / 3 * (4 * index - 2 * (port_count - 1) - 1))
+                port_item.setToolTip('uses: ' + triple[2])
+                self._step_port_items.append(port_item)
+            else:
+                print('Warning: Invalid port.')
+
+        port_count = len(provides_ports)
+        for index, port in enumerate(provides_ports):
+            triples = port.getTriplesForPred('http://physiomeproject.org/workflow/1.0/rdf-schema#provides')
+            if len(triples) == 1:
+                triple = triples[0]
+                port_item = StepPort(port, self)
+                w = port_item.width()
+                h = port_item.height()
+                port_item.moveBy(self.Size - w / 4, self.Size / 2 + h / 3 * (4 * index - 2 * (port_count - 1) - 1))
+                port_item.setToolTip('provides: ' + triple[2])
+                self._step_port_items.append(port_item)
+            else:
+                print('Warning: Invalid port.')
 
         self._configure_item = ConfigureIcon(self)
         self._configure_item.moveBy(40, 40)
@@ -318,8 +323,11 @@ class Node(Item):
             self.scene().commitChanges(step_location)
             self.updateMercurialIcon()
 
+<<<<<<< TREE
     def _removeMe(self):
         self.scene().removeStep(self)
+=======
+>>>>>>> MERGE-SOURCE
 
     def configureMe(self):
         self.scene().setConfigureNode(self)
@@ -379,9 +387,12 @@ class StepPort(QtGui.QGraphicsEllipseItem):
     def type(self):
         return StepPort.Type
 
+<<<<<<< TREE
     def portIndex(self):
         return self._port.index()
 
+=======
+>>>>>>> MERGE-SOURCE
     def width(self):
         return self.boundingRect().width()
 
