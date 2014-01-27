@@ -31,20 +31,29 @@ if __package__:
 else:
     from mapclient.settings import info
 
-# Ensure the MAP Client module directory is in the system path so relative 'import' statements work
-base_path = os.path.dirname(os.path.abspath(__file__))
-if sys.path.count(base_path) == 0:
-    sys.path.insert(0, base_path)
+logger = logging.getLogger('mapclient.application')
 
+def initialiseLogger():
+    logging.basicConfig(format='%(asctime)s %(levelname)s - %(name)s--> %(message)s', datefmt='%Y/%m/%d %H:%M:%S', level='DEBUG')
+    logging.addLevelName(29, 'PLUGIN')
+#     logging.addLevelName(28, 'MSG')
+
+
+#     ch = logging.StreamHandler()
+#     ch.setLevel(28)
+#     formatter = logging.Formatter('%(message)s')
+#     ch.setFormatter(formatter)
+
+#     logger.addHandler(ch)
 
 def progheader():
     '''
     Display program header
     '''
     programHeader = '   MAP Client (version %s)   ' % info.ABOUT['version']
-    print('-' * len(programHeader))
-    print(programHeader)
-    print('-' * len(programHeader))
+    logger.info('-' * len(programHeader))
+    logger.info(programHeader)
+    logger.info('-' * len(programHeader))
 
 # This method starts MAP Client
 def winmain():
@@ -52,8 +61,7 @@ def winmain():
     Initialise common settings and check the operating environment before starting the application.
     '''
 
-    logging.basicConfig(level='DEBUG')
-
+    initialiseLogger()
     progheader()
     # import the locale, and set the locale. This is used for
     # locale-aware number to string formatting

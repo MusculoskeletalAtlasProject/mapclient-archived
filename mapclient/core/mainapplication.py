@@ -17,13 +17,16 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     You should have received a copy of the GNU General Public License
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
-import os
+import os, sys
+import logging
 
 from PySide import QtCore
 
 from mapclient.core.workflow import WorkflowManager
 from mapclient.core.undomanager import UndoManager
 from mapclient.core.threadcommandmanager import ThreadCommandManager
+
+logger = logging.getLogger(__name__)
 
 class MainApplication(object):
     '''
@@ -128,13 +131,20 @@ class PluginManager(object):
         return self._pluginsChanged
 
     def load(self):
+        old_stdout = sys.stdout
+        sys.stdout = redirectstdout = ConsumeOutput()
         self._pluginsChanged = False
         for directory in self.allDirectories():
             for p in getPlugins(directory):
                 try:
                     loadPlugin(p)
+                    msgs = redirectstdout.flush()
+                    for msg in msgs:
+                        logger.log(29, msg)
                 except:
-                    print('Plugin \'' + p['name'] + '\' not loaded')
+                    logger.warn('Plugin \'' + p['name'] + '\' not loaded')
+
+        sys.stdout = old_stdout
 
     def readSettings(self, settings):
         self._directories = []
@@ -158,3 +168,18 @@ class PluginManager(object):
             directory_index += 1
         settings.endArray()
         settings.endGroup()
+
+
+class ConsumeOutput(object):
+    def __init__(self):
+        self.messages = list()
+
+    def write(self, message):
+        if message != '\n':
+            self.messages.append(message)
+
+    def flush(self):
+        msgs = self.messages
+        self.messages = []
+        return msgs
+

@@ -132,8 +132,8 @@ class WorkflowManager(object):
 
     def load(self, location):
         '''
-        Open a workflow from the given _location.
-        :param _location:
+        Open a workflow from the given location.
+        :param location:
         '''
         if location is None:
             raise WorkflowError('No location given to open Workflow.')
@@ -151,14 +151,14 @@ class WorkflowManager(object):
             # compare first two elements of version (major, minor)
             raise WorkflowError(
                 'Major/Minor version number mismatch - '
-                'application version: %s; workflow version: %s.'
+                'application version: %s; workflow version: %s.' %
                     (info.VERSION_STRING, wf.value('version'))
             )
         if not workflow_version[2] <= software_version[2]:
             raise WorkflowError(
                 'Patch version number of the workflow cannot be newer than '
                 'application - '
-                'application version: %s; workflow version: %s' % 
+                'application version: %s; workflow version: %s' %
                     (info.VERSION_STRING, wf.value('version'))
             )
 

@@ -1,5 +1,9 @@
 import logging
-from urllib import quote_plus
+
+try:
+    from urllib import quote_plus
+except:
+    from urllib.parse import quote_plus
 
 from requests_oauthlib.oauth1_session import OAuth1Session
 
@@ -13,7 +17,7 @@ DEFAULT_SCOPE = (
     '{0}/scope/workspace_full'
 ).format(DEFAULT_SITE_URL,)
 
- 
+
 class TokenHelper(object):
 
     request_token_endpoint = 'OAuthRequestToken'

@@ -17,10 +17,17 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     You should have received a copy of the GNU General Public License
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
-from PySide import QtGui
+import logging
+import webbrowser
+
+from PySide import QtCore, QtGui
 
 from mapclient.tools.pmr.ui_authoriseapplicationdialog import Ui_AuthoriseApplicationDialog
 
+from mapclient.settings import info
+from mapclient.tools.pmr.core import TokenHelper
+
+logger = logging.getLogger(__name__)
 
 class AuthoriseApplicationDialog(QtGui.QDialog):
     '''
@@ -35,6 +42,62 @@ class AuthoriseApplicationDialog(QtGui.QDialog):
         QtGui.QDialog.__init__(self, parent)
         self._ui = Ui_AuthoriseApplicationDialog()
         self._ui.setupUi(self)
-        
-    def token(self):
-        return self._ui.tokenLineEdit.text()
+
+        pmr_info = info.PMRInfo()
+        self._helper = TokenHelper(
+            client_key=pmr_info.consumer_public_token,
+            client_secret=pmr_info.consumer_secret_token,
+            site_url=pmr_info.host,
+        )
+
+    def event(self, event):
+        result = QtGui.QDialog.event(self, event)
+        if event.type() == QtCore.QEvent.ShowToParent:
+            answer = QtGui.QMessageBox.question(self, 'Permission Required',
+                'Can the MAP Client access PMR on your behalf?',
+                QtGui.QMessageBox.Yes | QtGui.QMessageBox.No, QtGui.QMessageBox.Yes)
+            if answer == QtGui.QMessageBox.No:
+                self.reject()
+            else:
+                self._show_pmr()
+
+        return result
+
+    def _show_pmr(self):
+
+        try:
+            self._helper.get_temporary_credentials()
+        except ValueError:
+            logger.info('Invalid Client Credentials: Failed to retrieve temporary credentials.')
+            QtGui.QMessageBox.information(self, 'Invalid Client Credentials',
+                'Failed to retrieve temporary credentials.')
+            return
+
+        url = self._helper.get_authorize_url()
+        webbrowser.open(url)
+
+    def accept(self):
+        if len(self._ui.tokenLineEdit.text()) > 0:
+            self._register()
+
+        QtGui.QDialog.accept(self)
+
+    def _register(self):
+        pmr_info = info.PMRInfo()
+
+        verifier = self._ui.tokenLineEdit.text()
+        self._helper.set_verifier(verifier)
+
+        try:
+            token_credentials = self._helper.get_token_credentials()
+        except ValueError:
+            logger.info('Invalid Verifier: Failed to retrieve token access with verification code.')
+            QtGui.QMessageBox.information(self, 'Invalid Verifier',
+                'Failed to retrieve token access with verification code.')
+            return False
+
+        logger.debug('token: %r', token_credentials)
+
+        pmr_info.update_token(**token_credentials)
+
+        return True

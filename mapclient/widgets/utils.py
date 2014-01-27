@@ -23,7 +23,6 @@ from PySide import QtCore, QtGui
 
 from mapclient.exceptions import ClientRuntimeError
 
-
 def createDefaultImageIcon(name):
     '''
     The default image size is 512x512
@@ -86,9 +85,9 @@ def handle_runtime_error(f):
     """
 
     @wraps(f)
-    def do_runtime_error(*a, **kw):
+    def do_runtime_error(self, *a, **kw):
         try:
-            return f(*a, **kw)
+            return f(self, *a, **kw)
         except ClientRuntimeError as e:
-            QtGui.QMessageBox.critical(None, e.title, e.description)
+            QtGui.QMessageBox.critical(self, e.title, e.description)
     return do_runtime_error
