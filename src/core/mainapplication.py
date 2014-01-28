@@ -22,7 +22,7 @@ import os
 from PySide import QtCore
 
 from core.workflow import WorkflowManager
-from core.undomanager import UndoManager
+from core.editmanager import EditManager
 from core.threadcommandmanager import ThreadCommandManager
 
 class MainApplication(object):
@@ -40,7 +40,7 @@ class MainApplication(object):
         self._pos = QtCore.QPoint(100, 150)
         self._pluginManager = PluginManager()
         self._workflowManager = WorkflowManager()
-        self._undoManager = UndoManager()
+        self._editManager = EditManager()
         self._threadCommandManager = ThreadCommandManager()
 
     def setSize(self, size):
@@ -55,15 +55,15 @@ class MainApplication(object):
     def pos(self):
         return self._pos
 
-    def undoManager(self):
-        return self._undoManager
+    def editManager(self):
+        return self._editManager
 
     def workflowManager(self):
         return self._workflowManager
 
     def pluginManager(self):
         return self._pluginManager
-    
+
     def threadCommandManager(self):
         return self._threadCommandManager
 

@@ -10,6 +10,7 @@ MAP Features Demonstration
 .. _launchpad project: http://launchpad.net/mapclient
 .. _physiome: http://physiomeproject.org/zinclibrary
 .. _project downloads: https://launchpad.net/mapclient/+download
+.. _read-the-docs: http://abibook.readthedocs.org/en/latest/PMR/index.html
 
 .. note::
    `MAP`_ is currently under active development, and this document will be updated to reflect any changes to the software or new features that are added. You can follow the development of MAP at the `launchpad project`_.
@@ -37,6 +38,15 @@ Menu Bar
 --------
 
 The Menu bar provides a selection of drop down menus for accessing the applications functions.  The File menu provides access to opening, importing, closing workspaces as well as quitting the application.  The Edit menu provides access to the undo/redo functionality.  The Tools menu provides access to the Plugin Manager tool, Physiome Model Repository (PMR) tool and the Annotation tool.  The Help menu provides access to the about box which contains information on contributors and the license that the MAP application is released under.
+
+The 'New' menu has two sub-menus: 'New/PMR Workflow' and 'New/Workflow'.  The PMR Workflow menu command will create a new workflow in the chosen directory and use Mercurial to track changes to your project.  When saving the workflow the contents of the project will be transferred to PMR via Mercurial, this transfer is managed by the application.  For more information on the benefits and use of PMR please read the documentation available at `read-the-docs`_ .
+
+.. figure:: resources/images/select_workflow_directory_1.png
+   :align: center
+   :width: 75%
+
+
+The Workflow menu command will create a new workflow on your local disk in the selected directory.
 
 Step Box
 --------
@@ -78,15 +88,18 @@ Physiome Model Repository (PMR) Tool
 
 The PMR tool uses webservices and OAuth to communicate between itself (the consumer) and the PMR website (the server).  Using this tool we can search for and find suitable resources on PMR.
 
-The PMR website uses OAuth to authenticate a consumer and determine consumer access privileges.  Here we will discuss the parts of OAuth that are relevant to getting you (the user) able to access resources on PMR.
+The PMR website uses OAuth to authenticate a consumer and determine consumer access privileges.  Here we will discuss the parts of OAuth that are relevant to getting you (the user) able to access resources on PMR.  Please read the section `Simplified OAuth Primer`_ for a quick overview of OAuth authentication.
 
-In OAuth we have three players the server, the consumer and the user.  The server is providing a service that the consumer wishes to use.  It is up to the user to allow the consumer access to the servers resources and set the level of access to the resource.  For the the consumer to access privileged information of the user stored on the server the user must register the consumer with the server, this is done by the user giving the consumer a temporary access token.  This temporary access token is then used by the consumer to finalise the transaction and acquire a permanent access token.  The user can deny the consumer access at anytime by logging into the server and revoking the permanent access token.
-
-If you want the PMR tool to have access to privileged information (your non-public workspaces stored on PMR) you will need to register the PMR tool with the PMR website.  We do this by clicking on the `register` link as shown in the figure below.  This does two things: it shows the Application Authorisation dialog; opens a webbrowser at the PMR website.  [If you are not logged on at the PMR website you will need to do so now to continue, instructions on obtaining a PMR account are availble here XXXXX].  On the PMR website you are asked to either accept or deny access to the PMR tool.  If you allow access then the website will display a temporary access token that you will need to copy and paste into the Application Authorisation dialog so that the PMR tool can get the permanent access token.
+If you want the PMR tool to have access to privileged information (your non-public workspaces stored on PMR) you will need to register the PMR tool with the PMR website.  We do this by clicking on the `register` link as shown in the figure below.  This does two things: it shows the Application Authorisation dialog; opens a webbrowser at the PMR website.  [If you are not logged on at the PMR website you will need to do so now to continue, instructions on obtaining a PMR account are available here XXXXX].  On the PMR website you are asked to either accept or deny access to the PMR tool.  If you allow access then the website will display a temporary access token that you will need to copy and paste into the Application Authorisation dialog so that the PMR tool can get the permanent access token.
 
 .. figure:: resources/images/PMRTool_1.png
    :align: center
    :width: 25%
+
+Simplified OAuth Primer
+^^^^^^^^^^^^^^^^^^^^^^^
+
+In OAuth we have three players the server, the consumer and the user.  The server is providing a service that the consumer wishes to use.  It is up to the user to allow the consumer access to the servers resources and set the level of access to the resource.  For the the consumer to access privileged information of the user stored on the server the user must register the consumer with the server, this is done by the user giving the consumer a temporary access token.  This temporary access token is then used by the consumer to finalise the transaction and acquire a permanent access token.  The user can deny the consumer access at anytime by logging into the server and revoking the permanent access token.
 
 Annotation Tool
 ---------------

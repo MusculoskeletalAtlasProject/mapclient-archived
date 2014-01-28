@@ -55,22 +55,26 @@ class MainWindow(QtGui.QMainWindow):
     def model(self):
         return self._model
 
+    def updateUi(self):
+        has_selection = self._model.editManager().hasSelection()
+        self._ui.actionCopy.setEnabled(has_selection)
+
     def _makeConnections(self):
         self._ui.action_Quit.triggered.connect(self.quitApplication)
         self._ui.action_About.triggered.connect(self.about)
         self._ui.actionPluginManager.triggered.connect(self.pluginManager)
         self._ui.actionPMR.triggered.connect(self.pmr)
         self._ui.actionAnnotation.triggered.connect(self.annotationTool)
-        self._ui.actionUndo.triggered.connect(self._model.undoManager().undo)
-        self._ui.actionRedo.triggered.connect(self._model.undoManager().redo)
+        self._ui.actionUndo.triggered.connect(self._model.editManager().undo)
+        self._ui.actionRedo.triggered.connect(self._model.editManager().redo)
 
     def setCurrentUndoRedoStack(self, stack):
-        current_stack = self._model.undoManager().currentStack()
+        current_stack = self._model.editManager().currentStack()
         if current_stack:
             current_stack.canRedoChanged.disconnect(self._canRedoChanged)
             current_stack.canUndoChanged.disconnect(self._canUndoChanged)
 
-        self._model.undoManager().setCurrentStack(stack)
+        self._model.editManager().setCurrentStack(stack)
 
         self._ui.actionRedo.setEnabled(stack.canRedo())
         self._ui.actionUndo.setEnabled(stack.canUndo())

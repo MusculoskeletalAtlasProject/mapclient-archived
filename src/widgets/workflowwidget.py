@@ -69,6 +69,7 @@ class WorkflowWidget(QtGui.QWidget):
         self._updateUi()
 
     def _updateUi(self):
+        print("_updateUI")
         wfm = self._mainWindow.model().workflowManager()
         self._mainWindow.setWindowTitle(wfm.title())
         workflowOpen = wfm.isWorkflowOpen()
@@ -130,7 +131,7 @@ class WorkflowWidget(QtGui.QWidget):
             self._ui.graphicsView.setLocation(workflowDir)
             self._graphicsScene.updateModel()
             self._updateUi()
-            
+
     def newpmr(self):
         self.new(pmr=True)
 
@@ -149,7 +150,7 @@ class WorkflowWidget(QtGui.QWidget):
                 self._updateUi()
             except (ValueError, WorkflowError) as e:
                 self.close()
-                QtGui.QMessageBox.critical( self, 'Error Caught', 'Invalid Workflow.  ' + str(e))
+                QtGui.QMessageBox.critical(self, 'Error Caught', 'Invalid Workflow.  ' + str(e))
 
     def importFromPMR(self):
         m = self._mainWindow.model().workflowManager()
@@ -176,9 +177,9 @@ class WorkflowWidget(QtGui.QWidget):
                         self._updateUi()
                     except (ValueError, WorkflowError) as e:
                         self.close()
-                        QtGui.QMessageBox.critical( self, 'Error Caught', 'Invalid Workflow.  ' + str(e))
-                    
-        
+                        QtGui.QMessageBox.critical(self, 'Error Caught', 'Invalid Workflow.  ' + str(e))
+
+
     def close(self):
         m = self._mainWindow.model().workflowManager()
         self._undoStack.clear()
@@ -191,7 +192,7 @@ class WorkflowWidget(QtGui.QWidget):
         m.save()
         if os.path.exists(os.path.join(m.location(), '.hg')):
             self.commitChanges(m.location())
-            
+
         self._updateUi()
 
     def commitChanges(self, location):
@@ -207,7 +208,7 @@ class WorkflowWidget(QtGui.QWidget):
                 QtGui.QApplication.restoreOverrideCursor()
             except Exception:
                 QtGui.QMessageBox.warning(self._mainWindow, 'Error Saving', 'The commit to PMR did not succeed')
-        
+
     def _setActionProperties(self, action, name, slot, shortcut='', statustip=''):
         action.setObjectName(name)
         action.triggered.connect(slot)
@@ -218,7 +219,7 @@ class WorkflowWidget(QtGui.QWidget):
     def _createMenuItems(self):
         menu_File = self._mainWindow._ui.menubar.findChild(QtGui.QMenu, 'menu_File')
         lastFileMenuAction = menu_File.actions()[-1]
-        menu_New = QtGui.QMenu('&New', menu_File)            
+        menu_New = QtGui.QMenu('&New', menu_File)
 #        menu_Open = QtGui.QMenu('&Open', menu_File)
 
         action_NewPMR = QtGui.QAction('PMR Workflow', menu_New)
