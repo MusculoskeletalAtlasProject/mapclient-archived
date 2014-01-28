@@ -3,7 +3,7 @@ MAP Client
 ==========
 
 .. _MAP Client: https://launchpad.net/mapclient
-.. _docuementation: https://map-client.readthedocs.org/
+.. _documentation: https://map-client.readthedocs.org/
 
 The `MAP Client`_ is a cross-platform framework for managing workflows. MAP Client is a plugin-based application that can be used to 
 create workflows from a collection of workflow steps.  Each workflow step is simply a plugin for the MAP Client which performs some 
