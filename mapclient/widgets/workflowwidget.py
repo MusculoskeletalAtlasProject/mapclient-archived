@@ -77,7 +77,6 @@ class WorkflowWidget(QtGui.QWidget):
         self._updateUi()
 
     def _updateUi(self):
-        print("_updateUI")
         wfm = self._mainWindow.model().workflowManager()
         self._mainWindow.setWindowTitle(wfm.title())
         workflowOpen = wfm.isWorkflowOpen()

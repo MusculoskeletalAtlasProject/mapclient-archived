@@ -43,7 +43,7 @@ class MainApplication(object):
         self._pos = QtCore.QPoint(100, 150)
         self._pluginManager = PluginManager()
         self._workflowManager = WorkflowManager()
-        self._editManager = EditManager()
+        self._undoManager = UndoManager()
         self._threadCommandManager = ThreadCommandManager()
 
     def setSize(self, size):
@@ -58,8 +58,8 @@ class MainApplication(object):
     def pos(self):
         return self._pos
 
-    def editManager(self):
-        return self._editManager
+    def undoManager(self):
+        return self._undoManager
 
     def workflowManager(self):
         return self._workflowManager

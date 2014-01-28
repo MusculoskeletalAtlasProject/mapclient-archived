@@ -52,16 +52,6 @@ which should result in an application window similar to that shown below.
 .. figure:: resources/images/mapClientBarebones.png
    :align: center
    :width: 80%
-   
-Now that the barebones MAP application is installed and running we can look at adding the plugins that add functionality to the MAP application.
-
-MAP Plugins
-===========
-
-.. _github project: https://github.com/mapclient-plugins
-
-The installation of MAP plugins simply requires obtaining the plugins and then using the :ref:`MAP plugin manager <MAP-plugin-manager-tool>` to let the MAP client know where to look for plugins. Furthermore, there is a `github project`_ which is used to provide a common collection of MAP plugins. For the purposes of this tutorial, the ``autosegmentationstep`` plugin will be used. You can `download <https://github.com/mapclient-plugins/autosegmentationstep/archive/master.zip>`__ a copy of the plugin, extract it, and then follow the instructions for adding the folder in which you extracted the plugin to the :ref:`MAP plugin manager <MAP-plugin-manager-tool>`.
-=======
 
 The MAP Client relies heavily on plugins to do anything interesting, you can either create these yourself or add already available ones to your application by downloading them and using the Plugin Manager Tool in the MAP Client, read the documents :ref:`MAP-feature-demonstration` and :ref:`MAP-plugin-wizard` to learn more.
 
@@ -123,23 +113,23 @@ There is a `github orginisation`_ which has a collection of MAP Client plugins. 
 Zinc and PyZinc
 ===============
 
-`Zinc <http://physiomeproject.org/software/zinclibrary/>`_ is an advanced field manipulation and visualisation library and `PyZinc <http://physiomeproject.org/software/pyzinc/>`_ provides :term:`Python` bindings to the Zinc library.  There are a number of plugins for the MAP application that rely on the Zinc/PyZinc libraries.  Zinc and PyZinc are typically required to run some of the advanced visualisation and image processing plugins.  The MAP client is able to make use of Zinc for advanced visualisation and image processing steps.  Binaries are available for `download <ftp://ftp.bioeng.auckland.ac.nz/cmiss/zinclibrary/embc2013/>`__ for Linux, Windows, and OS X.  To get PyZinc installed, follow these steps:
+`Zinc <http://physiomeproject.org/software/zinclibrary/>`_ is an advanced field manipulation and visualisation library and `PyZinc <http://physiomeproject.org/software/pyzinc/>`_ provides :term:`Python` bindings to the Zinc library.  The MAP client is able to make use of Zinc for advanced visualisation and image processing steps through PyZinc.  Binaries for Zinc and PyZinc are available from `here <http://physiomeproject.org/software/zinclibrary/download>`__ and `here <http://physiomeproject.org/software/pyzinc/download>`__ for Linux, Windows, and OS X.
 
-#. Install Zinc using either: the Windows installer (ensuring that you enable the option for the installer to add Zinc to the system PATH); or unzip the archive and manually copy library file to somewhere on your PATH (which could include the PyZinc installation folder).
-#. Unzip the downloaded PyZinc archive.
-#. In a command window, change into the folder where PyZinc was extracted.
-#. Execute the following command: ``python setup.py install`` (this uses a similar mechanism as the ``easy_instal`` software above..
+First install Zinc, for Ubuntu download the debian package and install it with the folowing command::
 
-You can check that you have Zinc and PyZinc correctly installed and functional by running the ``volume_fitting.py`` application provided with the tutorial materials. If Zinc and PyZinc are working you should get an application window similar to that shown below with the interactive three-dimensional model viewer shown. *Note* you will need to restart the command window after installing PyZinc in order to refresh the system PATH.
+  sudo dpkg -i zinc-X.Y.Z-x86_64-Ubuntu-10.04.4-LTS.deb
 
-.. figure:: resources/images/volumeFitting.png
-   :align: center
-   :width: 80%
+for Windows download the executable installer and follow the onscreen instructions.  For Mac OSX download the dmg and follow the onscreen instructions.  Archived versions exist for installing the Zinc library manually if you prefer.
 
-Which Binary?
--------------
+To get PyZinc installed, follow these steps:
 
-There are a number of binaries available for any given platform and you must match the package description with your system setup.  The package description contains the package name, package version, package architecture, package operating system and in the case of PyZinc the package Python version.  The package extension indicates the type of package and they come in two main flavours: installer/package manager; archive.
+#. Download the PyZinc archive that matches the Zinc library already downloaded.
+#. Extract the downloaded PyZinc archive (unzip on Windows, tar for Ubuntu and Mac OSX).
+#. In a command window, make the current directory the directory where PyZinc was extracted.
+#. Execute the following command: ``python setup.py install``.
 
-Additionally the version of the PyZinc binaries you download must match the version of the Zinc library binaries.
+note::
+
+ The Zinc and PyZinc packages must have the same version 
+ number.
 

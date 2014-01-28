@@ -18,9 +18,9 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
 
-class EditManager(object):
+class UndoManager(object):
     '''
-    This class is the edit manager. It handles multiple undo/redo stacks. It is a
+    This class is the undo redo manager for multiple undo stacks. It is a
     singleton class. 
     
     Don't inherit from this class.
@@ -30,7 +30,7 @@ class EditManager(object):
 
     def __new__(cls, *args, **kwargs):
         if not cls._instance:
-            cls._instance = super(EditManager, cls).__new__(
+            cls._instance = super(UndoManager, cls).__new__(
                                 cls, *args, **kwargs)
         return cls._instance
 
@@ -45,8 +45,4 @@ class EditManager(object):
 
     def redo(self):
         self._stack.redo()
-
-    def hasSelection(self):
-        return False
-
 
