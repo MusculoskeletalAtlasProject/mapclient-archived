@@ -22,24 +22,38 @@ import sys
 import shutil
 import tempfile
 import unittest
+import logging
 
 from mapclient.core.pluginframework import PluginManager
 from mapclient.core.pluginframework import PluginSiteManager
 from tests.utils import ConsumeOutput
 
+def initialiseLogger():
+    logging.basicConfig(format='%(asctime)s %(levelname)s - %(name)s--> %(message)s', datefmt='%Y/%m/%d %H:%M:%S', level='DEBUG')
+    logging.addLevelName(29, 'PLUGIN')
+
 class PluginFrameworkTestCase(unittest.TestCase):
 
 
     def testLoadPlugins(self):
-        pm = PluginManager()
 
-        old_stdout = sys.stdout
-        sys.stdout = redirectstdout = ConsumeOutput()
+        initialiseLogger()
+
+        redirectstdout = ConsumeOutput()
+        root = logging.getLogger('mapclient.core.mainapplication')
+        ch = logging.StreamHandler(redirectstdout)
+        ch.setLevel(29)
+        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        ch.setFormatter(formatter)
+        root.addHandler(ch)
+        root.propagate = False
+
+        pm = PluginManager()
 
         pm.load()
 
-        sys.stdout = old_stdout
-        self.assertTrue("Plugin 'pointcloudserializerstep' version 0.3.0 by Hugh Sorby loaded" in redirectstdout.messages)
+        features = [True for msg in redirectstdout.messages if "Plugin 'pointcloudserializerstep' version 0.3.0 by Hugh Sorby loaded" in msg]
+        self.assertEqual(1, len(features))
 
 
 class PluginSiteTestCase(unittest.TestCase):
@@ -104,5 +118,5 @@ class PluginSiteTestCase(unittest.TestCase):
 
 
 if __name__ == "__main__":
-    #import sys;sys.argv = ['', 'Test.testLoadPlugins']
+    # import sys;sys.argv = ['', 'Test.testLoadPlugins']
     unittest.main()

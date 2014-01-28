@@ -10,7 +10,6 @@ import logging
 from requests import HTTPError
 from requests import Session
 from requests_oauthlib import OAuth1Session
-from simplejson import JSONDecodeError
 
 from pmr.wfctrl.core import get_cmd_by_name
 from pmr.wfctrl.core import CmdWorkspace
@@ -21,7 +20,6 @@ import pmr.wfctrl.cmd
 
 from mapclient.exceptions import ClientRuntimeError
 from mapclient.settings import info
-from mapclient.tools.pmr.authoriseapplicationdialog import AuthoriseApplicationDialog
 
 logger = logging.getLogger(__name__)
 
@@ -51,6 +49,53 @@ def make_form_request(action_=None, **kw):
 
 class PMRToolError(ClientRuntimeError):
     pass
+
+
+class JSONDecodeError(ValueError):
+    """Subclass of ValueError with the following additional properties:
+
+    msg: The unformatted error message
+    doc: The JSON document being parsed
+    pos: The start index of doc where parsing failed
+    end: The end index of doc where parsing failed (may be None)
+    lineno: The line corresponding to pos
+    colno: The column corresponding to pos
+    endlineno: The line corresponding to end (may be None)
+    endcolno: The column corresponding to end (may be None)
+
+    """
+    # Note that this exception is used from _speedups
+    def __init__(self, msg, doc, pos, end=None):
+        ValueError.__init__(self, errmsg(msg, doc, pos, end=end))
+        self.msg = msg
+        self.doc = doc
+        self.pos = pos
+        self.end = end
+        self.lineno, self.colno = linecol(doc, pos)
+        if end is not None:
+            self.endlineno, self.endcolno = linecol(doc, end)
+        else:
+            self.endlineno, self.endcolno = None, None
+
+
+def linecol(doc, pos):
+    lineno = doc.count('\n', 0, pos) + 1
+    if lineno == 1:
+        colno = pos + 1
+    else:
+        colno = pos - doc.rindex('\n', 0, pos)
+    return lineno, colno
+
+
+def errmsg(msg, doc, pos, end=None):
+    lineno, colno = linecol(doc, pos)
+    msg = msg.replace('%r', repr(doc[pos:pos + 1]))
+    if end is None:
+        fmt = '%s: line %d column %d (char %d)'
+        return fmt % (msg, lineno, colno, pos)
+    endlineno, endcolno = linecol(doc, end)
+    fmt = '%s: line %d column %d - line %d column %d (char %d - %d)'
+    return fmt % (msg, lineno, colno, endlineno, endcolno, pos, end)
 
 
 class PMRTool(object):
@@ -274,7 +319,7 @@ class PMRTool(object):
         for fn in files:
             sout, serr = cmd.add(workspace, fn)
             # if serr has something we need to handle?
-        
+
         # XXX committer will be a problem if unset in git.
         return cmd.commit(workspace, message)
 

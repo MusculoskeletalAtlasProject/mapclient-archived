@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
+    <width>482</width>
     <height>300</height>
    </rect>
   </property>
@@ -38,7 +38,7 @@
         <property name="sizeHint" stdset="0">
          <size>
           <width>20</width>
-          <height>40</height>
+          <height>122</height>
          </size>
         </property>
        </spacer>
@@ -62,33 +62,33 @@
  <connections>
   <connection>
    <sender>buttonBox</sender>
-   <signal>accepted()</signal>
+   <signal>rejected()</signal>
    <receiver>AuthoriseApplicationDialog</receiver>
-   <slot>accept()</slot>
+   <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>248</x>
-     <y>254</y>
+     <x>336</x>
+     <y>287</y>
     </hint>
     <hint type="destinationlabel">
-     <x>157</x>
+     <x>286</x>
      <y>274</y>
     </hint>
    </hints>
   </connection>
   <connection>
    <sender>buttonBox</sender>
-   <signal>rejected()</signal>
+   <signal>accepted()</signal>
    <receiver>AuthoriseApplicationDialog</receiver>
-   <slot>reject()</slot>
+   <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>316</x>
-     <y>260</y>
+     <x>317</x>
+     <y>267</y>
     </hint>
     <hint type="destinationlabel">
-     <x>286</x>
-     <y>274</y>
+     <x>193</x>
+     <y>254</y>
     </hint>
    </hints>
   </connection>

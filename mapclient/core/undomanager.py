@@ -26,7 +26,7 @@ class UndoManager(object):
     Don't inherit from this class.
     '''
     _instance = None
-    stack = None
+    _stack = None
 
     def __new__(cls, *args, **kwargs):
         if not cls._instance:
@@ -35,14 +35,14 @@ class UndoManager(object):
         return cls._instance
 
     def setCurrentStack(self, stack):
-        self.stack = stack
+        self._stack = stack
 
     def currentStack(self):
-        return self.stack
+        return self._stack
 
     def undo(self):
-        self.stack.undo()
+        self._stack.undo()
 
     def redo(self):
-        self.stack.redo()
+        self._stack.redo()
 

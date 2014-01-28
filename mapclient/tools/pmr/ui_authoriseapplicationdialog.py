@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'qt/authoriseapplicationdialog.ui'
 #
-# Created: Thu Jun 20 17:39:33 2013
+# Created: Mon Dec 23 19:31:45 2013
 #      by: pyside-uic 0.2.14 running on PySide 1.1.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -12,7 +12,7 @@ from PySide import QtCore, QtGui
 class Ui_AuthoriseApplicationDialog(object):
     def setupUi(self, AuthoriseApplicationDialog):
         AuthoriseApplicationDialog.setObjectName("AuthoriseApplicationDialog")
-        AuthoriseApplicationDialog.resize(400, 300)
+        AuthoriseApplicationDialog.resize(482, 300)
         self.verticalLayout = QtGui.QVBoxLayout(AuthoriseApplicationDialog)
         self.verticalLayout.setObjectName("verticalLayout")
         self.groupBox = QtGui.QGroupBox(AuthoriseApplicationDialog)
@@ -25,7 +25,7 @@ class Ui_AuthoriseApplicationDialog(object):
         self.tokenLineEdit = QtGui.QLineEdit(self.groupBox)
         self.tokenLineEdit.setObjectName("tokenLineEdit")
         self.verticalLayout_2.addWidget(self.tokenLineEdit)
-        spacerItem = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
+        spacerItem = QtGui.QSpacerItem(20, 122, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
         self.verticalLayout_2.addItem(spacerItem)
         self.verticalLayout.addWidget(self.groupBox)
         self.buttonBox = QtGui.QDialogButtonBox(AuthoriseApplicationDialog)
@@ -35,8 +35,8 @@ class Ui_AuthoriseApplicationDialog(object):
         self.verticalLayout.addWidget(self.buttonBox)
 
         self.retranslateUi(AuthoriseApplicationDialog)
-        QtCore.QObject.connect(self.buttonBox, QtCore.SIGNAL("accepted()"), AuthoriseApplicationDialog.accept)
         QtCore.QObject.connect(self.buttonBox, QtCore.SIGNAL("rejected()"), AuthoriseApplicationDialog.reject)
+        QtCore.QObject.connect(self.buttonBox, QtCore.SIGNAL("accepted()"), AuthoriseApplicationDialog.accept)
         QtCore.QMetaObject.connectSlotsByName(AuthoriseApplicationDialog)
 
     def retranslateUi(self, AuthoriseApplicationDialog):

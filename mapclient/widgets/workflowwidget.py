@@ -19,12 +19,13 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
 '''
 import os
 import logging
-from urlparse import urlsplit, urlunsplit
-from ConfigParser import ConfigParser
 
-from PySide import QtGui, QtCore
+from PySide import QtGui
 
+from requests.exceptions import HTTPError
 from mapclient.exceptions import ClientRuntimeError
+
+from mapclient.settings.info import DEFAULT_WORKFLOW_PROJECT_FILENAME
 
 from mapclient.widgets.utils import set_wait_cursor
 from mapclient.widgets.utils import handle_runtime_error
@@ -35,9 +36,7 @@ from mapclient.widgets.workflowgraphicsscene import WorkflowGraphicsScene
 from mapclient.core.workflow import WorkflowError
 from mapclient.tools.pmr.pmrtool import PMRTool
 from mapclient.tools.pmr.pmrsearchdialog import PMRSearchDialog
-from mapclient.tools.pmr.pmrhglogindialog import PMRHgLoginDialog
 from mapclient.tools.pmr.pmrhgcommitdialog import PMRHgCommitDialog
-from mapclient.core.threadcommandmanager import CommandCloneWorkspace, CommandIgnoreDirectoriesHg, CommandCommit
 
 logger = logging.getLogger(__name__)
 
@@ -157,8 +156,9 @@ class WorkflowWidget(QtGui.QWidget):
                 return
 
         # got dir, continue
-        return self._createNewWorkflow(workflowDir, pmr)
+        self._createNewWorkflow(workflowDir, pmr)
 
+    @handle_runtime_error
     @set_wait_cursor
     def _createNewWorkflow(self, workflowDir, pmr):
         m = self._mainWindow.model().workflowManager()
@@ -168,8 +168,14 @@ class WorkflowWidget(QtGui.QWidget):
         if pmr:
             pmr_tool = PMRTool()
             dir_name = os.path.basename(workflowDir)
-            repourl = pmr_tool.addWorkspace('Workflow: ' + dir_name, None)
-            pmr_tool.linkWorkspaceDirToUrl(workflowDir, repourl)
+            try:
+                repourl = pmr_tool.addWorkspace('Workflow: ' + dir_name, None)
+                pmr_tool.linkWorkspaceDirToUrl(workflowDir, repourl)
+            except HTTPError as e:
+                logger.exception('Error creating new')
+                self.close()
+                raise ClientRuntimeError(
+                    'Error Creating New', e.message)
 
         self._undoStack.clear()
         self._ui.graphicsView.setLocation(workflowDir)
@@ -278,7 +284,7 @@ class WorkflowWidget(QtGui.QWidget):
         pmr_tool = PMRTool()
         try:
             pmr_tool.commitFiles(workflowDir, comment,
-                [workflowDir + '/.workflow.conf'])  # XXX make/use file tracker
+                [workflowDir + '/%s' % (DEFAULT_WORKFLOW_PROJECT_FILENAME)])  # XXX make/use file tracker
             pmr_tool.pushToRemote(workflowDir)
         except ClientRuntimeError:
             # handler will deal with this.
