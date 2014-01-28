@@ -21,7 +21,7 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
 from PySide.QtGui import QDialog, QFileDialog, QDialogButtonBox
 
 from imagesourcestep.widgets.ui_configuredialog import Ui_ConfigureDialog
-from tools.pmr.pmrtool import PMRTool
+from mapclient.tools.pmr.pmrtool import PMRTool
 
 REQUIRED_STYLE_SHEET = 'border: 1px solid red; border-radius: 3px'
 DEFAULT_STYLE_SHEET = 'border: 1px solid gray; border-radius: 3px'
@@ -157,7 +157,7 @@ class ConfigureDialog(QDialog):
         self._updateUi()
         
     def _pmrLocationClicked(self):
-        from tools.pmr.pmrsearchdialog import PMRSearchDialog
+        from mapclient.tools.pmr.pmrsearchdialog import PMRSearchDialog
         dlg = PMRSearchDialog(self)
         dlg.setModal(True)
         if dlg.exec_():

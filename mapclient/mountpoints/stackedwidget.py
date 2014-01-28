@@ -1,4 +1,3 @@
-#!/usr/bin/python
 '''
 MAP Client, a program to generate detailed musculoskeletal models for OpenSim.
     Copyright (C) 2012  University of Auckland
@@ -18,32 +17,20 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     You should have received a copy of the GNU General Public License
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
-import unittest
 
-def suite():
-    tests = unittest.TestSuite()
+from mapclient.core.pluginframework import MetaPluginMountPoint
+'''
+Plugins can inherit this mount point to extend
 
-    from settings import settingstests
-    tests.addTests(settingstests.suite())
+ A plugin that registers this mount point must have attributes
+ * name
+ 
+ A plugin that registers this mount point could have attributes
+ * None
+ 
+ It must implement
+ * setWidgetIndex 
+ 
+'''
+StackedWidgetMountPoint = MetaPluginMountPoint('StackedWidgetMountPoint', (object,), {})
 
-    from widgets import widgetstests
-    tests.addTests(widgetstests.suite())
-
-    from core import coretests
-    tests.addTests(coretests.suite())
-
-    from plugins.imagesourcestep import imagesourcesteptests
-    tests.addTests(imagesourcesteptests.suite())
-    
-    from plugins.pointcloudserializerstep import pointcloudserializertests
-    tests.addTests(pointcloudserializertests.suite())
-    
-    return tests
-
-def load_tests(loader, tests, pattern):
-    return suite()
-
-
-if __name__ == '__main__':
-    #unittest.main()
-    unittest.TextTestRunner().run(suite())

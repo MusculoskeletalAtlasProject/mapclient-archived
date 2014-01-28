@@ -21,12 +21,12 @@ import os
 
 from PySide import QtGui, QtCore
 
-from mountpoints.workflowstep import WorkflowStepMountPoint
+from mapclient.mountpoints.workflowstep import WorkflowStepMountPoint
 from imagesourcestep.widgets.configuredialog import ConfigureDialog, ConfigureDialogState
 
-from core.threadcommandmanager import ThreadCommandManager, CommandCopyDirectory, CommandCloneWorkspace
-from tools.pmr.pmrtool import PMRTool
-from tools.pmr.pmrhglogindialog import PMRHgLoginDialog
+from mapclient.core.threadcommandmanager import ThreadCommandManager, CommandCopyDirectory, CommandCloneWorkspace
+from mapclient.tools.pmr.pmrtool import PMRTool
+from mapclient.tools.pmr.pmrhglogindialog import PMRHgLoginDialog
 
 def getConfigFilename(identifier):
     return identifier + '.conf'
@@ -93,24 +93,34 @@ class ImageSourceStep(WorkflowStepMountPoint):
                 if d.addToPMR():
                     pmr_tool = PMRTool()
                     # Get login details:
-                    dlg = PMRHgLoginDialog()
-                    if dlg.exec_():
-                        repourl = pmr_tool.addWorkspace(ImageSourceData.name + ': ' + self._state.identifier(), None)
-                        c = CommandCloneWorkspace(repourl, step_location, dlg.username(), dlg.password())
-                        self._threadCommandManager.addCommand(c)
-                        self._state._pmrLocation = repourl
-                        delay = True
-            elif self._state._pmrLocation:
-                pmr_tool = PMRTool()
-                # Get login details:
-                dlg = PMRHgLoginDialog()
-                if dlg.exec_():
-                    if not os.path.exists(step_location):
-                        os.mkdir(step_location)
-                    c = CommandCloneWorkspace(self._state._pmrLocation, step_location, dlg.username(), dlg.password())
+                    repourl = pmr_tool.addWorkspace(
+                        ImageSourceData.name + ': ' + self._state.identifier(),
+                        None)
+                    p = pmr_tool.requestTemporaryPassword(repourl)
+                    username = p['user']
+                    password = p['key']
+                    c = CommandCloneWorkspace(repourl, step_location,
+                        username, password)
                     self._threadCommandManager.addCommand(c)
-                    self._state._localLocation = step_location
+                    self._state._pmrLocation = repourl
                     delay = True
+
+            elif self._state._pmrLocation:
+                # Get login details:
+                if not os.path.exists(step_location):
+                    os.mkdir(step_location)
+
+                repourl = self._state._pmrLocation
+
+                pmr_tool = PMRTool()
+                p = pmr_tool.requestTemporaryPassword(repourl)
+                username = p['user']
+                password = p['key']
+                c = CommandCloneWorkspace(repourl, step_location,
+                    username, password)
+                self._threadCommandManager.addCommand(c)
+                self._state._localLocation = step_location
+                delay = True
 
 
 

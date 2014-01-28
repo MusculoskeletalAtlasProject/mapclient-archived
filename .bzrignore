@@ -2,3 +2,5 @@
 .pydevproject
 .settings
 .directory
+*.egg-info
+.coverage

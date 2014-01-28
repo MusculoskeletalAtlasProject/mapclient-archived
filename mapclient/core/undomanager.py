@@ -1,4 +1,3 @@
-#!/usr/bin/python
 '''
 MAP Client, a program to generate detailed musculoskeletal models for OpenSim.
     Copyright (C) 2012  University of Auckland
@@ -18,32 +17,32 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     You should have received a copy of the GNU General Public License
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
-import unittest
 
-def suite():
-    tests = unittest.TestSuite()
-
-    from settings import settingstests
-    tests.addTests(settingstests.suite())
-
-    from widgets import widgetstests
-    tests.addTests(widgetstests.suite())
-
-    from core import coretests
-    tests.addTests(coretests.suite())
-
-    from plugins.imagesourcestep import imagesourcesteptests
-    tests.addTests(imagesourcesteptests.suite())
+class UndoManager(object):
+    '''
+    This class is the undo redo manager for multiple undo stacks. It is a
+    singleton class. 
     
-    from plugins.pointcloudserializerstep import pointcloudserializertests
-    tests.addTests(pointcloudserializertests.suite())
-    
-    return tests
+    Don't inherit from this class.
+    '''
+    _instance = None
+    _stack = None
 
-def load_tests(loader, tests, pattern):
-    return suite()
+    def __new__(cls, *args, **kwargs):
+        if not cls._instance:
+            cls._instance = super(UndoManager, cls).__new__(
+                                cls, *args, **kwargs)
+        return cls._instance
 
+    def setCurrentStack(self, stack):
+        self._stack = stack
 
-if __name__ == '__main__':
-    #unittest.main()
-    unittest.TextTestRunner().run(suite())
+    def currentStack(self):
+        return self._stack
+
+    def undo(self):
+        self._stack.undo()
+
+    def redo(self):
+        self._stack.redo()
+
