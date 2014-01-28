@@ -53,10 +53,10 @@ Step Box
 
 The Step box provides a selection of steps that are available to construct a workflow from.  The first time we start the program only the default plugins are available.  To add more steps we can use the Plugin Manager tool.  To use a step in our workflow we drag the desired step from the step box onto the workflow canvas.
 
-Workflow canvas
+Workflow Canvas
 ---------------
 
-The workflow canvas is where we construct our workflow.  We do this by adding the steps to the workflow canvas from the step box that make up our workflow.  We then make connections between the workflow steps to define the complete workflow.
+The workflow canvas is where we construct and edit our workflow.  We do this by adding the steps to the workflow canvas from the step box that make up our workflow.  We then make connections between the workflow steps to define the complete workflow.
 
 When a step is added to the workflow the icon which is visible in the Step box is augmented with visualisations of the Steps ports and the steps configured status.  The annotation of the steps ports will show when the mouse is hovered over a port.  The image below shows the Image Source step with the annotation for the port displayed.
 
@@ -74,14 +74,17 @@ MAP currently has three tools that may be used to aide the management of the wor
 Plugin Manager Tool
 -------------------
 
-The plugin tool is a simple tool that enables the user to add or remove additional plugin directories.  MAP comes with some default plugins which the user can decide to load or not.  External directories are added with the add directory button.  Directories are removed by selecting the required directory in the Plugin directories list and clicking the remove directory button.
+The plugin tool is a simple tool that enables the user to add or remove additional plugin directories.  MAP comes with some default plugins which the user can decide to load or not by checking or unchecking the check box (1) at the bottom of the dialog.  External directories are added with the add directory button (2).  Directories are removed by selecting the required directory in the Plugin directories list (3) and clicking the remove directory button (4).  To reload plugins from the current plugin directories use the reload button (5).
 
-Whilst additions to the plugin path will be visible immediately in the Step box deletions will not be apparent until the next time the MAP Client is started.  This behaviour is a side-effect of the Python programming language.  
+.. note::
 
-.. figure:: resources/images/plugin_manager_1.png
+ The reload will only reload the plugins from the current plugin directories, this will not include any changes to the directories in the current dialog.  To confirm changes and load plugins from the plugin directories listed in the plugin manager click the OK button (6).
+
+.. figure:: resources/images/plugin_manager_2.png
    :align: center
    :width: 25%
-  
+
+Whilst additions to the plugin path will be visible immediately in the Step box deletions will not be apparent until the next time the MAP Client is started.  This behaviour is a side-effect of the Python programming language.  
 
 Physiome Model Repository (PMR) Tool
 ------------------------------------

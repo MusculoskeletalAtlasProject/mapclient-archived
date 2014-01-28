@@ -18,29 +18,29 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
 
-from mountpoints.workflowstep import WorkflowStepMountPoint
+from mapclient.mountpoints.workflowstep import WorkflowStepMountPoint
 
 class SkeletonStep(WorkflowStepMountPoint):
     '''
     Skeleton step which is intended to be used as a starting point
     for new steps.
     '''
-    
+
     def __init__(self, location):
         super(SkeletonStep, self).__init__('Skeleton', location)
-    
+
     def configure(self):
         pass
-    
+
     def getIdentifier(self):
-        pass
-     
+        return 'skeleton'
+
     def setIdentifier(self, identifier):
         pass
-     
+
     def serialize(self, location):
         pass
-     
+
     def deserialize(self, location):
         pass
-     
+

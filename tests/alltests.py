@@ -23,19 +23,19 @@ import unittest
 def suite():
     tests = unittest.TestSuite()
 
-    from settings_tests import settingstests
+    from settings import settingstests
     tests.addTests(settingstests.suite())
 
-    from widgets_tests import widgetstests
+    from widgets import widgetstests
     tests.addTests(widgetstests.suite())
 
-    from core_tests import coretests
+    from core import coretests
     tests.addTests(coretests.suite())
 
-    from imagesourcestep_tests import imagesourcesteptests
+    from plugins.imagesourcestep import imagesourcesteptests
     tests.addTests(imagesourcesteptests.suite())
     
-    from pointcloudserializerstep_tests import pointcloudserializertests
+    from plugins.pointcloudserializerstep import pointcloudserializertests
     tests.addTests(pointcloudserializertests.suite())
     
     return tests

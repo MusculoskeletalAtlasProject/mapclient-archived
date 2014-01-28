@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 '''
 MAP Client, a program to generate detailed musculoskeletal models for OpenSim.
     Copyright (C) 2012  University of Auckland
@@ -26,11 +27,11 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 if current_dir not in sys.path:
     # Using __file__ will not work if py2exe is used,
     # Possible problem of OSX10.6 also.
-    sys.path.insert(0, current_dir)
+    sys.path.insert(1, current_dir)
 
 from imagesourcestep import step
 from imagesourcestep.widgets import resources_rc
 
-( _, tail ) = os.path.split(current_dir)
+(_, tail) = os.path.split(current_dir)
 print("Plugin '{0}' version {1} by {2} loaded".format(tail, __version__, __author__))
 

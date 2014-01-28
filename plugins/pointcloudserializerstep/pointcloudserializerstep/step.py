@@ -21,7 +21,7 @@ import os
 
 from PySide import QtGui, QtCore
 
-from mountpoints.workflowstep import WorkflowStepMountPoint
+from mapclient.mountpoints.workflowstep import WorkflowStepMountPoint
 
 from pointcloudserializerstep.widgets.configuredialog import ConfigureDialog, ConfigureDialogState
 
@@ -45,6 +45,7 @@ class PointCloudSerializerStep(WorkflowStepMountPoint):
         self._icon = QtGui.QImage(':/pointcloudserializer/images/pointcloudserializer.png')
         self.addPort(('http://physiomeproject.org/workflow/1.0/rdf-schema#port', 'http://physiomeproject.org/workflow/1.0/rdf-schema#uses', 'http://physiomeproject.org/workflow/1.0/rdf-schema#pointcloud'))
         self._state = ConfigureDialogState()
+        self._dataIn = None
 
     def configure(self):
         d = ConfigureDialog(self._state)
@@ -66,12 +67,12 @@ class PointCloudSerializerStep(WorkflowStepMountPoint):
         if not os.path.exists(self.getOutputDirectory()):
             os.mkdir(self.getOutputDirectory())
 
-        configuration_file = os.path.join(location,getConfigFilename(self._state.identifier()))
+        configuration_file = os.path.join(location, getConfigFilename(self._state.identifier()))
         s = QtCore.QSettings(configuration_file, QtCore.QSettings.IniFormat)
         self._state.save(s)
 
     def deserialize(self, location):
-        configuration_file = os.path.join(location,getConfigFilename(self._state.identifier()))
+        configuration_file = os.path.join(location, getConfigFilename(self._state.identifier()))
         s = QtCore.QSettings(configuration_file, QtCore.QSettings.IniFormat)
         self._state.load(s)
         d = ConfigureDialog(self._state)
@@ -80,10 +81,14 @@ class PointCloudSerializerStep(WorkflowStepMountPoint):
     def getOutputDirectory(self):
         return os.path.join(self._location, self._state.identifier())
 
-    def execute(self, dataIn):
-        f = open(os.path.join(self.getOutputDirectory(), 'pointcloud.txt'), 'w')
-        for i, pt in enumerate(dataIn):
-            f.write(str(i + 1) + '\t' + str(pt[0]) + '\t' + str(pt[1]) + '\t' + str(pt[2]) + '\n')
-        f.close()
+    def setPortData(self, portId, dataIn):
+        self._dataIn = dataIn
+
+    def execute(self):
+        if self._dataIn:
+            f = open(os.path.join(self.getOutputDirectory(), 'pointcloud.txt'), 'w')
+            for i, pt in enumerate(self._dataIn):
+                f.write(str(i + 1) + '\t' + str(pt[0]) + '\t' + str(pt[1]) + '\t' + str(pt[2]) + '\n')
+            f.close()
         self._doneExecution()
 
