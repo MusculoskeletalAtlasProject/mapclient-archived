@@ -24,7 +24,7 @@ from mapclient.core.mainapplication import PluginManager
 from tests.utils import ConsumeOutput
 
 def initialiseLogger():
-    logging.basicConfig(format='%(asctime)s %(levelname)s - %(name)s--> %(message)s', datefmt='%Y/%m/%d %H:%M:%S', level='DEBUG')
+    logging.basicConfig(format='%(asctime)s %(levelname)s - %(name)s--> %(message)s', datefmt='%Y/%m/%d %H:%M:%S', level=logging.DEBUG)
     logging.addLevelName(29, 'PLUGIN')
 
 class PluginFrameworkTestCase(unittest.TestCase):
