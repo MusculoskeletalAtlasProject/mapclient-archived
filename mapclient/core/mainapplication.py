@@ -17,7 +17,7 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     You should have received a copy of the GNU General Public License
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
-import os, sys
+import os
 import logging
 
 from PySide import QtCore
@@ -25,6 +25,7 @@ from PySide import QtCore
 from mapclient.core.workflow import WorkflowManager
 from mapclient.core.undomanager import UndoManager
 from mapclient.core.threadcommandmanager import ThreadCommandManager
+from mapclient.core.pluginframework import PluginManager
 
 logger = logging.getLogger(__name__)
 
@@ -91,95 +92,3 @@ class MainApplication(object):
         self._workflowManager.readSettings(settings)
 #        for stackedWidgetPage in self.stackedWidgetPages:
 #            stackedWidgetPage.readSettings(settings)
-
-from mapclient.core.pluginframework import getPlugins, loadPlugin
-
-class PluginManager(object):
-
-
-    def __init__(self):
-        self._directories = []
-        self._loadDefaultPlugins = True
-        self._pluginsChanged = False
-
-    def directories(self):
-        return self._directories
-
-    def setDirectories(self, directories):
-        if self._directories != directories:
-            self._directories = directories
-            self._pluginsChanged = True
-
-    def loadDefaultPlugins(self):
-        return self._loadDefaultPlugins
-
-    def setLoadDefaultPlugins(self, loadDefaultPlugins):
-        if self._loadDefaultPlugins != loadDefaultPlugins:
-            self._loadDefaultPlugins = loadDefaultPlugins
-            self._pluginsChanged = True
-
-    def allDirectories(self):
-        plugin_dirs = self._directories[:]
-        if self._loadDefaultPlugins:
-            file_dir = os.path.dirname(os.path.abspath(__file__))
-            inbuilt_plugin_dir = os.path.realpath(os.path.join(file_dir, '..', '..', 'plugins'))
-            plugin_dirs.insert(0, inbuilt_plugin_dir)
-
-        return plugin_dirs
-
-    def pluginsModified(self):
-        return self._pluginsChanged
-
-    def load(self):
-        old_stdout = sys.stdout
-        sys.stdout = redirectstdout = ConsumeOutput()
-        self._pluginsChanged = False
-        for directory in self.allDirectories():
-            for p in getPlugins(directory):
-                try:
-                    loadPlugin(p)
-                    msgs = redirectstdout.flush()
-                    for msg in msgs:
-                        logger.log(29, msg)
-                except:
-                    logger.warn('Plugin \'' + p['name'] + '\' not loaded')
-
-        sys.stdout = old_stdout
-
-    def readSettings(self, settings):
-        self._directories = []
-        settings.beginGroup('Plugins')
-        self._loadDefaultPlugins = settings.value('load_defaults', 'true') == 'true'
-        directory_count = settings.beginReadArray('directories')
-        for i in range(directory_count):
-            settings.setArrayIndex(i)
-            self._directories.append(settings.value('directory'))
-        settings.endArray()
-        settings.endGroup()
-
-    def writeSettings(self, settings):
-        settings.beginGroup('Plugins')
-        settings.setValue('load_defaults', self._loadDefaultPlugins)
-        settings.beginWriteArray('directories')
-        directory_index = 0
-        for directory in self._directories:
-            settings.setArrayIndex(directory_index)
-            settings.setValue('directory', directory)
-            directory_index += 1
-        settings.endArray()
-        settings.endGroup()
-
-
-class ConsumeOutput(object):
-    def __init__(self):
-        self.messages = list()
-
-    def write(self, message):
-        if message != '\n':
-            self.messages.append(message)
-
-    def flush(self):
-        msgs = self.messages
-        self.messages = []
-        return msgs
-

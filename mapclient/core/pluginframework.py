@@ -23,9 +23,13 @@ Inspired by Marty Alchin's Simple plugin framework.
 http://martyalchin.com/2008/jan/10/simple-plugin-framework/
 '''
 
+import logging
 import os
 import imp
 import site
+import sys
+
+logger = logging.getLogger(__name__)
 
 PLUGINS_PTH = 'mapclientplugins.pth'
 MAIN_MODULE = '__init__'
@@ -263,7 +267,6 @@ ToolMountPoint = MetaPluginMountPoint('ToolMountPoint', (object,), {})
 
 class PluginManager(object):
 
-
     def __init__(self):
         self._directories = []
         self._loadDefaultPlugins = True
@@ -298,13 +301,20 @@ class PluginManager(object):
         return self._pluginsChanged
 
     def load(self):
+        old_stdout = sys.stdout
+        sys.stdout = redirectstdout = ConsumeOutput()
         self._pluginsChanged = False
         for directory in self.allDirectories():
             for p in getPlugins(directory):
                 try:
                     loadPlugin(p)
+                    msgs = redirectstdout.flush()
+                    for msg in msgs:
+                        logger.log(29, msg)
                 except:
-                    print('Plugin \'' + p['name'] + '\' not loaded')
+                    logger.warn('Plugin \'' + p['name'] + '\' not loaded')
+
+        sys.stdout = old_stdout
 
     def readSettings(self, settings):
         self._directories = []
@@ -330,7 +340,24 @@ class PluginManager(object):
         settings.endGroup()
 
 
+class ConsumeOutput(object):
+    def __init__(self):
+        self.messages = list()
+
+    def write(self, message):
+        if message != '\n':
+            self.messages.append(message)
+
+    def flush(self):
+        msgs = self.messages
+        self.messages = []
+        return msgs
+
+
 class PluginSiteManager(object):
+    """
+    Python site module/pth based plugin manager.  WIP.
+    """
 
     def __init__(self):
         pass
