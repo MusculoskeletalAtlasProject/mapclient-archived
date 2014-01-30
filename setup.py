@@ -13,7 +13,7 @@ setup(name='mapclient',
      packages=find_packages(exclude=['tests', 'tests.*', ]),
      package_data={'mapclient.tools.annotation': ['annotation.voc']},
      #py_modules=['mapclient.mapclient'],
-     entry_points={'console_scripts':['mapclient=mapclient.mapclient:winmain']},
+     entry_points={'console_scripts': ['mapclient=mapclient.application:winmain']},
      install_requires=[
         'PySide',
         'requests-oauthlib',
