@@ -17,11 +17,17 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     You should have received a copy of the GNU General Public License
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
-import os, unittest
+import unittest
+
+import os
+import shutil
+import tempfile
+
 from PySide import QtGui
 
 from mapclient.tools.pluginwizard import wizarddialog
 from mapclient.tools.pluginwizard.skeleton import SkeletonOptions, Skeleton
+from mapclient.tools.pluginwizard.skeleton import PLUGIN_NAMESPACE
 
 if QtGui.qApp == None: QtGui.QApplication([])
 import mapclient.widgets.resources_rc
@@ -37,13 +43,14 @@ PLUGIN_IMAGE_FILE = os.path.join(test_path, 'logo.png')
 CATEGORY = 'Viewer'
 AUTHOR_NAME = 'Prince of Persia'
 
-class WizardTestCase(unittest.TestCase):
 
+# ... just use unittest2 for backward compatibility?  or just use assertTrue?
+class _TestCase(unittest.TestCase):
 
     def assertIn(self, a, b, *args, **kwargs):
         ''''Python < v2.7 compatibility.  Assert "a" in "b"'''
         try:
-            f = super(WizardTestCase, self).assertIn
+            f = super(_TestCase, self).assertIn
         except AttributeError:
             self.assertTrue(a in b, *args, **kwargs)
         else:
@@ -52,31 +59,20 @@ class WizardTestCase(unittest.TestCase):
     def assertNotIn(self, a, b, *args, **kwargs):
         ''''Python < v2.7 compatibility.  Assert "a" NOT in "b"'''
         try:
-            f = super(WizardTestCase, self).assertNotIn
+            f = super(_TestCase, self).assertNotIn
         except AttributeError:
             self.assertFalse(a in b, *args, **kwargs)
         else:
             f(a, b, *args, **kwargs)
 
-    def _doCleanUp(self, package_name):
-        rmdir = os.path.join(PLUGIN_WRITE_TO_DIRECTORY, package_name)
-        if os.path.exists(rmdir):
-            directories = []
-            for package_dir, _, files in os.walk(rmdir):
-                for file_ in files:
-                    src_file = os.path.join(package_dir, file_)
-                    os.remove(src_file)
 
-                directories.append(package_dir)
+class WizardTestCase(_TestCase):
 
-            directories.reverse()
-            for directory in directories:
-                os.rmdir(directory)
-
+    def setUp(self):
+        self.working_dir = tempfile.mkdtemp()
 
     def tearDown(self):
-        pass
-
+        shutil.rmtree(self.working_dir, ignore_errors=True)
 
 #     def testRunWizard(self):
 #         '''
@@ -104,7 +100,7 @@ class WizardTestCase(unittest.TestCase):
         p4._ui.authorNameLineEdit.setText(AUTHOR_NAME)
         p4._ui.categoryLineEdit.setText(CATEGORY)
         p5 = dlg.page(5)
-        p5._ui.directoryLineEdit.setText(PLUGIN_WRITE_TO_DIRECTORY)
+        p5._ui.directoryLineEdit.setText(self.working_dir)
 
         dlg.accept()
 
@@ -112,7 +108,7 @@ class WizardTestCase(unittest.TestCase):
         self.assertEqual(PLUGIN_NAME, options.getName())
         self.assertEqual(PLUGIN_IMAGE_FILE, options.getImageFile())
         self.assertEqual(PLUGIN_PACKAGE_NAME, options.getPackageName())
-        self.assertEqual(PLUGIN_WRITE_TO_DIRECTORY, options.getOutputDirectory())
+        self.assertEqual(self.working_dir, options.getOutputDirectory())
         self.assertEqual(1, options.portCount())
         self.assertEqual([u'http://physiomeproject.org/workflow/1.0/rdf-schema#provides', u'http://my.example.org/1.0/workflowstep#octopus'], options.getPort(0))
         self.assertEqual(1, options.configCount())
@@ -122,13 +118,17 @@ class WizardTestCase(unittest.TestCase):
 
     def testSkeleton1(self):
 
-        local_package_name = PLUGIN_PACKAGE_NAME.replace('step', str(1) + 'step')
+        local_package_name = PLUGIN_PACKAGE_NAME
+        package_full_name = PLUGIN_NAMESPACE + '.' + PLUGIN_PACKAGE_NAME
+        package_dir = os.path.join(self.working_dir, package_full_name)
+        step_dir = os.path.join(
+            package_dir, PLUGIN_NAMESPACE, local_package_name)
 
         options = SkeletonOptions()
         options.setImageFile(PLUGIN_IMAGE_FILE)
         options.setName(PLUGIN_NAME + str(1))
         options.setPackageName(local_package_name)
-        options.setOutputDirectory(PLUGIN_WRITE_TO_DIRECTORY)
+        options.setOutputDirectory(self.working_dir)
         options.addPort('http://physiomeproject.org/workflow/1.0/rdf-schema#uses', 'object')
         options.addPort('http://physiomeproject.org/workflow/1.0/rdf-schema#provides', 'http://my.example.org/1.0/workflowstep#octopus')
         options.addConfig('identifier', '')
@@ -138,14 +138,12 @@ class WizardTestCase(unittest.TestCase):
         s = Skeleton(options)
         s.write()
 
-        package_dir = os.path.join(PLUGIN_WRITE_TO_DIRECTORY, local_package_name)
-        self.assertTrue(os.path.exists(package_dir))
         package_init_file = os.path.join(package_dir, '__init__.py')
-        self.assertTrue(os.path.exists(package_init_file))
-        init_contents = open(package_init_file).read()
-        self.assertIn(AUTHOR_NAME, init_contents)
+        #self.assertTrue(os.path.exists(package_init_file))
+        #init_contents = open(package_init_file).read()
+        #self.assertIn(AUTHOR_NAME, init_contents)
 
-        step_file = os.path.join(package_dir, local_package_name, 'step.py')
+        step_file = os.path.join(step_dir, 'step.py')
         self.assertTrue(os.path.exists(step_file))
 
         file_contents = open(step_file).read()
@@ -159,26 +157,29 @@ class WizardTestCase(unittest.TestCase):
         self.assertNotIn('{serializesetvalues}', file_contents)
 
 
-        resources_file = os.path.join(package_dir, local_package_name, 'resources_rc.py')
+        resources_file = os.path.join(step_dir, 'resources_rc.py')
         self.assertTrue(os.path.exists(resources_file))
 
-        config_file = os.path.join(package_dir, local_package_name, 'configuredialog.py')
+        config_file = os.path.join(step_dir, 'configuredialog.py')
         self.assertTrue(os.path.exists(config_file))
 
         config_contents = open(config_file).read()
         self.assertIn('validate', config_contents)
 
-        self._doCleanUp(local_package_name)  # Move this to the start of the test if you want to see the output
 
     def testSkeleton2(self):
 
-        local_package_name = PLUGIN_PACKAGE_NAME.replace('step', str(2) + 'step')
+        local_package_name = PLUGIN_PACKAGE_NAME
+        package_full_name = PLUGIN_NAMESPACE + '.' + PLUGIN_PACKAGE_NAME
+        package_dir = os.path.join(self.working_dir, package_full_name)
+        step_dir = os.path.join(
+            package_dir, PLUGIN_NAMESPACE, local_package_name)
 
         options = SkeletonOptions()
         options.setImageFile(PLUGIN_IMAGE_FILE)
         options.setName(PLUGIN_NAME + str(2))
         options.setPackageName(local_package_name)
-        options.setOutputDirectory(PLUGIN_WRITE_TO_DIRECTORY)
+        options.setOutputDirectory(self.working_dir)
         options.addPort('http://physiomeproject.org/workflow/1.0/rdf-schema#uses', 'object')
         options.addPort('http://physiomeproject.org/workflow/1.0/rdf-schema#provides', 'number')
         options.addPort('http://physiomeproject.org/workflow/1.0/rdf-schema#provides', 'http://my.example.org/1.0/workflowstep#octopus')
@@ -187,11 +188,9 @@ class WizardTestCase(unittest.TestCase):
         s = Skeleton(options)
         s.write()
 
-        package_dir = os.path.join(PLUGIN_WRITE_TO_DIRECTORY, local_package_name)
-        self.assertTrue(os.path.exists(package_dir))
-        package_init_file = os.path.join(package_dir, '__init__.py')
-        self.assertTrue(os.path.exists(package_init_file))
-        step_file = os.path.join(package_dir, local_package_name, 'step.py')
+        #package_init_file = os.path.join(package_dir, '__init__.py')
+        #self.assertTrue(os.path.exists(package_init_file))
+        step_file = os.path.join(step_dir, 'step.py')
         self.assertTrue(os.path.exists(step_file))
 
         file_contents = open(step_file).read()
@@ -203,20 +202,23 @@ class WizardTestCase(unittest.TestCase):
         self.assertNotIn('{serializecontent}', file_contents)
         self.assertNotIn('{serializesetvalues}', file_contents)
 
-        resources_file = os.path.join(package_dir, local_package_name, 'resources_rc.py')
+        resources_file = os.path.join(step_dir, 'resources_rc.py')
         self.assertTrue(os.path.exists(resources_file))
 
-        self._doCleanUp(local_package_name)  # Move this to the start of the test if you want to see the output
 
     def testSkeleton3(self):
 
-        local_package_name = PLUGIN_PACKAGE_NAME.replace('step', str(3) + 'step')
+        local_package_name = PLUGIN_PACKAGE_NAME
+        package_full_name = PLUGIN_NAMESPACE + '.' + PLUGIN_PACKAGE_NAME
+        package_dir = os.path.join(self.working_dir, package_full_name)
+        step_dir = os.path.join(
+            package_dir, PLUGIN_NAMESPACE, local_package_name)
 
         options = SkeletonOptions()
         options.setImageFile(PLUGIN_IMAGE_FILE)
         options.setName(PLUGIN_NAME + str(3))
         options.setPackageName(local_package_name)
-        options.setOutputDirectory(PLUGIN_WRITE_TO_DIRECTORY)
+        options.setOutputDirectory(self.working_dir)
         options.addPort('http://physiomeproject.org/workflow/1.0/rdf-schema#uses', 'object')
         options.addPort('http://physiomeproject.org/workflow/1.0/rdf-schema#provides', 'number')
         options.addPort('http://physiomeproject.org/workflow/1.0/rdf-schema#provides', 'http://my.example.org/1.0/workflowstep#octopus')
@@ -229,11 +231,9 @@ class WizardTestCase(unittest.TestCase):
         s = Skeleton(options)
         s.write()
 
-        package_dir = os.path.join(PLUGIN_WRITE_TO_DIRECTORY, local_package_name)
-        self.assertTrue(os.path.exists(package_dir))
-        package_init_file = os.path.join(package_dir, '__init__.py')
-        self.assertTrue(os.path.exists(package_init_file))
-        step_file = os.path.join(package_dir, local_package_name, 'step.py')
+        #package_init_file = os.path.join(package_dir, '__init__.py')
+        #self.assertTrue(os.path.exists(package_init_file))
+        step_file = os.path.join(step_dir, 'step.py')
         self.assertTrue(os.path.exists(step_file))
 
         file_contents = open(step_file).read()
@@ -245,23 +245,26 @@ class WizardTestCase(unittest.TestCase):
         self.assertNotIn('{serializecontent}', file_contents)
         self.assertNotIn('{serializesetvalues}', file_contents)
 
-        resources_file = os.path.join(package_dir, local_package_name, 'resources_rc.py')
+        resources_file = os.path.join(step_dir, 'resources_rc.py')
         self.assertTrue(os.path.exists(resources_file))
 
-        config_file = os.path.join(package_dir, local_package_name, 'configuredialog.py')
+        config_file = os.path.join(step_dir, 'configuredialog.py')
         self.assertTrue(os.path.exists(config_file))
 
-        self._doCleanUp(local_package_name)  # Move this to the start of the test if you want to see the output
 
     def testSkeleton4(self):
 
-        local_package_name = PLUGIN_PACKAGE_NAME.replace('step', str(4) + 'step')
+        local_package_name = PLUGIN_PACKAGE_NAME
+        package_full_name = PLUGIN_NAMESPACE + '.' + PLUGIN_PACKAGE_NAME
+        package_dir = os.path.join(self.working_dir, package_full_name)
+        step_dir = os.path.join(
+            package_dir, PLUGIN_NAMESPACE, local_package_name)
 
         options = SkeletonOptions()
         options.setImageFile(PLUGIN_IMAGE_FILE)
         options.setName(PLUGIN_NAME + str(4))
         options.setPackageName(local_package_name)
-        options.setOutputDirectory(PLUGIN_WRITE_TO_DIRECTORY)
+        options.setOutputDirectory(self.working_dir)
         options.addPort('http://physiomeproject.org/workflow/1.0/rdf-schema#uses', 'object')
         options.addPort('http://physiomeproject.org/workflow/1.0/rdf-schema#provides', 'number')
         options.addPort('http://physiomeproject.org/workflow/1.0/rdf-schema#provides', 'http://my.example.org/1.0/workflowstep#octopus')
@@ -274,11 +277,10 @@ class WizardTestCase(unittest.TestCase):
         s = Skeleton(options)
         s.write()
 
-        package_dir = os.path.join(PLUGIN_WRITE_TO_DIRECTORY, local_package_name)
         self.assertTrue(os.path.exists(package_dir))
-        package_init_file = os.path.join(package_dir, '__init__.py')
-        self.assertTrue(os.path.exists(package_init_file))
-        step_file = os.path.join(package_dir, local_package_name, 'step.py')
+        #package_init_file = os.path.join(package_dir, '__init__.py')
+        #self.assertTrue(os.path.exists(package_init_file))
+        step_file = os.path.join(step_dir, 'step.py')
         self.assertTrue(os.path.exists(step_file))
 
         file_contents = open(step_file).read()
@@ -290,13 +292,12 @@ class WizardTestCase(unittest.TestCase):
         self.assertNotIn('{serializecontent}', file_contents)
         self.assertNotIn('{serializesetvalues}', file_contents)
 
-        resources_file = os.path.join(package_dir, local_package_name, 'resources_rc.py')
+        resources_file = os.path.join(step_dir, 'resources_rc.py')
         self.assertTrue(os.path.exists(resources_file))
 
-        config_file = os.path.join(package_dir, local_package_name, 'configuredialog.py')
+        config_file = os.path.join(step_dir, 'configuredialog.py')
         self.assertTrue(os.path.exists(config_file))
 
-        self._doCleanUp(local_package_name)  # Move this to the start of the test if you want to see the output
 
 
 if __name__ == "__main__":

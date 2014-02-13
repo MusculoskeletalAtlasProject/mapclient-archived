@@ -33,4 +33,4 @@ if current_dir not in sys.path:
 
 # Add a small statement about the plugin, using directory name for reference.
 (_, tail) = os.path.split(current_dir)
-# print("Plugin '{0}' version {1} by {2} loaded".format(tail, __version__, __author__))
+print("Plugin '{0}' version {1} by {2} loaded".format(tail, __version__, __author__))
