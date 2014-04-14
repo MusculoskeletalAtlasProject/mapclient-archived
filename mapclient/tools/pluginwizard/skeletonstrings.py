@@ -226,6 +226,19 @@ print("Plugin '{{0}}' version {{1}} by {{2}} loaded".format(tail, __version__, _
 
 '''
 
+STEP_PACKAGE_INIT_STRING = '''
+\'\'\'
+MAP Client Plugin
+\'\'\'
+__version__ = '0.1.0'
+__author__ = '{author_name}'
+
+
+# import class that derives itself from the step mountpoint.
+from {package_name} import step
+
+'''
+
 RESOURCE_FILE_STRING = '''
 <RCC>
   <qresource prefix="{step_package_name}">
@@ -348,10 +361,6 @@ setup(name=%(name)r,
 
 
 NAMESPACE_INIT = """\
-#http://peak.telecommunity.com/DevCenter/setuptools#namespace-packages
-try:
-    __import__('pkg_resources').declare_namespace(__name__)
-except ImportError:
-    from pkgutil import extend_path
-    __path__ = extend_path(__path__, __name__)
+from pkgutil import extend_path
+__path__ = extend_path(__path__, __name__)
 """

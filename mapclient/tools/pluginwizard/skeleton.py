@@ -25,7 +25,7 @@ from mapclient.tools.pluginwizard.skeletonstrings import CONFIGURE_DIALOG_STRING
 from mapclient.tools.pluginwizard.skeletonstrings import CONFIGURE_METHOD_STRING, IDENTIFIER_METHOD_STRING, SERIALIZE_METHOD_STRING, IMPORT_STRING, PACKAGE_INIT_STRING
 from mapclient.tools.pluginwizard.skeletonstrings import RESOURCE_FILE_STRING, GETIDENTIFIER_DEFAULT_CONTENT_STRING, GETIDENTIFIER_IDENTIFER_CONTENT_STRING
 from mapclient.tools.pluginwizard.skeletonstrings import SETIDENTIFIER_DEFAULT_CONTENT_STRING, SETIDENTIFIER_IDENTIFER_CONTENT_STRING
-from mapclient.tools.pluginwizard.skeletonstrings import SERIALIZE_DEFAULT_CONTENT_STRING, SERIALIZE_IDENTIFIER_CONTENT_STRING
+from mapclient.tools.pluginwizard.skeletonstrings import SERIALIZE_DEFAULT_CONTENT_STRING, SERIALIZE_IDENTIFIER_CONTENT_STRING, STEP_PACKAGE_INIT_STRING
 from mapclient.tools.pluginwizard.skeletonstrings import DESERIALIZE_DEFAULT_CONTENT_STRING, DESERIALIZE_IDENTIFIER_CONTENT_STRING
 from mapclient.tools.pluginwizard.skeletonstrings import CONFIGURE_DIALOG_INIT_ADDITIONS, CONFIGURE_DIALOG_ACCEPT_METHOD, CONFIGURE_DIALOG_MAKE_CONNECTIONS_METHOD
 from mapclient.tools.pluginwizard.skeletonstrings import CONFIGURE_DIALOG_IDENTIFIER_VALIDATE_METHOD, CONFIGURE_DIALOG_DEFAULT_VALIDATE_METHOD
@@ -305,6 +305,10 @@ class Skeleton(object):
         '''
         init_file = os.path.join(init_dir, '__init__.py')
         f = open(init_file, 'w')
+        f.write(STEP_PACKAGE_INIT_STRING.format(
+            package_name=self._options.getFullPackageName(),
+            author_name=self._options.getAuthorName())
+        )
         image_filename = self._options.getImageFile()
         if image_filename:
             (package, _) = os.path.splitext(PYTHON_QT_RESOURCE_FILENAME)
@@ -443,7 +447,7 @@ class Skeleton(object):
         self._writeNamespaceInit(namespace_dir)
 
         # Write the package init file
-        #self._writePackageInit(package_dir)
+        # self._writePackageInit(package_dir)
 
         # Write step package init file
         self._writeStepPackageInit(step_package_dir)

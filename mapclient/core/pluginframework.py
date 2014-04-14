@@ -302,13 +302,15 @@ class PluginManager(object):
 
     def load(self):
         old_stdout = sys.stdout
-        sys.stdout = redirectstdout = ConsumeOutput()
+#         sys.stdout = redirectstdout = ConsumeOutput()
         self._pluginsChanged = False
         for directory in self.allDirectories():
             for p in getPlugins(directory):
                 try:
+                    print(p)
                     loadPlugin(p)
-                    msgs = redirectstdout.flush()
+#                     msgs = redirectstdout.flush()
+                    msgs = []
                     for msg in msgs:
                         logger.log(29, msg)
                 except:
@@ -366,7 +368,7 @@ class PluginSiteManager(object):
         if not os.path.isdir(target_dir):
             return []
         g = os.walk(target_dir)
-        p, dirs, files = next(g)
+        _, dirs, _ = next(g)
         return [os.path.join(target_dir, d) for d in dirs]
 
     def build_site(self, target_dir):
