@@ -138,11 +138,6 @@ class WizardTestCase(_TestCase):
         s = Skeleton(options)
         s.write()
 
-        package_init_file = os.path.join(package_dir, '__init__.py')
-        #self.assertTrue(os.path.exists(package_init_file))
-        #init_contents = open(package_init_file).read()
-        #self.assertIn(AUTHOR_NAME, init_contents)
-
         step_file = os.path.join(step_dir, 'step.py')
         self.assertTrue(os.path.exists(step_file))
 
@@ -188,8 +183,6 @@ class WizardTestCase(_TestCase):
         s = Skeleton(options)
         s.write()
 
-        #package_init_file = os.path.join(package_dir, '__init__.py')
-        #self.assertTrue(os.path.exists(package_init_file))
         step_file = os.path.join(step_dir, 'step.py')
         self.assertTrue(os.path.exists(step_file))
 
@@ -231,8 +224,6 @@ class WizardTestCase(_TestCase):
         s = Skeleton(options)
         s.write()
 
-        #package_init_file = os.path.join(package_dir, '__init__.py')
-        #self.assertTrue(os.path.exists(package_init_file))
         step_file = os.path.join(step_dir, 'step.py')
         self.assertTrue(os.path.exists(step_file))
 
@@ -278,8 +269,6 @@ class WizardTestCase(_TestCase):
         s.write()
 
         self.assertTrue(os.path.exists(package_dir))
-        #package_init_file = os.path.join(package_dir, '__init__.py')
-        #self.assertTrue(os.path.exists(package_init_file))
         step_file = os.path.join(step_dir, 'step.py')
         self.assertTrue(os.path.exists(step_file))
 
