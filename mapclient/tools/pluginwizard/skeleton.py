@@ -176,7 +176,9 @@ class Skeleton(object):
                 if current_port[0].endswith('provides'):
                     provides_count += 1
                     if provides_total == 1:
-                        method_string += '        return portData{0} # {1}\n'.format(index, current_port[1])
+                        method_string += '''        portData{0} = None # {1}
+        return portData{0}
+'''.format(index, current_port[1])
                     else:
                         if provides_count == 1:
                             method_string += '''        if index == {0}:
@@ -219,7 +221,7 @@ class Skeleton(object):
     def _generateImportStatements(self):
         if self._options.configCount() > 0:
             import_string = IMPORT_STRING.format(os_import='import os\n', pyside_qtcore_import='from PySide import QtCore\n')
-            import_string += 'from {package_name}.configuredialog import ConfigureDialog\n'.format(package_name=self._options.getPackageName())
+            import_string += 'from mapclientplugins.{package_name}.configuredialog import ConfigureDialog\n'.format(package_name=self._options.getPackageName())
         else:
             import_string = IMPORT_STRING.format(os_import='', pyside_qtcore_import='')
 
@@ -400,11 +402,14 @@ class Skeleton(object):
             fui.close()
 
             # Difficulties arise when cross Python version calling pyside-uic.
-            result = call(['pyside-uic', '-o', os.path.join(step_dir, PYTHON_QT_CONFDIALOG_UI_FILENAME), ui_file])
-            if result < 0:
-                result = call(['py2side-uic', '-o', os.path.join(step_dir, PYTHON_QT_CONFDIALOG_UI_FILENAME), ui_file])
-                if result < 0:
-                    result = call(['py3side-uic', '-o', os.path.join(step_dir, PYTHON_QT_CONFDIALOG_UI_FILENAME), ui_file])
+            pyside_uic_potentials = ['pyside-uic', 'py2side-uic', 'py3side-uic', 'pyside-uic-py2']
+            for pyside_uic in pyside_uic_potentials:
+                try:
+                    result = call([pyside_uic, '-o', os.path.join(step_dir, PYTHON_QT_CONFDIALOG_UI_FILENAME), ui_file])
+                except:
+                    result = -1
+                if result == 0:
+                    break
 
             if result < 0:
                 raise Exception('Failed to generate Python ui file using pyside-uic.')
