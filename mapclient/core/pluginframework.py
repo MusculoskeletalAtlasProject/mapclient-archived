@@ -28,6 +28,8 @@ import os
 import imp
 import site
 import sys
+import pkgutil
+from importlib import import_module
 
 logger = logging.getLogger(__name__)
 
@@ -270,23 +272,38 @@ class PluginManager(object):
     def __init__(self):
         self._directories = []
         self._loadDefaultPlugins = True
-        self._pluginsChanged = False
 
     def directories(self):
         return self._directories
 
     def setDirectories(self, directories):
+        '''
+        Set the list of directories to be searched for
+        plugins.  Returns true if the directories listing
+        was updated and false otherwise.
+        '''
+        directories_changed = False
         if self._directories != directories:
             self._directories = directories
-            self._pluginsChanged = True
+            directories_changed = True
+
+        return directories_changed
 
     def loadDefaultPlugins(self):
         return self._loadDefaultPlugins
 
     def setLoadDefaultPlugins(self, loadDefaultPlugins):
+        '''
+        Set whether or not the default plugins should be loaded.
+        Returns true if the default load plugin setting is changed
+        and false otherwise.
+        '''
+        defaults_changed = False
         if self._loadDefaultPlugins != loadDefaultPlugins:
             self._loadDefaultPlugins = loadDefaultPlugins
-            self._pluginsChanged = True
+            defaults_changed = True
+
+        return defaults_changed
 
     def allDirectories(self):
         plugin_dirs = self._directories[:]
@@ -297,26 +314,20 @@ class PluginManager(object):
 
         return plugin_dirs
 
-    def pluginsModified(self):
-        return self._pluginsChanged
-
     def load(self):
-        old_stdout = sys.stdout
-#         sys.stdout = redirectstdout = ConsumeOutput()
-        self._pluginsChanged = False
+        len_package_modules_prior = len(sys.modules['mapclientplugins'].__path__) if 'mapclientplugins' in sys.modules else 0
         for directory in self.allDirectories():
-            for p in getPlugins(directory):
-                try:
-                    print(p)
-                    loadPlugin(p)
-#                     msgs = redirectstdout.flush()
-                    msgs = []
-                    for msg in msgs:
-                        logger.log(29, msg)
-                except:
-                    logger.warn('Plugin \'' + p['name'] + '\' not loaded')
+            site.addsitedir(directory)
 
-        sys.stdout = old_stdout
+        package = import_module('mapclientplugins') if len_package_modules_prior == 0 else reload(sys.modules['mapclientplugins'])
+        for _, modname, ispkg in pkgutil.iter_modules(package.__path__):
+            if ispkg:
+                try:
+                    module = import_module('mapclientplugins.' + modname)
+                    if hasattr(module, '__version__') and hasattr(module, '__author__'):
+                        logger.info('Loaded plugin \'' + modname + '\' version [' + module.__version__ + '] by ' + module.__author__)
+                except:
+                    logger.warn('Plugin \'' + modname + '\' not loaded')
 
     def readSettings(self, settings):
         self._directories = []
@@ -340,20 +351,6 @@ class PluginManager(object):
             directory_index += 1
         settings.endArray()
         settings.endGroup()
-
-
-class ConsumeOutput(object):
-    def __init__(self):
-        self.messages = list()
-
-    def write(self, message):
-        if message != '\n':
-            self.messages.append(message)
-
-    def flush(self):
-        msgs = self.messages
-        self.messages = []
-        return msgs
 
 
 class PluginSiteManager(object):
