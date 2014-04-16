@@ -23,7 +23,7 @@ from PySide import QtGui, QtCore
 
 from mapclient.mountpoints.workflowstep import WorkflowStepMountPoint
 
-from pointcloudserializerstep.widgets.configuredialog import ConfigureDialog, ConfigureDialogState
+from mapclientplugins.pointcloudserializerstep.widgets.configuredialog import ConfigureDialog, ConfigureDialogState
 
 def getConfigFilename(identifier):
     return identifier + '.conf'

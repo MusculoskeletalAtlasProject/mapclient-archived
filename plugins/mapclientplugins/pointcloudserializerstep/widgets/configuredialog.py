@@ -19,7 +19,7 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
 '''
 from PySide.QtGui import QDialog, QDialogButtonBox
 
-from pointcloudserializerstep.widgets.ui_configuredialog import Ui_ConfigureDialog
+from mapclientplugins.pointcloudserializerstep.widgets.ui_configuredialog import Ui_ConfigureDialog
 
 REQUIRED_STYLE_SHEET = 'border: 1px solid red; border-radius: 3px'
 DEFAULT_STYLE_SHEET = 'border: 1px solid gray; border-radius: 3px'
@@ -29,28 +29,28 @@ class ConfigureDialogState(object):
     Class to encapsulate the state of the configure dialog so that the 
     dialog state can be persistent.
     '''
-    
-    
+
+
     def __init__(self, identifier=''):
         self._identifier = identifier
-        
+
     def identifier(self):
         return self._identifier
-    
+
     def setIdentifier(self, identifier):
         self._identifier = identifier
-    
+
     def save(self, conf):
         conf.beginGroup('status')
         conf.setValue('identifier', self._identifier)
         conf.endGroup()
-    
+
     def load(self, conf):
         conf.beginGroup('status')
         self._identifier = conf.value('identifier', '')
         conf.endGroup()
-        
-        
+
+
 class ConfigureDialog(QDialog):
     '''
     Configure dialog to present the user with the options to configure this step.
@@ -65,26 +65,26 @@ class ConfigureDialog(QDialog):
         self._ui = Ui_ConfigureDialog()
         self._ui.setupUi(self)
         self._ui.identifierLineEdit.setStyleSheet(REQUIRED_STYLE_SHEET)
-        
+
         self.setState(state)
         self.validate()
         self._makeConnections()
-        
+
     def _makeConnections(self):
         self._ui.identifierLineEdit.textChanged.connect(self.validate)
-        
+
     def setState(self, state):
         self._ui.identifierLineEdit.setText(state._identifier)
-    
+
     def getState(self):
         state = ConfigureDialogState(
             self._ui.identifierLineEdit.text())
-                
+
         return state
-    
+
     def validate(self):
         identifierValid = len(self._ui.identifierLineEdit.text()) > 0
-            
+
         self._ui.buttonBox.button(QDialogButtonBox.Ok).setEnabled(identifierValid)
 
         if identifierValid:

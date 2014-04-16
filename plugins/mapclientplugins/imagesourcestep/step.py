@@ -22,7 +22,7 @@ import os
 from PySide import QtGui, QtCore
 
 from mapclient.mountpoints.workflowstep import WorkflowStepMountPoint
-from imagesourcestep.widgets.configuredialog import ConfigureDialog, ConfigureDialogState
+from mapclientplugins.imagesourcestep.widgets.configuredialog import ConfigureDialog, ConfigureDialogState
 
 from mapclient.core.threadcommandmanager import ThreadCommandManager, CommandCopyDirectory, CommandCloneWorkspace
 from mapclient.tools.pmr.pmrtool import PMRTool
@@ -71,7 +71,7 @@ class ImageSourceStep(WorkflowStepMountPoint):
         self._configured = False
         self._state = ConfigureDialogState()
         self._threadCommandManager = ThreadCommandManager()
-        self._threadCommandManager.registerFinishedCallback(self._threadCommandsFinished)
+#         self._threadCommandManager.registerFinishedCallback(self._threadCommandsFinished)
 
     def configure(self):
         delay = False

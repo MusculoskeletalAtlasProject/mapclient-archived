@@ -20,3 +20,5 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
 __version__ = '0.3.0'
 __author__ = 'Hugh Sorby'
 
+from mapclientplugins.pointcloudserializerstep import step
+
