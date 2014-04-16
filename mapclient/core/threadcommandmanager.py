@@ -24,6 +24,8 @@ from os.path import isfile, join, isdir
 from shutil import copy, move, rmtree
 from subprocess import call, Popen, PIPE, STDOUT
 
+from PySide import QtCore
+
 class ThreadCommand(Thread):
     '''Base class for threaded commands to be used by the CommandThreadManager.
     Set the _caller for a callback to the manager to inform the manager that
@@ -106,7 +108,7 @@ class CommandCloneWorkspace(ThreadCommand):
     ''' Threadable command to clone a PMR workspace.
     '''
 
-    def __init__(self, repourl, location, username, password):
+    def __init__(self, repourl, location, username=None, password=None):
         ThreadCommand.__init__(self, 'CommandCloneWorkspace')
         self._repourl = repourl
         self._location = location
@@ -125,7 +127,11 @@ class CommandCloneWorkspace(ThreadCommand):
         if self._hg and not os.path.exists(join(self._location, '.hg')):
             d = tempfile.mkdtemp(dir=self._location)
 
-            repourl = self._repourl[:7] + self._username + ':' + self._password + '@' + self._repourl[7:]
+
+            if self._username is None or self._password is None:
+                repourl = self._repourl
+            else:
+                repourl = self._repourl[:7] + self._username + ':' + self._password + '@' + self._repourl[7:]
             call([self._hg, 'clone', repourl, d])
             mvdir(d, self._location)
 #            move(join(d, '.hg'), self._location)
@@ -167,31 +173,30 @@ class CommandCommit(ThreadCommand):
         self.runFinished()
 
 
-class ThreadCommandManager(object):
-    '''This class managers thread commands in a queue.  The queue will
+class ThreadCommandManager(QtCore.QObject):
+    '''
+    This class managers thread commands in a queue.  The queue will
     be executed in order serially.
     '''
+    queue_empty = QtCore.Signal()
 
     def __init__(self):
+        super(ThreadCommandManager, self).__init__()
         self._queue = []
-        self._finished = None  # Callback for informing when the queue is empty
-
-    def registerFinishedCallback(self, callback):
-        self._finished = callback
 
     def addCommand(self, c):
         self._queue.append(c)
 
-    def execute(self):
+    def next(self):
         if len(self._queue) > 0:
             c = self._queue.pop(0)
             c.setCaller(self)
             c.start()
-        elif self._finished:
-            self._finished()
+        else:
+            self.queue_empty.emit()
 
     def _commandFinished(self, thread_name):
-        self.execute()
+        self.next()
 
 
 def which(name, flags=os.X_OK):
