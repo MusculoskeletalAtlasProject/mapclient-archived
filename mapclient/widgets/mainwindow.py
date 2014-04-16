@@ -148,18 +148,19 @@ class MainWindow(QtGui.QMainWindow):
 
     def pluginManager(self):
         from mapclient.tools.pluginmanagerdialog import PluginManagerDialog
+        pm = self._model.pluginManager()
         dlg = PluginManagerDialog(self)
         self._pluginManagerDlg = dlg
-        dlg.setDirectories(self._model.pluginManager().directories())
-        dlg.setLoadDefaultPlugins(self._model.pluginManager().loadDefaultPlugins())
+        dlg.setDirectories(pm.directories())
+        dlg.setLoadDefaultPlugins(pm.loadDefaultPlugins())
         dlg.reloadPlugins = self._pluginManagerReloadPlugins
 
         dlg.setModal(True)
         if dlg.exec_():
-            self._model.pluginManager().setDirectories(dlg.directories())
-            self._model.pluginManager().setLoadDefaultPlugins(dlg.loadDefaultPlugins())
-            if self._model.pluginManager().pluginsModified():
-                self._model.pluginManager().load()
+            directories_modified = pm.setDirectories(dlg.directories())
+            defaults_modified = pm.setLoadDefaultPlugins(dlg.loadDefaultPlugins())
+            if directories_modified or defaults_modified:
+                pm.load()
                 self._workflowWidget.updateStepTree()
 
         self._pluginManagerDlg = None
@@ -168,9 +169,10 @@ class MainWindow(QtGui.QMainWindow):
         '''
         Callback from the plugin manager to reload the current plugins.
         '''
-        self._model.pluginManager().setDirectories(self._pluginManagerDlg.directories())
-        self._model.pluginManager().setLoadDefaultPlugins(self._pluginManagerDlg.loadDefaultPlugins())
-        self._model.pluginManager().load()
+        pm = self._model.pluginManager()
+        pm.setDirectories(self._pluginManagerDlg.directories())
+        pm.setLoadDefaultPlugins(self._pluginManagerDlg.loadDefaultPlugins())
+        pm.load()
         self._workflowWidget.updateStepTree()
 
     def pluginWizard(self):
