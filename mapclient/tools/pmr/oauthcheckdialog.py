@@ -17,13 +17,9 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     You should have received a copy of the GNU General Public License
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
-import webbrowser
 import logging
 from PySide import QtGui
 
-from mapclient.settings import info
-from mapclient.tools.pmr.core import TokenHelper
-from mapclient.tools.pmr.authoriseapplicationdialog import AuthoriseApplicationDialog
 from mapclient.tools.pmr.ui_oauthcheckdialog import Ui_OAuthCheckDialog
 
 logger = logging.getLogger(__name__)

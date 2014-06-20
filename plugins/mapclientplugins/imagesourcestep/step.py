@@ -26,7 +26,6 @@ from mapclientplugins.imagesourcestep.widgets.configuredialog import ConfigureDi
 
 from mapclient.core.threadcommandmanager import ThreadCommandManager, CommandCopyDirectory, CommandCloneWorkspace
 from mapclient.tools.pmr.pmrtool import PMRTool
-from mapclient.tools.pmr.pmrhglogindialog import PMRHgLoginDialog
 
 def getConfigFilename(identifier):
     return identifier + '.conf'

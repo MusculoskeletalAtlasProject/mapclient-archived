@@ -33,7 +33,8 @@ from importlib import import_module
 
 logger = logging.getLogger(__name__)
 
-PLUGINS_PTH = 'mapclientplugins.pth'
+PLUGINS_PACKAGE_NAME = 'mapclientplugins'
+PLUGINS_PTH = PLUGINS_PACKAGE_NAME + '.pth'
 MAIN_MODULE = '__init__'
 
 def getPlugins(pluginDirectory):
@@ -314,10 +315,25 @@ class PluginManager(object):
 
         return plugin_dirs
 
+    def _addPluginDir(self, directory):
+        added = False
+        if isMapClientPluginsDir(directory):
+            site.addsitedir(directory)
+            added = True
+
+        return added
+
     def load(self):
         len_package_modules_prior = len(sys.modules['mapclientplugins'].__path__) if 'mapclientplugins' in sys.modules else 0
         for directory in self.allDirectories():
-            site.addsitedir(directory)
+            if not self._addPluginDir(directory):
+                try:
+                    names = os.listdir(directory)
+                except os.error:
+                    continue
+
+                for name in sorted(names):
+                    self._addPluginDir(os.path.join(directory, name))
 
         package = import_module('mapclientplugins') if len_package_modules_prior == 0 else reload(sys.modules['mapclientplugins'])
         for _, modname, ispkg in pkgutil.iter_modules(package.__path__):
@@ -352,6 +368,21 @@ class PluginManager(object):
         settings.endArray()
         settings.endGroup()
 
+def isMapClientPluginsDir(plugin_dir):
+    result = False
+    try:
+        names = os.listdir(plugin_dir)
+    except:
+        return result
+
+    if PLUGINS_PACKAGE_NAME in names:
+        init_file = os.path.join(plugin_dir, PLUGINS_PACKAGE_NAME, '__init__.py')
+        if os.path.isfile(init_file):
+            contents = open(init_file).read()
+            if 'pkgutil' in contents and 'extend_path' in contents:
+                result = True
+
+    return result
 
 class PluginSiteManager(object):
     """

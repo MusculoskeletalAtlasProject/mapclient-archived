@@ -32,6 +32,21 @@ DEFAULT_PMR_IPADDRESS = 'http://teaching.physiomeproject.org'
 DEFAULT_CONSUMER_PUBLIC_TOKEN = 'ghRsy25tpMnt36Aj7R_LsxUS'
 DEFAULT_CONSUMER_SECRET_TOKEN = '41IgdRjQS1HsO_mq8VN2M2Dg'
 
+# Credentials follows:
+#
+# Key    OP8AKmDIlH7OkHaPWNbnb-zf
+# Secret    QQcKMnyCjjb7JNDHA-Lwdu7p
+#
+# The scope that should be used
+#
+# from urllib import quote_plus
+# DEFAULT_SCOPE = quote_plus(
+#     'http://localhost:8280/pmr/scope/collection,'
+#     'http://localhost:8280/pmr/scope/search,'
+#     'http://localhost:8280/pmr/scope/workspace_tempauth,'
+#     'http://localhost:8280/pmr/scope/workspace_full'
+# )
+
 # Contributors list
 HS = {'name': 'Hugh Sorby', 'email': 'h.sorby@auckland.ac.nz'}
 

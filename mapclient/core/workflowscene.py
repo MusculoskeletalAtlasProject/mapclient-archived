@@ -20,7 +20,7 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
 from PySide import QtCore
 
 from mapclient.mountpoints.workflowstep import workflowStepFactory
-
+from mapclient.core.workflow import WorkflowError
 
 class Item(object):
 
@@ -194,7 +194,7 @@ class WorkflowDependencyGraph(object):
                     new_connections = self._connectionsForNodes(node, current_node)
                     connections.extend([c for c in new_connections if c not in connections])
                     if len(new_connections) == 0:
-                        raise('Connection in workflow not found, something has gone horribly wrong')
+                        raise WorkflowError('Connection in workflow not found, something has gone horribly wrong')
 
                 for connection in connections:
                     dataIn = connection.source()._step.getPortData(connection.sourceIndex())

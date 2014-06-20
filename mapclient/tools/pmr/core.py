@@ -10,11 +10,13 @@ from requests_oauthlib.oauth1_session import OAuth1Session
 logger = logging.getLogger(__name__)
 
 DEFAULT_SITE_URL = 'https://models.physiomeproject.org'
+TEACHING_SITE_URL = 'https://teaching.physiomeproject.org'
+
 DEFAULT_SCOPE = (
-    '{0}/scope/collection,'
-    '{0}/scope/search,'
-    '{0}/scope/workspace_tempauth,'
-    '{0}/scope/workspace_full'
+    '{0}/pmr/scope/collection,'
+    '{0}/pmr/scope/search,'
+    '{0}/pmr/scope/workspace_tempauth,'
+    '{0}/pmr/scope/workspace_full'
 ).format(DEFAULT_SITE_URL,)
 
 

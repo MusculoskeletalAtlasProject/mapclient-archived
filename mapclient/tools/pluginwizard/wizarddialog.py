@@ -96,8 +96,11 @@ class WizardDialog(QtGui.QWizard):
         configs_table = self.page(3)._ui.configTableWidget
         row_index = 0
         while row_index < configs_table.rowCount():
-            self._options.addConfig(configs_table.item(row_index, 0).text(),
-                                    configs_table.item(row_index, 1).text())
+            config_label = configs_table.item(row_index, 0)
+            config_default_value = configs_table.item(row_index, 1)
+            if config_label is not None:
+                self._options.addConfig(config_label.text(),
+                                        '' if config_default_value is None else config_default_value.text())
             row_index += 1
 
         self._options.setCategory(self.field(CATEGORY_FIELD))

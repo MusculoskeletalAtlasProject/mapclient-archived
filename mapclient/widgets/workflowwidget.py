@@ -167,15 +167,18 @@ class WorkflowWidget(QtGui.QWidget):
 
         if pmr:
             pmr_tool = PMRTool()
-            dir_name = os.path.basename(workflowDir)
-            try:
-                repourl = pmr_tool.addWorkspace('Workflow: ' + dir_name, None)
-                pmr_tool.linkWorkspaceDirToUrl(workflowDir, repourl)
-            except HTTPError as e:
-                logger.exception('Error creating new')
-                self.close()
-                raise ClientRuntimeError(
-                    'Error Creating New', e.message)
+            if pmr_tool.hasAccess():
+                dir_name = os.path.basename(workflowDir)
+                try:
+                    repourl = pmr_tool.addWorkspace('Workflow: ' + dir_name, None)
+                    pmr_tool.linkWorkspaceDirToUrl(workflowDir, repourl)
+                except HTTPError as e:
+                    logger.exception('Error creating new')
+                    self.close()
+                    raise ClientRuntimeError(
+                        'Error Creating New', e.message)
+            else:
+                raise ClientRuntimeError('Error Creating New', "Client doesn't have access to PMR")
 
         self._undoStack.clear()
         self._ui.graphicsView.setLocation(workflowDir)

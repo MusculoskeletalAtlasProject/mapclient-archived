@@ -18,7 +18,6 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
 import os
-import sys
 import shutil
 import tempfile
 import unittest
