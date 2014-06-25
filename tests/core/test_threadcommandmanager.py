@@ -34,15 +34,20 @@ class ThreadCommandManagerTestCase(unittest.TestCase):
 
 
     def tearDown(self):
-        pass
+        '''
+        Add a backup path removal if path still exists due to exception in test.
+        '''
+        to_path = os.path.join(os.path.dirname(utils.__file__), 'test_resources/utils_copy/')
+        if os.path.exists(to_path):
+            shutil.rmtree(to_path)
 
 
     def testCopyDirectory(self):
         # create to directory
-        
+
         from_path = os.path.join(os.path.dirname(utils.__file__), 'test_resources/utils/')
         to_path = os.path.join(os.path.dirname(utils.__file__), 'test_resources/utils_copy/')
-        
+
         os.mkdir(to_path)
 
         c = CommandCopyDirectory(from_path, to_path)
@@ -50,47 +55,47 @@ class ThreadCommandManagerTestCase(unittest.TestCase):
         self.assertTrue(os.path.exists(os.path.join(to_path, 'utoutput1.log')))
 
         shutil.rmtree(to_path)
-        
+
     def testExecutetEmptyQueue(self):
         m = ThreadCommandManager()
-        m.execute()
+        m.next()
         self.assertEqual(0, len(m._queue))
-        
+
     def testAddCommand(self):
-        
+
         c = CommandCopyDirectory('', '')
         m = ThreadCommandManager()
         m.addCommand(c)
-        
+
     def testRunCommand(self):
 
         from_path = os.path.join(os.path.dirname(utils.__file__), 'test_resources/utils/')
         to_path = os.path.join(os.path.dirname(utils.__file__), 'test_resources/utils_copy/')
-        
+
         os.mkdir(to_path)
 
         c = CommandCopyDirectory(from_path, to_path)
         m = ThreadCommandManager()
-        m.registerFinishedCallback(self.commandFinished)
+        m.queue_empty.connect(self.commandFinished)
         m.addCommand(c)
-        
-        m.execute()
+
+        m.next()
         count = 0
         while not self._command_finished and count < 200:
             sleep(0.001)
             count += 1
-            
+
         shutil.rmtree(to_path)
-        
+
     def commandFinished(self):
         self._command_finished = True
-        
+
     def testWhichNotExists(self):
         result = which('blahblah')
         self.assertEqual(0, len(result))
-        
+
 #        self.assertTrue(os.path.exists(os.path.join(to_path, 'utoutput1.log')))
-        
+
 if __name__ == "__main__":
-    #import sys;sys.argv = ['', 'Test.testName']
+    # import sys;sys.argv = ['', 'Test.testName']
     unittest.main()

@@ -36,48 +36,48 @@ class PointCloudSerializerTestCase(unittest.TestCase):
     def testStep(self):
         if self.pixmap_unavailable:
             return
-        
-        from pointcloudserializerstep.step import PointCloudSerializerStep
+
+        from mapclientplugins.pointcloudserializerstep.step import PointCloudSerializerStep
         mystep = PointCloudSerializerStep('empty')
-        
+
         self.assertFalse(mystep.isConfigured())
 
     def testStepStatus(self):
-        from pointcloudserializerstep.widgets.configuredialog import ConfigureDialogState
+        from mapclientplugins.pointcloudserializerstep.widgets.configuredialog import ConfigureDialogState
         state = ConfigureDialogState()
-        
+
         self.assertEqual(state.identifier(), '')
-        
+
         newstate = ConfigureDialogState('here')
         self.assertEqual(newstate.identifier(), 'here')
-        
+
     if sys.version_info >= (2, 7, 0):
         @unittest.skipIf(DISABLE_GUI_TESTS, 'GUI tests are disabled')
         def testConfigure(self):
             if self.pixmap_unavailable:
                 return
-            
-            from pointcloudserializerstep.step import PointCloudSerializerStep
+
+            from mapclientplugins.pointcloudserializerstep.step import PointCloudSerializerStep
             mystep = PointCloudSerializerStep()
             mystep.configure()
-        
+
     if HAVE_QTTEST:
         def testConfigureDialog(self):
             if self.pixmap_unavailable:
                 return
-            
-            from pointcloudserializerstep.widgets.configuredialog import ConfigureDialog, ConfigureDialogState
+
+            from mapclientplugins.pointcloudserializerstep.widgets.configuredialog import ConfigureDialog, ConfigureDialogState
             state = ConfigureDialogState()
             d = ConfigureDialog(state)
-            
+
             self.assertEqual(d._ui.buttonBox.button(QtGui.QDialogButtonBox.Ok).isEnabled(), False)
             QTest.keyClicks(d._ui.identifierLineEdit, 'hello')
             self.assertEqual(d._ui.buttonBox.button(QtGui.QDialogButtonBox.Ok).isEnabled(), True)
-            #QTest.mouseClick(d._ui.buttonBox.button(QtGui.QDialogButtonBox.Ok), QtCore.Qt.LeftButton)
+            # QTest.mouseClick(d._ui.buttonBox.button(QtGui.QDialogButtonBox.Ok), QtCore.Qt.LeftButton)
             newstate = d.getState()
             self.assertEqual(newstate.identifier(), 'hello')
-        
+
 
 if __name__ == "__main__":
-    #import sys;sys.argv = ['', 'Test.testName']
+    # import sys;sys.argv = ['', 'Test.testName']
     unittest.main()
