@@ -77,13 +77,22 @@ class WorkflowWidget(QtGui.QWidget):
         self._updateUi()
 
     def _updateUi(self):
-        wfm = self._mainWindow.model().workflowManager()
-        self._mainWindow.setWindowTitle(wfm.title())
-        workflowOpen = wfm.isWorkflowOpen()
-        self.action_Close.setEnabled(workflowOpen)
-        self.setEnabled(workflowOpen)
-        self.action_Save.setEnabled(wfm.isModified())
-        self._action_annotation.setEnabled(workflowOpen)
+        if hasattr(self, '_mainWindow'):
+            wfm = self._mainWindow.model().workflowManager()
+            self._mainWindow.setWindowTitle(wfm.title())
+
+            widget_visible = self.isVisible()
+
+            workflowOpen = wfm.isWorkflowOpen()
+            self.action_Close.setEnabled(workflowOpen and widget_visible)
+            self.setEnabled(workflowOpen and widget_visible)
+            self.action_Save.setEnabled(wfm.isModified() and widget_visible)
+            self._action_annotation.setEnabled(workflowOpen and widget_visible)
+            self.action_Import.setEnabled(widget_visible)
+            self.action_New.setEnabled(widget_visible)
+            self.action_NewPMR.setEnabled(widget_visible)
+            self.action_Open.setEnabled(widget_visible)
+            self.action_Execute.setEnabled(widget_visible)
 
     def updateStepTree(self):
         self._ui.stepTree.clear()
@@ -97,9 +106,13 @@ class WorkflowWidget(QtGui.QWidget):
     def undoRedoStack(self):
         return self._undoStack
 
-    def setActive(self):
-        logger.info('setting active - workflow widget')
-        self._mainWindow.setCurrentUndoRedoStack(self._undoStack)
+    def showEvent(self, *args, **kwargs):
+        self._updateUi()
+        return QtGui.QWidget.showEvent(self, *args, **kwargs)
+
+    def hideEvent(self, *args, **kwargs):
+        self._updateUi()
+        return QtGui.QWidget.hideEvent(self, *args, **kwargs)
 
     def executeNext(self):
         self._mainWindow.execute()
@@ -167,15 +180,18 @@ class WorkflowWidget(QtGui.QWidget):
 
         if pmr:
             pmr_tool = PMRTool()
-            dir_name = os.path.basename(workflowDir)
-            try:
-                repourl = pmr_tool.addWorkspace('Workflow: ' + dir_name, None)
-                pmr_tool.linkWorkspaceDirToUrl(workflowDir, repourl)
-            except HTTPError as e:
-                logger.exception('Error creating new')
-                self.close()
-                raise ClientRuntimeError(
-                    'Error Creating New', e.message)
+            if pmr_tool.hasAccess():
+                dir_name = os.path.basename(workflowDir)
+                try:
+                    repourl = pmr_tool.addWorkspace('Workflow: ' + dir_name, None)
+                    pmr_tool.linkWorkspaceDirToUrl(workflowDir, repourl)
+                except HTTPError as e:
+                    logger.exception('Error creating new')
+                    self.close()
+                    raise ClientRuntimeError(
+                        'Error Creating New', e.message)
+            else:
+                raise ClientRuntimeError('Error Creating New', "Client doesn't have access to PMR")
 
         self._undoStack.clear()
         self._ui.graphicsView.setLocation(workflowDir)
@@ -302,32 +318,32 @@ class WorkflowWidget(QtGui.QWidget):
         action.setStatusTip(statustip)
 
     def _createMenuItems(self):
-        menu_File = self._mainWindow._ui.menubar.findChild(QtGui.QMenu, 'menu_File')
+        menu_File = self._mainWindow.menubar.findChild(QtGui.QMenu, 'menu_File')
+        menu_Project = self._mainWindow.menubar.findChild(QtGui.QMenu, 'menu_Project')
+
         lastFileMenuAction = menu_File.actions()[-1]
         menu_New = QtGui.QMenu('&New', menu_File)
 #        menu_Open = QtGui.QMenu('&Open', menu_File)
 
-        action_NewPMR = QtGui.QAction('PMR Workflow', menu_New)
-        self._setActionProperties(action_NewPMR, 'action_NewPMR', self.newpmr, 'Ctrl+N', 'Create a new PMR based Workflow')
-        action_New = QtGui.QAction('Workflow', menu_New)
-        self._setActionProperties(action_New, 'action_New', self.new, 'Ctrl+Shift+N', 'Create a new Workflow')
-#        action_OpenPMR = QtGui.QAction('PMR Workflow', menu_Open)
-#        self._setActionProperties(action_OpenPMR, 'action_OpenPMR', self.load, 'Ctrl+O', 'Open an existing PMR based Workflow')
-        action_Open = QtGui.QAction('&Open', menu_File)
-        self._setActionProperties(action_Open, 'action_Open', self.load, 'Ctrl+O', 'Open an existing Workflow')
+        self.action_NewPMR = QtGui.QAction('PMR Workflow', menu_New)
+        self._setActionProperties(self.action_NewPMR, 'action_NewPMR', self.newpmr, 'Ctrl+N', 'Create a new PMR based Workflow')
+        self.action_New = QtGui.QAction('Workflow', menu_New)
+        self._setActionProperties(self.action_New, 'action_New', self.new, 'Ctrl+Shift+N', 'Create a new Workflow')
+        self.action_Open = QtGui.QAction('&Open', menu_File)
+        self._setActionProperties(self.action_Open, 'action_Open', self.load, 'Ctrl+O', 'Open an existing Workflow')
         self.action_Import = QtGui.QAction('I&mport', menu_File)
         self._setActionProperties(self.action_Import, 'action_Import', self.importFromPMR, 'Ctrl+M', 'Import existing Workflow from PMR')
         self.action_Close = QtGui.QAction('&Close', menu_File)
         self._setActionProperties(self.action_Close, 'action_Close', self.close, 'Ctrl+W', 'Close open Workflow')
         self.action_Save = QtGui.QAction('&Save', menu_File)
         self._setActionProperties(self.action_Save, 'action_Save', self.save, 'Ctrl+S', 'Save Workflow')
+        self.action_Execute = QtGui.QAction('E&xecute', menu_Project)
+        self._setActionProperties(self.action_Execute, 'action_Execute', self.executeWorkflow, 'Ctrl+X', 'Execute Workflow')
 
-        menu_New.insertAction(QtGui.QAction(self), action_NewPMR)
-        menu_New.insertAction(QtGui.QAction(self), action_New)
+        menu_New.insertAction(QtGui.QAction(self), self.action_NewPMR)
+        menu_New.insertAction(QtGui.QAction(self), self.action_New)
         menu_File.insertMenu(lastFileMenuAction, menu_New)
-#        menu_Open.insertAction(QtGui.QAction(self), action_OpenPMR)
-#        menu_Open.insertAction(QtGui.QAction(self), action_Open)
-        menu_File.insertAction(lastFileMenuAction, action_Open)
+        menu_File.insertAction(lastFileMenuAction, self.action_Open)
         menu_File.insertSeparator(lastFileMenuAction)
         menu_File.insertAction(lastFileMenuAction, self.action_Import)
         menu_File.insertSeparator(lastFileMenuAction)
@@ -335,5 +351,6 @@ class WorkflowWidget(QtGui.QWidget):
         menu_File.insertSeparator(lastFileMenuAction)
         menu_File.insertAction(lastFileMenuAction, self.action_Save)
         menu_File.insertSeparator(lastFileMenuAction)
+        menu_Project.addAction(self.action_Execute)
 
 

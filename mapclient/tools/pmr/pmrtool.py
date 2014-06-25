@@ -286,11 +286,7 @@ class PMRTool(object):
         # links a non-pmr workspace dir to a remote workspace url.
         # prereq is that the remote must be new.
 
-        # XXX should assert availability of storage
-        # XXX figure out if/when/how to offer Git.
-
         workspace_obj = self.getObjectInfo(remote_workspace_url)
-        # XXX only supporting mercurial now even though we can clone both
         cmd_cls = get_cmd_by_name(workspace_obj.get('storage'))
         if cmd_cls is None:
             raise PMRToolError('Remote storage format unsupported',

@@ -48,7 +48,7 @@ class Ui_ConfigureDialog(object):
         self.verticalLayout_2.addWidget(self.groupBox)
         self.buttonBox = QtGui.QDialogButtonBox(ConfigureDialog)
         self.buttonBox.setOrientation(QtCore.Qt.Horizontal)
-        self.buttonBox.setStandardButtons(QtGui.QDialogButtonBox.Cancel|QtGui.QDialogButtonBox.Ok)
+        self.buttonBox.setStandardButtons(QtGui.QDialogButtonBox.Cancel | QtGui.QDialogButtonBox.Ok)
         self.buttonBox.setObjectName(_fromUtf8("buttonBox"))
         self.verticalLayout_2.addWidget(self.buttonBox)
         self.label.setBuddy(self.identifierLineEdit)
@@ -62,4 +62,4 @@ class Ui_ConfigureDialog(object):
         ConfigureDialog.setWindowTitle(_translate("ConfigureDialog", "Configure - Point Cloud Store", None))
         self.label.setText(_translate("ConfigureDialog", "Identifier:", None))
 
-import pointcloudserializerstep.widgets.resources_rc
+import mapclientplugins.pointcloudserializerstep.widgets.resources_rc

@@ -25,10 +25,15 @@ from mapclient.tools.pluginwizard.skeletonstrings import CONFIGURE_DIALOG_STRING
 from mapclient.tools.pluginwizard.skeletonstrings import CONFIGURE_METHOD_STRING, IDENTIFIER_METHOD_STRING, SERIALIZE_METHOD_STRING, IMPORT_STRING, PACKAGE_INIT_STRING
 from mapclient.tools.pluginwizard.skeletonstrings import RESOURCE_FILE_STRING, GETIDENTIFIER_DEFAULT_CONTENT_STRING, GETIDENTIFIER_IDENTIFER_CONTENT_STRING
 from mapclient.tools.pluginwizard.skeletonstrings import SETIDENTIFIER_DEFAULT_CONTENT_STRING, SETIDENTIFIER_IDENTIFER_CONTENT_STRING
-from mapclient.tools.pluginwizard.skeletonstrings import SERIALIZE_DEFAULT_CONTENT_STRING, SERIALIZE_IDENTIFIER_CONTENT_STRING
+from mapclient.tools.pluginwizard.skeletonstrings import SERIALIZE_DEFAULT_CONTENT_STRING, SERIALIZE_IDENTIFIER_CONTENT_STRING, STEP_PACKAGE_INIT_STRING
 from mapclient.tools.pluginwizard.skeletonstrings import DESERIALIZE_DEFAULT_CONTENT_STRING, DESERIALIZE_IDENTIFIER_CONTENT_STRING
 from mapclient.tools.pluginwizard.skeletonstrings import CONFIGURE_DIALOG_INIT_ADDITIONS, CONFIGURE_DIALOG_ACCEPT_METHOD, CONFIGURE_DIALOG_MAKE_CONNECTIONS_METHOD
 from mapclient.tools.pluginwizard.skeletonstrings import CONFIGURE_DIALOG_IDENTIFIER_VALIDATE_METHOD, CONFIGURE_DIALOG_DEFAULT_VALIDATE_METHOD
+
+from mapclient.tools.pluginwizard.skeletonstrings import (
+    SETUP_PY_TEMPLATE,
+    NAMESPACE_INIT,
+)
 
 # from mapclient.tools.pluginwizard.skeletonstrings import
 QT_RESOURCE_FILENAME = 'resources.qrc'
@@ -37,6 +42,9 @@ IMAGES_DIRECTORY = 'images'
 CONFIG_DIALOG_FILE = 'configuredialog.py'
 QT_CONFDIALOG_UI_FILENAME = 'configuredialog.ui'
 PYTHON_QT_CONFDIALOG_UI_FILENAME = 'ui_configuredialog.py'
+
+PLUGIN_NAMESPACE = 'mapclientplugins'
+
 
 class Skeleton(object):
     '''
@@ -47,6 +55,33 @@ class Skeleton(object):
     def __init__(self, options):
         self._options = options
 
+    def _writeSetup(self, target_dir):
+        '''
+        Write the setup file, for integration with setuptools.
+        '''
+        target_file = os.path.join(target_dir, 'setup.py')
+        f = open(target_file, 'w')
+        f.write(SETUP_PY_TEMPLATE % dict(
+            version='0.0',
+            description='',
+            name=self._options.getFullPackageName(),
+            author=self._options.getAuthorName(),
+            author_email='',
+            url='',
+            license='GPL',
+            namespace_packages=[PLUGIN_NAMESPACE],
+        ))
+        f.close()
+
+    def _writeNamespaceInit(self, target_dir):
+        '''
+        Write the namespace declaration init file.
+        '''
+        target_file = os.path.join(target_dir, '__init__.py')
+        f = open(target_file, 'w')
+        f.write(NAMESPACE_INIT)
+        f.close()
+
     def _writePackageInit(self, init_dir):
         '''
         Write the package __init__ file.  This file imports the step, sets the 
@@ -54,7 +89,10 @@ class Skeleton(object):
         '''
         init_file = os.path.join(init_dir, '__init__.py')
         f = open(init_file, 'w')
-        f.write(PACKAGE_INIT_STRING.format(package_name=self._options.getPackageName(), author_name=self._options.getAuthorName()))
+        f.write(PACKAGE_INIT_STRING.format(
+            package_name=self._options.getFullPackageName(),
+            author_name=self._options.getAuthorName())
+        )
         f.close()
 
     def _generateExecuteMethod(self):
@@ -138,7 +176,9 @@ class Skeleton(object):
                 if current_port[0].endswith('provides'):
                     provides_count += 1
                     if provides_total == 1:
-                        method_string += '        return portData{0} # {1}\n'.format(index, current_port[1])
+                        method_string += '''        portData{0} = None # {1}
+        return portData{0}
+'''.format(index, current_port[1])
                     else:
                         if provides_count == 1:
                             method_string += '''        if index == {0}:
@@ -181,7 +221,7 @@ class Skeleton(object):
     def _generateImportStatements(self):
         if self._options.configCount() > 0:
             import_string = IMPORT_STRING.format(os_import='import os\n', pyside_qtcore_import='from PySide import QtCore\n')
-            import_string += 'from {package_name}.configuredialog import ConfigureDialog\n'.format(package_name=self._options.getPackageName())
+            import_string += 'from mapclientplugins.{package_name}.configuredialog import ConfigureDialog\n'.format(package_name=self._options.getPackageName())
         else:
             import_string = IMPORT_STRING.format(os_import='', pyside_qtcore_import='')
 
@@ -267,6 +307,10 @@ class Skeleton(object):
         '''
         init_file = os.path.join(init_dir, '__init__.py')
         f = open(init_file, 'w')
+        f.write(STEP_PACKAGE_INIT_STRING.format(
+            package_name=self._options.getFullPackageName(),
+            author_name=self._options.getAuthorName())
+        )
         image_filename = self._options.getImageFile()
         if image_filename:
             (package, _) = os.path.splitext(PYTHON_QT_RESOURCE_FILENAME)
@@ -358,18 +402,21 @@ class Skeleton(object):
             fui.close()
 
             # Difficulties arise when cross Python version calling pyside-uic.
-            result = call(['pyside-uic', '-o', os.path.join(step_dir, PYTHON_QT_CONFDIALOG_UI_FILENAME), ui_file])
-            if result < 0:
-                result = call(['py2side-uic', '-o', os.path.join(step_dir, PYTHON_QT_CONFDIALOG_UI_FILENAME), ui_file])
-                if result < 0:
-                    result = call(['py3side-uic', '-o', os.path.join(step_dir, PYTHON_QT_CONFDIALOG_UI_FILENAME), ui_file])
+            pyside_uic_potentials = ['pyside-uic', 'py2side-uic', 'py3side-uic', 'pyside-uic-py2']
+            for pyside_uic in pyside_uic_potentials:
+                try:
+                    result = call([pyside_uic, '-o', os.path.join(step_dir, PYTHON_QT_CONFDIALOG_UI_FILENAME), ui_file])
+                except:
+                    result = -1
+                if result == 0:
+                    break
 
             if result < 0:
                 raise Exception('Failed to generate Python ui file using pyside-uic.')
 
             dialog_file = os.path.join(step_dir, CONFIG_DIALOG_FILE)
             f = open(dialog_file, 'w')
-            f.write(CONFIGURE_DIALOG_STRING.format(package_name=self._options.getPackageName()))
+            f.write(CONFIGURE_DIALOG_STRING.format(package_name=self._options.getFullPackageName()))
             if self._options.hasIdentifierConfig():
                 f.write(CONFIGURE_DIALOG_INIT_ADDITIONS)
                 f.write(CONFIGURE_DIALOG_MAKE_CONNECTIONS_METHOD)
@@ -386,18 +433,28 @@ class Skeleton(object):
         Write out the step using the options set on initialisation, assumes the output
         directory is writable otherwise an exception will be raised.
         '''
-        # Make package directory
-        package_dir = os.path.join(self._options.getOutputDirectory(), self._options.getPackageName())
+
+        out_dir = self._options.getOutputDirectory()
+        package_name = self._options.getPackageName()
+
+        package_full_name = '%s.%s' % (PLUGIN_NAMESPACE, package_name)
+
+        package_dir = os.path.join(out_dir, package_full_name)
+        namespace_dir = os.path.join(package_dir, PLUGIN_NAMESPACE)
+        step_package_dir = os.path.join(namespace_dir, package_name)
+
+        # Make directories
         os.mkdir(package_dir)
-
-        # Write the package init file
-        self._writePackageInit(package_dir)
-
-        # Make step pakcage directory
-        step_package_dir = os.path.join(package_dir, self._options.getPackageName())
+        os.mkdir(namespace_dir)
         os.mkdir(step_package_dir)
 
-        # Write step packate init file
+        self._writeSetup(package_dir)
+        self._writeNamespaceInit(namespace_dir)
+
+        # Write the package init file
+        # self._writePackageInit(package_dir)
+
+        # Write step package init file
         self._writeStepPackageInit(step_package_dir)
 
         # Write out the step file
@@ -443,6 +500,9 @@ class SkeletonOptions(object):
 
     def setPackageName(self, packageName):
         self._packageName = packageName
+
+    def getFullPackageName(self):
+        return PLUGIN_NAMESPACE + '.' + self._packageName
 
     def getImageFile(self):
         return self._imageFile

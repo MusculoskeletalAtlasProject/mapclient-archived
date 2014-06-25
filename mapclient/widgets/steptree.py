@@ -25,6 +25,15 @@ class StepTree(QtGui.QTreeWidget):
     def __init__(self, parent=None):
         super(StepTree, self).__init__(parent)
         self.stepIconSize = 64
+        self.setStyleSheet("QTreeWidget::item::has-children { \
+            background: lightgray; text-align: center;  \
+            color: black; border: 2px solid lightgray; \
+            padding-bottom: 4px; padding-top: 4px; \
+            border-radius: 4px; } \
+            QTreeWidget::item::closed { padding-left: 4px;\
+            image: url(':/stepbox/images/branch-closed.png') } \
+            QTreeWidget::item::closed::has-children { padding-left: 40px;\
+            image: url(':/stepbox/images/branch-closed.png') }")
 
         size = QtCore.QSize(self.stepIconSize, self.stepIconSize)
         self.setIconSize(size)
@@ -46,22 +55,28 @@ class StepTree(QtGui.QTreeWidget):
 
     def addStep(self, step):
 
+        column = 0
         parentItem = self.findParentItem(step._category)
         if not parentItem:
             parentItem = QtGui.QTreeWidgetItem(self)
-            parentItem.setText(0, step._category)
+            parentItem.setText(column, step._category)
+            parentItem.setTextAlignment(column, QtCore.Qt.AlignCenter)
+            font = parentItem.font(column)
+            font.setPointSize(12)
+            font.setWeight(QtGui.QFont.Bold)
+            parentItem.setFont(column, font)
 
         if not parentItem.isExpanded():
             parentItem.setExpanded(True)
 
         stepItem = QtGui.QTreeWidgetItem(parentItem)
-        stepItem.setText(0, step.getName())
+        stepItem.setText(column, step.getName())
         if step._icon:
-            stepItem.setIcon(0, QtGui.QIcon(QtGui.QPixmap.fromImage(step._icon)))
+            stepItem.setIcon(column, QtGui.QIcon(QtGui.QPixmap.fromImage(step._icon)))
         else:
-            stepItem.setIcon(0, QtGui.QIcon(QtGui.QPixmap.fromImage(createDefaultImageIcon(step.getName()))))
+            stepItem.setIcon(column, QtGui.QIcon(QtGui.QPixmap.fromImage(createDefaultImageIcon(step.getName()))))
 
-        stepItem.setData(0, QtCore.Qt.UserRole, step)
+        stepItem.setData(column, QtCore.Qt.UserRole, step)
         stepItem.setFlags(QtCore.Qt.ItemIsEnabled)
 
     def mousePressEvent(self, event):

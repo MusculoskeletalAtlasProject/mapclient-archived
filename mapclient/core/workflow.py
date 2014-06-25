@@ -23,9 +23,7 @@ from PySide import QtCore
 
 from mapclient.settings import info
 from mapclient.core.workflowscene import WorkflowScene
-
-class WorkflowError(Exception):
-    pass
+from mapclient.core.workflowerror import WorkflowError
 
 _PREVIOUS_LOCATION_STRING = 'previousLocation'
 

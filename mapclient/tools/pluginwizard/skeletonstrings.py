@@ -226,6 +226,19 @@ print("Plugin '{{0}}' version {{1}} by {{2}} loaded".format(tail, __version__, _
 
 '''
 
+STEP_PACKAGE_INIT_STRING = '''
+\'\'\'
+MAP Client Plugin
+\'\'\'
+__version__ = '0.1.0'
+__author__ = '{author_name}'
+
+
+# import class that derives itself from the step mountpoint.
+from {package_name} import step
+
+'''
+
 RESOURCE_FILE_STRING = '''
 <RCC>
   <qresource prefix="{step_package_name}">
@@ -321,3 +334,33 @@ CONFIGURE_DIALOG_UI = '''<?xml version="1.0" encoding="UTF-8"?>
  </connections>
 </ui>
 '''
+
+
+SETUP_PY_TEMPLATE = """\
+from setuptools import setup, find_packages
+import sys, os
+
+setup(name=%(name)r,
+      version=%(version)r,
+      description=%(description)r,
+      long_description="",
+      classifiers=[],
+      author=%(author)r,
+      author_email=%(author_email)r,
+      url=%(url)r,
+      license=%(license)r,
+      packages=find_packages(exclude=['ez_setup',]),
+      namespace_packages=%(namespace_packages)r,
+      include_package_data=True,
+      zip_safe=False,
+      install_requires=[
+          # -*- Extra requirements: -*-
+      ],
+      )
+"""
+
+
+NAMESPACE_INIT = """\
+from pkgutil import extend_path
+__path__ = extend_path(__path__, __name__)
+"""

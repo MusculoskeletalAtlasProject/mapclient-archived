@@ -23,8 +23,18 @@ Inspired by Marty Alchin's Simple plugin framework.
 http://martyalchin.com/2008/jan/10/simple-plugin-framework/
 '''
 
-import os, imp
+import logging
+import os
+import imp
+import site
+import sys
+import pkgutil
+from importlib import import_module
 
+logger = logging.getLogger(__name__)
+
+PLUGINS_PACKAGE_NAME = 'mapclientplugins'
+PLUGINS_PTH = PLUGINS_PACKAGE_NAME + '.pth'
 MAIN_MODULE = '__init__'
 
 def getPlugins(pluginDirectory):
@@ -257,3 +267,145 @@ keyword arguments, the tool menu ('menu_Tool') and the parent widget ('parent').
 '''
 ToolMountPoint = MetaPluginMountPoint('ToolMountPoint', (object,), {})
 
+
+class PluginManager(object):
+
+    def __init__(self):
+        self._directories = []
+        self._loadDefaultPlugins = True
+
+    def directories(self):
+        return self._directories
+
+    def setDirectories(self, directories):
+        '''
+        Set the list of directories to be searched for
+        plugins.  Returns true if the directories listing
+        was updated and false otherwise.
+        '''
+        directories_changed = False
+        if self._directories != directories:
+            self._directories = directories
+            directories_changed = True
+
+        return directories_changed
+
+    def loadDefaultPlugins(self):
+        return self._loadDefaultPlugins
+
+    def setLoadDefaultPlugins(self, loadDefaultPlugins):
+        '''
+        Set whether or not the default plugins should be loaded.
+        Returns true if the default load plugin setting is changed
+        and false otherwise.
+        '''
+        defaults_changed = False
+        if self._loadDefaultPlugins != loadDefaultPlugins:
+            self._loadDefaultPlugins = loadDefaultPlugins
+            defaults_changed = True
+
+        return defaults_changed
+
+    def allDirectories(self):
+        plugin_dirs = self._directories[:]
+        if self._loadDefaultPlugins:
+            file_dir = os.path.dirname(os.path.abspath(__file__))
+            inbuilt_plugin_dir = os.path.realpath(os.path.join(file_dir, '..', '..', 'plugins'))
+            plugin_dirs.insert(0, inbuilt_plugin_dir)
+
+        return plugin_dirs
+
+    def _addPluginDir(self, directory):
+        added = False
+        if isMapClientPluginsDir(directory):
+            site.addsitedir(directory)
+            added = True
+
+        return added
+
+    def load(self):
+        len_package_modules_prior = len(sys.modules['mapclientplugins'].__path__) if 'mapclientplugins' in sys.modules else 0
+        for directory in self.allDirectories():
+            if not self._addPluginDir(directory):
+                try:
+                    names = os.listdir(directory)
+                except os.error:
+                    continue
+
+                for name in sorted(names):
+                    self._addPluginDir(os.path.join(directory, name))
+
+        package = import_module('mapclientplugins') if len_package_modules_prior == 0 else reload(sys.modules['mapclientplugins'])
+        for _, modname, ispkg in pkgutil.iter_modules(package.__path__):
+            if ispkg:
+                try:
+                    module = import_module('mapclientplugins.' + modname)
+                    if hasattr(module, '__version__') and hasattr(module, '__author__'):
+                        logger.info('Loaded plugin \'' + modname + '\' version [' + module.__version__ + '] by ' + module.__author__)
+                except:
+                    logger.warn('Plugin \'' + modname + '\' not loaded')
+
+    def readSettings(self, settings):
+        self._directories = []
+        settings.beginGroup('Plugins')
+        self._loadDefaultPlugins = settings.value('load_defaults', 'true') == 'true'
+        directory_count = settings.beginReadArray('directories')
+        for i in range(directory_count):
+            settings.setArrayIndex(i)
+            self._directories.append(settings.value('directory'))
+        settings.endArray()
+        settings.endGroup()
+
+    def writeSettings(self, settings):
+        settings.beginGroup('Plugins')
+        settings.setValue('load_defaults', self._loadDefaultPlugins)
+        settings.beginWriteArray('directories')
+        directory_index = 0
+        for directory in self._directories:
+            settings.setArrayIndex(directory_index)
+            settings.setValue('directory', directory)
+            directory_index += 1
+        settings.endArray()
+        settings.endGroup()
+
+def isMapClientPluginsDir(plugin_dir):
+    result = False
+    try:
+        names = os.listdir(plugin_dir)
+    except:
+        return result
+
+    if PLUGINS_PACKAGE_NAME in names:
+        init_file = os.path.join(plugin_dir, PLUGINS_PACKAGE_NAME, '__init__.py')
+        if os.path.isfile(init_file):
+            contents = open(init_file).read()
+            if 'pkgutil' in contents and 'extend_path' in contents:
+                result = True
+
+    return result
+
+class PluginSiteManager(object):
+    """
+    Python site module/pth based plugin manager.  WIP.
+    """
+
+    def __init__(self):
+        pass
+
+    def generate_pth_entries(self, target_dir):
+        if not os.path.isdir(target_dir):
+            return []
+        g = os.walk(target_dir)
+        _, dirs, _ = next(g)
+        return [os.path.join(target_dir, d) for d in dirs]
+
+    def build_site(self, target_dir):
+        pth_entries = self.generate_pth_entries(target_dir)
+        pth_filename = os.path.join(target_dir, PLUGINS_PTH)
+
+        with open(pth_filename, 'w') as f:
+            # should probably check that they are valid packages
+            f.write('\n'.join(pth_entries))
+
+    def load_site(self, target_dir):
+        site.addsitedir(target_dir)
