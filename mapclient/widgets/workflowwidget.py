@@ -92,6 +92,7 @@ class WorkflowWidget(QtGui.QWidget):
             self.action_New.setEnabled(widget_visible)
             self.action_NewPMR.setEnabled(widget_visible)
             self.action_Open.setEnabled(widget_visible)
+            self.action_Execute.setEnabled(widget_visible)
 
     def updateStepTree(self):
         self._ui.stepTree.clear()
@@ -318,6 +319,8 @@ class WorkflowWidget(QtGui.QWidget):
 
     def _createMenuItems(self):
         menu_File = self._mainWindow.menubar.findChild(QtGui.QMenu, 'menu_File')
+        menu_Project = self._mainWindow.menubar.findChild(QtGui.QMenu, 'menu_Project')
+
         lastFileMenuAction = menu_File.actions()[-1]
         menu_New = QtGui.QMenu('&New', menu_File)
 #        menu_Open = QtGui.QMenu('&Open', menu_File)
@@ -334,6 +337,8 @@ class WorkflowWidget(QtGui.QWidget):
         self._setActionProperties(self.action_Close, 'action_Close', self.close, 'Ctrl+W', 'Close open Workflow')
         self.action_Save = QtGui.QAction('&Save', menu_File)
         self._setActionProperties(self.action_Save, 'action_Save', self.save, 'Ctrl+S', 'Save Workflow')
+        self.action_Execute = QtGui.QAction('E&xecute', menu_Project)
+        self._setActionProperties(self.action_Execute, 'action_Execute', self.executeWorkflow, 'Ctrl+X', 'Execute Workflow')
 
         menu_New.insertAction(QtGui.QAction(self), self.action_NewPMR)
         menu_New.insertAction(QtGui.QAction(self), self.action_New)
@@ -346,5 +351,6 @@ class WorkflowWidget(QtGui.QWidget):
         menu_File.insertSeparator(lastFileMenuAction)
         menu_File.insertAction(lastFileMenuAction, self.action_Save)
         menu_File.insertSeparator(lastFileMenuAction)
+        menu_Project.addAction(self.action_Execute)
 
 
