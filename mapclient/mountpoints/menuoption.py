@@ -1,4 +1,4 @@
-#!/usr/bin/python
+
 '''
 MAP Client, a program to generate detailed musculoskeletal models for OpenSim.
     Copyright (C) 2012  University of Auckland
@@ -18,32 +18,31 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     You should have received a copy of the GNU General Public License
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
-import unittest
+from PySide.QtCore import QObject
 
-def suite():
-    tests = unittest.TestSuite()
+from mapclient.core.pluginframework import MetaQObjectPluginMountPoint
 
-    from settings import settingstests
-    tests.addTests(settingstests.suite())
+'''
+Plugins can inherit this mount point in order to add to the menu of the GUI.
 
-    from widgets import widgetstests
-    tests.addTests(widgetstests.suite())
+ A plugin that registers this mount point must have attributes
+ * parent
+ * menuLabel
+ * menuName
+ * actionLabel
+ 
+ A plugin that registers this mount point could have attributes
+ * subMenuLabel
+ * subMenuName
+ * shortcut
+ * statustip
+  
+ It must implement
+ * def execute(self):
+ 
+ And it must call
+ * QObject.__init__(self)
+ in it's __init__ function
+ '''
+MenuOptionMountPoint = MetaQObjectPluginMountPoint('MenuOptionMountPoint', (QObject,), {'subMenuLabel': None, 'subMenuName': None, 'shortcut': None, 'statustip': ''})
 
-    from core import coretests
-    tests.addTests(coretests.suite())
-
-    from plugins.imagesourcestep import imagesourcesteptests
-    tests.addTests(imagesourcesteptests.suite())
-    
-    from plugins.pointcloudserializerstep import pointcloudserializertests
-    tests.addTests(pointcloudserializertests.suite())
-    
-    return tests
-
-def load_tests(loader, tests, pattern):
-    return suite()
-
-
-if __name__ == '__main__':
-    #unittest.main()
-    unittest.TextTestRunner().run(suite())

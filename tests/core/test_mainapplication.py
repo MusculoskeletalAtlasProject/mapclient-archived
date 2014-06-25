@@ -1,4 +1,3 @@
-#!/usr/bin/python
 '''
 MAP Client, a program to generate detailed musculoskeletal models for OpenSim.
     Copyright (C) 2012  University of Auckland
@@ -20,30 +19,26 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
 '''
 import unittest
 
-def suite():
-    tests = unittest.TestSuite()
+from mapclient.core.mainapplication import MainApplication
 
-    from settings import settingstests
-    tests.addTests(settingstests.suite())
-
-    from widgets import widgetstests
-    tests.addTests(widgetstests.suite())
-
-    from core import coretests
-    tests.addTests(coretests.suite())
-
-    from plugins.imagesourcestep import imagesourcesteptests
-    tests.addTests(imagesourcesteptests.suite())
-    
-    from plugins.pointcloudserializerstep import pointcloudserializertests
-    tests.addTests(pointcloudserializertests.suite())
-    
-    return tests
-
-def load_tests(loader, tests, pattern):
-    return suite()
+class MainApplicationTestCase(unittest.TestCase):
 
 
-if __name__ == '__main__':
-    #unittest.main()
-    unittest.TextTestRunner().run(suite())
+    def testCreateMainApplication(self):
+        ma = MainApplication()
+
+        self.assertEqual(ma.size().width(), 600)
+        self.assertEqual(ma.size().height(), 400)
+        
+        self.assertEqual(ma.pos().x(), 100)
+        self.assertEqual(ma.pos().y(), 150)
+        
+    def testWorkflowManagerAPI(self):
+        ma = MainApplication()
+        wm = ma.workflowManager()
+        self.assertTrue(wm.setPreviousLocation('here') == None)
+        self.assertEqual(wm.previousLocation(), 'here')
+
+if __name__ == "__main__":
+    #import sys;sys.argv = ['', 'Test.testName']
+    unittest.main()

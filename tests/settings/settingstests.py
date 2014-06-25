@@ -1,4 +1,3 @@
-#!/usr/bin/python
 '''
 MAP Client, a program to generate detailed musculoskeletal models for OpenSim.
     Copyright (C) 2012  University of Auckland
@@ -21,29 +20,13 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
 import unittest
 
 def suite():
+    from tests.settings.test_info import InfoTestCase
     tests = unittest.TestSuite()
-
-    from settings import settingstests
-    tests.addTests(settingstests.suite())
-
-    from widgets import widgetstests
-    tests.addTests(widgetstests.suite())
-
-    from core import coretests
-    tests.addTests(coretests.suite())
-
-    from plugins.imagesourcestep import imagesourcesteptests
-    tests.addTests(imagesourcesteptests.suite())
-    
-    from plugins.pointcloudserializerstep import pointcloudserializertests
-    tests.addTests(pointcloudserializertests.suite())
-    
+    tests.addTests(unittest.TestLoader().loadTestsFromTestCase(InfoTestCase))
     return tests
 
 def load_tests(loader, tests, pattern):
     return suite()
 
-
 if __name__ == '__main__':
-    #unittest.main()
     unittest.TextTestRunner().run(suite())

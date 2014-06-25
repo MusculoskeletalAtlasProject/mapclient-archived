@@ -1,8 +1,7 @@
-#!/usr/bin/python
 '''
 MAP Client, a program to generate detailed musculoskeletal models for OpenSim.
     Copyright (C) 2012  University of Auckland
-    
+
 This file is part of MAP Client. (http://launchpad.net/mapclient)
 
     MAP Client is free software: you can redistribute it and/or modify
@@ -18,32 +17,29 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     You should have received a copy of the GNU General Public License
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
-import unittest
+import logging
+from PySide import QtGui
 
-def suite():
-    tests = unittest.TestSuite()
+from mapclient.tools.pmr.ui_oauthcheckdialog import Ui_OAuthCheckDialog
 
-    from settings import settingstests
-    tests.addTests(settingstests.suite())
-
-    from widgets import widgetstests
-    tests.addTests(widgetstests.suite())
-
-    from core import coretests
-    tests.addTests(coretests.suite())
-
-    from plugins.imagesourcestep import imagesourcesteptests
-    tests.addTests(imagesourcesteptests.suite())
-    
-    from plugins.pointcloudserializerstep import pointcloudserializertests
-    tests.addTests(pointcloudserializertests.suite())
-    
-    return tests
-
-def load_tests(loader, tests, pattern):
-    return suite()
+logger = logging.getLogger(__name__)
 
 
-if __name__ == '__main__':
-    #unittest.main()
-    unittest.TextTestRunner().run(suite())
+class OAuthCheckDialog(QtGui.QDialog):
+    """
+    Dialog that other UI elements can spawn to check for existence of
+    token credentials and acquire one from user if it is unavailable.
+    """
+
+    def __init__(self, parent=None):
+        QtGui.QDialog.__init__(self, parent)
+        self._ui = Ui_OAuthCheckDialog()
+        self._ui.setupUi(self)
+        self._makeConnections()
+
+    def _makeConnections(self):
+        self._ui.continueButton.clicked.connect(self.event_register)
+
+    def token(self):
+        return self._ui.tokenLineEdit.text()
+

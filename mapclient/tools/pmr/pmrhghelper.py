@@ -1,4 +1,3 @@
-#!/usr/bin/python
 '''
 MAP Client, a program to generate detailed musculoskeletal models for OpenSim.
     Copyright (C) 2012  University of Auckland
@@ -18,32 +17,25 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     You should have received a copy of the GNU General Public License
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
-import unittest
+import os
 
-def suite():
-    tests = unittest.TestSuite()
+from subprocess import Popen, PIPE
 
-    from settings import settingstests
-    tests.addTests(settingstests.suite())
+from mapclient.core.threadcommandmanager import which
 
-    from widgets import widgetstests
-    tests.addTests(widgetstests.suite())
+def isHgRepository(location):
+    return os.path.exists(os.path.join(location, '.hg'))
 
-    from core import coretests
-    tests.addTests(coretests.suite())
-
-    from plugins.imagesourcestep import imagesourcesteptests
-    tests.addTests(imagesourcesteptests.suite())
-    
-    from plugins.pointcloudserializerstep import pointcloudserializertests
-    tests.addTests(pointcloudserializertests.suite())
-    
-    return tests
-
-def load_tests(loader, tests, pattern):
-    return suite()
-
-
-if __name__ == '__main__':
-    #unittest.main()
-    unittest.TextTestRunner().run(suite())
+def repositoryIsUpToDate(location):
+    result = True
+    if isHgRepository(location):
+        hg = which('hg')
+        if len(hg) > 0:
+            process = Popen([hg[0], "status", location], stdout=PIPE, stderr=PIPE)
+            outputs = process.communicate()
+            stdout = outputs[0]
+            stderr = outputs[1]
+            if len(stdout) > 0 or len(stderr) > 0:
+                result = False
+        
+    return result

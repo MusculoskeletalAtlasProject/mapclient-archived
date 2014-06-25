@@ -18,32 +18,25 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     You should have received a copy of the GNU General Public License
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
+
 import unittest
+
+from mapclient.exceptions import ClientRuntimeError
+
+
+class ExceptionTestCase(unittest.TestCase):
+
+    def test_client_runtime_error(self):
+        error = ClientRuntimeError('title', 'desc')
+        self.assertEqual(error.title, 'title')
+        self.assertEqual(error.description, 'desc')
+
 
 def suite():
     tests = unittest.TestSuite()
-
-    from settings import settingstests
-    tests.addTests(settingstests.suite())
-
-    from widgets import widgetstests
-    tests.addTests(widgetstests.suite())
-
-    from core import coretests
-    tests.addTests(coretests.suite())
-
-    from plugins.imagesourcestep import imagesourcesteptests
-    tests.addTests(imagesourcesteptests.suite())
-    
-    from plugins.pointcloudserializerstep import pointcloudserializertests
-    tests.addTests(pointcloudserializertests.suite())
-    
+    tests.addTests(unittest.TestLoader().loadTestsFromTestCase(ExceptionTestCase))
     return tests
 
-def load_tests(loader, tests, pattern):
-    return suite()
-
-
 if __name__ == '__main__':
-    #unittest.main()
     unittest.TextTestRunner().run(suite())
+

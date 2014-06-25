@@ -1,4 +1,3 @@
-#!/usr/bin/python
 '''
 MAP Client, a program to generate detailed musculoskeletal models for OpenSim.
     Copyright (C) 2012  University of Auckland
@@ -23,27 +22,24 @@ import unittest
 def suite():
     tests = unittest.TestSuite()
 
-    from settings import settingstests
-    tests.addTests(settingstests.suite())
+    from tests.core.test_pluginframework import PluginFrameworkTestCase
+    tests.addTests(unittest.TestLoader().loadTestsFromTestCase(PluginFrameworkTestCase))
 
-    from widgets import widgetstests
-    tests.addTests(widgetstests.suite())
+    from tests.core.test_mainapplication import MainApplicationTestCase
+    tests.addTests(unittest.TestLoader().loadTestsFromTestCase(MainApplicationTestCase))
 
-    from core import coretests
-    tests.addTests(coretests.suite())
+    from tests.core.test_workflowscene import WorkflowSceneTestCase, WorkflowDependencyGraphTestCase, DictUtilsTestCase
+    tests.addTests(unittest.TestLoader().loadTestsFromTestCase(WorkflowSceneTestCase))
+    tests.addTests(unittest.TestLoader().loadTestsFromTestCase(WorkflowDependencyGraphTestCase))
+    tests.addTests(unittest.TestLoader().loadTestsFromTestCase(DictUtilsTestCase))
 
-    from plugins.imagesourcestep import imagesourcesteptests
-    tests.addTests(imagesourcesteptests.suite())
-    
-    from plugins.pointcloudserializerstep import pointcloudserializertests
-    tests.addTests(pointcloudserializertests.suite())
-    
+    from tests.core.test_threadcommandmanager import ThreadCommandManagerTestCase
+    tests.addTests(unittest.TestLoader().loadTestsFromTestCase(ThreadCommandManagerTestCase))
+
     return tests
 
 def load_tests(loader, tests, pattern):
     return suite()
 
-
 if __name__ == '__main__':
-    #unittest.main()
     unittest.TextTestRunner().run(suite())

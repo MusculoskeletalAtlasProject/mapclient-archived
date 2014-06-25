@@ -1,4 +1,4 @@
-#!/usr/bin/python
+
 '''
 MAP Client, a program to generate detailed musculoskeletal models for OpenSim.
     Copyright (C) 2012  University of Auckland
@@ -18,32 +18,16 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     You should have received a copy of the GNU General Public License
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
-import unittest
+class ClientRuntimeError(RuntimeError):
+    """
+    Generic error for indicating errors that should be notified to the
+    user running the client.
+    """
 
-def suite():
-    tests = unittest.TestSuite()
+    def __init__(self, title='Error', description=''):
+        super(ClientRuntimeError, self).__init__(description)
+        self.title = title
+        self.description = description
 
-    from settings import settingstests
-    tests.addTests(settingstests.suite())
-
-    from widgets import widgetstests
-    tests.addTests(widgetstests.suite())
-
-    from core import coretests
-    tests.addTests(coretests.suite())
-
-    from plugins.imagesourcestep import imagesourcesteptests
-    tests.addTests(imagesourcesteptests.suite())
-    
-    from plugins.pointcloudserializerstep import pointcloudserializertests
-    tests.addTests(pointcloudserializertests.suite())
-    
-    return tests
-
-def load_tests(loader, tests, pattern):
-    return suite()
-
-
-if __name__ == '__main__':
-    #unittest.main()
-    unittest.TextTestRunner().run(suite())
+    def __str__(self):
+        return '%s: %s' % (self.title, self.description)
