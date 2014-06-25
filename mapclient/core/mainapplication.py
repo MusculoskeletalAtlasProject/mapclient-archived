@@ -17,7 +17,6 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     You should have received a copy of the GNU General Public License
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
-import os
 import logging
 
 from PySide import QtCore
@@ -36,10 +35,6 @@ class MainApplication(object):
 
 
     def __init__(self):
-        '''
-        Constructor
-        '''
-
         self._size = QtCore.QSize(600, 400)
         self._pos = QtCore.QPoint(100, 150)
         self._pluginManager = PluginManager()
@@ -79,8 +74,6 @@ class MainApplication(object):
         settings.endGroup()
         self._pluginManager.writeSettings(settings)
         self._workflowManager.writeSettings(settings)
-#        for stackedWidgetPage in self.stackedWidgetPages:
-#            stackedWidgetPage.writeSettings(settings)
 
     def readSettings(self):
         settings = QtCore.QSettings()
@@ -90,5 +83,3 @@ class MainApplication(object):
         settings.endGroup()
         self._pluginManager.readSettings(settings)
         self._workflowManager.readSettings(settings)
-#        for stackedWidgetPage in self.stackedWidgetPages:
-#            stackedWidgetPage.readSettings(settings)

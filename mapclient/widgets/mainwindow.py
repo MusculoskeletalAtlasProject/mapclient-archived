@@ -40,10 +40,12 @@ class MainWindow(QtGui.QMainWindow):
 
         self._ui = Ui_MainWindow()
         self._ui.setupUi(self)
+        self._setupMenus()
+        self.setMenuBar(self.menubar)
         self._makeConnections()
 
-        self._createUndoAction(self._ui.menu_Edit)
-        self._createRedoAction(self._ui.menu_Edit)
+        self._createUndoAction(self.menu_Edit)
+        self._createRedoAction(self.menu_Edit)
 
         self._model.readSettings()
         self.resize(self._model.size())
@@ -56,6 +58,61 @@ class MainWindow(QtGui.QMainWindow):
         self.setCurrentUndoRedoStack(self._workflowWidget.undoRedoStack())
 
         self._pluginManagerDlg = None
+
+    def _setupMenus(self):
+        '''
+        Because of OS X we have to setup the menubar with no parent so we do
+        it manually here instead of through designer.
+        '''
+        self.menubar = QtGui.QMenuBar()
+        self.menubar.setObjectName("menubar")
+        self.menu_Help = QtGui.QMenu(self.menubar)
+        self.menu_Help.setObjectName("menu_Help")
+        self.menu_File = QtGui.QMenu(self.menubar)
+        self.menu_File.setObjectName("menu_File")
+        self.menu_Edit = QtGui.QMenu(self.menubar)
+        self.menu_Edit.setObjectName("menu_Edit")
+        self.menu_Tools = QtGui.QMenu(self.menubar)
+        self.menu_Tools.setObjectName("menu_Tools")
+        self.action_About = QtGui.QAction(self)
+        self.action_About.setObjectName("action_About")
+        self.action_Quit = QtGui.QAction(self)
+        self.action_Quit.setObjectName("action_Quit")
+        self.actionPluginManager = QtGui.QAction(self)
+        self.actionPluginManager.setObjectName("actionPluginManager")
+        self.actionPMR = QtGui.QAction(self)
+        self.actionPMR.setObjectName("actionPMR")
+        self.actionAnnotation = QtGui.QAction(self)
+        self.actionAnnotation.setObjectName("actionAnnotation")
+        self.actionPluginWizard = QtGui.QAction(self)
+        self.actionPluginWizard.setObjectName("actionPluginWizard")
+        self.menu_Help.addAction(self.action_About)
+        self.menu_File.addSeparator()
+        self.menu_File.addAction(self.action_Quit)
+        self.menu_Tools.addAction(self.actionPluginManager)
+        self.menu_Tools.addAction(self.actionPluginWizard)
+        self.menu_Tools.addAction(self.actionPMR)
+        self.menu_Tools.addAction(self.actionAnnotation)
+        self.menubar.addAction(self.menu_File.menuAction())
+        self.menubar.addAction(self.menu_Edit.menuAction())
+        self.menubar.addAction(self.menu_Tools.menuAction())
+        self.menubar.addAction(self.menu_Help.menuAction())
+
+        self._retranslateUi()
+
+    def _retranslateUi(self):
+        self.menu_Help.setTitle(QtGui.QApplication.translate("MainWindow", "&Help", None, QtGui.QApplication.UnicodeUTF8))
+        self.menu_File.setTitle(QtGui.QApplication.translate("MainWindow", "&File", None, QtGui.QApplication.UnicodeUTF8))
+        self.menu_Edit.setTitle(QtGui.QApplication.translate("MainWindow", "&Edit", None, QtGui.QApplication.UnicodeUTF8))
+        self.menu_Tools.setTitle(QtGui.QApplication.translate("MainWindow", "&Tools", None, QtGui.QApplication.UnicodeUTF8))
+        self.action_About.setText(QtGui.QApplication.translate("MainWindow", "&About", None, QtGui.QApplication.UnicodeUTF8))
+        self.action_Quit.setText(QtGui.QApplication.translate("MainWindow", "&Quit", None, QtGui.QApplication.UnicodeUTF8))
+        self.action_Quit.setStatusTip(QtGui.QApplication.translate("MainWindow", "Quit the application", None, QtGui.QApplication.UnicodeUTF8))
+        self.action_Quit.setShortcut(QtGui.QApplication.translate("MainWindow", "Ctrl+Q", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionPluginManager.setText(QtGui.QApplication.translate("MainWindow", "Plugin &Manager", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionPMR.setText(QtGui.QApplication.translate("MainWindow", "&PMR", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionAnnotation.setText(QtGui.QApplication.translate("MainWindow", "&Annotation", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionPluginWizard.setText(QtGui.QApplication.translate("MainWindow", "Plugin Wi&zard", None, QtGui.QApplication.UnicodeUTF8))
 
     def _createUndoAction(self, parent):
         self.undoAction = QtGui.QAction('Undo', parent)
@@ -85,12 +142,12 @@ class MainWindow(QtGui.QMainWindow):
         return self._model
 
     def _makeConnections(self):
-        self._ui.action_Quit.triggered.connect(self.quitApplication)
-        self._ui.action_About.triggered.connect(self.about)
-        self._ui.actionPluginManager.triggered.connect(self.pluginManager)
-        self._ui.actionPluginWizard.triggered.connect(self.pluginWizard)
-        self._ui.actionPMR.triggered.connect(self.pmr)
-        self._ui.actionAnnotation.triggered.connect(self.annotationTool)
+        self.action_Quit.triggered.connect(self.quitApplication)
+        self.action_About.triggered.connect(self.about)
+        self.actionPluginManager.triggered.connect(self.pluginManager)
+        self.actionPluginWizard.triggered.connect(self.pluginWizard)
+        self.actionPMR.triggered.connect(self.pmr)
+        self.actionAnnotation.triggered.connect(self.annotationTool)
 
     def setCurrentUndoRedoStack(self, stack):
         current_stack = self._model.undoManager().currentStack()
@@ -112,8 +169,9 @@ class MainWindow(QtGui.QMainWindow):
         self.undoAction.setEnabled(canUndo)
 
     def execute(self):
-        self._ui.stackedWidget.setCurrentWidget(self._workflowWidget)
-        self.setCurrentUndoRedoStack(self._workflowWidget.undoRedoStack())
+        if self._ui.stackedWidget.currentWidget() != self._workflowWidget:
+            self._ui.stackedWidget.setCurrentWidget(self._workflowWidget)
+            self.setCurrentUndoRedoStack(self._workflowWidget.undoRedoStack())
         self.model().workflowManager().execute()
 
     def setCurrentWidget(self, widget):

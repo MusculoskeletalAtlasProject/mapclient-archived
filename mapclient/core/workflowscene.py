@@ -20,7 +20,7 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
 from PySide import QtCore
 
 from mapclient.mountpoints.workflowstep import workflowStepFactory
-from mapclient.core.workflow import WorkflowError
+from mapclient.core.workflowerror import WorkflowError
 
 class Item(object):
 
