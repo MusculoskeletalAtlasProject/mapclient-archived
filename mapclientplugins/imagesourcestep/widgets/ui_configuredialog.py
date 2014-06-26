@@ -122,7 +122,7 @@ class Ui_ConfigureDialog(object):
         self.verticalLayout_2.addWidget(self.groupBox)
         self.buttonBox = QtGui.QDialogButtonBox(ConfigureDialog)
         self.buttonBox.setOrientation(QtCore.Qt.Horizontal)
-        self.buttonBox.setStandardButtons(QtGui.QDialogButtonBox.Cancel|QtGui.QDialogButtonBox.Ok)
+        self.buttonBox.setStandardButtons(QtGui.QDialogButtonBox.Cancel | QtGui.QDialogButtonBox.Ok)
         self.buttonBox.setObjectName("buttonBox")
         self.verticalLayout_2.addWidget(self.buttonBox)
         self.label.setBuddy(self.identifierLineEdit)
@@ -155,4 +155,7 @@ class Ui_ConfigureDialog(object):
         self.imageSourceTypeComboBox.setItemText(2, QtGui.QApplication.translate("ConfigureDialog", "jpg (*.jpg, *.jpeg)", None, QtGui.QApplication.UnicodeUTF8))
         self.imageSourceTypeComboBox.setItemText(3, QtGui.QApplication.translate("ConfigureDialog", "TIFF (*.tiff)", None, QtGui.QApplication.UnicodeUTF8))
         self.imageSourceTypeComboBox.setItemText(4, QtGui.QApplication.translate("ConfigureDialog", "DICOM (*.dcm)", None, QtGui.QApplication.UnicodeUTF8))
+
+import mapclientplugins.imagesourcestep.widgets.resources_rc
+
 
