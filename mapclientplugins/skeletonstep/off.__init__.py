@@ -20,4 +20,4 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
 __version__ = '0.1.0'
 __author__ = 'Xxxx Yyyyy'
 
-# from mapclientplugins.skeletonstep import step
+from mapclientplugins.skeletonstep import step
