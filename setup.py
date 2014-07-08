@@ -6,8 +6,18 @@ try:
     import PySide
     pyside_version = PySide.__version__
     pyside_requirement = 'PySide==' + pyside_version
-except:
+except ImportError:
     pyside_requirement = 'PySide'
+
+install_requires = [
+        pyside_requirement,
+        'requests-oauthlib',
+        'pmr.wfctrl']
+
+try:
+    import importlib
+except ImportError:
+    install_requires.append('importlib')
 
 setup(name='mapclient',
      version='0.11.1',
@@ -20,8 +30,5 @@ setup(name='mapclient',
      package_data={'mapclient.tools.annotation': ['annotation.voc']},
      # py_modules=['mapclient.mapclient'],
      entry_points={'console_scripts': ['mapclient=mapclient.application:winmain']},
-     install_requires=[
-        pyside_requirement,
-        'requests-oauthlib',
-        'pmr.wfctrl']
+     install_requires=install_requires
 )

@@ -49,7 +49,7 @@ class WorkflowWidget(QtGui.QWidget):
         '''
         Constructor
         '''
-        QtGui.QWidget.__init__(self)
+        QtGui.QWidget.__init__(self, parent=mainWindow)
         self._mainWindow = mainWindow
         self._ui = Ui_WorkflowWidget()
         self._ui.setupUi(self)
@@ -78,21 +78,24 @@ class WorkflowWidget(QtGui.QWidget):
 
     def _updateUi(self):
         if hasattr(self, '_mainWindow'):
-            wfm = self._mainWindow.model().workflowManager()
-            self._mainWindow.setWindowTitle(wfm.title())
+            try:
+                wfm = self._mainWindow.model().workflowManager()
+                self._mainWindow.setWindowTitle(wfm.title())
+            except RuntimeError:
+                return
 
             widget_visible = self.isVisible()
 
-            workflowOpen = wfm.isWorkflowOpen()
-            self.action_Close.setEnabled(workflowOpen and widget_visible)
-            self.setEnabled(workflowOpen and widget_visible)
+            workflow_open = wfm.isWorkflowOpen()
+            self.action_Close.setEnabled(workflow_open and widget_visible)
+            self.setEnabled(workflow_open and widget_visible)
             self.action_Save.setEnabled(wfm.isModified() and widget_visible)
-            self._action_annotation.setEnabled(workflowOpen and widget_visible)
+            self._action_annotation.setEnabled(workflow_open and widget_visible)
             self.action_Import.setEnabled(widget_visible)
             self.action_New.setEnabled(widget_visible)
             self.action_NewPMR.setEnabled(widget_visible)
             self.action_Open.setEnabled(widget_visible)
-            self.action_Execute.setEnabled(widget_visible)
+            self.action_Execute.setEnabled(workflow_open and widget_visible)
 
     def updateStepTree(self):
         self._ui.stepTree.clear()
