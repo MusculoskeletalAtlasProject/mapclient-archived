@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'qt/aboutdialog.ui'
 #
-# Created: Tue Nov  5 15:34:40 2013
-#      by: pyside-uic 0.2.14 running on PySide 1.1.2
+# Created: Thu Jul 10 13:20:15 2014
+#      by: pyside-uic 0.2.15 running on PySide 1.2.1
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -30,7 +30,7 @@ class Ui_AboutDialog(object):
         self.verticalLayout.setObjectName("verticalLayout")
         self.label_2 = QtGui.QLabel(self.frame)
         self.label_2.setText("")
-        self.label_2.setPixmap(QtGui.QPixmap(":/mapclient/images/about_logo.png"))
+        self.label_2.setPixmap(QtGui.QPixmap(":/mapclient/images/logo.png"))
         self.label_2.setAlignment(QtCore.Qt.AlignCenter)
         self.label_2.setObjectName("label_2")
         self.verticalLayout.addWidget(self.label_2)
