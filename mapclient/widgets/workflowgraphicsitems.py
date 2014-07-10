@@ -375,6 +375,10 @@ class StepPort(QtGui.QGraphicsEllipseItem):
         self.setBrush(QtCore.Qt.black)
         self._port = port
         self._connections = []
+        self._pixmap = QtGui.QPixmap(':/workflow/images/icon-port.png')  # .scaled(11, 11, aspectRatioMode=QtCore.Qt.KeepAspectRatio, transformMode=QtCore.Qt.FastTransformation)
+
+    def paint(self, painter, option, widget):
+        painter.drawPixmap(0, 0, self._pixmap)
 
     def type(self):
         return StepPort.Type
