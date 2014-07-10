@@ -172,7 +172,6 @@ class ConfigureDialog(QDialog):
             self._ui.previousLocationLabel.setText(location)
             self._ui.localLineEdit.setText(location)
 
-
     def _pmrLocationEdited(self):
         self._ui.localLineEdit.setText('')
         self.validate()

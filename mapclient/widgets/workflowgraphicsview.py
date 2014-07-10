@@ -140,13 +140,14 @@ class WorkflowGraphicsView(QtGui.QGraphicsView):
             self._connectSourceNode = None
         else:
             QtGui.QGraphicsView.mouseReleaseEvent(self, event)
-            diff = event.pos() - self._selectionStartPos
-            if diff.x() != 0 and diff.y() != 0:
-                self._undoStack.beginMacro('Move Step(s)')
-                for item in self.scene().selectedItems():
-                    if item.type() == Node.Type:
-                        self._undoStack.push(CommandMove(item, item.pos() - diff, item.pos()))
-                self._undoStack.endMacro()
+            if self._selectionStartPos:
+                diff = event.pos() - self._selectionStartPos
+                if diff.x() != 0 and diff.y() != 0:
+                    self._undoStack.beginMacro('Move Step(s)')
+                    for item in self.scene().selectedItems():
+                        if item.type() == Node.Type:
+                            self._undoStack.push(CommandMove(item, item.pos() - diff, item.pos()))
+                    self._undoStack.endMacro()
 
     def errorIconTimeout(self):
         self.scene().removeItem(self._errorIcon)
@@ -169,8 +170,8 @@ class WorkflowGraphicsView(QtGui.QGraphicsView):
         # Fill.
         gradient = QtGui.QLinearGradient(sceneRect.topLeft(), sceneRect.bottomRight())
         if self.isEnabled():
-            gradient.setColorAt(0, QtGui.QColor('aliceblue'))
-            gradient.setColorAt(1, QtGui.QColor('lightskyblue'))
+            gradient.setColorAt(0, QtGui.QColor('white'))
+            gradient.setColorAt(1, QtGui.QColor('white'))
         else:
             gradient.setColorAt(0, QtGui.QColor('lightgrey'))
             gradient.setColorAt(1, QtGui.QColor('darkgrey'))
