@@ -11,7 +11,9 @@
     <file>images/configure_red.png</file>
     <file>images/yellow_black_exclamation.png</file>
     <file>images/default_step_icon.png</file>
+    <file>images/default_workflow_step.png</file>
     <file>images/configure_green.png</file>
     <file>images/icon-port.png</file>
+    <file>images/grid.png</file>
   </qresource>
 </RCC>
