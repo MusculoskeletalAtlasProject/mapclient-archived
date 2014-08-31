@@ -17,7 +17,7 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     You should have received a copy of the GNU General Public License
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
-import sys
+import sys, math
 
 from PySide import QtCore, QtGui
 
@@ -234,4 +234,19 @@ class WorkflowGraphicsView(QtGui.QGraphicsView):
 
         scene_rect = view_rect.united(items_rect)
         scene.setSceneRect(10, 10, scene_rect.width() - 20, scene_rect.height() - 20)
+
+    def wheelEvent(self, event):
+        self._scaleView(math.pow(2.0, -event.delta() / 240.0))
+
+    def _scaleView(self, scaleFactor):
+        factor = self.matrix().scale(scaleFactor, scaleFactor).mapRect(QtCore.QRectF(0, 0, 1, 1)).width()
+
+        if factor < 0.07 or factor > 100:
+            return
+
+        transformation_anchor = self.transformationAnchor()
+        self.setTransformationAnchor(QtGui.QGraphicsView.AnchorUnderMouse)
+        self.scale(scaleFactor, scaleFactor)
+        self.setTransformationAnchor(transformation_anchor)
+
 
