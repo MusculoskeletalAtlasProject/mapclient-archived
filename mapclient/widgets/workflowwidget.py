@@ -37,6 +37,7 @@ from mapclient.core.workflow import WorkflowError
 from mapclient.tools.pmr.pmrtool import PMRTool
 from mapclient.tools.pmr.pmrsearchdialog import PMRSearchDialog
 from mapclient.tools.pmr.pmrhgcommitdialog import PMRHgCommitDialog
+import shutil
 
 logger = logging.getLogger(__name__)
 
@@ -153,11 +154,22 @@ class WorkflowWidget(QtGui.QWidget):
         self._mainWindow.setCurrentUndoRedoStack(stack)
 
     def new(self, pmr=False):
+        workflowDir = self._getWorkflowDir()
+        if workflowDir:
+            self._createNewWorkflow(workflowDir, pmr)
+
+    def _getWorkflowDir(self):
         m = self._mainWindow.model().workflowManager()
         workflowDir = QtGui.QFileDialog.getExistingDirectory(self._mainWindow, caption='Select Workflow Directory', directory=m.previousLocation())
         if not workflowDir:
             # user abort
-            return
+            return ''
+
+        class ProblemClass(object):
+            _mk_workflow_dir = False
+            _rm_tree_success = True
+            def rmTreeUnsuccessful(self, one, two, three):
+                self._rm_tree_success = False
 
         if m.exists(workflowDir):
             # Check to make sure user wishes to overwrite existing workflow.
@@ -169,10 +181,25 @@ class WorkflowWidget(QtGui.QWidget):
             # (QtGui.QMessageBox.Warning, '')
             if ret == QtGui.QMessageBox.No:
                 # user abort
-                return
+                return ''
+            else:
+                # Delete contents of directory
+                shutil.rmtree(workflowDir, onerror=ProblemClass.rmTreeUnsuccessful)
+                ProblemClass._mk_workflow_dir = True
 
         # got dir, continue
-        self._createNewWorkflow(workflowDir, pmr)
+        if ProblemClass._rm_tree_success:
+            if ProblemClass._mk_workflow_dir:
+                os.mkdir(workflowDir)
+            return workflowDir
+        else:
+            QtGui.QMessageBox.warning(self,
+                'Replace Existing Workflow',
+                'Could not remove existing workflow,'
+                'New workflow not created.',
+                QtGui.QMessageBox.Ok)
+
+        return ''
 
     @handle_runtime_error
     @set_wait_cursor
@@ -281,8 +308,14 @@ class WorkflowWidget(QtGui.QWidget):
 
     def save(self):
         m = self._mainWindow.model().workflowManager()
-        m.save()
-        self.commitChanges(m.location())
+        if not os.path.exists(m.location()):
+            workflow_dir = self._getWorkflowDir()
+            if workflow_dir:
+                m.setPreviousLocation(workflow_dir)
+                m.setLocation(workflow_dir)
+        if m.location():
+            m.save()
+            self.commitChanges(m.location())
         self._updateUi()
 
     def commitChanges(self, workflowDir):

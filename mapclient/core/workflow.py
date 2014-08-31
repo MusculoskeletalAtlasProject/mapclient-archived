@@ -28,9 +28,11 @@ from mapclient.core.workflowerror import WorkflowError
 _PREVIOUS_LOCATION_STRING = 'previousLocation'
 
 def _getWorkflowConfiguration(location):
+#     print('get workflow confiburation: ' + location)
     return QtCore.QSettings(_getWorkflowConfigurationAbsoluteFilename(location), QtCore.QSettings.IniFormat)
 
 def _getWorkflowConfigurationAbsoluteFilename(location):
+#     print('get workflow configuration abs filename: ' + os.path.join(location, info.DEFAULT_WORKFLOW_PROJECT_FILENAME))
     return os.path.join(location, info.DEFAULT_WORKFLOW_PROJECT_FILENAME)
 
 class WorkflowManager(object):
@@ -45,7 +47,7 @@ class WorkflowManager(object):
         self.name = 'WorkflowManager'
 #        self.widget = None
 #        self.widgetIndex = -1
-        self._location = None
+        self._location = ''
         self._conf_filename = None
         self._previousLocation = None
         self._saveStateIndex = 0
@@ -176,12 +178,12 @@ class WorkflowManager(object):
         '''
         Close the current workflow
         '''
-        self._location = None
+        self._location = ''
         self._saveStateIndex = self._currentStateIndex = 0
 #        self._title = info.APPLICATION_NAME
 
     def isWorkflowOpen(self):
-        return not self._location == None
+        return True  # not self._location == None
 
     def writeSettings(self, settings):
         settings.beginGroup(self.name)
