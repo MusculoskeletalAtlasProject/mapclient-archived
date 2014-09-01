@@ -15,5 +15,6 @@
     <file>images/configure_green.png</file>
     <file>images/icon-port.png</file>
     <file>images/grid.png</file>
+    <file>images/modified_repo.png</file>
   </qresource>
 </RCC>
