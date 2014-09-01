@@ -313,31 +313,41 @@ class WorkflowWidget(QtGui.QWidget):
             if workflow_dir:
                 m.setPreviousLocation(workflow_dir)
                 m.setLocation(workflow_dir)
-        if m.location():
+        if m.location() and self.commitChanges(m.location()):
             m.save()
-            self.commitChanges(m.location())
+
         self._updateUi()
 
     def commitChanges(self, workflowDir):
         pmr_tool = PMRTool()
         if not pmr_tool.hasDVCS(workflowDir):
             # nothing to commit.
-            return
+            return True
 
         dlg = PMRHgCommitDialog(self)
         dlg.setModal(True)
-        if not dlg.exec_():
-            return
-        self._commitChanges(workflowDir, dlg.comment())
+        if dlg.exec_() == QtGui.QDialog.Rejected:
+            return False
+
+        action = dlg.action()
+        if action == QtGui.QDialogButtonBox.Ok:
+            return True
+        elif action == QtGui.QDialogButtonBox.Save:
+            return self._commitChanges(workflowDir, dlg.comment(), commit_local=True)
+
+        return self._commitChanges(workflowDir, dlg.comment())
 
     @handle_runtime_error
     @set_wait_cursor
-    def _commitChanges(self, workflowDir, comment):
+    def _commitChanges(self, workflowDir, comment, commit_local=False):
+        committed_changes = False
         pmr_tool = PMRTool()
         try:
             pmr_tool.commitFiles(workflowDir, comment,
                 [workflowDir + '/%s' % (DEFAULT_WORKFLOW_PROJECT_FILENAME)])  # XXX make/use file tracker
-            pmr_tool.pushToRemote(workflowDir)
+            if not commit_local:
+                pmr_tool.pushToRemote(workflowDir)
+            committed_changes = True
         except ClientRuntimeError:
             # handler will deal with this.
             raise
@@ -345,6 +355,8 @@ class WorkflowWidget(QtGui.QWidget):
             logger.exception('Error')
             raise ClientRuntimeError(
                 'Error Saving', 'The commit to PMR did not succeed')
+
+        return committed_changes
 
     def _setActionProperties(self, action, name, slot, shortcut='', statustip=''):
         action.setObjectName(name)
