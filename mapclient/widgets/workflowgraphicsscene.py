@@ -76,7 +76,6 @@ class WorkflowGraphicsScene(QtGui.QGraphicsScene):
         meta_steps = {}
         connections = []
         for workflowitem in self._workflow_scene.items():
-            print('workflow item: ', workflowitem)
             if workflowitem.Type == MetaStep.Type:
                 node = Node(workflowitem)
                 workflowitem._step.registerConfiguredObserver(self.stepConfigured)

@@ -213,6 +213,9 @@ class WorkflowScene(object):
         self._items = {}
         self._dependencyGraph = WorkflowDependencyGraph(self)
 
+    def saveAnnotation(self, f):
+        pass
+
     def saveState(self, ws):
         connectionMap = {}
         stepList = []

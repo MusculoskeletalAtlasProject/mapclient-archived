@@ -8,7 +8,8 @@ from setuptools.command.develop import develop as _develop
 version = '0.11.2'
 # Define the list of requirments
 install_requires = ['requests-oauthlib',
-                    'pmr.wfctrl']
+                    'pmr2.wfctrl',
+                    'pmr2.client']
 try:
     import PySide
     pyside_version = PySide.__version__

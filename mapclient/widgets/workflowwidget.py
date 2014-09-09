@@ -25,7 +25,8 @@ from PySide import QtGui
 from requests.exceptions import HTTPError
 from mapclient.exceptions import ClientRuntimeError
 
-from mapclient.settings.info import DEFAULT_WORKFLOW_PROJECT_FILENAME
+from mapclient.settings.info import DEFAULT_WORKFLOW_PROJECT_FILENAME, \
+    DEFAULT_WORKFLOW_ANNOTATION_FILENAME
 
 from mapclient.widgets.utils import set_wait_cursor
 from mapclient.widgets.utils import handle_runtime_error
@@ -38,6 +39,7 @@ from mapclient.tools.pmr.pmrtool import PMRTool
 from mapclient.tools.pmr.pmrsearchdialog import PMRSearchDialog
 from mapclient.tools.pmr.pmrhgcommitdialog import PMRHgCommitDialog
 import shutil
+from mapclient.widgets.importworkflowdialog import ImportWorkflowDialog
 
 logger = logging.getLogger(__name__)
 
@@ -260,22 +262,18 @@ class WorkflowWidget(QtGui.QWidget):
 
     def importFromPMR(self):
         m = self._mainWindow.model().workflowManager()
-        workflowDir = QtGui.QFileDialog.getExistingDirectory(self._mainWindow, caption='Select Workflow Directory', directory=m.previousLocation())
-        if not workflowDir:
-            return
-
-        dlg = PMRSearchDialog(self._mainWindow)
-        dlg.setModal(True)
-        if not dlg.exec_():
-            return
-
-        ws = dlg.getSelectedWorkspace()
-        workspace_url = ws.get('target')
-
-        try:
-            self._importFromPMR(workspace_url, workflowDir)
-        except (ValueError, WorkflowError) as e:
-            QtGui.QMessageBox.critical(self, 'Error Caught', 'Invalid Workflow.  ' + str(e))
+        dlg = ImportWorkflowDialog(m.previousLocation(), self._mainWindow)
+        if dlg.exec_():
+            destination_dir = dlg.destinationDir()
+            workspace_url = dlg.workspaceUrl()
+            if os.path.exists(destination_dir) and workspace_url:
+                try:
+                    self._importFromPMR(workspace_url, destination_dir)
+                except (ValueError, WorkflowError) as e:
+                    QtGui.QMessageBox.critical(self, 'Error Caught', 'Invalid Workflow.  ' + str(e))
+            else:
+                QtGui.QMessageBox.critical(self, 'Error Caught', 'Invalid Import Settings.  Either the workspace url (%s) was not set' \
+                                           'or the destination directory (%s) does not exist. ' % (workspace_url, destination_dir))
 
     @handle_runtime_error
     @set_wait_cursor
@@ -313,8 +311,12 @@ class WorkflowWidget(QtGui.QWidget):
             if workflow_dir:
                 m.setPreviousLocation(workflow_dir)
                 m.setLocation(workflow_dir)
-        if m.location() and self.commitChanges(m.location()):
+        if m.location():
             m.save()
+            if self.commitChanges(m.location()):
+                self._setIndexerFile(m.location())
+            else:
+                pass  # undo changes
 
         self._updateUi()
 
@@ -344,7 +346,8 @@ class WorkflowWidget(QtGui.QWidget):
         pmr_tool = PMRTool()
         try:
             pmr_tool.commitFiles(workflowDir, comment,
-                [workflowDir + '/%s' % (DEFAULT_WORKFLOW_PROJECT_FILENAME)])  # XXX make/use file tracker
+                [workflowDir + '/%s' % (DEFAULT_WORKFLOW_PROJECT_FILENAME),
+                 workflowDir + '/%s' % (DEFAULT_WORKFLOW_ANNOTATION_FILENAME)])  # XXX make/use file tracker
             if not commit_local:
                 pmr_tool.pushToRemote(workflowDir)
             committed_changes = True
@@ -357,6 +360,20 @@ class WorkflowWidget(QtGui.QWidget):
                 'Error Saving', 'The commit to PMR did not succeed')
 
         return committed_changes
+
+    @handle_runtime_error
+    @set_wait_cursor
+    def _setIndexerFile(self, workflow_dir):
+        pmr_tool = PMRTool()
+
+        if not pmr_tool.hasDVCS(workflow_dir):
+            return
+        try:
+            pmr_tool.addFileToIndexer(workflow_dir, DEFAULT_WORKFLOW_ANNOTATION_FILENAME)
+#             pmr_tool.commitFiles(local_workspace_dir, message, files)
+        except ClientRuntimeError:
+            # handler will deal with this.
+            raise
 
     def _setActionProperties(self, action, name, slot, shortcut='', statustip=''):
         action.setObjectName(name)
