@@ -20,3 +20,4 @@ from relying on an external team of developers.
 
 The MAP Client is an application written in Python and based on Qt the cross-platform application and UI framework.  Further details 
 are available in the `documentation`_.
+
