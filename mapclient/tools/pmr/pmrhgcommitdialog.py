@@ -27,22 +27,43 @@ class PMRHgCommitDialog(QtGui.QDialog):
         self._ui = Ui_PMRHgCommitDialog()
         self._ui.setupUi(self)
 
-        self._ui.buttonBox.button(QtGui.QDialogButtonBox.Ok).setText('Commit')
-        self._ui.buttonBox.button(QtGui.QDialogButtonBox.Ok).clicked.connect(self._handleCommit)
+        self._activated_action = QtGui.QDialogButtonBox.Cancel
+
+        tick_icon = QtGui.QIcon(':/pmr/images/tick_yellow.png')
+        skip_commit_button = self._ui.buttonBox.button(QtGui.QDialogButtonBox.Ok)
+        skip_commit_button.setText('Skip Commit')
+        skip_commit_button.setIcon(tick_icon)
+        skip_commit_button.clicked.connect(self._handleCommit)
+
+        tick_icon = QtGui.QIcon(':/pmr/images/tick_blue.png')
+        commit_local_button = self._ui.buttonBox.button(QtGui.QDialogButtonBox.Save)
+        commit_local_button.setText('Commit Local')
+        commit_local_button.setIcon(tick_icon)
+        commit_local_button.clicked.connect(self._handleCommit)
+
+        tick_icon = QtGui.QIcon(':/pmr/images/tick_green.png')
+        commit_pmr_button = self._ui.buttonBox.button(QtGui.QDialogButtonBox.SaveAll)
+        commit_pmr_button.setText('Commit PMR')
+        commit_pmr_button.setIcon(tick_icon)
+        commit_pmr_button.clicked.connect(self._handleCommit)
 
     def _handleCommit(self):
         if len(self._ui.commentTextEdit.toPlainText()):
+            sender = self.sender()
+            if sender == self._ui.buttonBox.button(QtGui.QDialogButtonBox.Ok):
+                self._activated_action = QtGui.QDialogButtonBox.Ok
+            elif sender == self._ui.buttonBox.button(QtGui.QDialogButtonBox.Save):
+                self._activated_action = QtGui.QDialogButtonBox.Save
+            elif sender == self._ui.buttonBox.button(QtGui.QDialogButtonBox.SaveAll):
+                self._activated_action = QtGui.QDialogButtonBox.SaveAll
             self.accept()
         else:
-            QtGui.QMessageBox.warning(
-                self, 'Error', 'Missing comment')
+            QtGui.QMessageBox.critical(
+                self, 'Error', 'Commit requires a comment')
 
-    def username(self):
-        return self._ui.usernameLineEdit.text()
-    
-    def password(self):
-        return self._ui.passwordLineEdit.text()
-    
     def comment(self):
         return self._ui.commentTextEdit.toPlainText()
-    
+
+    def action(self):
+        return self._activated_action
+

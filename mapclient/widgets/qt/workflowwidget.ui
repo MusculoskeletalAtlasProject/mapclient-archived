@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>574</width>
-    <height>399</height>
+    <width>922</width>
+    <height>646</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -20,10 +20,17 @@
       <enum>Qt::Horizontal</enum>
      </property>
      <widget class="StepTree" name="stepTree" native="true"/>
-     <widget class="QWidget" name="">
+     <widget class="QWidget" name="layoutWidget">
       <layout class="QVBoxLayout" name="verticalLayout">
        <item>
-        <widget class="WorkflowGraphicsView" name="graphicsView"/>
+        <widget class="WorkflowGraphicsView" name="graphicsView">
+         <property name="minimumSize">
+          <size>
+           <width>900</width>
+           <height>600</height>
+          </size>
+         </property>
+        </widget>
        </item>
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout">

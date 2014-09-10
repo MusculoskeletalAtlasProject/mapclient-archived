@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'qt/workflowwidget.ui'
 #
-# Created: Fri Jun 14 11:25:00 2013
-#      by: pyside-uic 0.2.14 running on PySide 1.1.2
+# Created: Thu Aug 28 11:53:49 2014
+#      by: pyside-uic 0.2.15 running on PySide 1.2.1
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -12,7 +12,7 @@ from PySide import QtCore, QtGui
 class Ui_WorkflowWidget(object):
     def setupUi(self, WorkflowWidget):
         WorkflowWidget.setObjectName("WorkflowWidget")
-        WorkflowWidget.resize(574, 399)
+        WorkflowWidget.resize(922, 646)
         WorkflowWidget.setWindowTitle("")
         self.gridLayout = QtGui.QGridLayout(WorkflowWidget)
         self.gridLayout.setObjectName("gridLayout")
@@ -21,19 +21,20 @@ class Ui_WorkflowWidget(object):
         self.splitter.setObjectName("splitter")
         self.stepTree = StepTree(self.splitter)
         self.stepTree.setObjectName("stepTree")
-        self.widget = QtGui.QWidget(self.splitter)
-        self.widget.setObjectName("widget")
-        self.verticalLayout = QtGui.QVBoxLayout(self.widget)
+        self.layoutWidget = QtGui.QWidget(self.splitter)
+        self.layoutWidget.setObjectName("layoutWidget")
+        self.verticalLayout = QtGui.QVBoxLayout(self.layoutWidget)
         self.verticalLayout.setContentsMargins(0, 0, 0, 0)
         self.verticalLayout.setObjectName("verticalLayout")
-        self.graphicsView = WorkflowGraphicsView(self.widget)
+        self.graphicsView = WorkflowGraphicsView(self.layoutWidget)
+        self.graphicsView.setMinimumSize(QtCore.QSize(900, 600))
         self.graphicsView.setObjectName("graphicsView")
         self.verticalLayout.addWidget(self.graphicsView)
         self.horizontalLayout = QtGui.QHBoxLayout()
         self.horizontalLayout.setObjectName("horizontalLayout")
         spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout.addItem(spacerItem)
-        self.executeButton = QtGui.QPushButton(self.widget)
+        self.executeButton = QtGui.QPushButton(self.layoutWidget)
         self.executeButton.setObjectName("executeButton")
         self.horizontalLayout.addWidget(self.executeButton)
         self.verticalLayout.addLayout(self.horizontalLayout)
@@ -45,5 +46,5 @@ class Ui_WorkflowWidget(object):
     def retranslateUi(self, WorkflowWidget):
         self.executeButton.setText(QtGui.QApplication.translate("WorkflowWidget", "E&xecute", None, QtGui.QApplication.UnicodeUTF8))
 
-from mapclient.widgets.steptree import StepTree
-from mapclient.widgets.workflowgraphicsview import WorkflowGraphicsView
+from widgets.workflowgraphicsview import WorkflowGraphicsView
+from widgets.steptree import StepTree

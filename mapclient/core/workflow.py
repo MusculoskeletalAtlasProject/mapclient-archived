@@ -24,14 +24,20 @@ from PySide import QtCore
 from mapclient.settings import info
 from mapclient.core.workflowscene import WorkflowScene
 from mapclient.core.workflowerror import WorkflowError
+from mapclient.core.workflowrdf import serializeWorkflowAnnotation
 
 _PREVIOUS_LOCATION_STRING = 'previousLocation'
 
 def _getWorkflowConfiguration(location):
+#     print('get workflow confiburation: ' + location)
     return QtCore.QSettings(_getWorkflowConfigurationAbsoluteFilename(location), QtCore.QSettings.IniFormat)
 
 def _getWorkflowConfigurationAbsoluteFilename(location):
+#     print('get workflow configuration abs filename: ' + os.path.join(location, info.DEFAULT_WORKFLOW_PROJECT_FILENAME))
     return os.path.join(location, info.DEFAULT_WORKFLOW_PROJECT_FILENAME)
+
+def _getWorkflowMetaAbsoluteFilename(location):
+    return os.path.join(location, info.DEFAULT_WORKFLOW_ANNOTATION_FILENAME)
 
 class WorkflowManager(object):
     '''
@@ -45,7 +51,8 @@ class WorkflowManager(object):
         self.name = 'WorkflowManager'
 #        self.widget = None
 #        self.widgetIndex = -1
-        self._location = None
+        self._location = ''
+        self._workspace_location = None
         self._conf_filename = None
         self._previousLocation = None
         self._saveStateIndex = 0
@@ -170,18 +177,24 @@ class WorkflowManager(object):
         wf = _getWorkflowConfiguration(self._location)
         self._scene.saveState(wf)
         self._saveStateIndex = self._currentStateIndex
+        af = _getWorkflowMetaAbsoluteFilename(self._location)
+        f = open(af, 'w')
+        f.write(serializeWorkflowAnnotation())
+        self._scene.saveAnnotation(f)
+        f.close()
+
 #        self._title = info.APPLICATION_NAME + ' - ' + self._location
 
     def close(self):
         '''
         Close the current workflow
         '''
-        self._location = None
+        self._location = ''
         self._saveStateIndex = self._currentStateIndex = 0
 #        self._title = info.APPLICATION_NAME
 
     def isWorkflowOpen(self):
-        return not self._location == None
+        return True  # not self._location == None
 
     def writeSettings(self, settings):
         settings.beginGroup(self.name)

@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'qt/pmrhgcommitdialog.ui'
 #
-# Created: Wed Dec  4 17:01:10 2013
-#      by: pyside-uic 0.2.13 running on PySide 1.1.0
+# Created: Mon Sep  1 12:16:53 2014
+#      by: pyside-uic 0.2.15 running on PySide 1.2.1
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -29,7 +29,7 @@ class Ui_PMRHgCommitDialog(object):
         self.verticalLayout.addWidget(self.groupBox)
         self.buttonBox = QtGui.QDialogButtonBox(PMRHgCommitDialog)
         self.buttonBox.setOrientation(QtCore.Qt.Horizontal)
-        self.buttonBox.setStandardButtons(QtGui.QDialogButtonBox.Cancel|QtGui.QDialogButtonBox.Ok)
+        self.buttonBox.setStandardButtons(QtGui.QDialogButtonBox.Cancel|QtGui.QDialogButtonBox.Ok|QtGui.QDialogButtonBox.Save|QtGui.QDialogButtonBox.SaveAll)
         self.buttonBox.setObjectName("buttonBox")
         self.verticalLayout.addWidget(self.buttonBox)
         self.label_3.setBuddy(self.commentTextEdit)

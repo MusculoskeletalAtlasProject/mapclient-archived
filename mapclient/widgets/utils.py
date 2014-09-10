@@ -27,7 +27,7 @@ def createDefaultImageIcon(name):
     '''
     The default image size is 512x512
     '''
-    image = QtGui.QImage(':/workflow/images/default_step_icon.png')
+    image = QtGui.QImage(':/workflow/images/default_workflow_step.png')
     if name:
         p = QtGui.QPainter(image)
 

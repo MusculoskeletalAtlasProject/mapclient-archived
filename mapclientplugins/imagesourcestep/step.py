@@ -24,7 +24,7 @@ from PySide import QtGui, QtCore
 from mapclient.mountpoints.workflowstep import WorkflowStepMountPoint
 from mapclientplugins.imagesourcestep.widgets.configuredialog import ConfigureDialog, ConfigureDialogState
 
-from mapclient.core.threadcommandmanager import ThreadCommandManager, CommandCopyDirectory, CommandCloneWorkspace
+from mapclient.core.threadcommandmanager import ThreadCommandManager
 from mapclient.tools.pmr.pmrtool import PMRTool
 
 def getConfigFilename(identifier):
@@ -34,10 +34,10 @@ class ImageSourceData(object):
 
     name = 'ImageSourceData'
 
-    def __init__(self, identifier, location, imageType):
+    def __init__(self, identifier, location, image_type):
         self._identifier = identifier
         self._location = location
-        self._imageType = imageType
+        self._image_type = image_type
 
     def identifier(self):
         return self._identifier
@@ -46,7 +46,7 @@ class ImageSourceData(object):
         return self._location
 
     def imageType(self):
-        return self._imageType
+        return self._image_type
 
 
 class ImageSourceStep(WorkflowStepMountPoint):
@@ -68,12 +68,12 @@ class ImageSourceStep(WorkflowStepMountPoint):
                       'http://physiomeproject.org/workflow/1.0/rdf-schema#provides',
                       'http://physiomeproject.org/workflow/1.0/rdf-schema#images'))
         self._configured = False
+        self._category = 'Source'
         self._state = ConfigureDialogState()
         self._threadCommandManager = ThreadCommandManager()
 #         self._threadCommandManager.registerFinishedCallback(self._threadCommandsFinished)
 
     def configure(self):
-        delay = False
         d = ConfigureDialog(self._state)
         d.setModal(True)
         if d.exec_():
@@ -81,67 +81,24 @@ class ImageSourceStep(WorkflowStepMountPoint):
             self._state = d.getState()
             # When a PMR location is given we need to translate that into a
             # local path for passing into the ImageSourceData class
-            step_location = os.path.join(self._location, self._state.identifier())
-            if self._state._localLocation:
-                if d.copyToWorkflow():
-                    src_location = d.localLocation()
-                    if src_location != step_location:
-                        delay = True
-                        c = CommandCopyDirectory(src_location, step_location)
-                        self._threadCommandManager.addCommand(c)
-                if d.addToPMR():
-                    pmr_tool = PMRTool()
-                    # Get login details:
-                    repourl = pmr_tool.addWorkspace(
-                        ImageSourceData.name + ': ' + self._state.identifier(),
-                        None)
-                    p = pmr_tool.requestTemporaryPassword(repourl)
-                    username = p['user']
-                    password = p['key']
-                    c = CommandCloneWorkspace(repourl, step_location,
-                        username, password)
-                    self._threadCommandManager.addCommand(c)
-                    self._state._pmrLocation = repourl
-                    delay = True
-
-            elif self._state._pmrLocation:
+            local_dir = self._state.location()
+            pmr_location = self._state.pmrLocation()
+            if pmr_location and not len(local_dir):
                 # Get login details:
-                if not os.path.exists(step_location):
-                    os.mkdir(step_location)
+                local_dir = os.path.join(self._location, self._state.identifier())
+                if not os.path.exists(local_dir):
+                    os.mkdir(local_dir)
 
-                repourl = self._state._pmrLocation
+                self._state.setLocation(local_dir)
+                d.setState(self._state)
 
+            if pmr_location and os.path.exists(local_dir):
                 pmr_tool = PMRTool()
-                p = pmr_tool.requestTemporaryPassword(repourl)
-                username = p['user']
-                password = p['key']
-                c = CommandCloneWorkspace(repourl, step_location,
-                    username, password)
-                self._threadCommandManager.addCommand(c)
-                self._state._localLocation = step_location
-                delay = True
+                pmr_tool.cloneWorkspace(pmr_location, local_dir)
 
-
-
-        self._configured = d.validate()
-
-        if self._configured and delay:
-            self._threadCommandManager.execute()
-        elif self._configured and self._configuredObserver != None:
-            self._configuredObserver()
-
-    def _threadCommandsFinished(self):
-        if self._state._addToPMR:
-            self._state._addToPMR = False
-            self._state._copyTo = False
-            self._state._localLocation = ''
-            self._state._currentTab = 1
-        elif self._state._copyTo:
-            self._state._copyTo = False
-            self._state._localLocation = os.path.join(self._location, self._state.identifier())
-
-        if self._configured and self._configuredObserver != None:
-            self._configuredObserver()
+            self._configured = d.validate()
+            if self._configuredObserver is not None:
+                self._configuredObserver()
 
     def getIdentifier(self):
         return self._state.identifier()
