@@ -21,7 +21,7 @@ from PySide import QtCore
 
 VERSION_MAJOR = 0
 VERSION_MINOR = 11
-VERSION_PATCH = 1
+VERSION_PATCH = 2
 VERSION_STRING = str(VERSION_MAJOR) + "." + str(VERSION_MINOR) + "." + str(VERSION_PATCH)
 GPL_VERSION = '3'
 APPLICATION_NAME = 'MAP Client'
@@ -49,10 +49,12 @@ DEFAULT_CONSUMER_SECRET_TOKEN = 'QQcKMnyCjjb7JNDHA-Lwdu7p'
 
 # Contributors list
 HS = {'name': 'Hugh Sorby', 'email': 'h.sorby@auckland.ac.nz'}
+TY = {'name': 'Tommy Yu', 'email': 'tommy.yu@auckland.ac.nz'}
+JT = {'name': 'Justin Treadwell', 'email': 'justintreadwell@gmail.com'}
 
 CREDITS = {
-           'programming'  : [HS],
-           'artwork'      : [HS],
+           'programming'  : [HS, TY],
+           'artwork'      : [JT],
            'documentation': [HS]
            }
 

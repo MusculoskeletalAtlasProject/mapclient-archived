@@ -11,22 +11,29 @@ from requests import HTTPError
 from requests import Session
 from requests_oauthlib import OAuth1Session
 
-from pmr.wfctrl.core import get_cmd_by_name
-from pmr.wfctrl.core import CmdWorkspace
+from pmr2.wfctrl.core import get_cmd_by_name
+from pmr2.wfctrl.core import CmdWorkspace
 
 # This ensures the get_cmd_by_name will work, as any classes that needs
 # to be registered has to be imported first, usually at the module level.
-import pmr.wfctrl.cmd
+import pmr2.wfctrl.cmd
 
 from mapclient.exceptions import ClientRuntimeError
 from mapclient.settings import info
 
 logger = logging.getLogger(__name__)
 
+ontological_search_string = 'Ontological term'
+plain_text_search_string = 'Plain text'
+workflow_search_string = 'Workflow'
+search_domains = [ontological_search_string, plain_text_search_string, workflow_search_string]
+
 endpoints = {
     '': {
         'dashboard': 'pmr2-dashboard',
         'search': 'search',
+        'ricordo': 'pmr2_ricordo/query',
+        'map': 'map_query',
     },
 
     'WorkspaceContainer': {
@@ -110,6 +117,7 @@ class PMRTool(object):
         '''
         Constructor
         '''
+        self._termLookUpLimit = 32
 
     def make_session(self, pmr_info=None):
         if pmr_info is None:
@@ -133,28 +141,53 @@ class PMRTool(object):
         pmr_info = info.PMRInfo()
         return pmr_info.has_access()
 
+    def deregister(self):
+        pmr_info = info.PMRInfo()
+        pmr_info.update_token(None, None)
+
     # also workaround the resigning redirections by manually resolving
     # redirects while using allow_redirects=False when making all requests
 
-    def _search(self, text):
+    def _search(self, text, search_type):
         pmr_info = info.PMRInfo()
         session = self.make_session()
-        data = json.dumps({'SearchableText': text, 'portal_type': 'Workspace'})
-        r = session.post(
-            '/'.join((pmr_info.host, endpoints['']['search'])),
-            data=data,
-        )
+
+        if search_type == ontological_search_string:
+            r = session.post('/'.join((pmr_info.host, endpoints['']['ricordo'])),
+                data=make_form_request('search',
+                    simple_query=text,
+                ),
+                allow_redirects=False)
+        elif search_type == workflow_search_string:
+            r = session.post('/'.join((pmr_info.host, endpoints['']['map'])),
+                data=make_form_request('search',
+                    workflow_object='Workflow Project',
+                    ontological_term=text
+                ),
+                allow_redirects=False)
+        else:
+            data = json.dumps({'SearchableText': text, 'portal_type': 'Workspace'})
+            r = session.post(
+                '/'.join((pmr_info.host, endpoints['']['search'])),
+                data=data,
+            )
         r.raise_for_status()
         return r.json()
 
-    def search(self, text):
+    def search(self, text, search_type=plain_text_search_string):
+        '''
+        Search PMR for the given text, the search type
+        can be either 'plain' for plain text searching or
+        'ontological' for ricordo knowledge base searching.
+        '''
+        self._search(text, search_type)
         try:
-            return self._search(text)
+            return self._search(text, search_type)
         except HTTPError as e:
             msg_403 = 'The configured PMR server may have disallowed searching.'
             if self.hasAccess():
                 msg_403 = (
-                    'Access credentials have become longer valid.  Please '
+                    'Access credentials are no longer valid.  Please '
                     'deregister and register the application to renew access '
                     'and try again.'
                 )
@@ -181,6 +214,7 @@ class PMRTool(object):
         return r.json()
 
     def getObjectInfo(self, target_url):
+        return self._getObjectInfo(target_url)
         try:
             return self._getObjectInfo(target_url)
         except HTTPError as e:
@@ -281,6 +315,26 @@ class PMRTool(object):
         # TODO trap this result too?
         workspace.cmd.reset_to_remote(workspace)
         return result
+
+    def addFileToIndexer(self, local_workspace_dir, workspace_file):
+        '''
+        Add the given workspace file in the remote workspace to the 
+        indexer for ontological searching.
+        '''
+        workspace = CmdWorkspace(local_workspace_dir, auto=True)
+        cmd = workspace.cmd
+        remote_workspace_url = cmd.read_remote(workspace)
+        target = '/'.join([remote_workspace_url, 'rdf_indexer'])
+#         {u'fields': {u'paths': {u'items': None, u'error': None, u'description': u'Paths that will be indexed as RDF.', u'value': u'', u'klass': u'textarea-widget list-field'}}, u'actions': {u'apply': {u'title': u'Apply'}, u'export_rdf': {u'title': u'Apply Changes and Export To RDF Store'}}}
+        session = self.make_session()
+        r = session.post(target,
+            data=make_form_request('export_rdf',
+                paths=[workspace_file],
+            ),
+            allow_redirects=False)
+
+        r.raise_for_status()
+        return r.json()
 
     def linkWorkspaceDirToUrl(self, local_workspace_dir, remote_workspace_url):
         # links a non-pmr workspace dir to a remote workspace url.

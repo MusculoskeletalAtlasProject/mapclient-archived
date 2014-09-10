@@ -66,7 +66,7 @@ class WizardDialog(QtGui.QWizard):
 
         # set images banner, logo, watermark and background
         self.setPixmap(QtGui.QWizard.LogoPixmap, QtGui.QPixmap(':/wizard/images/logo.png'))
-#         self.setPixmap(QtGui.QWizard.BannerPixmap, QtGui.QPixmap(':/wizard/images/banner.png'))
+        self.setPixmap(QtGui.QWizard.BannerPixmap, QtGui.QPixmap(':/wizard/images/banner.png'))
 #         self.setPixmap(QtGui.QWizard.WatermarkPixmap, QtGui.QPixmap(':/wizard/images/watermark.png'))
 #         self.setPixmap(QtGui.QWizard.BackgroundPixmap, QtGui.QPixmap(':/wizard/images/background.png'))
         self._options = SkeletonOptions()
@@ -122,6 +122,7 @@ def createIntroPage():
 
     page.setPixmap(QtGui.QWizard.WatermarkPixmap, QtGui.QPixmap(':/wizard/images/watermark.png'))
     page.setPixmap(QtGui.QWizard.BackgroundPixmap, QtGui.QPixmap(':/wizard/images/background.png'))
+    page.setPixmap(QtGui.QWizard.BannerPixmap, QtGui.QPixmap(':/wizard/images/banner.png'))
 
     return page
 

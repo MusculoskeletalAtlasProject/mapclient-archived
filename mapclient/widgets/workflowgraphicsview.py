@@ -17,7 +17,7 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     You should have received a copy of the GNU General Public License
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
-import sys
+import sys, math
 
 from PySide import QtCore, QtGui
 
@@ -39,7 +39,7 @@ class WorkflowGraphicsView(QtGui.QGraphicsView):
         self._errorIcon = None
 
         self._undoStack = None
-        self._location = None
+        self._location = ''
 
         self._connectLine = None
         self._connectSourceNode = None
@@ -48,6 +48,10 @@ class WorkflowGraphicsView(QtGui.QGraphicsView):
 
         self.setCacheMode(QtGui.QGraphicsView.CacheBackground)
         self.setRenderHint(QtGui.QPainter.Antialiasing)
+
+        grid_pic = QtGui.QPixmap(':/workflow/images/grid.png')
+        self._grid_brush = QtGui.QBrush(grid_pic)
+
 #        self.setTransformationAnchor(QtGui.QGraphicsView.AnchorUnderMouse)
 #        self.setResizeAnchor(QtGui.QGraphicsView.AnchorViewCenter)
 
@@ -167,16 +171,7 @@ class WorkflowGraphicsView(QtGui.QGraphicsView):
         if bottomShadow.intersects(rect) or bottomShadow.contains(rect):
             painter.fillRect(bottomShadow, QtCore.Qt.darkGray)
 
-        # Fill.
-        gradient = QtGui.QLinearGradient(sceneRect.topLeft(), sceneRect.bottomRight())
-        if self.isEnabled():
-            gradient.setColorAt(0, QtGui.QColor('white'))
-            gradient.setColorAt(1, QtGui.QColor('white'))
-        else:
-            gradient.setColorAt(0, QtGui.QColor('lightgrey'))
-            gradient.setColorAt(1, QtGui.QColor('darkgrey'))
-        painter.fillRect(rect.intersect(sceneRect), QtGui.QBrush(gradient))
-        painter.setBrush(QtCore.Qt.NoBrush)
+        painter.setBrush(self._grid_brush)  # QtCore.Qt.NoBrush
         painter.drawRect(sceneRect)
 
     def dropEvent(self, event):
@@ -189,33 +184,34 @@ class WorkflowGraphicsView(QtGui.QGraphicsView):
             name = stream.readRawData(nameLen).decode(sys.stdout.encoding)
             stream >> hotspot
 
+            scene = self.scene()
             position = self.mapToScene(event.pos() - hotspot)
             metastep = MetaStep(workflowStepFactory(name, self._location))
             node = Node(metastep)
-            metastep._step.registerConfiguredObserver(self.scene().stepConfigured)
-            metastep._step.registerDoneExecution(self.scene().doneExecution)
-            metastep._step.registerOnExecuteEntry(self.scene().setCurrentWidget)
-            metastep._step.registerIdentifierOccursCount(self.scene().identifierOccursCount)
+            metastep._step.registerConfiguredObserver(scene.stepConfigured)
+            metastep._step.registerDoneExecution(scene.doneExecution)
+            metastep._step.registerOnExecuteEntry(scene.setCurrentWidget)
+            metastep._step.registerIdentifierOccursCount(scene.identifierOccursCount)
 
             self._undoStack.beginMacro('Add node')
-            self._undoStack.push(CommandAdd(self.scene(), node))
+            self._undoStack.push(CommandAdd(scene, node))
             # Set the position after it has been added to the scene
-            self._undoStack.push(CommandMove(node, position, self.scene().ensureItemInScene(node, position)))
-            self.scene().clearSelection()
+            self._undoStack.push(CommandMove(node, position, scene.ensureItemInScene(node, position)))
+            scene.clearSelection()
             node.setSelected(True)
             self._undoStack.endMacro()
 
             self.setFocus()
-            event.accept();
+            event.accept()
         else:
             event.ignore()
 
     def dragMoveEvent(self, event):
         if event.mimeData().hasFormat("image/x-workflow-step"):
-            event.setDropAction(QtCore.Qt.MoveAction);
-            event.accept();
+            event.setDropAction(QtCore.Qt.MoveAction)
+            event.accept()
         else:
-            event.ignore();
+            event.ignore()
 
         self.update()
 
@@ -227,4 +223,30 @@ class WorkflowGraphicsView(QtGui.QGraphicsView):
             event.accept()
         else:
             event.ignore()
+
+    def resizeEvent(self, event):
+        QtGui.QGraphicsView.resizeEvent(self, event)
+        scene = self.scene()
+        event_size = event.size()
+        view_rect = QtCore.QRectF(0, 0, event_size.width(), event_size.height())
+        items_rect = scene.itemsBoundingRect()
+        items_rect.adjust(0, 0, 10, 10)
+
+        scene_rect = view_rect.united(items_rect)
+        scene.setSceneRect(10, 10, scene_rect.width() - 20, scene_rect.height() - 20)
+
+    def wheelEvent(self, event):
+        self._scaleView(math.pow(2.0, -event.delta() / 240.0))
+
+    def _scaleView(self, scaleFactor):
+        factor = self.matrix().scale(scaleFactor, scaleFactor).mapRect(QtCore.QRectF(0, 0, 1, 1)).width()
+
+        if factor < 0.07 or factor > 100:
+            return
+
+        transformation_anchor = self.transformationAnchor()
+        self.setTransformationAnchor(QtGui.QGraphicsView.AnchorUnderMouse)
+        self.scale(scaleFactor, scaleFactor)
+        self.setTransformationAnchor(transformation_anchor)
+
 

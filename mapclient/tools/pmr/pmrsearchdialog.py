@@ -100,6 +100,5 @@ class PMRSearchDialog(QtGui.QDialog):
         self._updateUi()
 
     def deregister(self):
-        pmr_info = info.PMRInfo()
-        pmr_info.update_token(None, None)
+        self._pmrTool.deregister()
         self._updateUi()

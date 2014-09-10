@@ -45,6 +45,7 @@ class PointCloudSerializerStep(WorkflowStepMountPoint):
         self._icon = QtGui.QImage(':/pointcloudserializer/images/pointcloudserializer.png')
         self.addPort(('http://physiomeproject.org/workflow/1.0/rdf-schema#port', 'http://physiomeproject.org/workflow/1.0/rdf-schema#uses', 'http://physiomeproject.org/workflow/1.0/rdf-schema#pointcloud'))
         self._state = ConfigureDialogState()
+        self._category = 'Sink'
         self._dataIn = None
 
     def configure(self):

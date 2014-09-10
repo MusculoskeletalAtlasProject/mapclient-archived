@@ -291,8 +291,8 @@ class Node(Item):
 
         self.updateConfigureIcon()
 
-        self._outofdate_item = MercurialIcon(self)
-        self._outofdate_item.moveBy(5, 40)
+        self._modified_item = MercurialIcon(self)
+        self._modified_item.moveBy(5, 40)
 
         self.updateMercurialIcon()
 
@@ -300,10 +300,14 @@ class Node(Item):
         self._configure_item.setConfigured(self._metastep._step.isConfigured())
 
     def updateMercurialIcon(self):
-        if repositoryIsUpToDate(self._getStepLocation()):
-            self._outofdate_item.hide()
+        if self._metastep._step.getIdentifier():
+            if repositoryIsUpToDate(self._getStepLocation()):
+                self._modified_item.hide()
+            else:
+                self._modified_item.show()
         else:
-            self._outofdate_item.show()
+            self._modified_item.hide()
+
 
     def setPos(self, pos):
         QtGui.QGraphicsItem.setPos(self, pos)
@@ -431,7 +435,8 @@ class MercurialIcon(QtGui.QGraphicsItem):
 
     def __init__(self, *args, **kwargs):
         super(MercurialIcon, self).__init__(*args, **kwargs)
-        self._hg_yellow = QtGui.QPixmap(':/workflow/images/yellow_black_exclamation.png').scaled(24, 24, aspectRatioMode=QtCore.Qt.KeepAspectRatio, transformMode=QtCore.Qt.FastTransformation)
+        self._hg_yellow = QtGui.QPixmap(':/workflow/images/modified_repo.png').scaled(24, 24, aspectRatioMode=QtCore.Qt.KeepAspectRatio, transformMode=QtCore.Qt.FastTransformation)
+        self.setToolTip('The repository has been modified')
 
     def paint(self, painter, option, widget):
         painter.drawPixmap(0, 0, self._hg_yellow)
@@ -454,6 +459,7 @@ class ConfigureIcon(QtGui.QGraphicsItem):
         self._configured = False
         self._configure_green = QtGui.QPixmap(':/workflow/images/configure_green.png').scaled(24, 24, aspectRatioMode=QtCore.Qt.KeepAspectRatio, transformMode=QtCore.Qt.FastTransformation)
         self._configure_red = QtGui.QPixmap(':/workflow/images/configure_red.png').scaled(24, 24, aspectRatioMode=QtCore.Qt.KeepAspectRatio, transformMode=QtCore.Qt.FastTransformation)
+        self.setToolTip('Configure the step')
 
     def setConfigured(self, state):
         self._configured = state

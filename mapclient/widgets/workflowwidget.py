@@ -25,7 +25,8 @@ from PySide import QtGui
 from requests.exceptions import HTTPError
 from mapclient.exceptions import ClientRuntimeError
 
-from mapclient.settings.info import DEFAULT_WORKFLOW_PROJECT_FILENAME
+from mapclient.settings.info import DEFAULT_WORKFLOW_PROJECT_FILENAME, \
+    DEFAULT_WORKFLOW_ANNOTATION_FILENAME
 
 from mapclient.widgets.utils import set_wait_cursor
 from mapclient.widgets.utils import handle_runtime_error
@@ -37,6 +38,8 @@ from mapclient.core.workflow import WorkflowError
 from mapclient.tools.pmr.pmrtool import PMRTool
 from mapclient.tools.pmr.pmrsearchdialog import PMRSearchDialog
 from mapclient.tools.pmr.pmrhgcommitdialog import PMRHgCommitDialog
+import shutil
+from mapclient.widgets.importworkflowdialog import ImportWorkflowDialog
 
 logger = logging.getLogger(__name__)
 
@@ -153,11 +156,22 @@ class WorkflowWidget(QtGui.QWidget):
         self._mainWindow.setCurrentUndoRedoStack(stack)
 
     def new(self, pmr=False):
+        workflowDir = self._getWorkflowDir()
+        if workflowDir:
+            self._createNewWorkflow(workflowDir, pmr)
+
+    def _getWorkflowDir(self):
         m = self._mainWindow.model().workflowManager()
         workflowDir = QtGui.QFileDialog.getExistingDirectory(self._mainWindow, caption='Select Workflow Directory', directory=m.previousLocation())
         if not workflowDir:
             # user abort
-            return
+            return ''
+
+        class ProblemClass(object):
+            _mk_workflow_dir = False
+            _rm_tree_success = True
+            def rmTreeUnsuccessful(self, one, two, three):
+                self._rm_tree_success = False
 
         if m.exists(workflowDir):
             # Check to make sure user wishes to overwrite existing workflow.
@@ -169,10 +183,25 @@ class WorkflowWidget(QtGui.QWidget):
             # (QtGui.QMessageBox.Warning, '')
             if ret == QtGui.QMessageBox.No:
                 # user abort
-                return
+                return ''
+            else:
+                # Delete contents of directory
+                shutil.rmtree(workflowDir, onerror=ProblemClass.rmTreeUnsuccessful)
+                ProblemClass._mk_workflow_dir = True
 
         # got dir, continue
-        self._createNewWorkflow(workflowDir, pmr)
+        if ProblemClass._rm_tree_success:
+            if ProblemClass._mk_workflow_dir:
+                os.mkdir(workflowDir)
+            return workflowDir
+        else:
+            QtGui.QMessageBox.warning(self,
+                'Replace Existing Workflow',
+                'Could not remove existing workflow,'
+                'New workflow not created.',
+                QtGui.QMessageBox.Ok)
+
+        return ''
 
     @handle_runtime_error
     @set_wait_cursor
@@ -233,22 +262,18 @@ class WorkflowWidget(QtGui.QWidget):
 
     def importFromPMR(self):
         m = self._mainWindow.model().workflowManager()
-        workflowDir = QtGui.QFileDialog.getExistingDirectory(self._mainWindow, caption='Select Workflow Directory', directory=m.previousLocation())
-        if not workflowDir:
-            return
-
-        dlg = PMRSearchDialog(self._mainWindow)
-        dlg.setModal(True)
-        if not dlg.exec_():
-            return
-
-        ws = dlg.getSelectedWorkspace()
-        workspace_url = ws.get('target')
-
-        try:
-            self._importFromPMR(workspace_url, workflowDir)
-        except (ValueError, WorkflowError) as e:
-            QtGui.QMessageBox.critical(self, 'Error Caught', 'Invalid Workflow.  ' + str(e))
+        dlg = ImportWorkflowDialog(m.previousLocation(), self._mainWindow)
+        if dlg.exec_():
+            destination_dir = dlg.destinationDir()
+            workspace_url = dlg.workspaceUrl()
+            if os.path.exists(destination_dir) and workspace_url:
+                try:
+                    self._importFromPMR(workspace_url, destination_dir)
+                except (ValueError, WorkflowError) as e:
+                    QtGui.QMessageBox.critical(self, 'Error Caught', 'Invalid Workflow.  ' + str(e))
+            else:
+                QtGui.QMessageBox.critical(self, 'Error Caught', 'Invalid Import Settings.  Either the workspace url (%s) was not set' \
+                                           'or the destination directory (%s) does not exist. ' % (workspace_url, destination_dir))
 
     @handle_runtime_error
     @set_wait_cursor
@@ -281,30 +306,51 @@ class WorkflowWidget(QtGui.QWidget):
 
     def save(self):
         m = self._mainWindow.model().workflowManager()
-        m.save()
-        self.commitChanges(m.location())
+        if not os.path.exists(m.location()):
+            workflow_dir = self._getWorkflowDir()
+            if workflow_dir:
+                m.setPreviousLocation(workflow_dir)
+                m.setLocation(workflow_dir)
+        if m.location():
+            m.save()
+            if self.commitChanges(m.location()):
+                self._setIndexerFile(m.location())
+            else:
+                pass  # undo changes
+
         self._updateUi()
 
     def commitChanges(self, workflowDir):
         pmr_tool = PMRTool()
         if not pmr_tool.hasDVCS(workflowDir):
             # nothing to commit.
-            return
+            return True
 
         dlg = PMRHgCommitDialog(self)
         dlg.setModal(True)
-        if not dlg.exec_():
-            return
-        self._commitChanges(workflowDir, dlg.comment())
+        if dlg.exec_() == QtGui.QDialog.Rejected:
+            return False
+
+        action = dlg.action()
+        if action == QtGui.QDialogButtonBox.Ok:
+            return True
+        elif action == QtGui.QDialogButtonBox.Save:
+            return self._commitChanges(workflowDir, dlg.comment(), commit_local=True)
+
+        return self._commitChanges(workflowDir, dlg.comment())
 
     @handle_runtime_error
     @set_wait_cursor
-    def _commitChanges(self, workflowDir, comment):
+    def _commitChanges(self, workflowDir, comment, commit_local=False):
+        committed_changes = False
         pmr_tool = PMRTool()
         try:
             pmr_tool.commitFiles(workflowDir, comment,
-                [workflowDir + '/%s' % (DEFAULT_WORKFLOW_PROJECT_FILENAME)])  # XXX make/use file tracker
-            pmr_tool.pushToRemote(workflowDir)
+                [workflowDir + '/%s' % (DEFAULT_WORKFLOW_PROJECT_FILENAME),
+                 workflowDir + '/%s' % (DEFAULT_WORKFLOW_ANNOTATION_FILENAME)])  # XXX make/use file tracker
+            if not commit_local:
+                pmr_tool.pushToRemote(workflowDir)
+            committed_changes = True
         except ClientRuntimeError:
             # handler will deal with this.
             raise
@@ -312,6 +358,22 @@ class WorkflowWidget(QtGui.QWidget):
             logger.exception('Error')
             raise ClientRuntimeError(
                 'Error Saving', 'The commit to PMR did not succeed')
+
+        return committed_changes
+
+    @handle_runtime_error
+    @set_wait_cursor
+    def _setIndexerFile(self, workflow_dir):
+        pmr_tool = PMRTool()
+
+        if not pmr_tool.hasDVCS(workflow_dir):
+            return
+        try:
+            pmr_tool.addFileToIndexer(workflow_dir, DEFAULT_WORKFLOW_ANNOTATION_FILENAME)
+#             pmr_tool.commitFiles(local_workspace_dir, message, files)
+        except ClientRuntimeError:
+            # handler will deal with this.
+            raise
 
     def _setActionProperties(self, action, name, slot, shortcut='', statustip=''):
         action.setObjectName(name)

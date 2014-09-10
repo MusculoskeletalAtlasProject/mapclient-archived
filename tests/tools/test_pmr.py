@@ -166,9 +166,6 @@ class PMRToolTestCase(TestCase):
         tool.make_session = make_session
         return tool
 
-    def tearDown(self):
-        pass
-
     def test_make_session_no_access(self):
         tool = PMRTool()
         session = tool.make_session()
@@ -268,5 +265,5 @@ class PMRToolTestCase(TestCase):
 
 
 if __name__ == "__main__":
-    #import sys;sys.argv = ['', 'Test.testName']
+    # import sys;sys.argv = ['', 'Test.testName']
     main()

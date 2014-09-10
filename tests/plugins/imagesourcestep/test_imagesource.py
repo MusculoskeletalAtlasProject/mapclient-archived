@@ -51,14 +51,15 @@ class ImageSourceTestCase(unittest.TestCase):
 
         self.assertEqual(state.location(), '')
 
-        newstate = ConfigureDialogState('here', 'there', True, 'anywhere', 3)
+        newstate = ConfigureDialogState('here', 'there', 'anywhere', 3)
         self.assertEqual(newstate.identifier(), 'here')
         self.assertEqual(newstate.location(), 'there')
-        self.assertEqual(newstate.copyTo(), True)
+        self.assertEqual(newstate.pmrLocation(), 'anywhere')
         self.assertEqual(newstate.imageType(), 3)
-        otherstate = ConfigureDialogState('here2', '', True, 'anywhere', 3)
+        otherstate = ConfigureDialogState('here2', '', 'anywhere', 3)
         self.assertEqual(otherstate.identifier(), 'here2')
-        self.assertEqual(otherstate.location(), 'anywhere')
+        self.assertEqual(otherstate.location(), '')
+        self.assertEqual(otherstate.pmrLocation(), 'anywhere')
 
     if sys.version_info >= (2, 7, 0):
         @unittest.skipIf(DISABLE_GUI_TESTS, 'GUI tests are disabled')
