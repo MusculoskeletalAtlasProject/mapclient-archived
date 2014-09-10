@@ -120,4 +120,4 @@ Once the workflow has been saved the execute button in the lower left corner sho
 Automatic Segmenter Step
 ------------------------
 
-The 'Automatic Segmenter' actually allows us to interact with executing workflow.  With this step we can move the image plane up and down and change the visibility of the graphical items in the scene.  The image plane is moved through the use of the slider on the left hand side.  The visibility of the graphical items is controlled by checking or unchecking the relevant check boxes.
+The 'Automatic Segmenter' actually allows us to interact with executing workflow.  With this step we can move the image plane up and down and change the visibility of the graphical items in the scene.  The image plane is moved through the use of the slider on the left hand side.  The visibility of the graphical items is controlled by checking or unchecking the relevant check boxes.  To continue execution of the workflow click the Done button in the lower right hand corner.

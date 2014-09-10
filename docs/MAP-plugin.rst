@@ -16,7 +16,7 @@ The Workflow Step is the basic item that a plugin developers need to place their
 
 ::
 
- from mountpoints.workflowstep import WorkflowStepMountPoint
+ from mapclient.mountpoints.workflowstep import WorkflowStepMountPoint
 
 A skeleton step is provided as a starting point for the developer to create their own workflow steps.  The skeleton step is actually a valid step in its own right and it will show up in the Step box if enabled.  However the skeleton step has no use other than as an item to drag around on the workflow area.  The skeleton step is discussed below, before that the plugin interface itself is discussed.
 
@@ -44,7 +44,7 @@ The following three sections discuss these three levels in more detail.
 A Step Must
 -----------
 
- * The plugin must be derived from the WorkflowStepMountPoint class defined in the package mountpoints.workflowstep
+ * The plugin must be derived from the WorkflowStepMountPoint class defined in the package mapclient.mountpoints.workflowstep
  * Accept a single parameter in it's __init__ method.
  * Define a name for itself, this must be passed into the initialisation of the base class.
  * Define the methods
