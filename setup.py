@@ -7,7 +7,7 @@ from setuptools.command.develop import develop as _develop
 # Version, this should match the value in mapclient.settings.info
 version = '0.11.2'
 # Define the list of requirments
-install_requires = ['requests-oauthlib',
+install_requires = ['rdflib',
                     'pmr2.wfctrl',
                     'pmr2.client']
 try:
