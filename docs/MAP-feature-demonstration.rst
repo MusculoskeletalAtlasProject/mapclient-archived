@@ -26,7 +26,7 @@ Quick Tour
 
 When you first load MAP, it will look something like this:
 
-.. figure:: resources/images/blank_MAP_1.png
+.. figure:: resources/images/map_client_gui.png
    :align: center
    :width: 75%
 
@@ -95,7 +95,7 @@ The PMR website uses OAuth to authenticate a consumer and determine consumer acc
 
 If you want the PMR tool to have access to privileged information (your non-public workspaces stored on PMR) you will need to register the PMR tool with the PMR website.  We do this by clicking on the `register` link as shown in the figure below.  This does two things: it shows the Application Authorisation dialog; opens a webbrowser at the PMR website.  [If you are not logged on at the PMR website you will need to do so now to continue, instructions on obtaining a PMR account are available here XXXXX].  On the PMR website you are asked to either accept or deny access to the PMR tool.  If you allow access then the website will display a temporary access token that you will need to copy and paste into the Application Authorisation dialog so that the PMR tool can get the permanent access token.
 
-.. figure:: resources/images/PMRTool_1.png
+.. figure:: resources/images/pmr_tool_1.png
    :align: center
    :width: 25%
 
@@ -106,6 +106,8 @@ In OAuth we have three players the server, the consumer and the user.  The serve
 
 Annotation Tool
 ---------------
+
+[Note: The annotation tool is currently under development, this tool in it's current form as documented here does not integrate well with the latest version of PMR.  This version of the annotation tool has been marked as deprecated]
 
 The Annotation tool is a very simple tool to help a user annotate the Workflow itself and the Step data directories that are linked to PMR.  At this stage there is a limited vocabulary that the Annotation tool knows about, but this is intended to be extended in coming releases.  The vocabulary that the annotation is aware of is available in the three combo-boxes near the top of the dialog.
 

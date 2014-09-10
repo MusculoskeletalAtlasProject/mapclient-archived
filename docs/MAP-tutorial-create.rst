@@ -24,9 +24,9 @@ To create a meaningful workflow we will need to use some external plugins.  To l
 Creating the Workflow
 =====================
 
-To create a workflow we use Drag 'n' Drop to drag steps from the Step box and drop the step onto the workflow canvas.  When steps are first dropped onto the canvas they show a red cog icon to indicate that the step is not configured.  At a minimum a step requires an identifier to be set before it can be used.
+To create a workflow we use Drag 'n' Drop to drag steps from the Step box and drop the step onto the workflow canvas.  When steps are first dropped onto the canvas they show a red gear icon to indicate that the step is not configured.  At a minimum a step requires an identifier to be set before it can be used.
  
-Drag the steps `Image Source`, `Data Store` and `Automatic Segmenter` onto the workflow canvas.  All the steps will show a red cog, except the 'Automatic Segmenter', step this indicates that the step needs to be configured.  To configure a step we can either right click on the step to bring up a context menu from which the configure action can be chosen or simply click the red cog directly.  See the relevant section for the configuration of a particular step.
+Drag the steps `Image Source`, `Data Store` and `Automatic Segmenter` onto the workflow canvas.  All the steps will show a red gear, except the 'Automatic Segmenter' step, this red gear icon indicates that the step needs to be configured.  To configure a step we can either right click on the step to bring up a context menu from which the configure action can be chosen or simply click the red gear directly.  See the relevant section for the configuration of a particular step.
 
 .. note::
   When configuring a step you are asked to set an identifier.  The identifier you set must unique within the workflow and it must not start with a '.'.
@@ -35,19 +35,54 @@ Drag the steps `Image Source`, `Data Store` and `Automatic Segmenter` onto the w
 Configuring the Image Source Step
 ---------------------------------
 
-The Image Source step requires a location.  This location contains the images to import.  The location may be a directory on the local hard disk or a workspace on PMR.  Here we will show how to configure the Image Source step with images that have been stored in a workspace on PMR.
+The image source step requires a unique identifier for the step to be set.  It also requires either a location on the local disk where the image data is located or a PMR workspace url from which the image data may be downloaded.  Here we will show how to configure the Image Source step with images that have been stored in a workspace on PMR.
 
-First each step requires a unique id.  The id is used to create a file containing the step configuration information.  This id for the Image Source step is used to create a directory under the workflow project directory.  In the identifier edit box enter a directory name.  Once a valid identifier is entered the red highlight around the edit box will be turned off.
+This step requires a unique id to be manually set.  The id is used to create a file containing the step configuration information.  This id for the Image Source step is also used to create a default directory under the workflow project directory if required.  Once a valid identifier is entered the red highlight around the edit box will disappear.
 
-Next change to the PMR tab and we will see an ellipses button for bringing up the PMR tool dialog.  You need to register the PMR tool to access certain webservices the details on how to do this are available :doc:`here <MAP-feature-demonstration>`.  The remainder of this tutorial will assume you have setup access to PMR properly.  In the search box of the PMR dialog we need to enter the search term 'blood-vessels'.  The result of the search should look like the image below.
+This step configuration makes use of the PMR search widget which gives us the ability to search available workspaces on PMR.  In the image source step configuration dialog seen in `Figure 1`_ we can see that there is a place to set a unique identifier for the step and also two tabs, one tab is for setting the image dataset location on the local disk and the other tab is for searching PMR workspaces for image data.  We will leave the local disk edit box on the local file system tab empty and allow the configuration to set the default location for us.
 
-.. figure:: resources/images/PMRTool_2.png
+.. _`Figure 1`:
+
+.. figure:: resources/images/image_configureblank.png
    :align: center
-   :width: 35%
+   :width: 30%
+   
+   **Figure 1**: Image source step configuration dialog.
 
-Select this entry in the search listing and click 'Ok'.  The selected PMR workspace will be downloaded in the background.  When the download is finished the red cog icon will disappear.  If the download is not successful a dialog will appear to inform you of the error.
+Set the identifer edit box to bv_images and select the Physiome Model Repository tab so that we can search PMR for our images.  On this tab we see 
+We are going to conduct an ontological term [**2**] search for our images, we are looking for some images that show an anyeurism in the anterior communicating artery.  To do this we can start entering the text anterior communicating artery into the search term edit box [**3**], when we pause in our typing the dialog will query the PMR OWL terms for suitable matches.  We will see results similar to what is shown in `Figure 3`_, we can click on the matching term in this list and the correct reference will be added to the search term edit box [**3**] for us.
 
-MAP is not setup to work with streamed resources so we must download the workspace from PMR.
+.. _`Figure 2`:
+
+.. figure:: resources/images/image_configurepmr.png
+   :align: center
+   :width: 40%
+   
+   **Figure 2**: PMR search tab, [**1**] Workspace url, [**2**] Search type combobox, [**3**] Search term, [**4**] Search button, [**5**] Search results.
+
+.. _`Figure 3`:
+
+.. figure:: resources/images/image_owltermscompleter.png
+   :align: center
+   :width: 30%
+   
+   **Figure 3**: PMR OWL terms.
+
+With the correct term in place we can click the search button to return matching results from PMR.  We will get back a single result Blood Vessel in MR Images.  When we select this result in the search results list [**5**] the url for the workspace will be loaded into the workspace url edit box [**1**].  We should now have the dialog looking similar to `Figure 4`_.
+
+.. _`Figure 4`:
+
+.. figure:: resources/images/image_antcommartresults.png
+   :align: center
+   :width: 30%
+   
+   **Figure 4**: Completed Physiome Model Repository search tab.
+
+This completes the configuration of the image source step.  When we click Ok in the dialog the images will be downloaded to the default directory on our local disk.
+
+We can also use the combobox at the bottom of the dialog (`Figure 1`_) to set the image type however this is only necessary if the image type cannot be determined through the filename extension.  In our case we can leave this as it is.
+
+MAP is not setup to work with streamed resources so we must download the workspace from PMR to our local disk.
 
 Configuring the Point Cloud Step
 --------------------------------
@@ -63,7 +98,7 @@ At this point you should have a workflow area looking like this:
    :align: center
    :width: 75%
 
-Once the All the steps in the workflow are configured (no more red cog icons) we can make connections between the steps.  To make a connection between two steps the first step must provide what the second step uses.  When trying to connect two steps that cannot be connected you will see a no entry icon over the connection for a short period of time and then the connection will be removed.  The following image shows an incorrect connection trying to be made.
+Once the All the steps in the workflow are configured (i.e. no more red gear icons) we can make connections between the steps.  To make a connection between two steps the first step must provide what the second step uses.  When trying to connect two steps that cannot be connected you will see a no entry icon over the connection for a short period of time and then the connection will be removed.  The following image shows an incorrect connection trying to be made.
 
 .. figure:: resources/images/error_connection.png
    :align: center
