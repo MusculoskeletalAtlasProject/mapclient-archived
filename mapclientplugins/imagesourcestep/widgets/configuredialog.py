@@ -148,7 +148,7 @@ class ConfigureDialog(QDialog):
             self._ui.localLineEdit.setText(location)
 
     def _workspaceChanged(self, text):
-        print text
+        pass
 
     def _localLocationEdited(self):
         self.validate()

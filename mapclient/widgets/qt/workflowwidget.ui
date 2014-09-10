@@ -24,6 +24,12 @@
       <layout class="QVBoxLayout" name="verticalLayout">
        <item>
         <widget class="WorkflowGraphicsView" name="graphicsView">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
          <property name="minimumSize">
           <size>
            <width>900</width>
@@ -66,13 +72,13 @@
   <customwidget>
    <class>StepTree</class>
    <extends>QWidget</extends>
-   <header>widgets.steptree</header>
+   <header>mapclient.widgets.steptree</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>WorkflowGraphicsView</class>
    <extends>QGraphicsView</extends>
-   <header>widgets.workflowgraphicsview</header>
+   <header>mapclient.widgets.workflowgraphicsview</header>
   </customwidget>
  </customwidgets>
  <resources/>

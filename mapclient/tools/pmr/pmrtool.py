@@ -149,7 +149,6 @@ class PMRTool(object):
     # redirects while using allow_redirects=False when making all requests
 
     def _search(self, text, search_type):
-        print 'here'
         pmr_info = info.PMRInfo()
         session = self.make_session()
 
