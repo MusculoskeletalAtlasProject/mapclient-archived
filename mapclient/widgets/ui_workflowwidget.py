@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'qt/workflowwidget.ui'
 #
-# Created: Thu Aug 28 11:53:49 2014
+# Created: Wed Sep 10 15:58:22 2014
 #      by: pyside-uic 0.2.15 running on PySide 1.2.1
 #
 # WARNING! All changes made in this file will be lost!
@@ -27,6 +27,11 @@ class Ui_WorkflowWidget(object):
         self.verticalLayout.setContentsMargins(0, 0, 0, 0)
         self.verticalLayout.setObjectName("verticalLayout")
         self.graphicsView = WorkflowGraphicsView(self.layoutWidget)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.graphicsView.sizePolicy().hasHeightForWidth())
+        self.graphicsView.setSizePolicy(sizePolicy)
         self.graphicsView.setMinimumSize(QtCore.QSize(900, 600))
         self.graphicsView.setObjectName("graphicsView")
         self.verticalLayout.addWidget(self.graphicsView)
@@ -46,5 +51,5 @@ class Ui_WorkflowWidget(object):
     def retranslateUi(self, WorkflowWidget):
         self.executeButton.setText(QtGui.QApplication.translate("WorkflowWidget", "E&xecute", None, QtGui.QApplication.UnicodeUTF8))
 
-from widgets.workflowgraphicsview import WorkflowGraphicsView
-from widgets.steptree import StepTree
+from mapclient.widgets.steptree import StepTree
+from mapclient.widgets.workflowgraphicsview import WorkflowGraphicsView
