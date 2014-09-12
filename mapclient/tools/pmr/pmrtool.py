@@ -321,6 +321,9 @@ class PMRTool(object):
         Add the given workspace file in the remote workspace to the 
         indexer for ontological searching.
         '''
+        if not self.hasAccess():
+            return
+
         workspace = CmdWorkspace(local_workspace_dir, auto=True)
         cmd = workspace.cmd
         remote_workspace_url = cmd.read_remote(workspace)
