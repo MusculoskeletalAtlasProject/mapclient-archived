@@ -113,7 +113,7 @@ There is a `github orginisation`_ which has a collection of MAP Client plugins. 
 Zinc and PyZinc
 ===============
 
-`Zinc <http://physiomeproject.org/software/zinclibrary/>`_ is an advanced field manipulation and visualisation library and `PyZinc <http://physiomeproject.org/software/pyzinc/>`_ provides :term:`Python` bindings to the Zinc library.  The MAP client is able to make use of Zinc for advanced visualisation and image processing steps through PyZinc.  Binaries for Zinc and PyZinc are available from `here <http://physiomeproject.org/software/zinclibrary/download>`__ and `here <http://physiomeproject.org/software/pyzinc/download>`__ for Linux, Windows, and OS X.
+`Zinc <http://physiomeproject.org/software/opencmiss/zinc/>`_ is an advanced field manipulation and visualisation library and PyZinc provides :term:`Python` bindings to the Zinc library.  The MAP client is able to make use of Zinc for advanced visualisation and image processing steps through PyZinc.  Binaries for Zinc and PyZinc are available from `here <http://physiomeproject.org/software/opencmiss/zinc/download/>`__ for Linux, Windows, and OS X.
 
 First install Zinc, for Ubuntu download the debian package and install it with the folowing command::
 
@@ -130,6 +130,6 @@ To get PyZinc installed, follow these steps:
 
 note::
 
- The Zinc and PyZinc packages must have the same version 
+ The Zinc and PyZinc packages **must** have the same version 
  number.
 
