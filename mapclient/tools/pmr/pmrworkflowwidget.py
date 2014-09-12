@@ -54,15 +54,6 @@ class PMRWorkflowWidget(QtGui.QWidget):
         word_list = ['pending ...']
         self._list_model = OWLTermsListModel(word_list)
 
-        self._completer = QtGui.QCompleter(self._ui.lineEditSearch)
-        self._completer.setCompletionMode(QtGui.QCompleter.UnfilteredPopupCompletion)
-        self._completer.setCaseSensitivity(QtCore.Qt.CaseInsensitive)
-        self._completer.setModel(self._list_model)
-        self._completer.setCompletionColumn(0)
-        self._completer.setCompletionRole(QtCore.Qt.DisplayRole)
-
-#         self._ui.lineEditSearch.setCompleter(self._completer)
-
 #         self._client = Client(site=pmr_target, use_default_headers=True)
 
         self._makeConnections()
@@ -88,11 +79,22 @@ class PMRWorkflowWidget(QtGui.QWidget):
         self._timer.timeout.connect(self._queryRepository)
         self._ui.comboBoxSearch.currentIndexChanged.connect(self._searchTypeChanged)
 
+    def _initialiseCompleter(self):
+        completer = QtGui.QCompleter(self._ui.lineEditSearch)
+        completer.setCompletionMode(QtGui.QCompleter.UnfilteredPopupCompletion)
+        completer.setCaseSensitivity(QtCore.Qt.CaseInsensitive)
+        completer.setModel(self._list_model)
+        completer.setCompletionColumn(0)
+        completer.setCompletionRole(QtCore.Qt.DisplayRole)
+
+        return completer
+
     def _searchTypeChanged(self, index):
         text = self._ui.comboBoxSearch.currentText()
         if text == ontological_search_string:
             self._ontological_search = True
-            self._ui.lineEditSearch.setCompleter(self._completer)
+            completer = self._initialiseCompleter()
+            self._ui.lineEditSearch.setCompleter(completer)
         else:
             self._ontological_search = False
             self._ui.lineEditSearch.setCompleter(None)
