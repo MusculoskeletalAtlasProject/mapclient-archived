@@ -40,8 +40,6 @@ class PMRWorkflowWidget(QtGui.QWidget):
         super(PMRWorkflowWidget, self).__init__(parent)
         self._ui = Ui_PMRWorkflowWidget()
         self._ui.setupUi(self)
-        self._ui.comboBoxSearch.clear()
-        self._ui.comboBoxSearch.addItems(search_domains)
 
         self._pmrTool = PMRTool()
 
@@ -51,28 +49,22 @@ class PMRWorkflowWidget(QtGui.QWidget):
         self._timer.setInterval(500)
 
         self._busy_waiting = False
+        self._ontological_search = False
 
         word_list = ['pending ...']
         self._list_model = OWLTermsListModel(word_list)
-
-        self._completer = QtGui.QCompleter(self._ui.lineEditSearch)
-        self._completer.setCompletionMode(QtGui.QCompleter.UnfilteredPopupCompletion)
-        self._completer.setCaseSensitivity(QtCore.Qt.CaseInsensitive)
-        self._completer.setModel(self._list_model)
-        self._completer.setCompletionColumn(0)
-        self._completer.setCompletionRole(QtCore.Qt.DisplayRole)
-
-        self._ui.lineEditSearch.setCompleter(self._completer)
 
 #         self._client = Client(site=pmr_target, use_default_headers=True)
 
         self._makeConnections()
 
+        self._ui.comboBoxSearch.clear()
+        self._ui.comboBoxSearch.addItems(search_domains)
+
         self._updateUi()
 
     def _updateUi(self):
         if self._pmrTool.hasAccess():
-#             self._ui.labelLink.hide()
             self._ui.labelLink.setText('<a href="mapclient.deregister">deregister</a>')
         else:
             self._ui.labelLink.setText('<a href="mapclient.register">register</a>')
@@ -85,9 +77,30 @@ class PMRWorkflowWidget(QtGui.QWidget):
         self._ui.listWidgetResults.itemClicked.connect(self._searchResultClicked)
         self._ui.lineEditSearch.textEdited.connect(self._searchTextEdited)
         self._timer.timeout.connect(self._queryRepository)
+        self._ui.comboBoxSearch.currentIndexChanged.connect(self._searchTypeChanged)
+
+    def _initialiseCompleter(self):
+        completer = QtGui.QCompleter(self._ui.lineEditSearch)
+        completer.setCompletionMode(QtGui.QCompleter.UnfilteredPopupCompletion)
+        completer.setCaseSensitivity(QtCore.Qt.CaseInsensitive)
+        completer.setModel(self._list_model)
+        completer.setCompletionColumn(0)
+        completer.setCompletionRole(QtCore.Qt.DisplayRole)
+
+        return completer
+
+    def _searchTypeChanged(self, index):
+        text = self._ui.comboBoxSearch.currentText()
+        if text == ontological_search_string:
+            self._ontological_search = True
+            completer = self._initialiseCompleter()
+            self._ui.lineEditSearch.setCompleter(completer)
+        else:
+            self._ontological_search = False
+            self._ui.lineEditSearch.setCompleter(None)
 
     def _searchTextEdited(self, new_text):
-        if len(new_text) and not self._busy_waiting:
+        if self._ontological_search and len(new_text) and not self._busy_waiting:
             if self._timer.isActive():
                 QtGui.QApplication.restoreOverrideCursor()
             QtGui.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
