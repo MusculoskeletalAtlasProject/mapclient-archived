@@ -342,8 +342,9 @@ class PluginManager(object):
                     module = import_module('mapclientplugins.' + modname)
                     if hasattr(module, '__version__') and hasattr(module, '__author__'):
                         logger.info('Loaded plugin \'' + modname + '\' version [' + module.__version__ + '] by ' + module.__author__)
-                except:
+                except Exception as e:
                     logger.warn('Plugin \'' + modname + '\' not loaded')
+                    logger.warn('Reason: {0}'.format(e))
 
     def readSettings(self, settings):
         self._directories = []
