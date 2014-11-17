@@ -1,7 +1,0 @@
-...............................
-----------------------------------------------------------------------
-Ran 31 tests in 0.190s
-
-OK
-ERROR: Cmiss_field_module_create_cross_product.  Source field 1 missing or has wrong number of components
-ERROR: Cmiss_field_module_create_cross_product.  Source field 2 missing or has wrong number of components
