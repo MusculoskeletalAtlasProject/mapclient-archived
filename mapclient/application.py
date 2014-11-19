@@ -122,7 +122,7 @@ def main():
 
     # Possibly don't need to run app.exec_()
     sys.exit(app.quit())
-
+    
 
 if __name__ == '__main__':
     if len(sys.argv) == 1:  # No command line arguments
