@@ -57,3 +57,6 @@ target/
 # Spyder 
 .spyderproject
 .spyderworkspace
+
+# Log Records
+*.log.*

@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>LogInformation</class>
- <widget class="QDialog" name="LogInformation">
+ <class>LogRecord</class>
+ <widget class="QDialog" name="LogRecord">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>649</width>
-    <height>309</height>
+    <width>678</width>
+    <height>307</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -23,10 +23,10 @@
    </size>
   </property>
   <property name="windowTitle">
-   <string>Log Information</string>
+   <string>Log Record</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout">
-   <item>
+  <layout class="QGridLayout" name="gridLayout_2">
+   <item row="0" column="0">
     <layout class="QGridLayout" name="gridLayout">
      <item row="0" column="0">
       <widget class="QLabel" name="history">
@@ -36,12 +36,24 @@
       </widget>
      </item>
      <item row="1" column="0">
-      <widget class="QTableWidget" name="error_table">
+      <widget class="QTableWidget" name="information_table">
+       <property name="enabled">
+        <bool>true</bool>
+       </property>
        <property name="mouseTracking">
         <bool>false</bool>
        </property>
+       <property name="autoFillBackground">
+        <bool>false</bool>
+       </property>
        <property name="inputMethodHints">
-        <set>Qt::ImhDate|Qt::ImhHiddenText|Qt::ImhTime</set>
+        <set>Qt::ImhNone</set>
+       </property>
+       <property name="frameShadow">
+        <enum>QFrame::Raised</enum>
+       </property>
+       <property name="editTriggers">
+        <set>QAbstractItemView::NoEditTriggers</set>
        </property>
        <property name="tabKeyNavigation">
         <bool>false</bool>
@@ -52,25 +64,43 @@
        <property name="dragDropOverwriteMode">
         <bool>false</bool>
        </property>
-       <property name="gridStyle">
-        <enum>Qt::SolidLine</enum>
+       <property name="alternatingRowColors">
+        <bool>false</bool>
+       </property>
+       <property name="selectionMode">
+        <enum>QAbstractItemView::SingleSelection</enum>
+       </property>
+       <property name="selectionBehavior">
+        <enum>QAbstractItemView::SelectRows</enum>
        </property>
        <property name="sortingEnabled">
         <bool>true</bool>
        </property>
        <property name="cornerButtonEnabled">
-        <bool>true</bool>
+        <bool>false</bool>
        </property>
        <property name="rowCount">
-        <number>10</number>
+        <number>0</number>
        </property>
+       <property name="columnCount">
+        <number>3</number>
+       </property>
+       <attribute name="horizontalHeaderVisible">
+        <bool>true</bool>
+       </attribute>
        <attribute name="horizontalHeaderCascadingSectionResizes">
-        <bool>false</bool>
+        <bool>true</bool>
        </attribute>
        <attribute name="horizontalHeaderDefaultSectionSize">
-        <number>100</number>
+        <number>75</number>
        </attribute>
        <attribute name="horizontalHeaderHighlightSections">
+        <bool>true</bool>
+       </attribute>
+       <attribute name="horizontalHeaderMinimumSectionSize">
+        <number>75</number>
+       </attribute>
+       <attribute name="horizontalHeaderShowSortIndicator" stdset="0">
         <bool>true</bool>
        </attribute>
        <attribute name="horizontalHeaderStretchLastSection">
@@ -79,51 +109,56 @@
        <attribute name="verticalHeaderVisible">
         <bool>false</bool>
        </attribute>
-       <attribute name="verticalHeaderCascadingSectionResizes">
-        <bool>false</bool>
+       <attribute name="verticalHeaderDefaultSectionSize">
+        <number>20</number>
        </attribute>
        <attribute name="verticalHeaderHighlightSections">
         <bool>false</bool>
        </attribute>
-       <row/>
-       <row/>
-       <row/>
-       <row/>
-       <row/>
-       <row/>
-       <row/>
-       <row/>
-       <row/>
-       <row/>
+       <attribute name="verticalHeaderMinimumSectionSize">
+        <number>15</number>
+       </attribute>
        <column>
         <property name="text">
-         <string>Date</string>
+         <string>Time</string>
+        </property>
+        <property name="textAlignment">
+         <set>AlignHCenter|AlignVCenter|AlignCenter</set>
         </property>
        </column>
        <column>
         <property name="text">
-         <string>Time</string>
+         <string>Level</string>
+        </property>
+        <property name="textAlignment">
+         <set>AlignHCenter|AlignVCenter|AlignCenter</set>
         </property>
        </column>
        <column>
         <property name="text">
          <string>Description</string>
         </property>
-        <property name="textAlignment">
-         <set>AlignHCenter|AlignVCenter|AlignCenter</set>
-        </property>
        </column>
-       <item row="0" column="0">
-        <property name="text">
-         <string/>
-        </property>
-       </item>
       </widget>
      </item>
     </layout>
    </item>
-   <item>
+   <item row="1" column="0">
     <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <widget class="QPushButton" name="loadButton">
+       <property name="text">
+        <string>Load</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="detailsButton">
+       <property name="text">
+        <string>Details</string>
+       </property>
+      </widget>
+     </item>
      <item>
       <spacer name="horizontalSpacer">
        <property name="orientation">
@@ -131,7 +166,7 @@
        </property>
        <property name="sizeHint" stdset="0">
         <size>
-         <width>598</width>
+         <width>328</width>
          <height>20</height>
         </size>
        </property>
@@ -169,16 +204,32 @@
   <connection>
    <sender>closeWindowButton</sender>
    <signal>clicked()</signal>
-   <receiver>LogInformation</receiver>
+   <receiver>LogRecord</receiver>
    <slot>close()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>657</x>
-     <y>234</y>
+     <x>643</x>
+     <y>296</y>
     </hint>
     <hint type="destinationlabel">
      <x>364</x>
      <y>127</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>information_table</sender>
+   <signal>itemDoubleClicked(QTableWidgetItem*)</signal>
+   <receiver>detailsButton</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>207</x>
+     <y>211</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>128</x>
+     <y>278</y>
     </hint>
    </hints>
   </connection>
