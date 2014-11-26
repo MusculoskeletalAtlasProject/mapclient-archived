@@ -42,7 +42,7 @@ def initialiseLogger():
     logging.basicConfig(format='%(asctime)s.%(msecs).03d - %(name)s - %(levelname)s - %(message)s', level = logging.INFO, datefmt='%d/%m/%Y - %H:%M:%S')   
     logging.addLevelName(29, 'PLUGIN')
     
-    rotatingFH = logging.handlers.RotatingFileHandler('logging_record.log', mode='a', maxBytes=5000000, backupCount = 9)
+    rotatingFH = logging.handlers.RotatingFileHandler('C:\\Users\\Jonathan\\Desktop\\ABI Summer Work\\mapclient\\mapclient\\widgets\\logging_record.log', mode='a', maxBytes=5000000, backupCount = 9)
     rotatingFH.setLevel(logging.DEBUG) 
     file_formatter = logging.Formatter('%(asctime)s.%(msecs).03d - %(name)s - %(levelname)s - %(message)s', datefmt='%d/%m/%Y - %H:%M:%S')
     rotatingFH.setFormatter(file_formatter)

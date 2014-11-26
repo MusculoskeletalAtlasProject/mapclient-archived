@@ -17,14 +17,13 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     You should have received a copy of the GNU General Public License
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
-from PySide.QtGui import QDialog, QTableWidget, QTableWidgetItem
+from PySide.QtGui import QDialog, QTableWidgetItem
 
-from mapclient.widgets.ui_logdetails import Ui_LogDetails
-from mapclient.widgets.logrecord import LogRecord    
+from mapclient.widgets.ui_logdetails import Ui_LogDetails 
 
 class LogDetails(QDialog):
     '''
-    Lod details dialog to present the user with more detailed information about an individual recorded log.
+    Load details dialog to present the user with more detailed information about an individual recorded log.
     '''
     
     def __init__(self, parent=None):
@@ -53,10 +52,5 @@ class LogDetails(QDialog):
         row_number = 0
         for information in selectedLog:
             self._ui.detailedTable.setItem(row_number, 0, QTableWidgetItem(selectedLog[row_number]))
-            row_number += 1
-        
-        
-        
-        
-        
+            row_number += 1       
     

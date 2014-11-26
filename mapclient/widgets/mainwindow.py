@@ -19,7 +19,7 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
 '''
 
 import logging
-from PySide import QtGui
+from PySide import QtGui, QtCore
 
 from mapclient.widgets.ui_mainwindow import Ui_MainWindow
 # from mapclient.mountpoints.stackedwidget import StackedWidgetMountPoint
@@ -80,8 +80,8 @@ class MainWindow(QtGui.QMainWindow):
         self.menu_Project.setObjectName("menu_Project")
         self.menu_Tools = QtGui.QMenu(self.menubar)
         self.menu_Tools.setObjectName("menu_Tools")
-        self.action_LogRecord = QtGui.QAction(self)
-        self.action_LogRecord.setObjectName("action_LogRecord")
+        self.action_LogInformation = QtGui.QAction(self)
+        self.action_LogInformation.setObjectName("action_LogInformation")
         self.action_About = QtGui.QAction(self)
         self.action_About.setObjectName("action_About")
         self.action_Quit = QtGui.QAction(self)
@@ -96,7 +96,7 @@ class MainWindow(QtGui.QMainWindow):
         self.actionPluginWizard.setObjectName("actionPluginWizard")
         self.menu_Help.addAction(self.action_About)
         self.menu_View.addSeparator()
-        self.menu_View.addAction(self.action_LogRecord)
+        self.menu_View.addAction(self.action_LogInformation)
         self.menu_File.addSeparator()
         self.menu_File.addAction(self.action_Quit)
         self.menu_Tools.addAction(self.actionPluginManager)
@@ -123,9 +123,9 @@ class MainWindow(QtGui.QMainWindow):
         self.action_Quit.setText(QtGui.QApplication.translate("MainWindow", "&Quit", None, QtGui.QApplication.UnicodeUTF8))
         self.action_Quit.setStatusTip(QtGui.QApplication.translate("MainWindow", "Quit the application", None, QtGui.QApplication.UnicodeUTF8))
         self.action_Quit.setShortcut(QtGui.QApplication.translate("MainWindow", "Ctrl+Q", None, QtGui.QApplication.UnicodeUTF8))
-        self.action_LogRecord.setText(QtGui.QApplication.translate("MainWindow", "Log Record", None, QtGui.QApplication.UnicodeUTF8))
-        self.action_LogRecord.setStatusTip(QtGui.QApplication.translate("MainWindow", "Inspect recorded session logs", None, QtGui.QApplication.UnicodeUTF8))
-        self.action_LogRecord.setShortcut(QtGui.QApplication.translate("MainWindow", "Ctrl+L", None, QtGui.QApplication.UnicodeUTF8))
+        self.action_LogInformation.setText(QtGui.QApplication.translate("MainWindow", "Log Information", None, QtGui.QApplication.UnicodeUTF8))
+        self.action_LogInformation.setStatusTip(QtGui.QApplication.translate("MainWindow", "Inspect logged program information", None, QtGui.QApplication.UnicodeUTF8))
+        self.action_LogInformation.setShortcut(QtGui.QApplication.translate("MainWindow", "Ctrl+I", None, QtGui.QApplication.UnicodeUTF8))
         self.actionPluginManager.setText(QtGui.QApplication.translate("MainWindow", "Plugin &Manager", None, QtGui.QApplication.UnicodeUTF8))
         self.actionPMR.setText(QtGui.QApplication.translate("MainWindow", "&PMR", None, QtGui.QApplication.UnicodeUTF8))
         self.actionAnnotation.setText(QtGui.QApplication.translate("MainWindow", "&Annotation", None, QtGui.QApplication.UnicodeUTF8))
@@ -161,15 +161,15 @@ class MainWindow(QtGui.QMainWindow):
     def _makeConnections(self):
         self.action_Quit.triggered.connect(self.quitApplication)
         self.action_About.triggered.connect(self.about)
-        self.action_LogRecord.triggered.connect(self.displayLogRecord)
+        self.action_LogInformation.triggered.connect(self.displayLogInformation)
         self.actionPluginManager.triggered.connect(self.pluginManager)
         self.actionPluginWizard.triggered.connect(self.pluginWizard)
         self.actionPMR.triggered.connect(self.pmr)
         self.actionAnnotation.triggered.connect(self.annotationTool)
         
-    def displayLogRecord(self):
-        from mapclient.widgets.logrecord import LogRecord
-        dlg = LogRecord(self)
+    def displayLogInformation(self):
+        from mapclient.widgets.loginformation import LogInformation
+        dlg = LogInformation(self)
         dlg.fillTable(self)
         dlg.setModal(True)
         dlg.exec_()

@@ -1,28 +1,28 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'qt/logrecord.ui'
+# Form implementation generated from reading ui file 'qt/loginformation.ui'
 #
-# Created: Mon Nov 24 11:44:20 2014
+# Created: Wed Nov 26 10:01:58 2014
 #      by: pyside-uic 0.2.15 running on PySide 1.2.2
 #
 # WARNING! All changes made in this file will be lost!
 
 from PySide import QtCore, QtGui
 
-class Ui_LogRecord(object):
-    def setupUi(self, LogRecord):
-        LogRecord.setObjectName("LogRecord")
-        LogRecord.resize(678, 307)
-        LogRecord.setMinimumSize(QtCore.QSize(400, 200))
-        LogRecord.setMaximumSize(QtCore.QSize(1000, 600))
-        self.gridLayout_2 = QtGui.QGridLayout(LogRecord)
+class Ui_LogInformation(object):
+    def setupUi(self, LogInformation):
+        LogInformation.setObjectName("LogInformation")
+        LogInformation.resize(600, 450)
+        LogInformation.setMinimumSize(QtCore.QSize(600, 450))
+        LogInformation.setMaximumSize(QtCore.QSize(600, 450))
+        self.gridLayout_2 = QtGui.QGridLayout(LogInformation)
         self.gridLayout_2.setObjectName("gridLayout_2")
         self.gridLayout = QtGui.QGridLayout()
         self.gridLayout.setObjectName("gridLayout")
-        self.history = QtGui.QLabel(LogRecord)
+        self.history = QtGui.QLabel(LogInformation)
         self.history.setObjectName("history")
         self.gridLayout.addWidget(self.history, 0, 0, 1, 1)
-        self.information_table = QtGui.QTableWidget(LogRecord)
+        self.information_table = QtGui.QTableWidget(LogInformation)
         self.information_table.setEnabled(True)
         self.information_table.setMouseTracking(False)
         self.information_table.setAutoFillBackground(False)
@@ -35,6 +35,8 @@ class Ui_LogRecord(object):
         self.information_table.setAlternatingRowColors(False)
         self.information_table.setSelectionMode(QtGui.QAbstractItemView.SingleSelection)
         self.information_table.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
+        self.information_table.setShowGrid(False)
+        self.information_table.setGridStyle(QtCore.Qt.NoPen)
         self.information_table.setCornerButtonEnabled(False)
         self.information_table.setRowCount(0)
         self.information_table.setColumnCount(3)
@@ -62,34 +64,32 @@ class Ui_LogRecord(object):
         self.gridLayout_2.addLayout(self.gridLayout, 0, 0, 1, 1)
         self.horizontalLayout = QtGui.QHBoxLayout()
         self.horizontalLayout.setObjectName("horizontalLayout")
-        self.loadButton = QtGui.QPushButton(LogRecord)
+        self.loadButton = QtGui.QPushButton(LogInformation)
         self.loadButton.setObjectName("loadButton")
         self.horizontalLayout.addWidget(self.loadButton)
-        self.detailsButton = QtGui.QPushButton(LogRecord)
+        self.detailsButton = QtGui.QPushButton(LogInformation)
         self.detailsButton.setObjectName("detailsButton")
         self.horizontalLayout.addWidget(self.detailsButton)
         spacerItem = QtGui.QSpacerItem(328, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout.addItem(spacerItem)
-        self.closeWindowButton = QtGui.QPushButton(LogRecord)
+        self.closeWindowButton = QtGui.QPushButton(LogInformation)
         self.closeWindowButton.setObjectName("closeWindowButton")
         self.horizontalLayout.addWidget(self.closeWindowButton)
-        spacerItem1 = QtGui.QSpacerItem(18, 20, QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Minimum)
-        self.horizontalLayout.addItem(spacerItem1)
         self.gridLayout_2.addLayout(self.horizontalLayout, 1, 0, 1, 1)
 
-        self.retranslateUi(LogRecord)
-        QtCore.QObject.connect(self.closeWindowButton, QtCore.SIGNAL("clicked()"), LogRecord.close)
+        self.retranslateUi(LogInformation)
+        QtCore.QObject.connect(self.closeWindowButton, QtCore.SIGNAL("clicked()"), LogInformation.close)
         QtCore.QObject.connect(self.information_table, QtCore.SIGNAL("itemDoubleClicked(QTableWidgetItem*)"), self.detailsButton.click)
-        QtCore.QMetaObject.connectSlotsByName(LogRecord)
+        QtCore.QMetaObject.connectSlotsByName(LogInformation)
 
-    def retranslateUi(self, LogRecord):
-        LogRecord.setWindowTitle(QtGui.QApplication.translate("LogRecord", "Log Record", None, QtGui.QApplication.UnicodeUTF8))
-        self.history.setText(QtGui.QApplication.translate("LogRecord", "History:", None, QtGui.QApplication.UnicodeUTF8))
+    def retranslateUi(self, LogInformation):
+        LogInformation.setWindowTitle(QtGui.QApplication.translate("LogInformation", "Logged Information", None, QtGui.QApplication.UnicodeUTF8))
+        self.history.setText(QtGui.QApplication.translate("LogInformation", "History:", None, QtGui.QApplication.UnicodeUTF8))
         self.information_table.setSortingEnabled(True)
-        self.information_table.horizontalHeaderItem(0).setText(QtGui.QApplication.translate("LogRecord", "Time", None, QtGui.QApplication.UnicodeUTF8))
-        self.information_table.horizontalHeaderItem(1).setText(QtGui.QApplication.translate("LogRecord", "Level", None, QtGui.QApplication.UnicodeUTF8))
-        self.information_table.horizontalHeaderItem(2).setText(QtGui.QApplication.translate("LogRecord", "Description", None, QtGui.QApplication.UnicodeUTF8))
-        self.loadButton.setText(QtGui.QApplication.translate("LogRecord", "Load", None, QtGui.QApplication.UnicodeUTF8))
-        self.detailsButton.setText(QtGui.QApplication.translate("LogRecord", "Details", None, QtGui.QApplication.UnicodeUTF8))
-        self.closeWindowButton.setText(QtGui.QApplication.translate("LogRecord", "Close", None, QtGui.QApplication.UnicodeUTF8))
+        self.information_table.horizontalHeaderItem(0).setText(QtGui.QApplication.translate("LogInformation", "Time", None, QtGui.QApplication.UnicodeUTF8))
+        self.information_table.horizontalHeaderItem(1).setText(QtGui.QApplication.translate("LogInformation", "Level", None, QtGui.QApplication.UnicodeUTF8))
+        self.information_table.horizontalHeaderItem(2).setText(QtGui.QApplication.translate("LogInformation", "Description", None, QtGui.QApplication.UnicodeUTF8))
+        self.loadButton.setText(QtGui.QApplication.translate("LogInformation", "Load", None, QtGui.QApplication.UnicodeUTF8))
+        self.detailsButton.setText(QtGui.QApplication.translate("LogInformation", "Details", None, QtGui.QApplication.UnicodeUTF8))
+        self.closeWindowButton.setText(QtGui.QApplication.translate("LogInformation", "Close", None, QtGui.QApplication.UnicodeUTF8))
 

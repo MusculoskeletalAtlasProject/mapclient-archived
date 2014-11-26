@@ -1,6 +1,7 @@
 <RCC>
   <qresource prefix="mapclient">
     <file>images/icon.png</file>
+    <file>images/round_error_logo.png</file>
     <file>images/about_logo.png</file>
     <file>images/cross.jpg</file>
     <file>images/icon-app.png</file>
