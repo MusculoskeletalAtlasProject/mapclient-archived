@@ -17,15 +17,17 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     You should have received a copy of the GNU General Public License
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
-import os
+import os, sys
 from PySide.QtGui import QDialog, QFileDialog
 
 from mapclient.widgets.ui_loadlogsession import Ui_LoadWindow
+from mapclient.settings.info import LOGGING_DIRECTORIES
 
 class LoadLogSession(QDialog):
     '''
     Load a log record from a previous session.
     '''
+    
     
     def __init__(self, parent=None):
         '''
@@ -41,7 +43,8 @@ class LoadLogSession(QDialog):
         self._ui.loadButton.clicked.connect(self.getLogs)
         
     def findLogSession(self):
-        previousSession = QFileDialog.getOpenFileName(self, filter='Log Files (*.log.* *.log)', caption='Select Previous Session',  options=QFileDialog.DontResolveSymlinks | QFileDialog.ReadOnly)
+        previousSession = QFileDialog.getOpenFileName(self, dir = os.path.dirname(LOGGING_DIRECTORIES[sys.platform]), \
+            filter='Log Files (*.log.* *.log)', caption='Select Previous Session',  options=QFileDialog.DontResolveSymlinks | QFileDialog.ReadOnly)
         if len(previousSession) > 0 and len(self._ui.lineEdit.text()) == 0:
             self._ui.lineEdit.insert(previousSession[0])
         else:
@@ -58,6 +61,6 @@ class LoadLogSession(QDialog):
                 log_file.close()        
                 logs = log_data.split('\n')
                 logs = logs[:-1]
-                return logs
+                return logs, filename
             except IOError or FileNotFoundError:
                 return 'Unable to load file.'

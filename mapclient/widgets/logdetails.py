@@ -17,9 +17,11 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     You should have received a copy of the GNU General Public License
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
+import sys
+
 from PySide.QtGui import QDialog, QTableWidgetItem
 
-from mapclient.widgets.ui_logdetails import Ui_LogDetails 
+from mapclient.widgets.ui_logdetails import Ui_LogDetails
 
 class LogDetails(QDialog):
     '''
@@ -34,8 +36,8 @@ class LogDetails(QDialog):
         self._ui = Ui_LogDetails()
         self._ui.setupUi(self)
         
-    def fillTable(self, information, time, parent=None):
-        log_file = open('logging_record.log', 'r')
+    def fillTable(self, information, time, current_log_file, parent=None):
+        log_file = open(current_log_file, 'r')
         log_data = log_file.read()
         log_file.close()        
         logs = log_data.split('\n')
