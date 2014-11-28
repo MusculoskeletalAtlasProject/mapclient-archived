@@ -343,7 +343,7 @@ class PluginManager(object):
         else:
             try:
                 package = imp.reload(sys.modules['mapclientplugins'])
-            except Exception as e:
+            except Exception:
                 package = importlib.reload(sys.modules['mapclientplugins'])
         for _, modname, ispkg in pkgutil.iter_modules(package.__path__):
             if ispkg:
