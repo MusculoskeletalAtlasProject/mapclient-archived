@@ -338,7 +338,13 @@ class PluginManager(object):
 
                 for name in sorted(names):
                     self._addPluginDir(os.path.join(directory, name))
-        package = import_module('mapclientplugins') if len_package_modules_prior == 0 else reload(sys.modules['mapclientplugins'])
+        if len_package_modules_prior == 0:
+            package = import_module('mapclientplugins') 
+        else:
+            try:
+                package = imp.reload(sys.modules['mapclientplugins'])
+            except Exception as e:
+                package = importlib.reload(sys.modules['mapclientplugins'])
         for _, modname, ispkg in pkgutil.iter_modules(package.__path__):
             if ispkg:
                 try:
