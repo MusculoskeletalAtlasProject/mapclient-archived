@@ -51,9 +51,10 @@ DEFAULT_CONSUMER_SECRET_TOKEN = 'QQcKMnyCjjb7JNDHA-Lwdu7p'
 HS = {'name': 'Hugh Sorby', 'email': 'h.sorby@auckland.ac.nz'}
 TY = {'name': 'Tommy Yu', 'email': 'tommy.yu@auckland.ac.nz'}
 JT = {'name': 'Justin Treadwell', 'email': 'justintreadwell@gmail.com'}
+JR = {'name': 'Jonathan Ritchie', 'email': 'jrit927@aucklanduni.ac.nz'}
 
 CREDITS = {
-           'programming'  : [HS, TY],
+           'programming'  : [HS, TY, JR],
            'artwork'      : [JT],
            'documentation': [HS]
            }
@@ -68,6 +69,8 @@ ABOUT = {
 # APPLICATION
 DEFAULT_WORKFLOW_PROJECT_FILENAME = '.workflow.conf'
 DEFAULT_WORKFLOW_ANNOTATION_FILENAME = '.workflow.rdf'
+LOGGING_DIRECTORIES = {'win32':'\ProgramData\MAP Client\logs\logging_record.log', \
+    'darwin':'/Library/MAP Client/logs/logging_record.log', 'linux2':'/var/logs/MAP Client/logging_record.log'}
 
 class PMRInfo(object):
 

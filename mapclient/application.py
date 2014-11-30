@@ -22,6 +22,7 @@ from __future__ import absolute_import
 
 import os, sys, locale
 import logging
+import logging.handlers
 
 # With PEP366 we need to conditionally import the settings module based on
 # whether we are executing the file directly of indirectly.  This is my
@@ -30,14 +31,37 @@ if __package__:
     from .settings import info
 else:
     from mapclient.settings import info
-
+    
 logger = logging.getLogger('mapclient.application')
 
-def initialiseLogger():
-    logging.basicConfig(format='%(asctime)s %(levelname)s - %(name)s--> %(message)s', datefmt='%Y/%m/%d %H:%M:%S', level=logging.DEBUG)
+def initialiseLogLocation():
+    '''
+    Set up location where log files will be stored (platform dependent).
+    '''
+    
+    directory = os.path.dirname(info.LOGGING_DIRECTORIES[sys.platform])
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+        initial_log_file = open(info.LOGGING_DIRECTORIES[sys.platform], 'w')
+        initial_log_file.close()
+    return info.LOGGING_DIRECTORIES[sys.platform]
+    
+def initialiseLogger(log_path):
+    '''
+    Initialise logger settings and information formatting
+    '''
+    
+    logging.basicConfig(format='%(asctime)s.%(msecs).03d - %(name)s - %(levelname)s - %(message)s', level = logging.INFO, datefmt='%d/%m/%Y - %H:%M:%S')   
     logging.addLevelName(29, 'PLUGIN')
+    
+    rotatingFH = logging.handlers.RotatingFileHandler(log_path, mode='a', maxBytes=5000000, backupCount = 9)
+    rotatingFH.setLevel(logging.DEBUG) 
+    file_formatter = logging.Formatter('%(asctime)s.%(msecs).03d - %(name)s - %(levelname)s - %(message)s', datefmt='%d/%m/%Y - %H:%M:%S')
+    rotatingFH.setFormatter(file_formatter)
+    logging.getLogger().addHandler(rotatingFH)
+    rotatingFH.doRollover()
+       
 #     logging.addLevelName(28, 'MSG')
-
 
 #     ch = logging.StreamHandler()
 #     ch.setLevel(28)
@@ -60,8 +84,9 @@ def winmain():
     '''
     Initialise common settings and check the operating environment before starting the application.
     '''
-
-    initialiseLogger()
+    
+    log_path = initialiseLogLocation()
+    initialiseLogger(log_path)
     progheader()
     # import the locale, and set the locale. This is used for
     # locale-aware number to string formatting
