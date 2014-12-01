@@ -56,3 +56,8 @@ target/
 
 # Spyder 
 .spyderproject
+
+# Eclipse project
+.project
+.pydevproject
+
