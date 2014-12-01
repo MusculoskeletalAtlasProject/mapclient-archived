@@ -54,5 +54,4 @@ class LogDetails(QDialog):
         row_number = 0
         for information in selectedLog:
             self._ui.detailedTable.setItem(row_number, 0, QTableWidgetItem(selectedLog[row_number]))
-            row_number += 1       
-    
+            row_number += 1

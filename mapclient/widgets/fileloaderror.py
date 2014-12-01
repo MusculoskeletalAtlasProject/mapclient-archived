@@ -32,4 +32,3 @@ class FileLoadError(QDialog):
         QDialog.__init__(self, parent)
         self._ui = Ui_FileLoadError()
         self._ui.setupUi(self)
-        
