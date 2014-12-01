@@ -27,8 +27,7 @@ class LoadLogSession(QDialog):
     '''
     Load a log record from a previous session.
     '''
-    
-    
+
     def __init__(self, parent=None):
         '''
         Constructor
@@ -40,7 +39,7 @@ class LoadLogSession(QDialog):
         
     def _makeConnections(self):
         self._ui.searchButton.clicked.connect(self.findLogSession)
-        self._ui.loadButton.clicked.connect(self.getLogs)
+        self._ui.loadButton.clicked.connect(self.validateSelection)
         
     def findLogSession(self):
         previousSession = QFileDialog.getOpenFileName(self, dir = os.path.dirname(LOGGING_DIRECTORIES[sys.platform]), \
@@ -51,16 +50,33 @@ class LoadLogSession(QDialog):
             self._ui.lineEdit.clear()
             self._ui.lineEdit.insert(previousSession[0])
             
-    def getLogs(self):
-        logs = []
-        if len(self._ui.lineEdit.text()) > 0:
-            filename = self._ui.lineEdit.text()
-            try:
-                log_file = open(filename, 'r')
-                log_data = log_file.read()
-                log_file.close()        
-                logs = log_data.split('\n')
-                logs = logs[:-1]
-                return logs, filename
-            except IOError or FileNotFoundError:
-                return 'Unable to load file.'
+    def validateSelection(self):
+        from mapclient.widgets.ui_loadlogsession import Ui_LoadWindow
+        if len(self._ui.lineEdit.text()) == 0:
+            self.showSelectionError()
+        else:
+            self.accept()
+        
+    def loadSession(self):
+        filename = self._ui.lineEdit.text()
+        try:
+            log_file = open(filename, 'r')
+            log_data = log_file.read()
+            log_file.close()        
+            logs = log_data.split('\n')
+            logs = logs[:-1]
+            return logs, filename
+        except IOError or FileNotFoundError:
+            self.showLoadError()
+            
+    def showSelectionError(self):
+        from mapclient.widgets.fileselectionerror import FileSelectionError
+        dlg = FileSelectionError(self)
+        dlg.setModal(True)
+        dlg.exec_()
+            
+    def showLoadError(self):
+        from mapclient.widgets.fileloaderror import FileLoadError
+        dlg = FileLoadError(self)
+        dlg.setModal(True)
+        dlg.exec_()

@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'qt/loadlogsession.ui'
 #
-# Created: Wed Nov 26 13:36:29 2014
+# Created: Tue Dec  2 10:43:58 2014
 #      by: pyside-uic 0.2.15 running on PySide 1.2.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -47,7 +47,6 @@ class Ui_LoadWindow(object):
         self.verticalLayout.addLayout(self.horizontalLayout)
 
         self.retranslateUi(LoadWindow)
-        QtCore.QObject.connect(self.loadButton, QtCore.SIGNAL("clicked()"), LoadWindow.accept)
         QtCore.QObject.connect(self.cancelButton, QtCore.SIGNAL("clicked()"), LoadWindow.reject)
         QtCore.QMetaObject.connectSlotsByName(LoadWindow)
 

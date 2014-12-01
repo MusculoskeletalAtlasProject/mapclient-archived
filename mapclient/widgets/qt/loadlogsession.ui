@@ -105,22 +105,6 @@
  <resources/>
  <connections>
   <connection>
-   <sender>loadButton</sender>
-   <signal>clicked()</signal>
-   <receiver>LoadWindow</receiver>
-   <slot>accept()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>552</x>
-     <y>75</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>299</x>
-     <y>49</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
    <sender>cancelButton</sender>
    <signal>clicked()</signal>
    <receiver>LoadWindow</receiver>

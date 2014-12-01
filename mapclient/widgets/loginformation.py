@@ -76,30 +76,14 @@ class LogInformation(QDialog):
         
     def loadLogSession(self):
         from mapclient.widgets.loadlogsession import LoadLogSession
-        from mapclient.widgets.fileselectionerror import FileSelectionError
         dlg = LoadLogSession(self)
         dlg.setModal(True)
-        returnSignal = dlg.exec_()
-        loadState = dlg.getLogs()
-        while returnSignal:
-            if loadState == 'Unable to load file.':
-                self.fileLoadError()
-                dlg = LoadLogSession(self)
-                dlg.setModal(True)
-                returnSignal = dlg.exec_()  
-            elif returnSignal and loadState != None:
-                self.updateTable(loadState[0])
-                self.current_log_file = loadState[1]
-                print(self.current_log_file)
-                returnSignal = False
-            elif returnSignal and loadState == None:
-                error_dlg = FileSelectionError(self)
-                error_dlg.setModal(True)
-                if error_dlg.exec_():
-                    dlg = LoadLogSession(self)
-                    dlg.setModal(True)
-                    returnSignal = dlg.exec_()                
-
+        if dlg.exec_():
+            action = dlg.loadSession()
+            if action != None:
+                self.updateTable(action[0])
+                self.current_log_file = action[1]
+        
     def updateTable(self, logs):
         self._ui.information_table.clearContents()
         self._ui.information_table.setRowCount(len(logs))
@@ -113,9 +97,3 @@ class LogInformation(QDialog):
                 self._ui.information_table.setItem(row_number,column_number, \
                     QTableWidgetItem(basic_info[column_number]))
             row_number += 1
-            
-    def fileLoadError(self):
-        from mapclient.widgets.fileloaderror import FileLoadError
-        dlg = FileLoadError(self)
-        dlg.setModal(True)
-        dlg.exec_()
