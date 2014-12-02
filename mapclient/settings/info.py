@@ -69,8 +69,6 @@ ABOUT = {
 # APPLICATION
 DEFAULT_WORKFLOW_PROJECT_FILENAME = '.workflow.conf'
 DEFAULT_WORKFLOW_ANNOTATION_FILENAME = '.workflow.rdf'
-LOGGING_DIRECTORIES = {'win32':'\ProgramData\MAP Client\logs\logging_record.log', \
-    'darwin':'/Library/MAP Client/logs/logging_record.log', 'linux2':'/var/logs/MAP Client/logging_record.log'}
 
 class PMRInfo(object):
 

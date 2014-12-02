@@ -38,13 +38,20 @@ def initialiseLogLocation():
     '''
     Set up location where log files will be stored (platform dependent).
     '''
+    log_filename = 'logging_record.log'
+    platform = sys.platform
+    if platform == 'linux2':
+        logging_file_location = os.path.join(os.getenv('HOME'), '.conf', info.ORGANISATION_NAME, info.APPLICATION_NAME, log_filename)       
+    elif platform == 'win32':
+        logging_file_location = os.path.join(os.getenv('APPDATA'), info.ORGANISATION_NAME, info.APPLICATION_NAME, log_filename)
+    elif platform == 'darwin':
+        sub_dir = 'Library\\Preferences\\com.' + info.ORGANISATION_NAME + '.' + info.APPLICATION_NAME + '.' + log_filename
+        logging_file_location = os.path.join(os.getenv('HOME'), sub_dir)
     
-    directory = os.path.dirname(info.LOGGING_DIRECTORIES[sys.platform])
-    if not os.path.exists(directory):
-        os.makedirs(directory)
-        initial_log_file = open(info.LOGGING_DIRECTORIES[sys.platform], 'w')
-        initial_log_file.close()
-    return info.LOGGING_DIRECTORIES[sys.platform]
+    log_file_directory = os.path.dirname(logging_file_location)
+    if not os.path.exists(log_file_directory):
+        os.makedirs(log_file_directory)
+    return logging_file_location
     
 def initialiseLogger(log_path):
     '''
