@@ -40,6 +40,7 @@ PORTS_FIELD = 'ports_table'
 IDENTIFIER_CHECKBOX = 'identifier_checkbox'
 CATEGORY_FIELD = 'category'
 AUTHOR_NAME_FIELD = 'author_name'
+PLUGIN_LOCATION_FIELD = 'plugin_location'
 # Style sheets
 REQUIRED_STYLE_SHEET = 'background-color: rgba(239, 16, 16, 20%)'
 DEFAULT_STYLE_SHEET = ''
@@ -79,6 +80,7 @@ class WizardDialog(QtGui.QWizard):
         self._options.setImageFile(self.field(IMAGE_FILE_FIELD))
         self._options.setName(self.field(NAME_FIELD))
         self._options.setPackageName(self.field(PACKAGE_NAME_FIELD))
+        self._options.setPluginLocation(self.field(PLUGIN_LOCATION_FIELD))
 
         # Registered field failed to return table, may need to set up
         # default property for this to work.  Currently using workaround
@@ -336,6 +338,7 @@ class MiscWizardPage(QtGui.QWizardPage):
 
         self.registerField(AUTHOR_NAME_FIELD, self._ui.authorNameLineEdit)
         self.registerField(CATEGORY_FIELD, self._ui.categoryLineEdit)
+        self.registerField(PLUGIN_LOCATION_FIELD, self._ui.pluginLocationEdit)
 
 class OutputWizardPage(QtGui.QWizardPage):
 

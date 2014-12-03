@@ -232,6 +232,7 @@ MAP Client Plugin
 \'\'\'
 __version__ = '0.1.0'
 __author__ = '{author_name}'
+__location__ = '{plugin_location}'
 
 
 # import class that derives itself from the step mountpoint.

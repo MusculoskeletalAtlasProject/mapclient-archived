@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'qt/misc.ui'
 #
-# Created: Thu Oct 24 15:59:09 2013
-#      by: pyside-uic 0.2.14 running on PySide 1.1.2
+# Created: Wed Dec  3 14:46:20 2014
+#      by: pyside-uic 0.2.15 running on PySide 1.2.2
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -27,8 +27,15 @@ class Ui_Misc(object):
         self.categoryLineEdit = QtGui.QLineEdit(Misc)
         self.categoryLineEdit.setObjectName("categoryLineEdit")
         self.formLayout.setWidget(1, QtGui.QFormLayout.FieldRole, self.categoryLineEdit)
+        self.label_3 = QtGui.QLabel(Misc)
+        self.label_3.setObjectName("label_3")
+        self.formLayout.setWidget(2, QtGui.QFormLayout.LabelRole, self.label_3)
+        self.pluginLocationEdit = QtGui.QLineEdit(Misc)
+        self.pluginLocationEdit.setObjectName("pluginLocationEdit")
+        self.formLayout.setWidget(2, QtGui.QFormLayout.FieldRole, self.pluginLocationEdit)
         self.label.setBuddy(self.authorNameLineEdit)
         self.label_2.setBuddy(self.categoryLineEdit)
+        self.label_3.setBuddy(self.pluginLocationEdit)
 
         self.retranslateUi(Misc)
         QtCore.QMetaObject.connectSlotsByName(Misc)
@@ -39,4 +46,6 @@ class Ui_Misc(object):
         self.authorNameLineEdit.setPlaceholderText(QtGui.QApplication.translate("Misc", "Xxxx Yyyyy", None, QtGui.QApplication.UnicodeUTF8))
         self.label_2.setText(QtGui.QApplication.translate("Misc", "Category:  ", None, QtGui.QApplication.UnicodeUTF8))
         self.categoryLineEdit.setPlaceholderText(QtGui.QApplication.translate("Misc", "General", None, QtGui.QApplication.UnicodeUTF8))
+        self.label_3.setText(QtGui.QApplication.translate("Misc", "Plugin Location:", None, QtGui.QApplication.UnicodeUTF8))
+        self.pluginLocationEdit.setPlaceholderText(QtGui.QApplication.translate("Misc", "Repository URL", None, QtGui.QApplication.UnicodeUTF8))
 

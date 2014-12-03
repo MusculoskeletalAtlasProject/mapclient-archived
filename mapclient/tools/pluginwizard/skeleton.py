@@ -303,13 +303,15 @@ class Skeleton(object):
     def _writeStepPackageInit(self, init_dir):
         '''
         Write the step package __init__ file.  If a resource file
-        is present then load the module in here. 
+        is present then load the module in here. Displays the author name, 
+        plugin name and plugin location.
         '''
         init_file = os.path.join(init_dir, '__init__.py')
         f = open(init_file, 'w')
         f.write(STEP_PACKAGE_INIT_STRING.format(
             package_name=self._options.getFullPackageName(),
-            author_name=self._options.getAuthorName())
+            author_name=self._options.getAuthorName(),
+            plugin_location=self._options.getPluginLocation())
         )
         image_filename = self._options.getImageFile()
         if image_filename:
@@ -481,6 +483,7 @@ class SkeletonOptions(object):
         '''
         self._name = ''
         self._packageName = ''
+        self._pluginLocation = ''
         self._imageFile = ''
         self._outputDirectory = ''
         self._ports = []
@@ -491,6 +494,12 @@ class SkeletonOptions(object):
 
     def getName(self):
         return self._name
+    
+    def getPluginLocation(self):
+        return self._pluginLocation
+        
+    def setPluginLocation(self, pluginLocation):
+        self._pluginLocation = pluginLocation
 
     def setName(self, name):
         self._name = name
@@ -556,5 +565,4 @@ class SkeletonOptions(object):
             category = DEFAULT_CATEGORY
 
         self._category = category
-
-
+        
