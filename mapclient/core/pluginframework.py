@@ -352,10 +352,13 @@ class PluginManager(object):
                     if hasattr(module, '__version__') and hasattr(module, '__author__'):
                         logger.info('Loaded plugin \'' + modname + '\' version [' + module.__version__ + '] by ' + module.__author__)
                 except Exception as e:
-                    e = str(e).split('\n')
+                    if '\n' in e:
+                        e = str(e).split('\n')
+                    else:
+                        e = list(e)
                     e_new = ''
-                    for i in range(0, len(e), 2):
-                        e_new += e[i] + e[i+1] + '  '
+                    for i in range(len(e)):
+                        e_new += e[i] + '  '
                     logger.warn('Plugin \'' + modname + '\' not loaded')
                     logger.warn('Reason: {0}'.format(e_new))
 

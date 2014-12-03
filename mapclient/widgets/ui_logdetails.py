@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'qt/logdetails.ui'
 #
-# Created: Tue Nov 25 13:49:36 2014
+# Created: Thu Dec  4 11:31:41 2014
 #      by: pyside-uic 0.2.15 running on PySide 1.2.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -14,7 +14,7 @@ class Ui_LogDetails(object):
         LogDetails.setObjectName("LogDetails")
         LogDetails.resize(350, 150)
         LogDetails.setMinimumSize(QtCore.QSize(350, 150))
-        LogDetails.setMaximumSize(QtCore.QSize(500, 150))
+        LogDetails.setMaximumSize(QtCore.QSize(65535, 65535))
         LogDetails.setSizeGripEnabled(False)
         self.layout = QtGui.QGridLayout(LogDetails)
         self.layout.setObjectName("layout")

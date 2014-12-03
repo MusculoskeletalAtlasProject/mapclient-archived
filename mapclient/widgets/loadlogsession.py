@@ -18,7 +18,7 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
 import os, sys
-from PySide.QtGui import QDialog, QFileDialog
+from PySide.QtGui import QDialog, QFileDialog, QMessageBox
 
 from mapclient.widgets.ui_loadlogsession import Ui_LoadWindow
 from mapclient.application import initialiseLogLocation
@@ -53,7 +53,7 @@ class LoadLogSession(QDialog):
     def validateSelection(self):
         from mapclient.widgets.ui_loadlogsession import Ui_LoadWindow
         if len(self._ui.lineEdit.text()) == 0:
-            self.showSelectionError()
+            ret = QMessageBox.warning(self, 'Error', '\n  No file selected!\t', QMessageBox.Ok)
         else:
             self.accept()
         
@@ -67,16 +67,4 @@ class LoadLogSession(QDialog):
             logs = logs[:-1]
             return logs, filename
         except IOError or FileNotFoundError:
-            self.showLoadError()
-            
-    def showSelectionError(self):
-        from mapclient.widgets.fileselectionerror import FileSelectionError
-        dlg = FileSelectionError(self)
-        dlg.setModal(True)
-        dlg.exec_()
-            
-    def showLoadError(self):
-        from mapclient.widgets.fileloaderror import FileLoadError
-        dlg = FileLoadError(self)
-        dlg.setModal(True)
-        dlg.exec_()
+            ret = QMessageBox.critical(self, 'Error', '\n  Failed to load file!\t', QMessageBox.Ok)
