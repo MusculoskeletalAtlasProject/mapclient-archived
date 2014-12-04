@@ -45,9 +45,6 @@ coverage.xml
 *.mo
 *.pot
 
-# Django stuff:
-*.log
-
 # Sphinx documentation
 docs/_build/
 
@@ -60,3 +57,8 @@ target/
 
 # Log Records
 *.log.*
+
+# Eclipse project
+.project
+.pydevproject
+
