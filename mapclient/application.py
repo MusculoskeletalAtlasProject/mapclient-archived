@@ -22,6 +22,7 @@ from __future__ import absolute_import
 
 import os, sys, locale
 import logging
+import logging.handlers
 
 # With PEP366 we need to conditionally import the settings module based on
 # whether we are executing the file directly of indirectly.  This is my
@@ -30,14 +31,44 @@ if __package__:
     from .settings import info
 else:
     from mapclient.settings import info
-
+    
 logger = logging.getLogger('mapclient.application')
 
-def initialiseLogger():
-    logging.basicConfig(format='%(asctime)s %(levelname)s - %(name)s--> %(message)s', datefmt='%Y/%m/%d %H:%M:%S', level=logging.DEBUG)
+def initialiseLogLocation():
+    '''
+    Set up location where log files will be stored (platform dependent).
+    '''
+    log_filename = 'logging_record.log'
+    platform = sys.platform
+    if platform == 'linux2':
+        logging_file_location = os.path.join(os.getenv('HOME'), '.conf', info.ORGANISATION_NAME, info.APPLICATION_NAME, log_filename)       
+    elif platform == 'win32':
+        logging_file_location = os.path.join(os.getenv('APPDATA'), info.ORGANISATION_NAME, info.APPLICATION_NAME, log_filename)
+    elif platform == 'darwin':
+        sub_dir = 'Library\\Preferences\\com.' + info.ORGANISATION_NAME + '.' + info.APPLICATION_NAME + '.' + log_filename
+        logging_file_location = os.path.join(os.getenv('HOME'), sub_dir)
+    
+    log_file_directory = os.path.dirname(logging_file_location)
+    if not os.path.exists(log_file_directory):
+        os.makedirs(log_file_directory)
+    return logging_file_location
+    
+def initialiseLogger(log_path):
+    '''
+    Initialise logger settings and information formatting
+    '''
+    
+    logging.basicConfig(format='%(asctime)s.%(msecs).03d - %(name)s - %(levelname)s - %(message)s', level = logging.INFO, datefmt='%d/%m/%Y - %H:%M:%S')   
     logging.addLevelName(29, 'PLUGIN')
+    
+    rotatingFH = logging.handlers.RotatingFileHandler(log_path, mode='a', maxBytes=5000000, backupCount = 9)
+    rotatingFH.setLevel(logging.DEBUG) 
+    file_formatter = logging.Formatter('%(asctime)s.%(msecs).03d - %(name)s - %(levelname)s - %(message)s', datefmt='%d/%m/%Y - %H:%M:%S')
+    rotatingFH.setFormatter(file_formatter)
+    logging.getLogger().addHandler(rotatingFH)
+    rotatingFH.doRollover()
+       
 #     logging.addLevelName(28, 'MSG')
-
 
 #     ch = logging.StreamHandler()
 #     ch.setLevel(28)
@@ -60,8 +91,9 @@ def winmain():
     '''
     Initialise common settings and check the operating environment before starting the application.
     '''
-
-    initialiseLogger()
+    
+    log_path = initialiseLogLocation()
+    initialiseLogger(log_path)
     progheader()
     # import the locale, and set the locale. This is used for
     # locale-aware number to string formatting

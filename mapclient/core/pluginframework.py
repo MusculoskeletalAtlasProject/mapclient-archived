@@ -25,11 +25,15 @@ http://martyalchin.com/2008/jan/10/simple-plugin-framework/
 
 import logging
 import os
-import imp
 import site
 import sys
 import pkgutil
 from importlib import import_module
+
+if sys.version_info < (3, 4):
+    import imp
+else:
+    import importlib
 
 logger = logging.getLogger(__name__)
 
@@ -334,8 +338,13 @@ class PluginManager(object):
 
                 for name in sorted(names):
                     self._addPluginDir(os.path.join(directory, name))
-
-        package = import_module('mapclientplugins') if len_package_modules_prior == 0 else reload(sys.modules['mapclientplugins'])
+        if len_package_modules_prior == 0:
+            package = import_module('mapclientplugins') 
+        else:
+            try:
+                package = imp.reload(sys.modules['mapclientplugins'])
+            except Exception:
+                package = importlib.reload(sys.modules['mapclientplugins'])
         for _, modname, ispkg in pkgutil.iter_modules(package.__path__):
             if ispkg:
                 try:
@@ -343,8 +352,15 @@ class PluginManager(object):
                     if hasattr(module, '__version__') and hasattr(module, '__author__'):
                         logger.info('Loaded plugin \'' + modname + '\' version [' + module.__version__ + '] by ' + module.__author__)
                 except Exception as e:
+                    if '\n' in e:
+                        e = str(e).split('\n')
+                    else:
+                        e = list(e)
+                    e_new = ''
+                    for i in range(len(e)):
+                        e_new += e[i] + '  '
                     logger.warn('Plugin \'' + modname + '\' not loaded')
-                    logger.warn('Reason: {0}'.format(e))
+                    logger.warn('Reason: {0}'.format(e_new))
 
     def readSettings(self, settings):
         self._directories = []

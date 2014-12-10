@@ -53,6 +53,10 @@ target/
 
 # Spyder 
 .spyderproject
+.spyderworkspace
+
+# Log Records
+*.log.*
 
 # Eclipse project
 .project
