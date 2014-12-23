@@ -179,7 +179,7 @@ class WorkflowManager(object):
         self._saveStateIndex = self._currentStateIndex
         af = _getWorkflowMetaAbsoluteFilename(self._location)
         f = open(af, 'w')
-        f.write(serializeWorkflowAnnotation())
+        f.write(serializeWorkflowAnnotation().decode('utf-8'))
         self._scene.saveAnnotation(f)
         f.close()
 

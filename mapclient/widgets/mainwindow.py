@@ -18,12 +18,15 @@ This file is part of MAP Client. (http://launchpad.net/mapclient)
     along with MAP Client.  If not, see <http://www.gnu.org/licenses/>..
 '''
 
-from PySide import QtGui
+import logging
+from PySide import QtGui, QtCore
 
 from mapclient.widgets.ui_mainwindow import Ui_MainWindow
 # from mapclient.mountpoints.stackedwidget import StackedWidgetMountPoint
 from mapclient.widgets.workflowwidget import WorkflowWidget
 from mapclient.settings.info import DEFAULT_WORKFLOW_ANNOTATION_FILENAME
+
+logger = logging.getLogger(__name__)
 
 class MainWindow(QtGui.QMainWindow):
     '''
@@ -35,7 +38,6 @@ class MainWindow(QtGui.QMainWindow):
         Constructor
         '''
         QtGui.QMainWindow.__init__(self)
-
         self._model = model
 
         self._ui = Ui_MainWindow()
@@ -68,6 +70,8 @@ class MainWindow(QtGui.QMainWindow):
         self.menubar.setObjectName("menubar")
         self.menu_Help = QtGui.QMenu(self.menubar)
         self.menu_Help.setObjectName("menu_Help")
+        self.menu_View = QtGui.QMenu(self.menubar)
+        self.menu_View.setObjectName("menu_View")
         self.menu_File = QtGui.QMenu(self.menubar)
         self.menu_File.setObjectName("menu_File")
         self.menu_Edit = QtGui.QMenu(self.menubar)
@@ -76,6 +80,8 @@ class MainWindow(QtGui.QMainWindow):
         self.menu_Project.setObjectName("menu_Project")
         self.menu_Tools = QtGui.QMenu(self.menubar)
         self.menu_Tools.setObjectName("menu_Tools")
+        self.action_LogInformation = QtGui.QAction(self)
+        self.action_LogInformation.setObjectName("action_LogInformation")
         self.action_About = QtGui.QAction(self)
         self.action_About.setObjectName("action_About")
         self.action_Quit = QtGui.QAction(self)
@@ -89,6 +95,8 @@ class MainWindow(QtGui.QMainWindow):
         self.actionPluginWizard = QtGui.QAction(self)
         self.actionPluginWizard.setObjectName("actionPluginWizard")
         self.menu_Help.addAction(self.action_About)
+        self.menu_View.addSeparator()
+        self.menu_View.addAction(self.action_LogInformation)
         self.menu_File.addSeparator()
         self.menu_File.addAction(self.action_Quit)
         self.menu_Tools.addAction(self.actionPluginManager)
@@ -97,6 +105,7 @@ class MainWindow(QtGui.QMainWindow):
         self.menu_Tools.addAction(self.actionAnnotation)
         self.menubar.addAction(self.menu_File.menuAction())
         self.menubar.addAction(self.menu_Edit.menuAction())
+        self.menubar.addAction(self.menu_View.menuAction())
         self.menubar.addAction(self.menu_Project.menuAction())
         self.menubar.addAction(self.menu_Tools.menuAction())
         self.menubar.addAction(self.menu_Help.menuAction())
@@ -105,6 +114,7 @@ class MainWindow(QtGui.QMainWindow):
 
     def _retranslateUi(self):
         self.menu_Help.setTitle(QtGui.QApplication.translate("MainWindow", "&Help", None, QtGui.QApplication.UnicodeUTF8))
+        self.menu_View.setTitle(QtGui.QApplication.translate("MainWindow", "&View", None, QtGui.QApplication.UnicodeUTF8))
         self.menu_File.setTitle(QtGui.QApplication.translate("MainWindow", "&File", None, QtGui.QApplication.UnicodeUTF8))
         self.menu_Edit.setTitle(QtGui.QApplication.translate("MainWindow", "&Edit", None, QtGui.QApplication.UnicodeUTF8))
         self.menu_Project.setTitle(QtGui.QApplication.translate("MainWindow", "&Project", None, QtGui.QApplication.UnicodeUTF8))
@@ -113,6 +123,9 @@ class MainWindow(QtGui.QMainWindow):
         self.action_Quit.setText(QtGui.QApplication.translate("MainWindow", "&Quit", None, QtGui.QApplication.UnicodeUTF8))
         self.action_Quit.setStatusTip(QtGui.QApplication.translate("MainWindow", "Quit the application", None, QtGui.QApplication.UnicodeUTF8))
         self.action_Quit.setShortcut(QtGui.QApplication.translate("MainWindow", "Ctrl+Q", None, QtGui.QApplication.UnicodeUTF8))
+        self.action_LogInformation.setText(QtGui.QApplication.translate("MainWindow", "Log Information", None, QtGui.QApplication.UnicodeUTF8))
+        self.action_LogInformation.setStatusTip(QtGui.QApplication.translate("MainWindow", "Inspect logged program information", None, QtGui.QApplication.UnicodeUTF8))
+        self.action_LogInformation.setShortcut(QtGui.QApplication.translate("MainWindow", "Ctrl+I", None, QtGui.QApplication.UnicodeUTF8))
         self.actionPluginManager.setText(QtGui.QApplication.translate("MainWindow", "Plugin &Manager", None, QtGui.QApplication.UnicodeUTF8))
         self.actionPMR.setText(QtGui.QApplication.translate("MainWindow", "&PMR", None, QtGui.QApplication.UnicodeUTF8))
         self.actionAnnotation.setText(QtGui.QApplication.translate("MainWindow", "&Annotation", None, QtGui.QApplication.UnicodeUTF8))
@@ -148,11 +161,19 @@ class MainWindow(QtGui.QMainWindow):
     def _makeConnections(self):
         self.action_Quit.triggered.connect(self.quitApplication)
         self.action_About.triggered.connect(self.about)
+        self.action_LogInformation.triggered.connect(self.displayLogInformation)
         self.actionPluginManager.triggered.connect(self.pluginManager)
         self.actionPluginWizard.triggered.connect(self.pluginWizard)
         self.actionPMR.triggered.connect(self.pmr)
         self.actionAnnotation.triggered.connect(self.annotationTool)
-
+        
+    def displayLogInformation(self):
+        from mapclient.widgets.loginformation import LogInformation
+        dlg = LogInformation(self)
+        dlg.fillTable(self)
+        dlg.setModal(True)
+        dlg.exec_()
+        
     def setCurrentUndoRedoStack(self, stack):
         current_stack = self._model.undoManager().currentStack()
         if current_stack:
