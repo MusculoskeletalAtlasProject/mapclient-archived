@@ -1,9 +1,9 @@
 [submodule "src"]
 	path = src
-	url = git@github.com:MusculoskeletalAtlasProject/mapclient-src.git
+	url = git@github.com:jonathanritchie/mapclient-src.git
 [submodule "docs"]
 	path = docs
-	url = git@github.com:MusculoskeletalAtlasProject/mapclient-docs.git
+	url = git@github.com:jonathanritchie/mapclient-docs.git
 [submodule "tests"]
 	path = tests
-	url = git@github.com:MusculoskeletalAtlasProject/mapclient-tests.git
+	url = git@github.com:jonathanritchie/mapclient-tests.git
